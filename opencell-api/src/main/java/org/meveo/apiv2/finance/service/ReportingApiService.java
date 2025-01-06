@@ -78,6 +78,7 @@ public class ReportingApiService implements ApiService<AccountOperation> {
 		Date reportStartDate = targetPeriod.getFrom();
 		Date reportEndDate = targetPeriod.getTo();
 		LocalDate earliestDate = LocalDate.ofEpochDay(365);
+		LocalDate reportStartDateLocalDate = Instant.ofEpochMilli(reportStartDate.getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
 		LocalDate reportEndDateInclusive = Instant.ofEpochMilli(DateUtils.addDaysToDate(reportEndDate, 1).getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
 		if (limit != null) {
 			log.info("Computing Trial Balances during {} => {} ...", reportStartDate, reportEndDate);
@@ -91,10 +92,10 @@ public class ReportingApiService implements ApiService<AccountOperation> {
 			sqlFilter.append(" and (a.accountingCode.code like '" + codeOrLabel + "%' OR a.accountingCode.description like '" + codeOrLabel + "%')");
 		}
 		filters.put("SQL", sqlFilter.toString());
-		String initalBalanceDebit = String.format(BALANCE_CRITERIA, earliestDate, reportStartDate, "DEBIT");
-		String initalBalanceCredit = String.format(BALANCE_CRITERIA, earliestDate, reportStartDate, "CREDIT");
-		String currentBalanceDebit = String.format(BALANCE_CRITERIA, reportStartDate, reportEndDateInclusive, "DEBIT");
-		String currentBalanceCredit = String.format(BALANCE_CRITERIA, reportStartDate, reportEndDateInclusive, "CREDIT");
+		String initalBalanceDebit = String.format(BALANCE_CRITERIA, earliestDate, reportStartDateLocalDate, "DEBIT");
+		String initalBalanceCredit = String.format(BALANCE_CRITERIA, earliestDate, reportStartDateLocalDate, "CREDIT");
+		String currentBalanceDebit = String.format(BALANCE_CRITERIA, reportStartDateLocalDate, reportEndDateInclusive, "DEBIT");
+		String currentBalanceCredit = String.format(BALANCE_CRITERIA, reportStartDateLocalDate, reportEndDateInclusive, "CREDIT");
 		fetchFieldsSet.addAll(Arrays.asList("accountingCode.code", "accountingCode.description", initalBalanceDebit, initalBalanceCredit, currentBalanceDebit, currentBalanceCredit));
 
 		return new PaginationConfiguration(offset == null ? null : offset.intValue(), limit == null ? null : limit.intValue(), filters, null, new ArrayList<>(fetchFieldsSet), sortBy, sortOrder == null ? null : sortOrder.name());

@@ -24,7 +24,7 @@
 
         <p:panel id="fileExplorer">
 
-            <h:form>
+            <h:form id="fileDownloadForm">
                 <p:growl id="messages" showDetail="true" />
                 <p:dataTable var="file" value="#{filesBean.fileList}" sortBy="#{file.name}" resizableColumns="true">
                     <f:facet name="header">
@@ -54,10 +54,12 @@
                     </p:column>
                 </p:dataTable>
                 <p:panel rendered="#{filesBean.selectedFileName!=null}" id="fileManageForm">
-         			#{filesBean.selectedFileName}
-					<p:commandButton value="#{messages['fileExplorer.download']}" icon="pi pi-arrow-down">
-                        <p:fileDownload value="#{filesBean.selectedFile}" />
+                    #{filesBean.selectedFileName}
+					<p:commandButton value="#{messages['fileExplorer.download']}" icon="pi pi-arrow-down" ajax="false">
+                        <p:fileDownload value="#{fileForDownloadBean.selectedFile}" />
                         <f:param name="cid" value="#{jakarta.enterprise.context.conversation.id}" />
+                        <f:param name="selectedFileName" value="#{filesBean.selectedFileName}" />
+                        <f:param name="selectedFolder" value="#{filesBean.selectedFolder}" />
                     </p:commandButton>
                     <p:commandButton value="#{messages['fileExplorer.delete']}" icon="pi pi-trash" action="#{filesBean.deleteSelectedFile()}" update=":fileExplorer" process="@this"
                         rendered="#{filesBean.canUserDeleteEntity()}">
@@ -67,8 +69,9 @@
                 </p:panel>
                 <p:panel id="downloadZipfile" rendered="#{filesBean.selectedFileName==null}">
                     <p:commandButton value="#{messages['fileExplore.downloadZipfile']}" icon="pi pi-arrow-down" ajax="false">
-                        <p:fileDownload value="#{filesBean.downloadZipFile}" />
+                        <p:fileDownload value="#{fileForDownloadBean.downloadZipFile}" />
                         <f:param name="cid" value="#{jakarta.enterprise.context.conversation.id}" />
+                        <f:param name="selectedFolder" value="#{filesBean.selectedFolder}" />
                     </p:commandButton>
                 </p:panel>
             </h:form>

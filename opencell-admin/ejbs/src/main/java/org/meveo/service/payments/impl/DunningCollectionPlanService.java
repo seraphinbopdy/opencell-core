@@ -341,18 +341,15 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
                         .orElse(null);
     }
 
-    public DunningCollectionPlan pauseCollectionPlan(boolean forcePause, Date pauseUntil,
-			DunningCollectionPlan collectionPlanToPause, DunningPauseReason dunningPauseReason, boolean retryPaymentOnResumeDate) {
+    public DunningCollectionPlan pauseCollectionPlan(boolean forcePause, Date pauseUntil, DunningCollectionPlan collectionPlanToPause,
+                                                     DunningPauseReason dunningPauseReason, boolean retryPaymentOnResumeDate) {
+
     	collectionPlanToPause = dunningCollectionPlanService.refreshOrRetrieve(collectionPlanToPause);
 		collectionPlanToPause = refreshLevelInstances(collectionPlanToPause);
 		DunningCollectionPlanStatus dunningCollectionPlanStatus = dunningCollectionPlanStatusService.refreshOrRetrieve(collectionPlanToPause.getStatus());
-		if(!dunningCollectionPlanStatus.getStatus().equals(DunningCollectionPlanStatusEnum.ACTIVE)) {
-			throw new BusinessApiException("Collection Plan with id "+collectionPlanToPause.getId()+" cannot be paused, the collection plan status is not active");
-		}
 
-		if(dunningCollectionPlanStatus.getStatus().equals(DunningCollectionPlanStatusEnum.STOPPED)) {
-			throw new BusinessApiException("Collection Plan with id "+collectionPlanToPause.getId()+" cannot be paused, the collection plan status is not stopped");
-		}
+        // Check rules before pausing the collection plan
+		checkPauseCollectionPlanRules(collectionPlanToPause, dunningCollectionPlanStatus, pauseUntil);
 
 		if(!forcePause) {
 			Optional<DunningLevelInstance> dunningLevelInstance = collectionPlanToPause.getDunningLevelInstances()
@@ -377,9 +374,45 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
 		collectionPlanToPause.addPauseDuration((int) daysBetween(new Date(),collectionPlanToPause.getPausedUntilDate()));
         collectionPlanToPause.setNextActionDate(addDaysToDate(collectionPlanToPause.getNextActionDate(), collectionPlanToPause.getPauseDuration()));
 		update(collectionPlanToPause);
+
+        updateAllDunningLevelInstancesDate(collectionPlanToPause, collectionPlanToPause.getPauseDuration());
+
 		return collectionPlanToPause; 
 	}
-	
+
+    /**
+     * Check pause collection plan rules
+     *
+     * @param collectionPlanToPause Collection plan to pause
+     * @param dunningCollectionPlanStatus Dunning collection plan status
+     * @param pauseUntil Pause until date
+     */
+    private void checkPauseCollectionPlanRules(DunningCollectionPlan collectionPlanToPause, DunningCollectionPlanStatus dunningCollectionPlanStatus, Date pauseUntil) {
+        if(pauseUntil != null && pauseUntil.before(new Date())) {
+            throw new BusinessApiException("Collection Plan cannot be paused, the pause until date is in the past");
+        }
+
+        if(!dunningCollectionPlanStatus.getStatus().equals(DunningCollectionPlanStatusEnum.ACTIVE)) {
+            throw new BusinessApiException("Collection Plan with id " + collectionPlanToPause.getId() + " cannot be paused, the collection plan status is not active");
+        }
+
+        if(dunningCollectionPlanStatus.getStatus().equals(DunningCollectionPlanStatusEnum.STOPPED)) {
+            throw new BusinessApiException("Collection Plan with id " + collectionPlanToPause.getId() + " cannot be paused, the collection plan is already stopped");
+        }
+    }
+
+    private void updateAllDunningLevelInstancesDate(DunningCollectionPlan collectionPlanToPause, Integer pauseDuration) {
+        // Get the dunning level instance to be done and shift the execution date
+        collectionPlanToPause.getDunningLevelInstances().forEach(levelInstance -> {
+            if (DunningLevelInstanceStatusEnum.TO_BE_DONE == levelInstance.getLevelStatus()) {
+                levelInstance.setExecutionDate(addDaysToDate(levelInstance.getExecutionDate(), pauseDuration));
+                levelInstance.getActions().forEach(actionInstance -> {
+                    actionInstance.setExecutionDate(addDaysToDate(actionInstance.getExecutionDate(), pauseDuration));
+                });
+            }
+        });
+    }
+
     /**
      * Stop a collection plan
      * @param collectionPlanToStop Collection plan to stop
@@ -466,10 +499,10 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
 
 		if(validate) {
 			if(!dunningCollectionPlanStatus.getStatus().equals(DunningCollectionPlanStatusEnum.PAUSED)) {
-				throw new BusinessApiException("Collection Plan with id "+collectionPlanToResume.getId()+" cannot be resumed, the collection plan is not paused");
+				throw new BusinessApiException("Collection Plan with id " + collectionPlanToResume.getId() + " cannot be resumed, the collection plan is not paused");
 			}
 			if(collectionPlanToResume.getPausedUntilDate() != null && collectionPlanToResume.getPausedUntilDate().before(new Date())) {
-				throw new BusinessApiException("Collection Plan with id "+collectionPlanToResume.getId()+" cannot be resumed, the field pause until is in the past");
+				throw new BusinessApiException("Collection Plan with id " + collectionPlanToResume.getId() + " cannot be resumed, the field pause until is in the past");
 			}
 		}
 		
@@ -487,9 +520,13 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
 			collectionPlanToResume.setPauseReason(null);
 		}
 		collectionPlanToResume.setStatus(collectionPlanStatus);
+        int pause = collectionPlanToResume.getPauseDuration();
 		collectionPlanToResume.addPauseDuration((int) daysBetween(collectionPlanToResume.getPausedUntilDate(), new Date()));
         collectionPlanToResume.setNextActionDate(addDaysToDate(collectionPlanToResume.getNextActionDate(), (int) daysBetween(collectionPlanToResume.getPausedUntilDate(), new Date())));
+        collectionPlanToResume.setPausedUntilDate(null);
 		update(collectionPlanToResume);
+
+        updateAllDunningLevelInstancesDate(collectionPlanToResume, collectionPlanToResume.getPauseDuration() - pause);
 		return collectionPlanToResume;
 	}
 

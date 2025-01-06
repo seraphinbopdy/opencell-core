@@ -43,6 +43,7 @@ import org.meveo.model.billing.SubCategoryInvoiceAgregate;
 import org.meveo.model.billing.Tax;
 import org.meveo.model.billing.TaxInvoiceAgregate;
 import org.meveo.model.billing.UntdidTaxationCategory;
+import org.meveo.model.billing.UserAccount;
 import org.meveo.model.billing.VatDateCodeEnum;
 import org.meveo.model.cpq.commercial.CommercialOrder;
 import org.meveo.model.crm.Provider;
@@ -226,7 +227,7 @@ public class InvoiceUblHelper {
 		setPaymentTerms(invoice, invoiceXml, creditNote, invoice.getInvoiceType(), invoiceLanguageCode);
 		setAccountingSupplierParty(invoice.getSeller(), invoiceXml, creditNote, invoiceLanguageCode);
 		setAccountingCustomerParty(invoice.getBillingAccount(), invoiceXml, creditNote);
-		setPaymentMeans(invoice.getBillingAccount().getCustomerAccount().getPreferredPaymentMethod(), invoiceXml, creditNote);
+		setPaymentMeans(invoice.getBillingAccount().getCustomerAccount().getPreferredPaymentMethod(), invoiceXml, creditNote, invoice.getSeller());
 		String curreny = invoice.getTradingCurrency() != null ? invoice.getTradingCurrency().getCurrencyCode():null;
 		BigDecimal amountWithoutTax = invoice.getAmountWithoutTax();
 		BigDecimal amountWithTax = invoice.getAmountWithTax();
@@ -480,7 +481,7 @@ public class InvoiceUblHelper {
 	 * @param target the invoice
 	 * @param creditNote The credit note
 	 */
-	private void setPaymentMeans(PaymentMethod paymentMethod, Invoice target, CreditNote creditNote){
+	private void setPaymentMeans(PaymentMethod paymentMethod, Invoice target, CreditNote creditNote, Seller seller){
 		PaymentMeans paymentMeans = objectFactoryCommonAggrement.createPaymentMeans();
 
 		if(paymentMethod != null) {
@@ -491,8 +492,6 @@ public class InvoiceUblHelper {
 			paymentMeansCode.setListName("Payment Means");
 			paymentMeansCode.setValue(paymentMethod.getPaymentMeans() != null ? paymentMethod.getPaymentMeans().getCode() : "59");
 			paymentMeans.setPaymentMeansCode(paymentMeansCode);
-			
-			
 		}
 		
 		//check
@@ -507,7 +506,31 @@ public class InvoiceUblHelper {
 		// DirectDebit
 		if(Hibernate.unproxy(paymentMethod) instanceof DDPaymentMethod) {
 			DDPaymentMethod bank = (DDPaymentMethod) Hibernate.unproxy(paymentMethod);
-			setPaymentMeansForSEPA(bank, paymentMeans);
+			setPaymentMeansForSEPA(bank, paymentMeans, seller);
+		}
+
+		// PaymentMeans/PayeeFinancialInstitution
+		Provider provider = providerService.getProvider();
+		if (provider.getBankCoordinates() != null) {
+			FinancialAccountType payeeFinancialInstitution = objectFactoryCommonAggrement.createFinancialAccountType();
+			ID payeeFinancialInstitutionId = objectFactorycommonBasic.createID();
+			payeeFinancialInstitutionId.setValue(provider.getBankCoordinates().getIban());
+			payeeFinancialInstitution.setID(payeeFinancialInstitutionId);
+			if(seller.getName() != null) {
+				oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Name name = objectFactorycommonBasic.createName();
+				name.setValue(seller.getName().getFirstName());
+				payeeFinancialInstitution.setName(name);
+			}
+			if(StringUtils.isNotBlank(provider.getBankCoordinates().getBic())) {
+				BranchType branchType = objectFactoryCommonAggrement.createBranchType();
+				FinancialInstitution financialInstitution = objectFactoryCommonAggrement.createFinancialInstitution();
+				ID financialInstitutionId = objectFactorycommonBasic.createID();
+				financialInstitutionId.setValue(provider.getBankCoordinates().getBic());
+				financialInstitution.setID(financialInstitutionId);
+				branchType.setFinancialInstitution(financialInstitution);
+				payeeFinancialInstitution.setFinancialInstitutionBranch(branchType);
+			}
+			paymentMeans.setPayeeFinancialAccount(payeeFinancialInstitution);
 		}
 
 		if(paymentMeans.getPaymentMeansCode() != null || paymentMeans.getPayeeFinancialAccount() != null){
@@ -563,8 +586,8 @@ public class InvoiceUblHelper {
 	 */
 	// We can use this method in the future when we will have only the direct debit payment method
 	private static void setPaymentMeansForDirectDebit(DDPaymentMethod bank, PaymentMeans paymentMeans) {
-		paymentMeans.getPaymentMeansCode().setName("DirectDebit");
-		paymentMeans.getPaymentMeansCode().setValue("49");
+		//paymentMeans.getPaymentMeansCode().setName("DirectDebit");
+		//paymentMeans.getPaymentMeansCode().setValue("49");
 		FinancialAccountType financialAccountType = objectFactoryCommonAggrement.createFinancialAccountType();
 
 		// PaymentMeans/PayeeFinancialAccount/ID
@@ -613,7 +636,7 @@ public class InvoiceUblHelper {
 	 * @param bank the bank
 	 * @param paymentMeans the payment means
 	 */
-	private static void setPaymentMeansForSEPA(DDPaymentMethod bank, PaymentMeans paymentMeans) {
+	private static void setPaymentMeansForSEPA(DDPaymentMethod bank, PaymentMeans paymentMeans, Seller seller) {
 		if (paymentMeans.getPaymentMeansCode() == null) {
 			PaymentMeansCode paymentMeansCode = objectFactorycommonBasic.createPaymentMeansCode();
 			paymentMeans.setPaymentMeansCode(paymentMeansCode);
@@ -625,14 +648,14 @@ public class InvoiceUblHelper {
 
 		Provider provider = providerService.getProvider();
 		
-		PaymentMandate paymentMandate = objectFactoryCommonAggrement.createPaymentMandate();
+		/*PaymentMandate paymentMandate = objectFactoryCommonAggrement.createPaymentMandate();
 		// PaymentMeans/PaymentMandate
 		if (StringUtils.isNotBlank(bank.getMandateIdentification())) {
 			ID mandateID = objectFactorycommonBasic.createID();
 			mandateID.setValue(bank.getMandateIdentification());
 			paymentMandate.setID(mandateID);
 			
-		}
+		}*/
 
 		// PaymentMeans/PayeeFinancialAccount
 		if (bank.getBankCoordinates() != null) {
@@ -640,18 +663,11 @@ public class InvoiceUblHelper {
 			ID payerFinancialAccountId = objectFactorycommonBasic.createID();
 			payerFinancialAccountId.setValue(bank.getBankCoordinates().getIban());
 			payerFinancialAccount.setID(payerFinancialAccountId);
-			paymentMandate.setPayerFinancialAccount(payerFinancialAccount);
+			//paymentMandate.setPayerFinancialAccount(payerFinancialAccount);
 		}
-		paymentMeans.setPaymentMandate(paymentMandate);
+		//paymentMeans.setPaymentMandate(paymentMandate);
 
-		// PaymentMeans/PayeeFinancialInstitution
-		if (provider.getBankCoordinates() != null) {
-			FinancialAccountType payeeFinancialInstitution = objectFactoryCommonAggrement.createFinancialAccountType();
-			ID payeeFinancialInstitutionId = objectFactorycommonBasic.createID();
-			payeeFinancialInstitutionId.setValue(provider.getBankCoordinates().getIban());
-			payeeFinancialInstitution.setID(payeeFinancialInstitutionId);
-			paymentMeans.setPayeeFinancialAccount(payeeFinancialInstitution);
-		}
+
 	}
 
 	private void setInvoiceLine(List<InvoiceLine> invoiceLines, Invoice target, String invoiceLanguageCode){
@@ -1162,7 +1178,7 @@ public class InvoiceUblHelper {
 			BigDecimal totalWithTax = discountAgregates.stream()
 					.map(subCategoryInvoiceAgregate -> subCategoryInvoiceAgregate.getAmountWithTax().abs())
 					.reduce(BigDecimal.ZERO, BigDecimal::add);
-			
+
 			BigDecimal totalWithoutTax = discountAgregates.stream()
 					.map(subCategoryInvoiceAgregate -> subCategoryInvoiceAgregate.getAmountWithoutTax().abs())
 					.reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -1178,7 +1194,7 @@ public class InvoiceUblHelper {
 			allowanceChargeReason.setValue(subCategoryInvoiceAgregate.getDiscountPlanItem().getDescription());
 			allowanceCharge.getAllowanceChargeReasons().add(allowanceChargeReason);
 
-		
+
 			Amount amount = objectFactorycommonBasic.createAmount();
 			BaseAmount baseAmount = objectFactorycommonBasic.createBaseAmount();
 
@@ -1190,8 +1206,8 @@ public class InvoiceUblHelper {
 
 			baseAmount.setValue(totalWithoutTax.setScale(rounding, RoundingMode.HALF_UP));
 			allowanceCharge.setBaseAmount(baseAmount);
-			
-			
+
+
 			if(creditNote != null)
 				creditNote.getAllowanceCharges().add(allowanceCharge);
 			else
@@ -1634,6 +1650,31 @@ public class InvoiceUblHelper {
 		locationType.setAddress(addressType);
 
 		DeliveryType deliveryType = objectFactoryCommonAggrement.createDeliveryType();
+
+		//cac:Delivery/cac:DeliveryParty/cac:PartyName/cbc:Name
+		PartyType partyType = objectFactoryCommonAggrement.createPartyType();
+		PartyName partyName = objectFactoryCommonAggrement.createPartyName();
+		oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Name name = objectFactorycommonBasic.createName();
+		UserAccount userAccount = pInvoice.getBillingAccount().getUsersAccounts().get(0);
+		var registrationNumbers = userAccount.getRegistrationNumbers()
+				.stream().filter(registrationNumber -> registrationNumber.getIsoIcd() != null && SIREN.equalsIgnoreCase(registrationNumber.getIsoIcd().getCode()))
+				.findFirst();
+		if(registrationNumbers.isPresent()){
+			name.setValue(userAccount.getDescription());
+		}else if(userAccount.getName() != null){
+			name.setValue(userAccount.getName().getFirstName() + " " + userAccount.getName().getLastName());
+		}
+		partyName.setName(name);
+		partyType.getPartyNames().add(partyName);
+		deliveryType.setDeliveryParty(partyType);
+		//cac:Delivery/cac:DeliveryLocation/cbc:ID
+		if(registrationNumbers.isPresent()){
+			ID id = objectFactorycommonBasic.createID();
+			id.setSchemeID(registrationNumbers.get().getIsoIcd().getCode());
+			id.setValue(registrationNumbers.get().getRegistrationNo());
+			locationType.setID(id);
+		}
+
 		deliveryType.setDeliveryLocation(locationType);
 
 		return deliveryType;
@@ -1648,6 +1689,7 @@ public class InvoiceUblHelper {
 			startDate.setValue(toXmlDate(invoice.getStartDate()));
 			periodType.setStartDate(startDate);
 		}
+
 		if(invoice.getEndDate() != null){
 			EndDate endDate = objectFactorycommonBasic.createEndDate();
 			endDate.setValue(toXmlDate(invoice.getEndDate()));

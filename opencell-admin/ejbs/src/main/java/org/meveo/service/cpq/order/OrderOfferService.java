@@ -73,7 +73,11 @@ public class OrderOfferService extends PersistenceService<OrderOffer> {
 		Boolean updateMrr = (Boolean) advancedSettingsService.getParameter(AdvancedSettingsService.DISABLE_SYNC_MRR_UPDATE);
 		if(updateMrr != null && updateMrr) {
 			entity.getProducts().forEach(product ->product.setMrr(orderProductService.calculateMRR(product)));
-			entity.getOrder().setMrr(entity.getProducts().stream().map(OrderProduct::getMrr).filter(Objects::nonNull).reduce(BigDecimal.ZERO, BigDecimal::add));
+			entity.getOrder().setMrr(entity.getProducts().stream()
+					.map(OrderProduct::getMrr)
+					.filter(Objects::nonNull)
+					.reduce(BigDecimal::add)
+					.orElse(null));
 		}
 	}
 

@@ -15790,5 +15790,36 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
             <column name="rating_script_uses_price_versions" type="${type.boolean}" defaultValueNumeric="0"/>
         </addColumn>
     </changeSet>
+    
+    <changeSet id="#INTRD-26174_generic_export_limit" author="a.rouaguebe">
+        <insert tableName="advanced_settings">
+            <column name="id" valueSequenceNext="advanced_settings_seq" />
+            <column name="version" value="0" />
+            <column name="disabled" valueNumeric="0" />
+            <column name="created" valueComputed="${db.current.time}" />
+            <column name="category" value="performance" />
+            <column name="property_group" value="genericExport.limitation" />
+            <column name="property_type" value="java.lang.Integer" />
+            <column name="property_value" value="1000" />
+            <column name="creator" value="applicationInitializer" />
+            <column name="code" value="genericExport.limitation.default" />
+            <column name="description" value="Default limit for generic export" />
+            <column name="description_i18n">
+                <![CDATA[{
+					"FRA": "Limite par défault pour l'export générique.",
+					"ENG": "Default limit for generic export."
+				}]]>
+            </column>
+        </insert>
+        
+    </changeSet>
+
+    <changeSet id="#INTRD-28025_20241224" author="zelmeliani">
+        <update tableName="ar_customer_balance">
+            <column name="code" value="DUNNING_BALANCE" />
+            <column name="description" value="Dunning balance" />
+            <where>code='ARREARS_BALANCE'</where>
+        </update>
+    </changeSet>
 
 </databaseChangeLog>

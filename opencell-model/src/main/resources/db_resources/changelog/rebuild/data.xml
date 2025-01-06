@@ -13912,7 +13912,26 @@ Meaning that advances won’t be available for further invoices."/>
     "ENG": "Call for advance payments linked to an invoice will automatically be closed when the invoice is validated.Meaning that advances won’t be available for further invoices."
 }]]>
             </column>
-        </insert>        
+        </insert>
+		<insert tableName="advanced_settings">
+			<column name="id" valueSequenceNext="advanced_settings_seq" />
+			<column name="version" value="0" />
+			<column name="disabled" valueNumeric="0" />
+			<column name="created" valueComputed="${db.current.time}" />
+			<column name="category" value="performance" />
+			<column name="property_group" value="genericExport.limitation" />
+			<column name="property_type" value="java.lang.Integer" />
+			<column name="property_value" value="1000" />
+			<column name="creator" value="applicationInitializer" />
+			<column name="code" value="genericExport.limitation.default" />
+			<column name="description" value="Default limit for generic export" />
+			<column name="description_i18n">
+				<![CDATA[{
+					"FRA": "Limite par défault pour l'export générique.",
+					"ENG": "Default limit for generic export."
+				}]]>
+			</column>
+		</insert>
 	</changeSet>
 
     <changeSet id="rebuild-customer-balance" author="zelmeliani">
@@ -13921,8 +13940,8 @@ Meaning that advances won’t be available for further invoices."/>
 		    <column name="version" value="0" />
 		    <column name="created" valueDate="${db.current.time}" />
 		    <column name="creator" value="applicationInitializer" />
-		    <column name="code" value="ARREARS_BALANCE" />
-		    <column name="description" value="arrears balance" />
+		    <column name="code" value="DUNNING_BALANCE" />
+		    <column name="description" value="Dunning balance" />
 		    <column name="default_balance" value="0" />
 			<column name="balance_el" value="#{ accountOperation.type == 'I' &amp;&amp; accountOperation.dueDate &lt; currentDate &amp;&amp; (accountOperation.matchingStatus == 'O' || accountOperation.matchingStatus == 'P') }" />
 		</insert>

@@ -9,6 +9,7 @@ import java.util.*;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import jakarta.persistence.FlushModeType;
+import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 
 import org.meveo.admin.exception.*;
@@ -298,6 +299,7 @@ public class AccountingArticleApiService implements AccountingArticleServiceBase
         return accountingArticleService.getAccountingArticle(product, attributes);
     }
 
+    @Transactional
     public List<AccountingCodeMapping> createAccountingCodeMappings(AccountingCodeMappingInput accountingCodeMappingInput) throws NotFoundException {
         List<AccountingCodeMapping> accountingCodeMappings = new ArrayList<>();
         AccountingArticle accountingArticle = null;
@@ -309,6 +311,8 @@ public class AccountingArticleApiService implements AccountingArticleServiceBase
                         + accountingCodeMappingInput.getAccountingArticleCode() + " does not exits");
             }
         }
+
+        entityManagerWrapper.getEntityManager().refresh(accountingArticle);
         for (org.meveo.apiv2.article.AccountingCodeMapping accountingCodeMapping
                 : accountingCodeMappingInput.getAccountingCodeMappings()) {
             accountingCodeMappings.add(createAccountingCodeMapping(accountingCodeMapping, accountingArticle));

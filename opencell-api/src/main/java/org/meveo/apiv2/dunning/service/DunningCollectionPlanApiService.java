@@ -395,16 +395,14 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
                     if (levelInstanceToRemove == null) {
                         throw new EntityDoesNotExistsException("No Dunning Level Instance found with id : " + levelInstanceId);
                     }
+                    if (levelInstanceToRemove.getDunningLevel().isReminder()) {
+                        throw new ActionForbiddenException("Can not delete reminder level");
+                    }
                     // User can not delete the end level
                     if (levelInstanceToRemove.getDunningLevel().isEndOfDunningLevel()) {
                         throw new ActionForbiddenException("Can not delete the end level");
                     }
                     DunningCollectionPlan collectionPlan = levelInstanceToRemove.getCollectionPlan();
-                    // User can not the current dunning level instance
-                    Integer currentDunningLevelSequence = collectionPlan.getCurrentDunningLevelSequence();
-                    if (levelInstanceToRemove.getSequence() == currentDunningLevelSequence) {
-                        throw new ActionForbiddenException("Can not delete the current dunning level instance");
-                    }
                     // If the dunningLevelInstance status is DONE or IN_PROGRESS
                     if (levelInstanceToRemove.getLevelStatus() == DunningLevelInstanceStatusEnum.DONE
                             || levelInstanceToRemove.getLevelStatus() == DunningLevelInstanceStatusEnum.IN_PROGRESS) {
@@ -423,27 +421,6 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
                     }
                     if (collectionPlan.getTotalDunningLevels() > 0) {
                         collectionPlan.setTotalDunningLevels(collectionPlan.getTotalDunningLevels() - 1);
-                    }
-
-                    // if the deleted dunningLevelInstance sequence = currentSequence + 1
-                    if (currentDunningLevelSequence != null && levelInstanceToRemove.getSequence() == currentDunningLevelSequence + 1) {
-                        DunningLevelInstance nextLevelInstance = dunningLevelInstanceService.findBySequence(collectionPlan, currentDunningLevelSequence + 1);
-                        String nextLevelAction = null;
-                        if (nextLevelInstance != null && nextLevelInstance.getActions() != null && !nextLevelInstance.getActions().isEmpty()) {
-                            for (DunningActionInstance nextActionInstance : nextLevelInstance.getActions()) {
-                                if (nextActionInstance.getActionMode() == ActionModeEnum.AUTOMATIC) {
-                                    nextLevelAction = nextActionInstance.getCode();
-                                    break;
-                                }
-                            }
-                            if (nextLevelAction == null) {
-                                nextLevelAction = nextLevelInstance.getActions().get(0).getCode();
-                            }
-
-                            collectionPlan.setNextAction(nextLevelAction);
-                            collectionPlan
-                                .setNextActionDate(addDaysToDate(collectionPlan.getStartDate(), nextLevelInstance.getDaysOverdue() + collectionPlan.getPauseDuration()));
-                        }
                     }
 
                     dunningCollectionPlanService.update(collectionPlan);
@@ -506,6 +483,11 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
                     }
 
                     dunningActionInstanceService.remove(dunningActionInstance);
+
+                    // If the remaining of actions is empty the remove the dunningLevelInstance
+                    if (actions.isEmpty()) {
+                        dunningLevelInstanceService.remove(dunningLevelInstance);
+                    }
 
                     String origine = (dunningActionInstance.getCollectionPlan() != null) ? dunningActionInstance.getCollectionPlan().getCollectionPlanNumber() : "";
                     auditLogService.trackOperation("REMOVE DunningActionInstance", new Date(), dunningActionInstance.getCollectionPlan(), origine);
@@ -612,28 +594,30 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
         DunningLevelInstance lastDoneInstance = findLastDoneDunningLevel(collectionPlan);
         DunningLevelInstance endDunningLevel = findEndDunningLevel(collectionPlan);
 
-        if (executionDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().isBefore(collectionPlan.getStartDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate())) {
-            throw new BusinessApiException("The execution date must be after the collection plan start date");
-        }
+        if (executionDate != null) {
+            if (executionDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().isBefore(collectionPlan.getStartDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate())) {
+                throw new BusinessApiException("The execution date must be after the collection plan start date");
+            }
 
-        if (firstDunningLevel != null && firstDunningLevel.getExecutionDate() != null &&
-                executionDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().isBefore(firstDunningLevel.getExecutionDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate())) {
-            throw new BusinessApiException("The execution date must be after the first dunning level instance execution date");
-        }
+            if (firstDunningLevel != null && firstDunningLevel.getExecutionDate() != null &&
+                    executionDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().isBefore(firstDunningLevel.getExecutionDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate())) {
+                throw new BusinessApiException("The execution date must be after the first dunning level instance execution date");
+            }
 
-        if (inProgressDunningLevel != null && inProgressDunningLevel.getExecutionDate() != null
-                && executionDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().isBefore(inProgressDunningLevel.getExecutionDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate())) {
-            throw new BusinessApiException("The execution date must be after the current dunning level instance execution date");
-        }
+            if (inProgressDunningLevel != null && inProgressDunningLevel.getExecutionDate() != null
+                    && executionDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().isBefore(inProgressDunningLevel.getExecutionDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate())) {
+                throw new BusinessApiException("The execution date must be after the current dunning level instance execution date");
+            }
 
-        if (lastDoneInstance != null && lastDoneInstance.getExecutionDate() != null
-                && executionDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().isBefore(lastDoneInstance.getExecutionDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate())) {
-            throw new BusinessApiException("The execution date must be after the last done dunning level instance execution date");
-        }
+            if (lastDoneInstance != null && lastDoneInstance.getExecutionDate() != null
+                    && executionDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().isBefore(lastDoneInstance.getExecutionDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate())) {
+                throw new BusinessApiException("The execution date must be after the last done dunning level instance execution date");
+            }
 
-        if (endDunningLevel != null && endDunningLevel.getExecutionDate() != null
-                && executionDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().isAfter(endDunningLevel.getExecutionDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate())) {
-            throw new BusinessApiException("The execution date must be before the end dunning level instance execution date");
+            if (endDunningLevel != null && endDunningLevel.getExecutionDate() != null
+                    && executionDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().isAfter(endDunningLevel.getExecutionDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate())) {
+                throw new BusinessApiException("The execution date must be before the end dunning level instance execution date");
+            }
         }
     }
 
@@ -721,6 +705,8 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
                 levelInstanceToUpdate.setDaysOverdue(newDaysOverdue);
             }
 
+            // Validate previous level instance
+            validatePreviousLevelStatus(collectionPlan, levelInstanceToUpdate);
             // Validate the execution date
             validateExecutionDate(collectionPlan, updateLevelInstanceInput.getExecutionDate());
 
@@ -779,6 +765,20 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
             throw e;
         } catch (Exception e) {
             throw new MeveoApiException(e);
+        }
+    }
+
+    /**
+     * Validate the previous level status before updating the level instance.
+     *
+     * @param collectionPlan the collection plan
+     * @param levelInstanceToUpdate the level instance to update
+     */
+    private void validatePreviousLevelStatus(DunningCollectionPlan collectionPlan, DunningLevelInstance levelInstanceToUpdate) {
+        DunningLevelInstance previousLevelInstance = dunningLevelInstanceService.findBySequence(collectionPlan, levelInstanceToUpdate.getSequence() - 1);
+
+        if (previousLevelInstance != null && previousLevelInstance.getLevelStatus() != DunningLevelInstanceStatusEnum.IGNORED && previousLevelInstance.getLevelStatus() != DunningLevelInstanceStatusEnum.DONE) {
+            throw new BusinessApiException("Can not update a dunningLevelInstance if the previous dunningLevelInstance is not DONE or IGNORED");
         }
     }
 
@@ -928,6 +928,9 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
             if (dunningLevelInstance == null) {
                 throw new EntityDoesNotExistsException("No Dunning Level Instance found with id : " + dunningLevelInstanceIdInput);
             }
+
+            // Validate previous level instance
+            validatePreviousLevelStatus(dunningLevelInstance.getCollectionPlan(), dunningLevelInstance);
 
             if (!Objects.equals(dunningLevelInstanceIdInput, dunningLevelInstanceIdToUpdate)) {
                 fields.add("dunningLevelInstance");

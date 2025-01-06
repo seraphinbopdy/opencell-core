@@ -13,6 +13,9 @@ import org.meveo.commons.utils.ParamBeanFactory;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.MultivaluedMap;
+import org.meveo.model.IEntity;
+import org.meveo.service.settings.impl.AdvancedSettingsService;
+
 import java.util.*;
 
 /**
@@ -51,6 +54,9 @@ public class GenericPagingAndFilteringUtils {
 
     @Inject
     protected ParamBeanFactory paramBeanFactory;
+
+    @Inject
+    private AdvancedSettingsService advancedSettingsService;
 
     private static GenericPagingAndFilteringUtils instance = new GenericPagingAndFilteringUtils();
 
@@ -247,5 +253,16 @@ public class GenericPagingAndFilteringUtils {
                     Collections.emptyList(), pagingAndFiltering.getSortBy(),
                     pagingAndFiltering.getMultiSortOrder());
         }
+    }
+
+    public Integer getExportLimitForEntity(Class<? extends IEntity> entityClass) {
+
+        Integer limit = (Integer) advancedSettingsService.getParameter("genericExport.limitation.%s".formatted(entityClass.getSimpleName()));
+        if(limit == null) {
+            limit = (Integer) advancedSettingsService.getParameter("genericExport.limitation.default");
+        }
+
+        return limit;
+        
     }
 }

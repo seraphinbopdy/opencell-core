@@ -2,6 +2,9 @@ package org.meveo.admin.job.invoicing;
 
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.meveo.model.billing.InvoicePaymentStatusEnum.PENDING;
+import static org.meveo.model.billing.InvoicePaymentStatusEnum.UNPAID;
+import static org.meveo.model.billing.InvoiceStatusEnum.VALIDATED;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -106,7 +109,7 @@ public class InvoicingService extends PersistenceService<Invoice> {
     private Map<Long, TradingLanguage> tradingLanguages=new TreeMap<Long, TradingLanguage>();
     private Map<Long, DiscountPlan> discountPlans=new TreeMap<Long, DiscountPlan>();
     private Map<String, String> descriptionMap = new HashMap<>();
-	
+
 	@Inject
 	private DiscountPlanService discountPlanService;
 	@Inject
@@ -117,19 +120,19 @@ public class InvoicingService extends PersistenceService<Invoice> {
     private PurchaseOrderService PurchaseOrderService;
 
 	/** Creates the aggregates and invoice async. group of BAs at a time in a separate transaction.
-	 * 
+	 *
 	 * @param billingRun
 	 * @param billingCycle
 	 * @param jobInstanceId
 	 * @param lastCurrentUser
 	 * @param isFullAutomatic
-	 * @param result 
+	 * @param result
 	 */
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public Future<String> createAgregatesAndInvoiceForJob(List<Long> baIds, BillingRun billingRun, BillingCycle billingCycle,  Long jobInstanceId, MeveoUser lastCurrentUser, boolean isFullAutomatic, JobExecutionResultImpl result) {
 		return processInvoicingItems(billingRun, billingCycle, readInvoicingItems(billingRun, baIds), jobInstanceId, lastCurrentUser, isFullAutomatic, result);
 	}
-	
+
 	private List<BillingAccountDetailsItem> readInvoicingItems(BillingRun billingRun, List<Long> baIDs) {
 		boolean isBalanceDue = ParamBean.getInstance().getPropertyAsBoolean("invoice.balance.limitByDueDate", true);
         boolean isBalanceLitigation = ParamBean.getInstance().getPropertyAsBoolean("invoice.balance.includeLitigation", false);
@@ -148,12 +151,12 @@ public class InvoicingService extends PersistenceService<Invoice> {
 		Query query = getEntityManager().createNamedQuery("InvoiceLine.getInvoicingItems").setParameter("ids", baIDs).setParameter("billingRunId", billingRun.getId());
 		final Map<Long, List<InvoicingItem>> itemsByBAID = ((List<Object[]>)query.getResultList()).stream().map(InvoicingItem::new).collect(Collectors.groupingBy(InvoicingItem::getBillingAccountId));
 		log.info("======= {} InvoicingItems found =======",itemsByBAID.size());
-		
+
 		billingAccountDetailsMap.values().stream().forEach(x->x.setInvoicingItems(itemsByBAID.get(x.getBillingAccountId()).stream()
 		        .collect(Collectors.groupingBy(InvoicingItem::getInvoiceKey)).values().stream().collect(Collectors.toList())));
 		return new ArrayList<>(billingAccountDetailsMap.values());
 	}
-    
+
 	private Future<String> processInvoicingItems(BillingRun billingRun, BillingCycle billingCycle, List<BillingAccountDetailsItem> invoicingItemsList, Long jobInstanceId, MeveoUser lastCurrentUser, boolean isFullAutomatic, JobExecutionResultImpl result) {
         currentUserProvider.reestablishAuthentication(lastCurrentUser);
         List<List<Invoice>> invoicesByBA = generateInvoices(billingRun, invoicingItemsList, jobInstanceId, isFullAutomatic, billingCycle, result);
@@ -186,7 +189,7 @@ public class InvoicingService extends PersistenceService<Invoice> {
         }
         return invoicesByBA;
     }
-    
+
     private void createAggregatesAndInvoiceFromInvoicingItems(BillingAccountDetailsItem billingAccountDetailsItem, BillingRun billingRun, List<Invoice> invoices, BillingCycle billingCycle, BillingAccount billingAccount, boolean isFullAutomatic){
 
     	for (List<InvoicingItem> groupedItems : billingAccountDetailsItem.getInvoicingItems()) {
@@ -213,7 +216,10 @@ public class InvoicingService extends PersistenceService<Invoice> {
         if(!isFullAutomatic) {
             invoices.forEach(invoice->invoice.setTemporaryInvoiceNumber(serviceSingleton.getTempInvoiceNumber(billingRun.getId())));
         } else {
-        	invoices.forEach(invoice->serviceSingleton.assignInvoiceNumberVirtual(invoice));
+        	invoices.forEach(invoice-> {
+                serviceSingleton.assignInvoiceNumberVirtual(invoice);
+                invoiceService.updatePaymentStatus(invoice, new Date());
+            });
         	invoiceService.incrementBAInvoiceDate(billingRun, invoices.get(0).getBillingAccount());
         }
 		invoices.forEach(invoice -> {

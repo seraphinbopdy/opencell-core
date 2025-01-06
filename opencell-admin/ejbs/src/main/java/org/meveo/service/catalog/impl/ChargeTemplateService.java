@@ -17,9 +17,10 @@
  */
 package org.meveo.service.catalog.impl;
 
+import static java.math.RoundingMode.HALF_UP;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -69,7 +70,7 @@ public class ChargeTemplateService<P extends ChargeTemplate> extends BusinessSer
         chargeTemplate.clearUuid();
 
         List<TriggeredEDRTemplate> edrTemplates = chargeTemplate.getEdrTemplates();
-        chargeTemplate.setEdrTemplates(new ArrayList<TriggeredEDRTemplate>());
+        chargeTemplate.setEdrTemplates(new ArrayList<>());
         if (edrTemplates != null && edrTemplates.size() != 0) {
             for (TriggeredEDRTemplate edrTemplate : edrTemplates) {
                 edrTemplateService.detach(edrTemplate);
@@ -314,7 +315,10 @@ public class ChargeTemplateService<P extends ChargeTemplate> extends BusinessSer
                     BigDecimal outputMultiplicator = BigDecimal.valueOf(outputUnitFromEL.getMultiplicator());
                     BigDecimal inputMultiplicator = BigDecimal.valueOf(inputUnitFromEL.getMultiplicator());
                     Integer scale = calculateNeededScale(inputMultiplicator, outputMultiplicator);
-                    return quantity.multiply(inputMultiplicator).divide(outputMultiplicator, scale, RoundingMode.HALF_UP);
+                    if(chargeTemplate.getUnitNbDecimal() >= 0) {
+                        scale = chargeTemplate.getUnitNbDecimal();
+                    }
+                    return quantity.multiply(inputMultiplicator).divide(outputMultiplicator, scale, HALF_UP);
                 } else {
                     throw new ValidationException("incompatible input/rating UnitOfMeasures: " + inputUnitFromEL + "/" + outputUnitFromEL + " for chargeTemplate " + chargeTemplate.getCode());
                 }
@@ -368,7 +372,7 @@ public class ChargeTemplateService<P extends ChargeTemplate> extends BusinessSer
     }
 
     public Set<ChargeTemplate> getChargeTemplatesByCodes(List<String> chargeTemplateCodes) throws EntityDoesNotExistsException {
-        Set<ChargeTemplate> chargeTemplates = new HashSet<ChargeTemplate>();
+        Set<ChargeTemplate> chargeTemplates = new HashSet<>();
         if (chargeTemplateCodes == null) {
             return chargeTemplates;
         }

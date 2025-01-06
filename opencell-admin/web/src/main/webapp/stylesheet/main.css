@@ -355,7 +355,6 @@ span.ui-chkbox-label,
 .ui-state-highlight { background : #e84649 !Important; color : white !important; text-shadow : none !important; }
 .ui-fieldset-legend { border : none !important; background : none !important; font-size : 1em; }
 .ui-selectonemenu-list { background : white; }
-.ui-dialog-titlebar { width : 95% !important; }
 .ui-dialog-titlebar .ui-dialog-titlebar-close:hover { background : #b8eff7; }
 .ui-widget { font-size : 1em;}
 .ui-link .ui-widget .fa{ font: normal normal normal 14px/1 FontAwesome !important; }
@@ -514,7 +513,7 @@ vertical-align:top !important;
 }
 
 .search-panel-actions {
-	padding-top: 1em;
+	padding-top: 0.7em;
 	clear: both;
 }
 

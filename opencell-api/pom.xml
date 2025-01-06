@@ -269,6 +269,21 @@
 			<artifactId>commons-io</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		
+		<!-- SLF4J API -->
+    <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>2.0.9</version>
+    </dependency>
+    
+    <!-- SLF4J Simple Binding (for simple console output) -->
+    <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-simple</artifactId>
+        <version>2.0.9</version>
+    </dependency>
+    
 	</dependencies>
 	<build>
 		<plugins>
@@ -297,6 +312,74 @@
 			<id>api</id>
 			<!-- Dependencies for api documention generation -->
 			<dependencies>
+				<!-- Jakarta Persistence API (Replacement for javax.persistence) -->
+			    <dependency>
+			        <groupId>jakarta.persistence</groupId>
+			        <artifactId>jakarta.persistence-api</artifactId>
+			        <version>3.1.0</version>
+			    </dependency>
+			
+			    <!-- Hibernate Core (Ensure compatibility with Jakarta Persistence API) -->
+			    <dependency>
+			        <groupId>org.hibernate</groupId>
+			        <artifactId>hibernate-core</artifactId>
+			        <version>6.3.0.Final</version>
+			    </dependency>
+			
+			    <!-- Jakarta XML Binding (Replacement for javax.xml.bind) -->
+			    <dependency>
+			        <groupId>jakarta.xml.bind</groupId>
+			        <artifactId>jakarta.xml.bind-api</artifactId>
+			        <version>3.0.1</version>
+			    </dependency>
+			    <dependency>
+			        <groupId>org.glassfish.jaxb</groupId>
+			        <artifactId>jaxb-runtime</artifactId>
+			        <version>3.0.1</version>
+			    </dependency>
+			
+			    <!-- Jakarta Servlet API -->
+			    <dependency>
+			        <groupId>jakarta.servlet</groupId>
+			        <artifactId>jakarta.servlet-api</artifactId>
+			        <version>6.0.0</version>
+			    </dependency>
+			
+			    <!-- Jakarta Faces API -->
+			    <dependency>
+			        <groupId>jakarta.faces</groupId>
+			        <artifactId>jakarta.faces-api</artifactId>
+			        <version>4.0.1</version>
+			    </dependency>
+			
+			    <!-- Jakarta JMS API -->
+			    <dependency>
+			        <groupId>jakarta.jms</groupId>
+			        <artifactId>jakarta.jms-api</artifactId>
+			        <version>3.1.0</version>
+			    </dependency>
+			
+			    <!-- Jakarta Concurrency API -->
+			    <dependency>
+			        <groupId>jakarta.enterprise.concurrent</groupId>
+			        <artifactId>jakarta.enterprise.concurrent-api</artifactId>
+			        <version>3.0.0</version>
+			    </dependency>
+			
+			    <!-- Swagger Annotations -->
+			    <dependency>
+			        <groupId>io.swagger.core.v3</groupId>
+			        <artifactId>swagger-annotations</artifactId>
+			        <version>2.2.15</version>
+			    </dependency>
+			
+			    <!-- Infinispan -->
+			    <dependency>
+			        <groupId>org.infinispan</groupId>
+			        <artifactId>infinispan-core</artifactId>
+			        <version>14.0.3.Final</version>
+			    </dependency>
+
 				<dependency>
 					<groupId>com.opencellsoft</groupId>
 					<artifactId>opencell-model</artifactId>
@@ -304,8 +387,26 @@
 					<classifier>sources</classifier>
 				</dependency>
 				<dependency>
+					<groupId>com.opencellsoft</groupId>
+					<artifactId>opencell-admin-ejbs</artifactId>
+					<version>${project.version}</version>
+				</dependency>
+				<dependency>
+					<groupId>com.opencellsoft</groupId>
+					<artifactId>opencell-security</artifactId>
+					<version>${project.version}</version>
+					<classifier>sources</classifier>
+				</dependency>
+				<dependency>
+					<groupId>com.opencellsoft</groupId>
+					<artifactId>opencell-api-dto</artifactId>
+					<version>${project.version}</version>
+					<classifier>sources</classifier>
+				</dependency>
+				<dependency>
 					<groupId>org.primefaces</groupId>
 					<artifactId>primefaces</artifactId>
+					<version>14.0.2</version>
 				</dependency>
 				<dependency>
 					<groupId>com.thoughtworks.xstream</groupId>
@@ -316,8 +417,41 @@
 					<artifactId>reflections</artifactId>
 				</dependency>
 				<dependency>
-					<groupId>org.jboss.spec.javax.ws.rs</groupId>
-					<artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
+				    <groupId>org.apache.logging.log4j</groupId>
+				    <artifactId>log4j-core</artifactId>
+				    <version>2.20.0</version>
+				</dependency>
+				<dependency>
+				    <groupId>org.apache.logging.log4j</groupId>
+				    <artifactId>log4j-api</artifactId>
+				    <version>2.20.0</version>
+				</dependency>
+				<dependency>
+				    <groupId>commons-collections</groupId>
+				    <artifactId>commons-collections</artifactId>
+				    <version>3.2.2</version>
+				</dependency>
+				<dependency>
+				    <groupId>com.google.code.gson</groupId>
+				    <artifactId>gson</artifactId>
+				    <version>2.10.1</version>
+				</dependency>
+				<dependency>
+				    <groupId>org.apache.poi</groupId>
+				    <artifactId>poi</artifactId>
+				    <version>5.2.3</version>
+				</dependency>
+				
+				<dependency>
+				    <groupId>com.googlecode.json-simple</groupId>
+				    <artifactId>json-simple</artifactId>
+				    <version>1.1.1</version>
+				</dependency>
+				<dependency>
+					  <groupId>com.github.spotbugs</groupId>
+					  <artifactId>spotbugs-annotations</artifactId>
+					  <version>4.7.3</version> <!-- Use the latest stable version -->
+					  <scope>provided</scope>
 				</dependency>
 			</dependencies>
 			<build>
@@ -366,23 +500,32 @@
 			<id>swagger</id>
 			<dependencies>
 				<dependency>
-					<groupId>io.openapitools.swagger</groupId>
+					<groupId>com.github.kongchen</groupId>
 					<artifactId>swagger-maven-plugin</artifactId>
+					    <version>3.1.8</version>
+
 				</dependency>
 				<dependency>
 					<groupId>com.github.javaparser</groupId>
 					<artifactId>javaparser-symbol-solver-core</artifactId>
+					    <version>3.24.0</version> <!-- Use the latest version from Maven Central -->
+
 				</dependency>
 			</dependencies>
 			<build>
 				<plugins>
+				<!--
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>exec-maven-plugin</artifactId>
+						    <version>3.1.0</version>
+
 						<dependencies>
 							<dependency>
 								<groupId>com.github.javaparser</groupId>
 								<artifactId>javaparser-symbol-solver-core</artifactId>
+								            <version>3.24.0</version>
+
 							</dependency>
 						</dependencies>
 						<executions>
@@ -395,38 +538,62 @@
 						</executions>
 						<configuration>
 							<mainClass>org.meveo.api.ParserSwagger</mainClass>
+							        <classpathScope>runtime</classpathScope>
+
 						</configuration>
 					</plugin>
+					-->
 					<plugin>
-						<groupId>io.openapitools.swagger</groupId>
+						<groupId>com.github.kongchen</groupId>
 						<artifactId>swagger-maven-plugin</artifactId>
-						<dependencies>
+						<version>3.1.8</version>
+						
+												<dependencies>
+
+						<dependency>
+    <groupId>io.swagger.core.v3</groupId>
+    <artifactId>swagger-jaxrs2</artifactId>
+    <version>2.2.8</version>
+</dependency>
+
+<dependency>
+        <groupId>jakarta.xml.bind</groupId>
+        <artifactId>jakarta.xml.bind-api</artifactId>
+        <version>4.0.0</version>
+    </dependency>
+    <dependency>
+        <groupId>org.glassfish.jaxb</groupId>
+        <artifactId>jaxb-runtime</artifactId>
+        <version>4.0.0</version>
+    </dependency>
 							<dependency>
 								<groupId>com.opencellsoft</groupId>
 								<artifactId>opencell-model</artifactId>
-								<version>${project.version}</version>
+								<classifier>sources</classifier>
 							</dependency>
 							<dependency>
 								<groupId>com.opencellsoft</groupId>
 								<artifactId>opencell-api-dto</artifactId>
-								<version>${project.version}</version>
-							</dependency>
-							<dependency>
-								<groupId>com.opencellsoft</groupId>
-								<artifactId>opencell-admin-ejbs</artifactId>
-								<version>${project.version}</version>
+								<classifier>sources</classifier>
 							</dependency>
 							<dependency>
 								<groupId>com.opencellsoft</groupId>
 								<artifactId>opencell-api</artifactId>
-								<version>${project.version}</version>
+								<classifier>sources</classifier>
 							</dependency>
+							<dependency>
+								<groupId>com.opencellsoft</groupId>
+								<artifactId>opencell-admin-ejbs</artifactId>
+								<classifier>sources</classifier>
+							</dependency>
+						<!--	
 							<dependency>
 								<groupId>javax.servlet</groupId>
 								<artifactId>servlet-api</artifactId>
 								<version>4.0.1</version>
 								<scope>compile</scope>
 							</dependency>
+							
 							<dependency>
 								<groupId>org.jboss.resteasy</groupId>
 								<artifactId>resteasy-multipart-provider</artifactId>
@@ -438,47 +605,67 @@
 								<artifactId>javaparser-symbol-solver-core</artifactId>
 								<version>3.24.2</version>
 							</dependency>
+							-->
 						</dependencies>
-						<configuration>
-							<swaggerConfig>
-								<servers>
-									<server>
-										<url>${swagger.server.link}</url>
-										<description>Server to test</description>
-									</server>
-								</servers>
-								<info>
-									<title>Swagger of Opencellsoft Api</title>
-									<version>${project.version}</version>
-									<contact>
-										<email>contact@opencellsoft.fr</email>
-										<name>OpenCellSoft</name>
-										<url>
-											https://opencellsoft.com/contact_us/</url>
-									</contact>
-									<license>
-										<url>https://opencellsoft.com/</url>
-										<name>Opencellsoft</name>
-									</license>
-									<description>@#Introduction</description>
-								</info>
-							</swaggerConfig>
-							<resourcePackages>
-								<resourcePackage>org.meveo.api.rest</resourcePackage>
-								<resourcePackage>org.meveo.apiv2</resourcePackage>
-							</resourcePackages>
-							<outputDirectory>
-								${project.build.directory}/doc/swagger</outputDirectory>
-							<outputFilename>swagger</outputFilename>
-							<outputFormats>JSON,YAML</outputFormats>
-							<prettyPrint>true</prettyPrint>
-							<useResourcePackagesChildren>true</useResourcePackagesChildren>
-						</configuration>
 						<executions>
 							<execution>
+								<phase>package</phase>
 								<goals>
 									<goal>generate</goal>
 								</goals>
+								<configuration>
+									<apiSources>
+					                    <apiSource>
+					                        <springmvc>false</springmvc>
+					                        <locations>
+					                            <location>org.meveo.api.rest</location>
+												<location>org.meveo.apiv2</location>
+					                        </locations>
+					                       
+					                        <schemes>http</schemes>
+					                        <host>localhost:8080</host>
+					                        <basePath>/api</basePath>
+					                        <info>
+					                            <title>OpenCell API</title>
+					                            <version>1.0.0</version>
+					                            <description>API Documentation for OpenCell</description>
+					                        </info>
+					                        <outputFormats>json,yaml</outputFormats>
+					                        <outputPath>${project.build.directory}/swagger</outputPath>
+					                    </apiSource>
+					                </apiSources>
+									<swaggerConfig>
+										<servers>
+											<server>
+												<url>${swagger.server.link}</url>
+												<description>Server to test</description>
+											</server>
+										</servers>
+										<info>
+											<title>Swagger of Opencellsoft Api</title>
+											<version>${project.version}</version>
+											<contact>
+												<email>contact@opencellsoft.fr</email>
+												<name>OpenCellSoft</name>
+												<url>
+													https://opencellsoft.com/contact_us/</url>
+											</contact>
+											<license>
+												<url>https://opencellsoft.com/</url>
+												<name>Opencellsoft</name>
+											</license>
+											<description>@#Introduction</description>
+										</info>
+									</swaggerConfig>
+									<resourcePackages>
+										<resourcePackage>org.meveo.api.rest</resourcePackage>
+									</resourcePackages>
+									<outputDirectory>${project.build.directory}/generated-sources/swagger</outputDirectory>
+									<outputFilename>swagger</outputFilename>
+									<outputFormats>JSON,YAML</outputFormats>
+									<prettyPrint>true</prettyPrint>
+									<useResourcePackagesChildren>true</useResourcePackagesChildren>
+								</configuration>
 							</execution>
 						</executions>
 					</plugin>

@@ -1669,9 +1669,6 @@ public class BillingRunService extends PersistenceService<BillingRun> {
                                                                  JobExecutionResultImpl jobExecutionResult) {
         currentUserProvider.reestablishAuthentication(lastCurrentUser);
         for (IBillableEntity entityToInvoice : entities) {
-            if (jobInstanceId != null && !jobExecutionService.isJobRunningOnThis(jobInstanceId)) {
-                break;
-            }
             try {
                 List<Invoice> invoices = invoiceService.createAggregatesAndInvoiceWithILInNewTransaction(entityToInvoice, billingRun,
                         null, null, null, null, minAmountForAccounts,

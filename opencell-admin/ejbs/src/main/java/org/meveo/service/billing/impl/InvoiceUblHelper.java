@@ -121,6 +121,7 @@ import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Document
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.DueDate;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ElectronicMail;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.EndDate;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.EndpointID;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.FamilyName;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.FirstName;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.HolderName;
@@ -242,7 +243,6 @@ public class InvoiceUblHelper {
 		if (creditNote != null) {
 			setGeneralInfo(invoice, creditNote);
 			setBillingReference(invoice, creditNote);
-			setOrderReference(invoice, creditNote);
 			setInvoiceLine(invoice.getInvoiceLines(), creditNote, invoiceLanguageCode);
 			creditNote.setLegalMonetaryTotal(setTaxExclusiveAmount(totalPrepaidAmount, curreny, amountWithoutTax , amountWithTax, lineExtensionAmount, payableAmount, discountAmount));
 			creditNote.setProfileID(profileID);
@@ -989,6 +989,7 @@ public class InvoiceUblHelper {
 		SupplierPartyType supplierPartyType = objectFactoryCommonAggrement.createSupplierPartyType();
 		//AccountingSupplierParty/Party
 		PartyType partyType = objectFactoryCommonAggrement.createPartyType();
+
 		// AccountingSupplierParty/Party/PartyLegalEntity
 		PartyLegalEntity partyLegalEntity = objectFactoryCommonAggrement.createPartyLegalEntity();
 		// AccountingSupplierParty/Party/PartyLegalEntity/RegistrationName
@@ -1370,6 +1371,11 @@ public class InvoiceUblHelper {
 		}
 		
 		TaxScheme taxScheme = objectFactoryCommonAggrement.createTaxScheme();
+		ID id = objectFactorycommonBasic.createID();
+		id.setSchemeID("UN/ECE 5153");
+		id.setSchemeAgencyID("6");
+		id.setValue("VAT");
+		taxScheme.setID(id);
 		TaxTypeCode taxTypeCode = objectFactorycommonBasic.createTaxTypeCode();
 		taxTypeCode.setValue(taxInvoiceAgregate.getTax().getCode());
 		taxScheme.setTaxTypeCode(taxTypeCode);
@@ -1732,15 +1738,28 @@ public class InvoiceUblHelper {
 			for (RegistrationNumber registerNumber : registrationNumbers) {
 				if (registerNumber.getIsoIcd() == null) continue;
 				if (registerNumber.getIsoIcd().getCode() != null) {
-					PartyIdentification partyIdentification = objectFactoryCommonAggrement.createPartyIdentification();
-					ID id = objectFactorycommonBasic.createID();
-					id.setSchemeID(registerNumber.getIsoIcd().getCode());
-					id.setSchemeAgencyID(ISO_IEC_6523);
-					id.setValue(registerNumber.getRegistrationNo());
-					partyIdentification.setID(id);
-					partyType.getPartyIdentifications().add(partyIdentification);
+					if(registerNumber.getIsoIcd().getCode().equals("0230")){
+						partyType.setEndpointID(setEndpointID(registerNumber.getIsoIcd().getCode(), registerNumber.getRegistrationNo()));
+					}else{
+						PartyIdentification partyIdentification = objectFactoryCommonAggrement.createPartyIdentification();
+						ID id = objectFactorycommonBasic.createID();
+						id.setSchemeID(registerNumber.getIsoIcd().getCode());
+						id.setSchemeAgencyID(ISO_IEC_6523);
+						id.setValue(registerNumber.getRegistrationNo());
+						partyIdentification.setID(id);
+						partyType.getPartyIdentifications().add(partyIdentification);
 				}
 			}
 		}
+		}
+	}
+
+	// endpoint will display information about registration number that have iso code 0230
+	private EndpointID setEndpointID(String code, String value) {
+		EndpointID endpointIDType = objectFactorycommonBasic.createEndpointID();
+		//endpointIDType.setSchemeAgencyID(ISO_IEC_6523);
+		endpointIDType.setSchemeID(code);
+		endpointIDType.setValue(value);
+		return endpointIDType;
 	}
 }

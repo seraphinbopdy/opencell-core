@@ -669,11 +669,6 @@ public class AuditDataLogService extends PersistenceService<AuditDataLog> {
 
         // Remove records from an original audit data record list that were processed already
         recordsProcessed.sort(Comparator.naturalOrder());
-        /*
-        for (int i = recordsProcessed.size() - 1; i >= 0; i--) {
-            auditDataLogRecords.remove(recordsProcessed.get(i).intValue());
-        }
-        */
         return aggregatedLogs;
     }
 

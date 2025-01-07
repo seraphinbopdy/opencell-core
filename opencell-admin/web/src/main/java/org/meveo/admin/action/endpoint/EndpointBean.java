@@ -8,13 +8,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import jakarta.el.ELException;
-import jakarta.faces.context.FacesContext;
-import jakarta.faces.view.ViewScoped;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
-import jakarta.servlet.http.HttpServletRequest;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.jboss.seam.international.status.builder.BundleKey;
 import org.meveo.admin.action.BaseBean;
@@ -33,6 +26,13 @@ import org.meveo.service.script.ScriptUtils;
 import org.meveo.web.endpoint.EndpointServlet;
 import org.primefaces.event.TransferEvent;
 import org.primefaces.model.DualListModel;
+
+import jakarta.el.ELException;
+import jakarta.faces.context.FacesContext;
+import jakarta.faces.view.ViewScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Backend bean to manage a single Endpoint
@@ -74,6 +74,21 @@ public class EndpointBean extends BaseBean<Endpoint> {
     @Override
     protected String getDefaultSort() {
         return "code";
+    }
+
+    @Override
+    public Endpoint initEntity() {
+        super.initEntity();
+
+        if (entity.getService() != null) {
+            scriptSetters = ScriptUtils.getSetters(entity.getService());
+            scriptGetters = ScriptUtils.getGetters(entity.getService());
+        } else {
+            scriptSetters = null;
+            scriptGetters = null;
+        }
+
+        return entity;
     }
 
     public DualListModel<String> getPathParametersDL() {

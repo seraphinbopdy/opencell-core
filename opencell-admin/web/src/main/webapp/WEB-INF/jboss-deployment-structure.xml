@@ -27,6 +27,7 @@
 			<module name="org.jgroups" />
 			<module name="org.jboss.as.ee" />
 			<module name="com.opencellsoft.cache-scripts" />
+            <module name="com.google.code.gson" />
 		</dependencies>
 	</deployment>
 </jboss-deployment-structure>

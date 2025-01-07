@@ -162,7 +162,7 @@ public class FilesApiService extends BaseApi {
         Comparator<Path> comparator = Comparator.comparing(Path::getFileName);
         String sortBy = searchConfig.getSortBy();
         if (!StringUtils.isBlank(sortBy)) {
-            if (sortBy.equalsIgnoreCase("date")) {
+            if (sortBy.equalsIgnoreCase("date") || sortBy.equalsIgnoreCase("lastModified")) {
                 comparator = Comparator.comparing(p -> p.toFile().lastModified());
             } else if (sortBy.equalsIgnoreCase("size")) {
                 comparator = Comparator.comparing(p -> p.toFile().length());

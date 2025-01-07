@@ -15,6 +15,8 @@ import org.junit.runner.RunWith;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.apiv2.article.*;
 import org.meveo.apiv2.article.service.AccountingArticleApiService;
+import org.meveo.jpa.EntityManagerWrapper;
+import org.meveo.jpa.MeveoJpa;
 import org.meveo.model.article.AccountingArticle;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.billing.*;
@@ -27,6 +29,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import jakarta.persistence.EntityManager;
 import jakarta.ws.rs.NotFoundException;
 import java.util.*;
 
@@ -53,6 +56,13 @@ public class AccountingArticleApiServiceTest {
 
     @Mock
     private AccountingCodeService accountingCodeService;
+
+    @Mock
+    private EntityManager entityManager;
+    
+    @Mock
+    @MeveoJpa
+    private EntityManagerWrapper entityManagerWrapper;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -94,6 +104,8 @@ public class AccountingArticleApiServiceTest {
         when(tradingCountryService.findByCode("FR")).thenReturn(country);
         when(tradingCurrencyService.findByTradingCurrencyCode("EUR")).thenReturn(tradingCurrency);
         when(accountingCodeService.findByCode(anyString())).thenReturn(new AccountingCode());
+        
+        when(entityManagerWrapper.getEntityManager()).thenReturn(entityManager);        
     }
 
     @Test

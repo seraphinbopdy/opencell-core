@@ -312,11 +312,13 @@ public class AccountingArticleApiService implements AccountingArticleServiceBase
             }
         }
 
-        entityManagerWrapper.getEntityManager().refresh(accountingArticle);
         for (org.meveo.apiv2.article.AccountingCodeMapping accountingCodeMapping
                 : accountingCodeMappingInput.getAccountingCodeMappings()) {
             accountingCodeMappings.add(createAccountingCodeMapping(accountingCodeMapping, accountingArticle));
         }
+
+        entityManagerWrapper.getEntityManager().refresh(accountingArticle);
+        
         return accountingCodeMappings;
     }
 

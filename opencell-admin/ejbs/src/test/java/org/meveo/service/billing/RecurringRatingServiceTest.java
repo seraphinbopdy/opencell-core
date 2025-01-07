@@ -117,6 +117,7 @@ public class RecurringRatingServiceTest {
         }).when(walletOperationService).chargeWalletOperation(any());
 
         when(appProvider.getRoundingMode()).thenReturn(RoundingModeEnum.HALF_EVEN);
+        when(appProvider.getRounding()).thenReturn(2);
 
     }
 

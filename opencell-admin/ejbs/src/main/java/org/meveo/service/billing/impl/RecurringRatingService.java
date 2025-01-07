@@ -386,7 +386,7 @@ public class RecurringRatingService extends RatingService implements Serializabl
                 if(cal.getCalendarType() != null && cal.getCalendarType().equals("BANKING") && currentPeriodToDate != null && currentPeriodToDate.compareTo(currentPeriodFromDate) == 0) {
                 	throw new IllegalStateException("The given date: " +currentPeriodFromDate +" is not in period [startDate,endDate] of banking Calendar: "+ cal.getCode());
                 }
-                
+               
                 effectiveChargeToDate = currentPeriodToDate.before(applyChargeToDate) ? currentPeriodToDate : applyChargeToDate;
                 if (prorateLastPeriodToDate != null && currentPeriodToDate.after(prorateLastPeriodToDate)) {
                     effectiveChargeToDate = prorateLastPeriodToDate;
@@ -483,12 +483,7 @@ public class RecurringRatingService extends RatingService implements Serializabl
                             inputQuantity = inputQuantity.negate();
                         }
                     }
-                    if((!prorate && !prorateLastPeriod) && chargeInstance.getTerminationDate() != null && chargeInstance.getTerminationDate().compareTo(new Date()) < 0) {
-                        effectiveChargeToDate = chargeInstance.getTerminationDate();
-                        effectiveChargeFromDate = getRecurringPeriodStartDate(chargeInstance, chargeInstance.getChargeToDateOnTermination());
-                        inputQuantity = computeProrate(chargeInstance, effectiveChargeFromDate,
-                                effectiveChargeToDate, currentPeriodFromDate, currentPeriodToDate, inputQuantity);
-                    }
+
 
                     if (chargeMode.isReimbursement()) {
                         log.debug("Applying {} recurring charge {} for period {} - {}, quantity {}", "reimbursement", chargeInstance.getId(), effectiveChargeFromDate, effectiveChargeToDate, inputQuantity);

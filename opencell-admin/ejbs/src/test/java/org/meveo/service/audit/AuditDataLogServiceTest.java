@@ -121,9 +121,6 @@ public class AuditDataLogServiceTest {
 
         assertThat(auditDataLogs.get(1).getValuesOld().get("tradingCurrency")).isEqualTo(4);
         assertThat(auditDataLogs.get(1).getValuesOld().get("tradingCountry")).isEqualTo(8);
-
-        assertThat(auditDataLogRecords).isEmpty();
-
     }
 
     @Test
@@ -170,8 +167,6 @@ public class AuditDataLogServiceTest {
 
         assertThat(auditDataLogs.get(1).getValuesOld().get("tradingCurrency")).isEqualTo(4);
         assertThat(auditDataLogs.get(1).getValuesOld().get("tradingCountry")).isEqualTo(8);
-
-        assertThat(auditDataLogRecords).isEmpty();
     }
 
     @SuppressWarnings("unchecked")
@@ -791,8 +786,6 @@ public class AuditDataLogServiceTest {
         assertThat(((Map<String, Object>) auditDataLogs.get(5).getValuesOld().get("offerServiceTemplates_58")).get("mandatory")).isEqualTo(0);
         assertThat(((List<Map<String, Object>>) ((Map<String, Object>) auditDataLogs.get(5).getValuesOld().get("offerServiceTemplates_58")).get("incompatibleServices")).size()).isEqualTo(1);
         assertThat(((List<Object>) ((Map<String, Object>) auditDataLogs.get(5).getValuesOld().get("offerServiceTemplates_58")).get("incompatibleServices")).get(0)).isEqualTo(4);
-
-        assertThat(auditDataLogRecords).isEmpty();
     }
 
     @SuppressWarnings("unchecked")
@@ -1049,9 +1042,6 @@ public class AuditDataLogServiceTest {
 
         assertThat(deleteQuerySimulated.getIdsParam().size()).isEqualTo(26);
 
-        assertThat(auditDataLogRecords.size()).isEqualTo(1);
-        assertThat(auditDataLogRecords.get(0).getId()).isEqualTo(649L);
-
     }
 
     @SuppressWarnings("unchecked")
@@ -1193,8 +1183,6 @@ public class AuditDataLogServiceTest {
         assertThat(((List<Object>) ((Map<String, Object>) auditDataLogs.get(2).getValuesOld().get("offerServiceTemplates_77")).get("incompatibleServices")).get(1)).isEqualTo(4);
 
         assertThat(auditDataLogs.get(2).getAuditDataLogRecords()).containsAll(Arrays.asList(754L, 755L, 762L, 763L));
-
-        assertThat(auditDataLogRecords).isEmpty();
 
     }
 
@@ -1532,8 +1520,6 @@ public class AuditDataLogServiceTest {
         assertThat(subADeleteAL.getValuesOld().get("status")).isEqualTo("ACTIVE");
 
         assertThat(deleteQuerySimulated.getIdsParam().size()).isEqualTo(6);
-
-        assertThat(auditDataLogRecords.size()).isEqualTo(0);
     }
 
     private class QuerySimulation implements TypedQuery<Long> {

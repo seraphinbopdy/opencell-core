@@ -26,6 +26,7 @@ import org.meveo.api.exception.BusinessApiException;
 import org.meveo.jpa.JpaAmpNewTx;
 import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.Invoice;
+import org.meveo.model.billing.InvoicePaymentStatusEnum;
 import org.meveo.model.communication.email.EmailTemplate;
 import org.meveo.model.dunning.DunningActionInstanceStatusEnum;
 import org.meveo.model.dunning.DunningCollectionPlan;
@@ -636,34 +637,50 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
      * @param collectionPlan
      */
     public void launchPaymentAction(DunningCollectionPlan collectionPlan) {
-        BillingAccount billingAccount = collectionPlan.getBillingAccount();
-        if (billingAccount != null && billingAccount.getCustomerAccount() != null
-                && billingAccount.getCustomerAccount().getPaymentMethods() != null) {
-            PaymentMethod preferredPaymentMethod = billingAccount.getCustomerAccount()
+        PaymentMethod preferredPaymentMethod = null;
+        CustomerAccount customerAccount = null;
+
+        if (collectionPlan.getBillingAccount() != null && collectionPlan.getBillingAccount().getCustomerAccount() != null && collectionPlan.getBillingAccount().getCustomerAccount().getPaymentMethods() != null) {
+            preferredPaymentMethod = collectionPlan
+                    .getBillingAccount()
+                    .getCustomerAccount()
                     .getPaymentMethods()
                     .stream()
                     .filter(PaymentMethod::isPreferred)
                     .findFirst()
                     .orElseThrow(() -> new BusinessException("No preferred payment method found for customer account"
-                            + billingAccount.getCustomerAccount().getCode()));
-            CustomerAccount customerAccount = billingAccount.getCustomerAccount();
+                            + collectionPlan.getBillingAccount().getCustomerAccount().getCode()));
+        } else if(collectionPlan.getCustomerAccount() != null && collectionPlan.getCustomerAccount().getPaymentMethods() != null) {
+            customerAccount = collectionPlan.getCustomerAccount();
+            preferredPaymentMethod = collectionPlan
+                    .getCustomerAccount()
+                    .getPaymentMethods()
+                    .stream()
+                    .filter(PaymentMethod::isPreferred)
+                    .findFirst()
+                    .orElseThrow(() -> new BusinessException("No preferred payment method found for customer account"
+                            + collectionPlan.getCustomerAccount().getCode()));
+        }
+
+        if (customerAccount != null && preferredPaymentMethod != null) {
             //PaymentService.doPayment consider amount to pay in cent so amount should be * 100
-            long amountToPay = collectionPlan.getRelatedInvoice().getNetToPay().multiply(BigDecimal.valueOf(100)).longValue();
-            Invoice invoice = collectionPlan.getRelatedInvoice();
-            if (invoice.getRecordedInvoice() == null) {
-                throw new BusinessException("No getRecordedInvoice for the invoice "
-                        + (invoice.getInvoiceNumber() != null ? invoice.getInvoiceNumber() : invoice.getTemporaryInvoiceNumber()));
+            //long amountToPay = collectionPlan.getRelatedInvoice().getNetToPay().multiply(BigDecimal.valueOf(100)).longValue();
+            if (collectionPlan.getRelatedInvoices() != null && !collectionPlan.getRelatedInvoices().isEmpty()) {
+                long amountToPay = collectionPlan.getRelatedInvoices().stream().mapToLong(invoice -> invoice.getNetToPay().multiply(BigDecimal.valueOf(100)).longValue()).sum();
+                List<Invoice> invoices = collectionPlan.getRelatedInvoices().stream().filter(invoice -> invoice.getPaymentStatus().equals(InvoicePaymentStatusEnum.UNPAID)).toList();
+                List<Long> ids = new ArrayList<>();
+                for (Invoice invoice : invoices) {
+                    List<AccountOperation> accountOperations = accountOperationService.listByInvoice(invoice);
+                    ids.addAll(accountOperations.stream().map(AccountOperation::getId).toList());
+                }
+                PaymentGateway paymentGateway = paymentGatewayService.getPaymentGateway(customerAccount, preferredPaymentMethod, null);
+                doPayment(preferredPaymentMethod, customerAccount, amountToPay, ids, paymentGateway);
             }
-            List<Long> ids = new ArrayList<>();
-            ids.add(invoice.getRecordedInvoice().getId());
-            PaymentGateway paymentGateway = paymentGatewayService.getPaymentGateway(customerAccount, preferredPaymentMethod, null);
-            doPayment(preferredPaymentMethod, customerAccount, amountToPay, ids, paymentGateway);
         }
     }
 
-    @JpaAmpNewTx
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void doPayment(PaymentMethod preferredPaymentMethod, CustomerAccount customerAccount, long amountToPay, List<Long> accountOperationsToPayIds, PaymentGateway paymentGateway) {
+        CustomerAccount customerAccountToPay = customerAccountService.findById(customerAccount.getId());
         if (preferredPaymentMethod.getPaymentType()== PaymentMethodEnum.DIRECTDEBIT || preferredPaymentMethod.getPaymentType()==PaymentMethodEnum.CARD) {
             try {
                 if (accountOperationsToPayIds != null && !accountOperationsToPayIds.isEmpty()) {
@@ -672,19 +689,19 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
                             preferredPaymentMethod = (PaymentMethod) ((HibernateProxy) preferredPaymentMethod).getHibernateLazyInitializer().getImplementation();
                         }
                         CardPaymentMethod paymentMethod = (CardPaymentMethod) preferredPaymentMethod;
-                        paymentService.doPayment(customerAccount, amountToPay, accountOperationsToPayIds,
+                        paymentService.doPayment(customerAccountToPay, amountToPay, accountOperationsToPayIds,
                                 true, true, paymentGateway, paymentMethod.getCardNumber(),
                                 paymentMethod.getCardNumber(), paymentMethod.getHiddenCardNumber(),
                                 paymentMethod.getExpirationMonthAndYear(), paymentMethod.getCardType(),
                                 true, preferredPaymentMethod.getPaymentType(), false, null);
                     } else {
-                        paymentService.doPayment(customerAccount, amountToPay, accountOperationsToPayIds,
+                        paymentService.doPayment(customerAccountToPay, amountToPay, accountOperationsToPayIds,
                                 true, true, paymentGateway, null, null,
                                 null, null, null, true, preferredPaymentMethod.getPaymentType(), false, null);
                     }
                 }
             } catch (Exception exception) {
-                throw new BusinessException("Error occurred during payment process for customer " + customerAccount.getCode(), exception);
+                throw new BusinessException("Error occurred during payment process for customer " + customerAccountToPay.getCode(), exception);
             }
         }
     }

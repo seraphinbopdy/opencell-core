@@ -132,7 +132,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
     @Inject
     private AccountOperationService accountOperationService;
 
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void execute(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance) {
         // Get the last dunning setting configuration
         DunningSettings dunningSettings = dunningSettingsService.findLastOne();
@@ -142,19 +142,23 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
         jobExecutionResult.setNbItemsToProcess(collectionPlanToProcess.size());
         // Process collection plans
         collectionPlanToProcess.forEach(collectionPlanId -> {
+            // Get collection plan
+            DunningCollectionPlan collectionPlan = collectionPlanService.findById(collectionPlanId);
+
             try {
                 if(dunningSettings.getDunningMode().equals(DunningModeEnum.INVOICE_LEVEL)) {
-                    jobBean.processInvoiceLevel(collectionPlanId, jobExecutionResult);
+                    jobBean.processInvoiceLevel(collectionPlan, jobExecutionResult);
                 } else if(dunningSettings.getDunningMode().equals(DunningModeEnum.CUSTOMER_LEVEL)) {
-                    jobBean.processCustomerLevel(collectionPlanId, jobExecutionResult);
+                    jobBean.processCustomerLevel(collectionPlan, jobExecutionResult);
                 }
+
+                // Check all processed collection plan to verify if the invoice is paid
+                getAndUpdateProcessedCollectionPlans(collectionPlan, dunningSettings);
             } catch (Exception exception) {
                 jobExecutionResult.addErrorReport(exception.getMessage());
             }
         });
 
-        // Check all processed collection plan to verify if the invoice is paid
-        getAndUpdateProcessedCollectionPlans(collectionPlanToProcess, dunningSettings);
         // Update job execution result
         jobExecutionResult.setNbItemsCorrectlyProcessed(collectionPlanToProcess.size() - jobExecutionResult.getNbItemsProcessedWithError());
     }
@@ -184,14 +188,9 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
     /**
      * Get and update processed collection plans
      *
-     * @param collectionPlanToProcess Collection plan to process
      */
-    private void getAndUpdateProcessedCollectionPlans(List<Long> collectionPlanToProcess, DunningSettings pDunningSettings) {
-        // Transform to foreach
-        collectionPlanToProcess.forEach(collectionPlanId -> {
-            DunningCollectionPlan processedCollectionPlan = collectionPlanService.findById(collectionPlanId);
-            checkAndUpdateCollectionPlanWhenPaidInvoice(processedCollectionPlan, pDunningSettings);
-        });
+    private void getAndUpdateProcessedCollectionPlans(DunningCollectionPlan collectionPlan, DunningSettings pDunningSettings) {
+        checkAndUpdateCollectionPlanWhenPaidInvoice(collectionPlan, pDunningSettings);
     }
 
     /**
@@ -220,14 +219,10 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
     /**
      * Process collection plans
      *
-     * @param collectionPlanId   Collection plan id to process
+     * @param collectionPlan   Collection plan to process
      * @param jobExecutionResult Job execution result
      */
-    @JpaAmpNewTx
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public void processInvoiceLevel(Long collectionPlanId, JobExecutionResultImpl jobExecutionResult) {
-        // Get collection plan
-        DunningCollectionPlan collectionPlan = collectionPlanService.findById(collectionPlanId);
+    public void processInvoiceLevel(DunningCollectionPlan collectionPlan, JobExecutionResultImpl jobExecutionResult) {
         Date dateToCompare;
         Date today = new Date();
         int index = 0;
@@ -326,10 +321,10 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                     }
 
                         // Update collection plan status to FAILED if is end of dunning and invoice is unpaid
-                        if (levelInstance.getDunningLevel() != null && levelInstance.getDunningLevel().isEndOfDunningLevel() && collectionPlan.getRelatedInvoice().getPaymentStatus().equals(InvoicePaymentStatusEnum.UNPAID)) {
+                    if (levelInstance.getDunningLevel() != null && levelInstance.getDunningLevel().isEndOfDunningLevel() && collectionPlan.getRelatedInvoice().getPaymentStatus().equals(InvoicePaymentStatusEnum.UNPAID)) {
                         collectionPlan.setStatus(collectionPlanStatusService.findByStatus(FAILED));
-                            collectionPlan.setNextAction(null);
-                            collectionPlan.setNextActionDate(null);
+                        collectionPlan.setNextAction(null);
+                        collectionPlan.setNextActionDate(null);
                     }
 
                         // Update collection plan status to SUCCESS if is end of dunning and invoice is paid
@@ -379,15 +374,11 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
     /**
      * Process collection plans
      *
-     * @param collectionPlanId   Collection plan id to process
+     * @param collectionPlan   Collection plan to process
      * @param jobExecutionResult Job execution result
      */
-    @JpaAmpNewTx
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public void processCustomerLevel(Long collectionPlanId, JobExecutionResultImpl jobExecutionResult) {
+    public void processCustomerLevel(DunningCollectionPlan collectionPlan, JobExecutionResultImpl jobExecutionResult) {
         DunningSettings dunningSettings = dunningSettingsService.findLastOne();
-        // Get collection plan
-        DunningCollectionPlan collectionPlan = collectionPlanService.findById(collectionPlanId);
         Date dateToCompare;
         Date today = new Date();
         int index = 0;
@@ -442,7 +433,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                                 try {
                                     if (previousLevelInstance == null || (previousLevelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.DONE || previousLevelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.IGNORED)) {
                                         triggerActionAndRefreshLevelsAndActions(collectionPlan, levelInstance, actionInstance);
-                                        }
+                                    }
                                 } catch (Exception exception) {
                                     registerKO = true;
                                     jobExecutionResult.addReport(COLLECTION_PLAN_ID_MESSAGE
@@ -495,6 +486,22 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                             collectionPlan.setNextAction(null);
                             collectionPlan.setNextActionDate(null);
                         }
+
+                        // check if all invoices are paid
+                        List<Invoice> relatedInvoices = collectionPlan.getRelatedInvoices();
+                        boolean allPaid = true;
+                        for (Invoice invoice : relatedInvoices) {
+                            if (!invoice.getPaymentStatus().equals(PAID)) {
+                                allPaid = false;
+                            }
+                        }
+
+                        if(collectionPlan.getBalance().equals(0) && allPaid) {
+                            collectionPlan.setStatus(collectionPlanStatusService.findByStatus(SUCCESS));
+                            collectionPlan.setNextAction(null);
+                            collectionPlan.setNextActionDate(null);
+                        }
+
                         setLevelAndActionStatus(levelInstance);
                         }
 
@@ -545,36 +552,6 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                 collectionPlanService.update(collectionPlan);
             }
         });
-    }
-
-    @JpaAmpNewTx
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public void doPayment(PaymentMethod preferredPaymentMethod, CustomerAccount customerAccount,
-                          long amountToPay, List<Long> accountOperationsToPayIds, PaymentGateway paymentGateway) {
-        if (preferredPaymentMethod.getPaymentType().equals(DIRECTDEBIT) || preferredPaymentMethod.getPaymentType().equals(CARD)) {
-            try {
-                if (accountOperationsToPayIds != null && !accountOperationsToPayIds.isEmpty()) {
-                    if (preferredPaymentMethod.getPaymentType().equals(CARD)) {
-                        if (preferredPaymentMethod instanceof HibernateProxy) {
-                            preferredPaymentMethod = (PaymentMethod) ((HibernateProxy) preferredPaymentMethod).getHibernateLazyInitializer()
-                                    .getImplementation();
-                        }
-                        CardPaymentMethod paymentMethod = (CardPaymentMethod) preferredPaymentMethod;
-                        paymentService.doPayment(customerAccount, amountToPay, accountOperationsToPayIds,
-                                true, true, paymentGateway, paymentMethod.getCardNumber(),
-                                paymentMethod.getCardNumber(), paymentMethod.getHiddenCardNumber(),
-                                paymentMethod.getExpirationMonthAndYear(), paymentMethod.getCardType(),
-                                true, preferredPaymentMethod.getPaymentType(), false, null);
-                    } else {
-                        paymentService.doPayment(customerAccount, amountToPay, accountOperationsToPayIds,
-                                true, true, paymentGateway, null, null,
-                                null, null, null, true, preferredPaymentMethod.getPaymentType(), false, null);
-                    }
-                }
-            } catch (Exception exception) {
-                throw new BusinessException("Error occurred during payment process for customer " + customerAccount.getCode(), exception);
-            }
-        }
     }
 
     /**

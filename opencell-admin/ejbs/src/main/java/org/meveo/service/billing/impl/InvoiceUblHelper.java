@@ -1380,12 +1380,6 @@ public class InvoiceUblHelper {
 		taxTypeCode.setValue(taxInvoiceAgregate.getTax().getCode());
 		taxScheme.setTaxTypeCode(taxTypeCode);
 
-		ID id = objectFactorycommonBasic.createID();
-		id.setSchemeID("UN/ECE 5153");
-		id.setSchemeAgencyID("6");
-		id.setValue("VAT");
-		taxScheme.setID(id);
-
 		taxCategoryType.setTaxScheme(taxScheme);
 		return taxCategoryType;
 	}

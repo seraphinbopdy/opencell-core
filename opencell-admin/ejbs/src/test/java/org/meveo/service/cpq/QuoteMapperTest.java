@@ -221,7 +221,6 @@ public class QuoteMapperTest {
         List<QuoteArticleLine> quoteArticleLines = quoteProduct.getQuoteArticleLines();
         quoteVersion.setQuoteArticleLines(quoteArticleLines);
 
-        Mockito.doReturn(null).when(openOrderSettingService).findLastOne();
         Mockito.when(openOrderService.checkAvailableOpenOrderForArticle(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(Optional.empty());
         Mockito.doReturn(new TradingCurrency()).when(currencyService).findByTradingCurrencyCode(Mockito.any());
 

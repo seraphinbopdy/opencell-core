@@ -4163,7 +4163,9 @@ public class InvoiceService extends PersistenceService<Invoice> {
         List<DiscountPlanItem> subscriptionApplicableDiscountPlanItems = new ArrayList<>();
         List<DiscountPlanItem> billingAccountApplicableDiscountPlanItems = new ArrayList<>();
 
-        subscription = subscriptionService.refreshOrRetrieve(subscription);
+        if (subscription != null) {
+            subscription = subscriptionService.refreshOrRetrieve(subscription);
+        }
         if (subscription != null && subscription.getDiscountPlanInstances() != null && !subscription.getDiscountPlanInstances().isEmpty()) {
             addApplicableDiscount(subscriptionApplicableDiscountPlanItems,  subscription.getDiscountPlanInstances(), billingAccount, customerAccount, invoice);
         }

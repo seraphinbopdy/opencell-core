@@ -332,10 +332,10 @@ public class NativePersistenceServiceTest {
 
         assertThat(getQuery()).isEqualTo("select a.selectField " +
                 "from tableName a  " +
-                "left join customerAccount_1.name name_4  " +
                 "left join a.customerAccount customerAccount_1 " +
                 "left join customerAccount_1.customer customer_2 " +
                 "left join customer_2.name name_3 " +
+                "left join customerAccount_1.name name_4  " +
                 "where lower(name_3.firstName) = :name_3_firstName " +
                 "and lower(name_3.lastName) = :name_3_lastName " +
                 "and lower(name_4.lastName) = :name_4_lastName " +

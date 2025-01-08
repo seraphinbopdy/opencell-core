@@ -6,8 +6,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -46,6 +46,7 @@ import org.meveo.security.MeveoUser;
 import org.meveo.service.billing.impl.RatedTransactionService;
 import org.meveo.service.crm.impl.CustomFieldInstanceService;
 import org.meveo.service.payments.impl.AccountOperationService;
+import org.meveo.service.payments.impl.CustomerAccountService;
 import org.meveo.service.payments.impl.OCCTemplateService;
 import org.meveo.service.payments.impl.PaymentService;
 import org.meveo.service.payments.impl.RecordedInvoiceService;
@@ -96,6 +97,9 @@ public class SecurityDepositServiceTest {
 
     @Mock
     private RatedTransactionService ratedTransactionService;
+
+    @Mock
+    private CustomerAccountService customerAccountService;
 
     @Mock
     @ApplicationProvider
@@ -397,6 +401,9 @@ public class SecurityDepositServiceTest {
         customerAccount.setId(Long.valueOf(1));
 
         securityDeposit.setCustomerAccount(customerAccount);
+
+        when(customerAccountService.findById(eq(customerAccount.getId()))).thenReturn(customerAccount);
+        ReflectionUtils.setFieldValue(paymentService, "customerAccountService", customerAccountService);
 
         // When
         securityDepositService.createSecurityDepositPaymentAccountOperation(securityDeposit, invoicePaymentAmount);

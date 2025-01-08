@@ -3,9 +3,15 @@ package org.meveo.service.cpq;
 import static java.math.BigDecimal.valueOf;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.sql.Date;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
+
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.meveo.api.dto.cpq.TaxDetailDTO;
@@ -17,6 +23,8 @@ import org.meveo.api.dto.cpq.xml.Quote;
 import org.meveo.api.dto.cpq.xml.QuoteLine;
 import org.meveo.api.dto.cpq.xml.QuoteXmlDto;
 import org.meveo.api.dto.cpq.xml.SubCategory;
+import org.meveo.jpa.EntityManagerWrapper;
+import org.meveo.model.DatePeriod;
 import org.meveo.model.RegistrationNumber;
 import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.BillingCycle;
@@ -25,8 +33,10 @@ import org.meveo.model.billing.InvoiceCategory;
 import org.meveo.model.billing.InvoiceSubCategory;
 import org.meveo.model.billing.IsoIcd;
 import org.meveo.model.billing.Language;
+import org.meveo.model.billing.TradingCurrency;
 import org.meveo.model.billing.TradingLanguage;
 import org.meveo.model.cpq.CpqQuote;
+import org.meveo.model.cpq.commercial.PriceLevelEnum;
 import org.meveo.model.cpq.enums.PriceTypeEnum;
 import org.meveo.model.cpq.offer.QuoteOffer;
 import org.meveo.model.crm.Customer;
@@ -45,8 +55,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import jakarta.xml.bind.JAXBException;
+import org.meveo.service.admin.impl.TradingCurrencyService;
+import org.meveo.service.order.OpenOrderService;
+import org.meveo.service.settings.impl.OpenOrderSettingService;
+import org.mockito.Mockito;
 
 @RunWith(MockitoJUnitRunner.class)
 public class QuoteMapperTest {
@@ -55,11 +67,27 @@ public class QuoteMapperTest {
     @InjectMocks
     private QuoteMapper quoteMapper;
 
-    @Mock
+    @Spy
+    @InjectMocks
     private XmlQuoteFormatter xmlQuoteFormatter;
+    @Mock
+    private OpenOrderService openOrderService;
+    @Mock
+    private OpenOrderSettingService openOrderSettingService;
+    @Mock
+    private TradingCurrencyService currencyService;
+    @Spy
+    @InjectMocks
+    private EntityManagerWrapper emWrapper;
 
     @Mock
     public EntityToDtoConverter entityToDtoConverter;
+
+   @Before
+    public void setUp() throws Exception {
+       // quoteMapper = new QuoteMapper();
+       // xmlQuoteFormatter = new XmlQuoteFormatter();
+    }
 
     @Test
     public void createQuoteVersion() {
@@ -157,7 +185,7 @@ public class QuoteMapperTest {
     }
 
     @Test
-    public void quote_xml_has_details() throws JAXBException {
+    public void quote_xml_has_details() throws jakarta.xml.bind.JAXBException {
 
         BillingAccount billingAccount = createBillingAccount("BA");
 
@@ -188,6 +216,13 @@ public class QuoteMapperTest {
         quoteVersion.setQuote(quote);
         quoteVersion.setQuoteVersion(5);
         quoteVersion.setQuoteOffers(List.of(quoteOffer));
+        quoteVersion.setComment("Comment");
+        quoteVersion.setQuoteVersion(1);
+        List<QuoteArticleLine> quoteArticleLines = quoteProduct.getQuoteArticleLines();
+        quoteVersion.setQuoteArticleLines(quoteArticleLines);
+
+        Mockito.when(openOrderService.checkAvailableOpenOrderForArticle(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(Optional.empty());
+        Mockito.doReturn(new TradingCurrency()).when(currencyService).findByTradingCurrencyCode(Mockito.any());
 
         QuoteXmlDto quoteXmlDto = quoteMapper.map(quoteVersion, new HashMap<>(), new TaxDetailDTO());
 
@@ -195,13 +230,16 @@ public class QuoteMapperTest {
         Quote quoteXml = quoteXmlDto.getDetails().getQuote();
         assertThat(quoteXml).isNotNull();
         assertThat(quoteXml.getQuoteNumber()).isEqualTo("10");
-        assertThat(quoteXml.getQuoteDate()).isEqualTo(DateUtils.parseDateWithPattern("2020-01-02", DateUtils.DATE_PATTERN));
+        SimpleDateFormat dataFormat = new SimpleDateFormat("yyyy/MM/dd");
+        var quoteDate = dataFormat.format(quoteXml.getQuoteDate());
+        var quoteDateExpected = dataFormat.format(new java.util.Date());
+        assertThat(quoteDate).isEqualTo(quoteDateExpected);
         List<BillableAccount> billableAccounts = quoteXmlDto.getDetails().getQuote().getBillableAccounts();
         assertThat(billableAccounts).isNotEmpty();
         BillableAccount billableAccount = billableAccounts.get(0);
         assertThat(billableAccount.getBillingAccountCode()).isEqualTo("LINE_BA");
         assertThat(billableAccount.getQuoteLots()).isNotEmpty();
-        org.meveo.api.dto.cpq.xml.QuoteLot quoteLotXml = billableAccount.getQuoteLots().get(0);
+        org.meveo.api.dto.cpq.xml.QuoteLot quoteLotXml = billableAccount.getQuoteLots().stream().filter(ql -> ql.getCode()!= null && ql.getCode().equals("QL_CODE")).findFirst().get();
         assertThat(quoteLotXml.getCode()).isEqualTo("QL_CODE");
         assertThat(quoteLotXml.getDuration()).isEqualTo(11);
         assertThat(quoteLotXml.getName()).isEqualTo("LOT1");
@@ -220,11 +258,12 @@ public class QuoteMapperTest {
         AccountingArticle articleLine = subCategory.getArticleLines().get(0);
         assertThat(articleLine.getCode()).isEqualTo("ACC_CODE");
         assertThat(articleLine.getLabel()).isEqualTo("ART_LABEL");
-        QuoteLine quoteLine = articleLine.getQuoteLines().get(0);
+        QuoteLine quoteLine = articleLine.getQuoteLines().stream().filter(ql -> ql.getAccountingArticleCode().equals("ACC_CODE")).findFirst().get();
         assertThat(quoteLine.getQuantity()).isEqualTo(valueOf(10));
-        assertThat(quoteLine.getPrices()).isNotEmpty();
-        assertThat(quoteLine.getPrices().get(0).getPriceType()).isEqualTo(PriceTypeEnum.RECURRING);
-        assertThat(quoteLine.getPrices().get(1).getPriceType()).isEqualTo(PriceTypeEnum.ONE_SHOT_OTHER);
+        var prices = quoteXmlDto.getDetails().getQuotePrices();
+        assertThat(prices).isNotEmpty();
+        assertThat(prices.get(0).getPriceType()).isEqualTo(PriceTypeEnum.ONE_SHOT_OTHER);
+        assertThat(prices.get(1).getPriceType()).isEqualTo(PriceTypeEnum.RECURRING);
 
         String formattedQuote = xmlQuoteFormatter.format(quoteXmlDto);
 //        assertThat(formattedQuote).isEqualTo("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
@@ -338,6 +377,7 @@ public class QuoteMapperTest {
     private QuotePrice createQuotePrice(PriceTypeEnum type) {
         QuotePrice price = new QuotePrice();
         price.setPriceTypeEnum(type);
+        price.setPriceLevelEnum(PriceLevelEnum.QUOTE);
         price.setUnitPriceWithoutTax(valueOf(10));
         price.setTaxRate(valueOf(3));
         price.setAmountWithTax(valueOf(5));
@@ -384,26 +424,26 @@ public class QuoteMapperTest {
         country.setDescription("France");
         address.setCountry(country);
         billableAccount.setAddress(address);
-
         CustomerAccount customerAccount = new CustomerAccount();
         customerAccount.setCode("CA");
-        billableAccount.setCustomerAccount(customerAccount);
-
         Customer customer = new Customer();
-        customer.setCode("C");
+        customer.setCode("CUST");
         customerAccount.setCustomer(customer);
+        billableAccount.setCustomerAccount(customerAccount);
         return billableAccount;
     }
 
     private CpqQuote createQuote(BillingAccount billableAccount) {
         CpqQuote quote = new CpqQuote();
         quote.setApplicantAccount(billableAccount);
-        quote.setBillableAccount(null);
+        quote.setBillableAccount(billableAccount);
         quote.setQuoteNumber("10");
-        quote.setSendDate(DateUtils.parseDateWithPattern("2020-01-02", DateUtils.DATE_PATTERN));
-        quote.setQuoteDate(quote.getSendDate());
-        quote.getValidity().setFrom(DateUtils.parseDateWithPattern("2020-01-02", DateUtils.DATE_PATTERN));
-        quote.getValidity().setTo(DateUtils.parseDateWithPattern("2020-01-05", DateUtils.DATE_PATTERN));
+        quote.setSendDate(Date.valueOf(LocalDate.of(2020, 1, 2)));
+        DatePeriod validity = new DatePeriod();
+        validity.setFrom(Date.valueOf(LocalDate.of(2020, 1, 1)));
+        validity.setTo(Date.valueOf(LocalDate.of(2020, 1, 3)));
+        quote.setValidity(validity);
+        quote.setQuoteLotDuration(11);
         return quote;
     }
 

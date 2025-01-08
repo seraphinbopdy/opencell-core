@@ -270,6 +270,7 @@
 						<goals>
 							<goal>replace</goal>
 						</goals>
+						<phase>prepare-package</phase>
 						<configuration>
 							<includes>
 								<include>

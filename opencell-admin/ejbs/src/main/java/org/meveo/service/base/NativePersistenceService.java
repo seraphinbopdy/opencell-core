@@ -890,7 +890,7 @@ public class NativePersistenceService extends BaseService {
                                                                                 .map(f -> {
                                                                                     Field field = ReflectionUtils.getField(finalEntity, f.replace("a.", ""));
                                                                                     var sField = f;
-                                                                                    if(IEntity.class.isAssignableFrom(field.getType())) {
+                                                                                    if(field != null && IEntity.class.isAssignableFrom(field.getType())) {
                                                                                         sField += ".dummy";
                                                                                     }
                                                                                     String explicitInnerJoinsForAggregation = queryBuilder.createExplicitInnerJoinsForAggregation(sField);

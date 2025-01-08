@@ -188,12 +188,15 @@
 				</executions>
 			</plugin>
 			<plugin>
-			    <groupId>org.apache.maven.plugins</groupId>
-			    <artifactId>maven-resources-plugin</artifactId>
-			    <executions>
-			        <execution>
+				<groupId>com.google.code.maven-replacer-plugin</groupId>
+				<artifactId>replacer</artifactId>
+				<executions>
+					<execution>
 						<id>apiv0</id>
-						<phase>process-resources</phase>
+						<goals>
+							<goal>replace</goal>
+						</goals>
+						<phase>verify</phase>
 						<configuration>
 							<includes>
 								<include>
@@ -209,8 +212,25 @@
 						</configuration>
 					</execution>
 					<execution>
+						<id>replace-version-location</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>replace</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>replace-swagger-json-location</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>replace</goal>
+						</goals>
+					</execution>
+					<execution>
 						<id>apiv1</id>
-						<phase>process-resources</phase>
+						<goals>
+							<goal>replace</goal>
+						</goals>
+						<phase>verify</phase>
 						<configuration>
 							<includes>
 								<include>
@@ -227,7 +247,10 @@
 					</execution>
 					<execution>
 						<id>apiv2</id>
-						<phase>process-resources</phase>
+						<goals>
+							<goal>replace</goal>
+						</goals>
+						<phase>verify</phase>
 						<configuration>
 							<includes>
 								<include>
@@ -242,9 +265,12 @@
 							</replacements>
 						</configuration>
 					</execution>
-			        <execution>
-						<id>replace-resources</id>
-						<phase>process-resources</phase>
+					<execution>
+						<id>replace-version</id>
+						<goals>
+							<goal>replace</goal>
+						</goals>
+						<phase>package</phase>
 						<configuration>
 							<includes>
 								<include>
@@ -270,8 +296,9 @@
 							</replacements>
 						</configuration>
 					</execution>
-			    </executions>
+				</executions>
 			</plugin>
+			<!-- SWAGGER UI -->
 		</plugins>
 	</build>
 	<dependencies>

@@ -3,6 +3,7 @@ package org.meveo.service.payment;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.meveo.commons.utils.ReflectionUtils.getSubclassObjectByDiscriminatorValue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import java.util.Date;
@@ -38,234 +39,248 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class AccountOperationServiceTest {
 
-	@Spy
-	@InjectMocks
-	private AccountOperationService accountOperationService;
+    @Spy
+    @InjectMocks
+    private AccountOperationService accountOperationService;
 
-	@Mock
-	private AccountingPeriodService accountingPeriodService;
+    @Mock
+    private AccountingPeriodService accountingPeriodService;
 
-	@Mock
-	private SubAccountingPeriodService subAccountingPeriodService;
+    @Mock
+    private SubAccountingPeriodService subAccountingPeriodService;
 
-	@Test
-	public void handleAccountingPeriods_AccountOperation_Without_AccountingPeriod() {
+    @Test
+    public void handleAccountingPeriods_AccountOperation_Without_AccountingPeriod() {
 
-		AccountOperation ao = new AccountOperation();
-		Date transactionDate = new Date();
-		Date collectionDate = DateUtils.addDaysToDate(transactionDate, 5);
-		ao.setCollectionDate(collectionDate);
-		ao.setTransactionDate(transactionDate);
+        AccountOperation ao = new AccountOperation();
+        Date transactionDate = new Date();
+        Date collectionDate = DateUtils.addDaysToDate(transactionDate, 5);
+        ao.setCollectionDate(collectionDate);
+        ao.setTransactionDate(transactionDate);
 
-		accountOperationService.handleAccountingPeriods(ao);
-		assertThat(ao.getReason()).isNull();
-		assertThat(ao.getStatus()).isEqualTo(AccountOperationStatus.POSTED);
-		assertThat(ao.getAccountingDate()).isEqualToIgnoringHours(ao.getTransactionDate());
-	}
+        accountOperationService.handleAccountingPeriods(ao);
+        assertThat(ao.getReason()).isNull();
+        assertThat(ao.getStatus()).isEqualTo(AccountOperationStatus.POSTED);
+    }
 
-	@Test
-	public void handleAccountingPeriods_AutomatedPayment_ClosedAccountingPeriod() {
+    @Test
+    public void handleAccountingPeriods_AutomatedPayment_ClosedAccountingPeriod() {
 
-		when(accountingPeriodService.count()).thenReturn(1L);
-		AccountingPeriod closedAP = new AccountingPeriod();
-		closedAP.setAccountingPeriodStatus(AccountingPeriodStatusEnum.CLOSED);
-		when(accountingPeriodService.findByAccountingPeriodYear(any())).thenReturn(closedAP);
+        when(accountingPeriodService.count()).thenReturn(1L);
+        AccountingPeriod closedAP = new AccountingPeriod();
+        closedAP.setAccountingPeriodStatus(AccountingPeriodStatusEnum.CLOSED);
 
-		AutomatedPayment payment = (AutomatedPayment) createAccountOperation("AP");
+        doReturn(closedAP).when(accountingPeriodService).findAccountingPeriodByDate(any());
 
-		accountOperationService.handleAccountingPeriods(payment);
-		assertThat(payment.getAccountingDate()).isNull();
-		assertThat(payment.getStatus()).isEqualTo(AccountOperationStatus.REJECTED);
-		assertThat(payment.getReason()).isEqualTo(AccountOperationRejectionReason.CLOSED_PERIOD);
-	}
+        AutomatedPayment payment = (AutomatedPayment) createAccountOperation("AP");
 
-	@Test
-	public void handleAccountingPeriods_Payment_OpenAccountingPeriod() {
+        accountOperationService.handleAccountingPeriods(payment);
+        assertThat(payment.getAccountingDate()).isNull();
+        assertThat(payment.getStatus()).isEqualTo(AccountOperationStatus.REJECTED);
+        assertThat(payment.getReason()).isEqualTo(AccountOperationRejectionReason.CLOSED_PERIOD);
+    }
 
-		when(accountingPeriodService.count()).thenReturn(1L);
-		AccountingPeriod closedAP = new AccountingPeriod();
-		closedAP.setAccountingPeriodStatus(AccountingPeriodStatusEnum.OPEN);
-		when(accountingPeriodService.findByAccountingPeriodYear(any())).thenReturn(closedAP);
+    @Test
+    public void handleAccountingPeriods_Payment_OpenAccountingPeriod() {
 
-		Payment payment = (Payment) createAccountOperation("P");
+        when(accountingPeriodService.count()).thenReturn(1L);
+        AccountingPeriod closedAP = new AccountingPeriod();
+        closedAP.setAccountingPeriodStatus(AccountingPeriodStatusEnum.OPEN);
 
-		accountOperationService.handleAccountingPeriods(payment);
-		assertThat(payment.getStatus()).isEqualTo(AccountOperationStatus.POSTED);
-		assertThat(payment.getAccountingDate()).isEqualToIgnoringHours(payment.getCollectionDate());
-	}
+        doReturn(closedAP).when(accountingPeriodService).findAccountingPeriodByDate(any());
 
-	@Test
-	public void handleAccountingPeriods_RejectedPayment_OpenAccountingPeriod() {
+        Payment payment = (Payment) createAccountOperation("P");
 
-		when(accountingPeriodService.count()).thenReturn(1L);
-		AccountingPeriod openAP = new AccountingPeriod();
-		openAP.setAccountingPeriodStatus(AccountingPeriodStatusEnum.OPEN);
-		when(accountingPeriodService.findByAccountingPeriodYear(any())).thenReturn(openAP);
+        accountOperationService.handleAccountingPeriods(payment);
+        assertThat(payment.getStatus()).isEqualTo(AccountOperationStatus.POSTED);
+        assertThat(payment.getAccountingDate()).isEqualToIgnoringHours(payment.getCollectionDate());
+    }
 
-		RejectedPayment rejectedPayment = (RejectedPayment) createAccountOperation("R");
+    @Test
+    public void handleAccountingPeriods_RejectedPayment_OpenAccountingPeriod() {
 
-		accountOperationService.handleAccountingPeriods(rejectedPayment);
-		assertThat(rejectedPayment.getStatus()).isEqualTo(AccountOperationStatus.POSTED);
-		assertThat(rejectedPayment.getAccountingDate()).isEqualToIgnoringHours(rejectedPayment.getCollectionDate());
-	}
+        AccountingPeriod openAP = new AccountingPeriod();
+        openAP.setAccountingPeriodStatus(AccountingPeriodStatusEnum.OPEN);
+        openAP.setUseSubAccountingCycles(true);
 
-	@Test
-	public void handleAccountingPeriods_RecordedInvoice_OpenSubAccoutingPeriod() {
+        SubAccountingPeriod openSAP = new SubAccountingPeriod();
+        openSAP.setRegularUsersSubPeriodStatus(SubAccountingPeriodStatusEnum.OPEN);
 
-		when(accountingPeriodService.count()).thenReturn(1L);
-		AccountingPeriod openAP = new AccountingPeriod();
-		openAP.setUseSubAccountingCycles(Boolean.TRUE);
-		openAP.setAccountingPeriodStatus(AccountingPeriodStatusEnum.OPEN);
-		when(accountingPeriodService.findByAccountingPeriodYear(any())).thenReturn(openAP);
+        doReturn(openAP).when(accountingPeriodService).findAccountingPeriodByDate(any());
+        doReturn(1L).when(accountingPeriodService).count();
 
-		SubAccountingPeriod openSAP = new SubAccountingPeriod();
-		openSAP.setRegularUsersSubPeriodStatus(SubAccountingPeriodStatusEnum.OPEN);
-		when(subAccountingPeriodService.findByAccountingPeriod(any(), any())).thenReturn(openSAP);
+        when(subAccountingPeriodService.findByAccountingPeriod(any(), any())).thenReturn(openSAP);
 
-		RecordedInvoice recordedInvoice = (RecordedInvoice) createAccountOperation("I");
+        RejectedPayment rejectedPayment = (RejectedPayment) createAccountOperation("R");
 
-		accountOperationService.handleAccountingPeriods(recordedInvoice);
-		assertThat(recordedInvoice.getStatus()).isEqualTo(AccountOperationStatus.POSTED);
-		assertThat(recordedInvoice.getAccountingDate()).isEqualTo(recordedInvoice.getTransactionDate());
-	}
+        accountOperationService.handleAccountingPeriods(rejectedPayment);
 
-	@Test
-	public void handleAccountingPeriods_WriteOff_Block_Case() {
+        assertThat(rejectedPayment.getStatus()).isEqualTo(AccountOperationStatus.POSTED);
+        assertThat(rejectedPayment.getAccountingDate()).isEqualToIgnoringHours(rejectedPayment.getCollectionDate());
+    }
 
-		when(accountingPeriodService.count()).thenReturn(1L);
-		AccountingPeriod openAP = new AccountingPeriod();
-		openAP.setUseSubAccountingCycles(Boolean.TRUE);
-		openAP.setAccountingPeriodStatus(AccountingPeriodStatusEnum.OPEN);
-		openAP.setAccountingOperationAction(AccountingOperationAction.BLOCK);
-		when(accountingPeriodService.findByAccountingPeriodYear(any())).thenReturn(openAP);
+    @Test
+    public void handleAccountingPeriods_RecordedInvoice_OpenSubAccoutingPeriod() {
 
-		SubAccountingPeriod closedSAP = new SubAccountingPeriod();
-		closedSAP.setRegularUsersSubPeriodStatus(SubAccountingPeriodStatusEnum.CLOSED);
-		when(subAccountingPeriodService.findByAccountingPeriod(any(), any())).thenReturn(closedSAP);
+        when(accountingPeriodService.count()).thenReturn(1L);
+        AccountingPeriod openAP = new AccountingPeriod();
+        openAP.setUseSubAccountingCycles(true);
+        openAP.setAccountingPeriodStatus(AccountingPeriodStatusEnum.OPEN);
 
-		WriteOff writeOff = (WriteOff) createAccountOperation("W");
+        doReturn(openAP).when(accountingPeriodService).findAccountingPeriodByDate(any());
 
-		accountOperationService.handleAccountingPeriods(writeOff);
-		assertThat(writeOff.getAccountingDate()).isNull();
-		assertThat(writeOff.getStatus()).isEqualTo(AccountOperationStatus.REJECTED);
-		assertThat(writeOff.getReason()).isEqualTo(AccountOperationRejectionReason.CLOSED_PERIOD);
-	}
+        SubAccountingPeriod openSAP = new SubAccountingPeriod();
+        openSAP.setRegularUsersSubPeriodStatus(SubAccountingPeriodStatusEnum.OPEN);
+        when(subAccountingPeriodService.findByAccountingPeriod(any(), any())).thenReturn(openSAP);
 
-	@Test
-	public void handleAccountingPeriods_Refund_Force_Case_First_Day() {
+        RecordedInvoice recordedInvoice = (RecordedInvoice) createAccountOperation("I");
 
-		when(accountingPeriodService.count()).thenReturn(1L);
-		AccountingPeriod openAP = new AccountingPeriod();
-		openAP.setUseSubAccountingCycles(Boolean.TRUE);
-		openAP.setAccountingPeriodStatus(AccountingPeriodStatusEnum.OPEN);
-		openAP.setAccountingOperationAction(AccountingOperationAction.FORCE);
-		openAP.setForceOption(AccountingPeriodForceEnum.FIRST_DAY);
-		when(accountingPeriodService.findByAccountingPeriodYear(any())).thenReturn(openAP);
+        accountOperationService.handleAccountingPeriods(recordedInvoice);
+        assertThat(recordedInvoice.getStatus()).isEqualTo(AccountOperationStatus.POSTED);
+        assertThat(recordedInvoice.getAccountingDate()).isEqualTo(recordedInvoice.getTransactionDate());
+    }
 
-		SubAccountingPeriod closedSAP = new SubAccountingPeriod();
-		closedSAP.setRegularUsersSubPeriodStatus(SubAccountingPeriodStatusEnum.CLOSED);
-		when(subAccountingPeriodService.findByAccountingPeriod(any(), any())).thenReturn(closedSAP);
+    @Test
+    public void handleAccountingPeriods_WriteOff_Block_Case() {
 
-		SubAccountingPeriod openSAP = new SubAccountingPeriod();
-		Date startDate = DateUtils.parseDateWithPattern("2021-07-01", DateUtils.DATE_PATTERN);
-		openSAP.setStartDate(startDate);
-		openSAP.setRegularUsersSubPeriodStatus(SubAccountingPeriodStatusEnum.OPEN);
-		when(subAccountingPeriodService.findNextOpenSubAccountingPeriod(any())).thenReturn(openSAP);
+        when(accountingPeriodService.count()).thenReturn(1L);
+        AccountingPeriod openAP = new AccountingPeriod();
+        openAP.setUseSubAccountingCycles(true);
+        openAP.setAccountingPeriodStatus(AccountingPeriodStatusEnum.OPEN);
+        openAP.setAccountingOperationAction(AccountingOperationAction.BLOCK);
 
-		Refund refund = (Refund) createAccountOperation("RF");
+        doReturn(openAP).when(accountingPeriodService).findAccountingPeriodByDate(any());
 
-		accountOperationService.handleAccountingPeriods(refund);
-		assertThat(refund.getStatus()).isEqualTo(AccountOperationStatus.POSTED);
-		assertThat(refund.getReason()).isEqualTo(AccountOperationRejectionReason.FORCED);
-		assertThat(refund.getAccountingDate()).isEqualToIgnoringHours(startDate);
-	}
+        SubAccountingPeriod closedSAP = new SubAccountingPeriod();
+        closedSAP.setRegularUsersSubPeriodStatus(SubAccountingPeriodStatusEnum.CLOSED);
+        when(subAccountingPeriodService.findByAccountingPeriod(any(), any())).thenReturn(closedSAP);
 
-	@Test
-	public void handleAccountingPeriods_AutomatedRefund_Force_Case_First_Sunday() {
+        WriteOff writeOff = (WriteOff) createAccountOperation("W");
 
-		when(accountingPeriodService.count()).thenReturn(1L);
-		AccountingPeriod openAP = new AccountingPeriod();
-		openAP.setUseSubAccountingCycles(Boolean.TRUE);
-		openAP.setAccountingPeriodStatus(AccountingPeriodStatusEnum.OPEN);
-		openAP.setAccountingOperationAction(AccountingOperationAction.FORCE);
-		openAP.setForceOption(AccountingPeriodForceEnum.FIRST_SUNDAY);
-		when(accountingPeriodService.findByAccountingPeriodYear(any())).thenReturn(openAP);
+        accountOperationService.handleAccountingPeriods(writeOff);
+        assertThat(writeOff.getAccountingDate()).isNull();
+        assertThat(writeOff.getStatus()).isEqualTo(AccountOperationStatus.REJECTED);
+        assertThat(writeOff.getReason()).isEqualTo(AccountOperationRejectionReason.CLOSED_PERIOD);
+    }
 
-		SubAccountingPeriod closedSAP = new SubAccountingPeriod();
-		closedSAP.setRegularUsersSubPeriodStatus(SubAccountingPeriodStatusEnum.CLOSED);
-		when(subAccountingPeriodService.findByAccountingPeriod(any(), any())).thenReturn(closedSAP);
+    @Test
+    public void handleAccountingPeriods_Refund_Force_Case_First_Day() {
 
-		SubAccountingPeriod openSAP = new SubAccountingPeriod();
-		Date startDate = DateUtils.parseDateWithPattern("2021-07-01", DateUtils.DATE_PATTERN);
-		openSAP.setStartDate(startDate);
-		openSAP.setRegularUsersSubPeriodStatus(SubAccountingPeriodStatusEnum.OPEN);
-		when(subAccountingPeriodService.findNextOpenSubAccountingPeriod(any())).thenReturn(openSAP);
+        when(accountingPeriodService.count()).thenReturn(1L);
+        AccountingPeriod openAP = new AccountingPeriod();
+        openAP.setUseSubAccountingCycles(true);
+        openAP.setAccountingPeriodStatus(AccountingPeriodStatusEnum.OPEN);
+        openAP.setAccountingOperationAction(AccountingOperationAction.FORCE);
+        openAP.setForceOption(AccountingPeriodForceEnum.FIRST_DAY);
 
-		AutomatedRefund refund = (AutomatedRefund) createAccountOperation("ARF");
+        doReturn(openAP).when(accountingPeriodService).findAccountingPeriodByDate(any());
 
-		accountOperationService.handleAccountingPeriods(refund);
-		assertThat(refund.getStatus()).isEqualTo(AccountOperationStatus.POSTED);
-		assertThat(refund.getReason()).isEqualTo(AccountOperationRejectionReason.FORCED);
-		assertThat(refund.getAccountingDate()).isEqualToIgnoringHours("2021-07-04");
-	}
+        SubAccountingPeriod closedSAP = new SubAccountingPeriod();
+        closedSAP.setRegularUsersSubPeriodStatus(SubAccountingPeriodStatusEnum.CLOSED);
+        when(subAccountingPeriodService.findByAccountingPeriod(any(), any())).thenReturn(closedSAP);
 
-	@Test
-	public void handleAccountingPeriods_OCC_Force_Case_Custom_Day() {
+        SubAccountingPeriod openSAP = new SubAccountingPeriod();
+        Date startDate = DateUtils.parseDateWithPattern("2021-07-01", DateUtils.DATE_PATTERN);
+        openSAP.setStartDate(startDate);
+        openSAP.setRegularUsersSubPeriodStatus(SubAccountingPeriodStatusEnum.OPEN);
+        when(subAccountingPeriodService.findNextOpenSubAccountingPeriod(any())).thenReturn(openSAP);
 
-		when(accountingPeriodService.count()).thenReturn(1L);
-		AccountingPeriod openAP = new AccountingPeriod();
-		openAP.setUseSubAccountingCycles(Boolean.TRUE);
-		openAP.setAccountingPeriodStatus(AccountingPeriodStatusEnum.OPEN);
-		openAP.setAccountingOperationAction(AccountingOperationAction.FORCE);
-		openAP.setForceOption(AccountingPeriodForceEnum.CUSTOM_DAY);
-		openAP.setForceCustomDay(31);
-		when(accountingPeriodService.findByAccountingPeriodYear(any())).thenReturn(openAP);
+        Refund refund = (Refund) createAccountOperation("RF");
 
-		SubAccountingPeriod closedSAP = new SubAccountingPeriod();
-		closedSAP.setRegularUsersSubPeriodStatus(SubAccountingPeriodStatusEnum.CLOSED);
-		when(subAccountingPeriodService.findByAccountingPeriod(any(), any())).thenReturn(closedSAP);
+        accountOperationService.handleAccountingPeriods(refund);
+        assertThat(refund.getStatus()).isEqualTo(AccountOperationStatus.POSTED);
+        assertThat(refund.getReason()).isEqualTo(AccountOperationRejectionReason.FORCED);
+        assertThat(refund.getAccountingDate()).isEqualToIgnoringHours(startDate);
+    }
 
-		SubAccountingPeriod openSAP = new SubAccountingPeriod();
-		Date startDate = DateUtils.parseDateWithPattern("2021-02-01", DateUtils.DATE_PATTERN);
-		openSAP.setStartDate(startDate);
-		openSAP.setRegularUsersSubPeriodStatus(SubAccountingPeriodStatusEnum.OPEN);
-		when(subAccountingPeriodService.findNextOpenSubAccountingPeriod(any())).thenReturn(openSAP);
+    @Test
+    public void handleAccountingPeriods_AutomatedRefund_Force_Case_First_Sunday() {
 
-		OtherCreditAndCharge refund = (OtherCreditAndCharge) createAccountOperation("OCC");
+        when(accountingPeriodService.count()).thenReturn(1L);
+        AccountingPeriod openAP = new AccountingPeriod();
+        openAP.setUseSubAccountingCycles(true);
+        openAP.setAccountingPeriodStatus(AccountingPeriodStatusEnum.OPEN);
+        openAP.setAccountingOperationAction(AccountingOperationAction.FORCE);
+        openAP.setForceOption(AccountingPeriodForceEnum.FIRST_SUNDAY);
 
-		accountOperationService.handleAccountingPeriods(refund);
-		assertThat(refund.getStatus()).isEqualTo(AccountOperationStatus.POSTED);
-		assertThat(refund.getReason()).isEqualTo(AccountOperationRejectionReason.FORCED);
-		assertThat(refund.getAccountingDate()).isEqualToIgnoringHours("2021-02-28");
-	}
+        doReturn(openAP).when(accountingPeriodService).findAccountingPeriodByDate(any());
 
-	private AccountOperation createAccountOperation(String Type) {
-		Object object = getSubclassObjectByDiscriminatorValue(AccountOperation.class, Type);
+        SubAccountingPeriod closedSAP = new SubAccountingPeriod();
+        closedSAP.setRegularUsersSubPeriodStatus(SubAccountingPeriodStatusEnum.CLOSED);
+        when(subAccountingPeriodService.findByAccountingPeriod(any(), any())).thenReturn(closedSAP);
 
-		AccountOperation ao = null;
-		if (object instanceof AutomatedPayment) {
-			ao = (AutomatedPayment) object;
-		} else if (object instanceof AutomatedRefund) {
-			ao = (AutomatedRefund) object;
-		} else if (object instanceof Refund) {
-			ao = (Refund) object;
-		} else if (object instanceof Payment) {
-			ao = (Payment) object;
-		} else if (object instanceof WriteOff) {
-			ao = (WriteOff) object;
-		} else if (object instanceof RecordedInvoice) {
-			ao = (RecordedInvoice) object;
-		} else if (object instanceof RejectedPayment) {
-			ao = (RejectedPayment) object;
-		} else if (object instanceof OtherCreditAndCharge) {
-			ao = (OtherCreditAndCharge) object;
-		}
+        SubAccountingPeriod openSAP = new SubAccountingPeriod();
+        Date startDate = DateUtils.parseDateWithPattern("2021-07-01", DateUtils.DATE_PATTERN);
+        openSAP.setStartDate(startDate);
+        openSAP.setRegularUsersSubPeriodStatus(SubAccountingPeriodStatusEnum.OPEN);
+        when(subAccountingPeriodService.findNextOpenSubAccountingPeriod(any())).thenReturn(openSAP);
 
-		Date transactionDate = new Date();
-		Date collectionDate = DateUtils.addDaysToDate(transactionDate, 5);
-		ao.setTransactionDate(transactionDate);
-		ao.setCollectionDate(collectionDate);
+        AutomatedRefund refund = (AutomatedRefund) createAccountOperation("ARF");
 
-		return ao;
-	}
+        accountOperationService.handleAccountingPeriods(refund);
+        assertThat(refund.getStatus()).isEqualTo(AccountOperationStatus.POSTED);
+        assertThat(refund.getReason()).isEqualTo(AccountOperationRejectionReason.FORCED);
+        assertThat(refund.getAccountingDate()).isEqualToIgnoringHours("2021-07-04");
+    }
+
+    @Test
+    public void handleAccountingPeriods_OCC_Force_Case_Custom_Day() {
+
+        when(accountingPeriodService.count()).thenReturn(1L);
+        AccountingPeriod openAP = new AccountingPeriod();
+        openAP.setUseSubAccountingCycles(true);
+        openAP.setAccountingPeriodStatus(AccountingPeriodStatusEnum.OPEN);
+        openAP.setAccountingOperationAction(AccountingOperationAction.FORCE);
+        openAP.setForceOption(AccountingPeriodForceEnum.CUSTOM_DAY);
+        openAP.setForceCustomDay(31);
+
+        doReturn(openAP).when(accountingPeriodService).findAccountingPeriodByDate(any());
+
+        SubAccountingPeriod closedSAP = new SubAccountingPeriod();
+        closedSAP.setRegularUsersSubPeriodStatus(SubAccountingPeriodStatusEnum.CLOSED);
+        when(subAccountingPeriodService.findByAccountingPeriod(any(), any())).thenReturn(closedSAP);
+
+        SubAccountingPeriod openSAP = new SubAccountingPeriod();
+        Date startDate = DateUtils.parseDateWithPattern("2021-02-01", DateUtils.DATE_PATTERN);
+        openSAP.setStartDate(startDate);
+        openSAP.setRegularUsersSubPeriodStatus(SubAccountingPeriodStatusEnum.OPEN);
+        when(subAccountingPeriodService.findNextOpenSubAccountingPeriod(any())).thenReturn(openSAP);
+
+        OtherCreditAndCharge refund = (OtherCreditAndCharge) createAccountOperation("OCC");
+
+        accountOperationService.handleAccountingPeriods(refund);
+        assertThat(refund.getStatus()).isEqualTo(AccountOperationStatus.POSTED);
+        assertThat(refund.getReason()).isEqualTo(AccountOperationRejectionReason.FORCED);
+        assertThat(refund.getAccountingDate()).isEqualToIgnoringHours("2021-02-28");
+    }
+
+    private AccountOperation createAccountOperation(String Type) {
+        Object object = getSubclassObjectByDiscriminatorValue(AccountOperation.class, Type);
+
+        AccountOperation ao = null;
+        if (object instanceof AutomatedPayment) {
+            ao = (AutomatedPayment) object;
+        } else if (object instanceof AutomatedRefund) {
+            ao = (AutomatedRefund) object;
+        } else if (object instanceof Refund) {
+            ao = (Refund) object;
+        } else if (object instanceof Payment) {
+            ao = (Payment) object;
+        } else if (object instanceof WriteOff) {
+            ao = (WriteOff) object;
+        } else if (object instanceof RecordedInvoice) {
+            ao = (RecordedInvoice) object;
+        } else if (object instanceof RejectedPayment) {
+            ao = (RejectedPayment) object;
+        } else if (object instanceof OtherCreditAndCharge) {
+            ao = (OtherCreditAndCharge) object;
+        }
+
+        Date transactionDate = new Date();
+        Date collectionDate = DateUtils.addDaysToDate(transactionDate, 5);
+        ao.setTransactionDate(transactionDate);
+        ao.setCollectionDate(collectionDate);
+
+        return ao;
+    }
 }

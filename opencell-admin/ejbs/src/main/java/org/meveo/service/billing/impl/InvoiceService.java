@@ -4238,11 +4238,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         }
         
         if (billingAccount.getDiscountPlanInstances() != null && !billingAccount.getDiscountPlanInstances().isEmpty()) {
-            List<DiscountPlanInstance> discountPlanInstances = ofNullable(subscription)
-                    .map(Subscription::getDiscountPlanInstances)
-                    .orElse(emptyList());
-            addApplicableDiscount(billingAccountApplicableDiscountPlanItems,
-                    discountPlanInstances, billingAccount, customerAccount, invoice);
+            addApplicableDiscount(billingAccountApplicableDiscountPlanItems, billingAccount.getDiscountPlanInstances(), billingAccount, customerAccount, invoice);
         }
 
         BigDecimal otherDiscount = ZERO;

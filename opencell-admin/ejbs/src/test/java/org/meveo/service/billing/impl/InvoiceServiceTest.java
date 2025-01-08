@@ -188,19 +188,6 @@ public class InvoiceServiceTest {
 
     @Before
     public void setUp() {
-        when(ratedTransactionService.listRTsToInvoice(any(), any(), any(), any(), any(), anyInt())).thenAnswer(new Answer<List<RatedTransaction>>() {
-            public List<RatedTransaction> answer(InvocationOnMock invocation) throws Throwable {
-                List<RatedTransaction> ratedTransactions = new ArrayList<>();
-                IBillableEntity entity = (IBillableEntity) invocation.getArguments()[0];
-                RatedTransaction rt1 = getRatedTransaction(entity, 1l);
-                RatedTransaction rt2 = getRatedTransaction(entity, 2l);
-                RatedTransaction rt3 = getRatedTransaction(entity, 3l);
-                ratedTransactions.add(rt1);
-                ratedTransactions.add(rt2);
-                ratedTransactions.add(rt3);
-                return ratedTransactions;
-            }
-        });
 
         when(invoiceLinesService.listInvoiceLinesToInvoice(any(), any(), any(), any(), any(), any(), anyInt())).thenAnswer((Answer<List<InvoiceLine>>) invocation -> {
             List<InvoiceLine> invoiceLines = new ArrayList<>();
@@ -1197,18 +1184,18 @@ public class InvoiceServiceTest {
 
     @Test
     public void test_getInvoiceLinesGroups_EntityToInvoice_Subscription() {
-        Subscription subscription = mock(Subscription.class);
-        BillingAccount ba = mock(BillingAccount.class);
-        BillingCycle bc = mock(BillingCycle.class);
-        InvoiceType invoiceType = mock(InvoiceType.class);
-        PaymentMethod paymentMethod = mock(PaymentMethod.class);
-        CustomerAccount customerAccount = mock(CustomerAccount.class);
-        Customer customer = mock(Customer.class);
-        Seller seller = new Seller();
-        seller.setCode("Seller_code");
-        when(ba.getCustomerAccount()).thenReturn(customerAccount);
-        when(customerAccount.getCustomer()).thenReturn(customer);
-        when(customer.getSeller()).thenReturn(seller);
+        Subscription subscription = new Subscription();
+        BillingAccount ba = new BillingAccount();
+        BillingCycle bc = new BillingCycle();
+        InvoiceType invoiceType = new InvoiceType();
+        PaymentMethod paymentMethod = new CashPaymentMethod();
+        CustomerAccount customerAccount = new CustomerAccount();
+        Customer customer = new Customer();
+        Seller sellerCust = new Seller();
+        sellerCust.setCode("Seller_Custom");
+        ba.setCustomerAccount(customerAccount);
+        customerAccount.setCustomer(customer);
+        customer.setSeller(sellerCust);
         InvoiceService.InvoiceLinesToInvoice invoiceLinesToInvoice = invoiceService.getInvoiceLinesGroups(subscription, ba, null, bc, invoiceType, null, null, null, null, false, paymentMethod, null, null, null, null,
             true);
         assertThat(invoiceLinesToInvoice).isNotNull();
@@ -1436,24 +1423,6 @@ public class InvoiceServiceTest {
         }
 
         when(billingAccountService.isExonerated(any())).thenReturn(false);
-        TaxInfo taxInfo10 = taxMappingService.new TaxInfo();
-        taxInfo10.tax = tax10;
-        taxInfo10.taxClass = taxClass10;
-
-        TaxInfo taxInfo20 = taxMappingService.new TaxInfo();
-        taxInfo20.tax = tax20;
-        taxInfo20.taxClass = taxClass20;
-
-        doCallRealMethod().when(taxMappingService).checkIfTaxHasChanged(any(), anyBoolean(), any(), any(), any(), any(), any(), any());
-
-        when(taxMappingService.determineTax(eq(taxClass10), any(), any(), any(), any(), any(), anyBoolean(), anyBoolean(), any())).thenReturn(taxInfo10);
-        when(taxMappingService.determineTax(eq(taxClass20), any(), any(), any(), any(), any(), anyBoolean(), anyBoolean(), any())).thenReturn(taxInfo20);
-
-        when(entityManager.getReference(eq(Tax.class), eq(tax10.getId()))).thenReturn(tax10);
-        when(entityManager.getReference(eq(Tax.class), eq(tax20.getId()))).thenReturn(tax20);
-
-        when(entityManager.getReference(eq(TaxClass.class), eq(taxClass10.getId()))).thenReturn(taxClass10);
-        when(entityManager.getReference(eq(TaxClass.class), eq(taxClass20.getId()))).thenReturn(taxClass20);
 
         when(appProvider.getRoundingMode()).thenReturn(RoundingModeEnum.NEAREST);
         when(appProvider.getRounding()).thenReturn(6);

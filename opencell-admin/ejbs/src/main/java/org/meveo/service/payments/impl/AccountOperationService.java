@@ -676,7 +676,7 @@ public class AccountOperationService extends PersistenceService<AccountOperation
         // Case in which the accountingPeriod is found and it's open.
         AccountingOperationAction action = accountingPeriod.getAccountingOperationAction();
         // NO SUB ACCOUTING PERIOD USED
-        if (Boolean.FALSE.equals(accountingPeriod.isUseSubAccountingCycles())) {
+        if (!accountingPeriod.isUseSubAccountingCycles()) {
             accountOperation.setStatus(AccountOperationStatus.POSTED);
             // SUB ACCOUTING PERIOD ARE USED
         } else {

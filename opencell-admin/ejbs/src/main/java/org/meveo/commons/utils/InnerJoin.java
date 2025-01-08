@@ -1,13 +1,13 @@
 package org.meveo.commons.utils;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class InnerJoin {
 
     private final String alias;
     private String name;
-    private Set<InnerJoin> nextInnerJoins = new HashSet<>();
+    private Set<InnerJoin> nextInnerJoins = new LinkedHashSet<>();
 
     public InnerJoin(String name) {
         this.name = name;

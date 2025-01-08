@@ -30,6 +30,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -103,9 +105,9 @@ public class QueryBuilder {
 
     private int nbCriteriaInOrClause;
 
-    private Map<String, JoinWrapper> innerJoins = new HashMap<>();
+    private Map<String, JoinWrapper> innerJoins = new LinkedHashMap<>();
 
-    private Set<InnerJoin> rootInnerJoins = new HashSet<>();
+    private Set<InnerJoin> rootInnerJoins = new LinkedHashSet<>();
 
     protected PaginationConfiguration paginationConfiguration;
 

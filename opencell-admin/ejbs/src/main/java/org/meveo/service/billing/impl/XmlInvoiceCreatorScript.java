@@ -2025,6 +2025,7 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
             bankCoordinates.appendChild(bic);
             bankCoordinates.appendChild(name);
             providerTag.appendChild(bankCoordinates);
+            addCustomFields(provider, doc, providerTag);
         }
         return providerTag;
     }

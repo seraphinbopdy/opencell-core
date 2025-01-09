@@ -532,6 +532,30 @@ public class InvoiceUblHelper {
 			}
 			paymentMeans.setPayeeFinancialAccount(payeeFinancialInstitution);
 		}
+		// PaymentMeans/PayeeFinancialInstitution
+		Provider provider = providerService.getProvider();
+		if (provider.getBankCoordinates() != null) {
+			FinancialAccountType payeeFinancialInstitution = objectFactoryCommonAggrement.createFinancialAccountType();
+			ID payeeFinancialInstitutionId = objectFactorycommonBasic.createID();
+			payeeFinancialInstitutionId.setValue(provider.getBankCoordinates().getIban());
+			payeeFinancialInstitution.setID(payeeFinancialInstitutionId);
+			if(seller.getName() != null) {
+				oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Name name = objectFactorycommonBasic.createName();
+				name.setValue(seller.getName().getFirstName());
+				payeeFinancialInstitution.setName(name);
+			}
+			if(StringUtils.isNotBlank(provider.getBankCoordinates().getBic())) {
+				BranchType branchType = objectFactoryCommonAggrement.createBranchType();
+				FinancialInstitution financialInstitution = objectFactoryCommonAggrement.createFinancialInstitution();
+				ID financialInstitutionId = objectFactorycommonBasic.createID();
+				financialInstitutionId.setValue(provider.getBankCoordinates().getBic());
+				financialInstitution.setID(financialInstitutionId);
+				branchType.setFinancialInstitution(financialInstitution);
+				payeeFinancialInstitution.setFinancialInstitutionBranch(branchType);
+			}
+			paymentMeans.setPayeeFinancialAccount(payeeFinancialInstitution);
+		}
+
 
 		if(paymentMeans.getPaymentMeansCode() != null || paymentMeans.getPayeeFinancialAccount() != null){
 			if(creditNote == null) {

@@ -493,7 +493,7 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
         return version;
     }
 
-    private Map<Long, PricePlanMatrixColumn> duplicateColumns(PricePlanMatrixVersion entity, Set<PricePlanMatrixColumn> columns) {
+    public Map<Long, PricePlanMatrixColumn> duplicateColumns(PricePlanMatrixVersion entity, Set<PricePlanMatrixColumn> columns) {
         var ids = new HashMap<Long, PricePlanMatrixColumn>();
         if (columns != null && !columns.isEmpty()) {
 
@@ -518,7 +518,7 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
         return ids;
     }
 
-    private Map<Long, PricePlanMatrixLine> duplicateLines(PricePlanMatrixVersion entity, Set<PricePlanMatrixLine> lines, Boolean resetValueToPercent) {
+    public Map<Long, PricePlanMatrixLine> duplicateLines(PricePlanMatrixVersion entity, Set<PricePlanMatrixLine> lines, Boolean resetValueToPercent) {
         var ids = new HashMap<Long, PricePlanMatrixLine>();
         if (lines != null && !lines.isEmpty()) {
             lines.forEach(ppml -> {
@@ -528,6 +528,8 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
 
                 var duplicateLine = new PricePlanMatrixLine(ppml);
                 duplicateLine.setPricePlanMatrixVersion(entity);
+	            duplicateLine.setDescription(ppml.getDescription());
+				duplicateLine.setPriceWithoutTax(ppml.getPriceWithoutTax());
                 if(resetValueToPercent){
                     duplicateLine.setValue(BigDecimal.ZERO);
                 }
@@ -552,7 +554,7 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
         return ids;
     }
 
-    private void duplicatePricePlanMatrixValue(Map<Long, PricePlanMatrixColumn> columnsId, Map<Long, PricePlanMatrixLine> lineIds) {
+    public void duplicatePricePlanMatrixValue(Map<Long, PricePlanMatrixColumn> columnsId, Map<Long, PricePlanMatrixLine> lineIds) {
         var pricePlanMatrixValues = new HashSet<PricePlanMatrixValue>();
         columnsId.forEach((key, value) -> {
             var ppmv = new HashSet<>(pricePlanMatrixValueService.findByPricePlanMatrixColumn(key));

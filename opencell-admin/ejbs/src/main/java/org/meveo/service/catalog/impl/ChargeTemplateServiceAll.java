@@ -21,6 +21,7 @@ package org.meveo.service.catalog.impl;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -44,6 +45,7 @@ import org.meveo.model.cpq.Attribute;
 import org.meveo.model.cpq.enums.VersionStatusEnum;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.cpq.AttributeService;
+import software.amazon.awssdk.utils.CollectionUtils;
 
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
@@ -209,28 +211,24 @@ public class ChargeTemplateServiceAll extends BusinessService<ChargeTemplate> {
 							priceVersionNew.setId(null);
 							priceVersionNew.setStatus(VersionStatusEnum.DRAFT);
 							priceVersionNew.setPricePlanMatrix(pricePlanMatrixNew);
-							priceVersionNew.setColumns(null);
-							
-							if(priceVersion.getColumns() != null) {
-								Set<PricePlanMatrixColumn> pricePlanColumns = new HashSet<>();
-								for(PricePlanMatrixColumn pricePlanColumn:priceVersion.getColumns()){
-									PricePlanMatrixColumn pricePlanColumnNew = pricePlanMatrixColumnService.findByCode(pricePlanColumn.getCode());
-									pricePlanColumns.add(pricePlanColumnNew);
-								}
-								priceVersionNew.setColumns(pricePlanColumns);
-							}
-							
-							if(priceVersion.getLines() != null) {
-								Set<PricePlanMatrixLine> lines = new HashSet<>();
-								for(PricePlanMatrixLine pricePlanMatrixLine:priceVersion.getLines()){
-									PricePlanMatrixLine pricePlanMatrixLineNew = pricePlanMatrixLineService.findById(pricePlanMatrixLine.getId());
-									lines.add(pricePlanMatrixLineNew);
-								}
-								priceVersionNew.setLines(lines);
-							}
-							
-							priceVersionNew.setPricePlanMatrix(pricePlanMatrixNew);
+							priceVersionNew.setColumns(new HashSet<>());
+							priceVersionNew.setLines(new HashSet<>());
 							pricePlanMatrixVersionService.create(priceVersionNew);
+							priceVersionNew.setMatrix(priceVersion.isMatrix());
+							
+							Map<Long, PricePlanMatrixColumn> columnsId = null;
+							Map<Long, PricePlanMatrixLine> linesId = null;
+							if(priceVersion.getColumns() != null && !priceVersion.getColumns().isEmpty()) {
+								columnsId = pricePlanMatrixVersionService.duplicateColumns(priceVersionNew, priceVersion.getColumns());
+							}
+							
+							if(priceVersion.getLines() != null && !priceVersion.getLines().isEmpty()) {
+								linesId = pricePlanMatrixVersionService.duplicateLines(priceVersionNew, priceVersion.getLines(), false);
+							}
+							if(CollectionUtils.isNotEmpty(columnsId) && CollectionUtils.isNotEmpty(linesId)) {
+								pricePlanMatrixVersionService.duplicatePricePlanMatrixValue(columnsId, linesId);
+							}
+							priceVersionNew.setPricePlanMatrix(pricePlanMatrixNew);
 							
 							if(priceVersion.getTradingPricePlanVersions() != null) {
 								Set<TradingPricePlanVersion> tradingPricePlanVersions = new HashSet<>();
@@ -242,6 +240,7 @@ public class ChargeTemplateServiceAll extends BusinessService<ChargeTemplate> {
 								}
 								priceVersionNew.setTradingPricePlanVersions(tradingPricePlanVersions);
 							}
+							pricePlanMatrixVersionService.update(priceVersionNew);
 						}
 					}
 					pricePlanMatrixNew.getChargeTemplates().add(duplicateChargeTemplate);

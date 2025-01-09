@@ -148,7 +148,7 @@ public class GenericApiLoadServiceTest {
         fetchFieldsSet = new LinkedHashSet<>();
         fetchFieldsSet.addAll(Arrays.asList("MAX(id)", "code", "field2", "cfValues"));
         String paginatedRecords = loadService.findPaginatedRecords(false, Seller.class, searchConfig, fetchFieldsSet, null, null, null, null);
-        Assert.assertEquals("{\"total\":1,\"limit\":0,\"offset\":0,\"data\":[{\"MAX(id)\":\"5\",\"code\":\"dd\",\"field2\":\"11\",\"cfValues\":{\"valuesByCode\":{\"CF1\":[{\"priority\":0,\"value\":\"wweeee\",\"string\":\"wweeee\"}],\"CFlist\":[{\"priority\":0,\"value\":[\"house\"],\"listValue\":[\"house\"],\"listString\":[\"house\"]}],\"CF_OF_STRING\":[{\"priority\":0,\"value\":\"from CFT on OfferTemplate\",\"string\":\"from CFT on OfferTemplate\"}]}}}]}", paginatedRecords);
+        Assert.assertEquals("{\"total\":1,\"limit\":0,\"offset\":0,\"data\":[{\"MAX(id)\":\"5\",\"code\":\"dd\",\"field2\":\"11\",\"cfValues\":{\"valuesByCode\":{\"CF1\":[{\"priority\":0,\"value\":\"wweeee\",\"string\":\"wweeee\"}],\"CFlist\":[{\"priority\":0,\"listValue\":[\"house\"],\"value\":[\"house\"],\"listString\":[\"house\"]}],\"CF_OF_STRING\":[{\"priority\":0,\"value\":\"from CFT on OfferTemplate\",\"string\":\"from CFT on OfferTemplate\"}]}}}]}", paginatedRecords);
     }
 }
 

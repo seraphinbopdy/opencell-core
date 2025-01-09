@@ -1,5 +1,6 @@
 package org.meveo.model.cpq.commercial;
 
+import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.FetchType.LAZY;
 
 import java.math.BigDecimal;
@@ -148,7 +149,7 @@ public class OrderProduct extends AuditableCFEntity {
     @JoinColumn(name = "service_instance_id")
     private ServiceInstance serviceInstance;
 
-    @OneToMany(mappedBy = "orderProduct", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "orderProduct", fetch = FetchType.LAZY, cascade = ALL, orphanRemoval = true)
     private List<OrderArticleLine> orderArticleLines;
 
 	/** MRR. */

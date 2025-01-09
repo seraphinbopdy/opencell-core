@@ -1,7 +1,9 @@
 package org.meveo.model.cpq.commercial;
 
 import java.math.BigDecimal;
+import java.util.List;
 
+import jakarta.persistence.OneToMany;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.BusinessEntity;
@@ -18,6 +20,8 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
+
+import static jakarta.persistence.CascadeType.ALL;
 
 /**
  * @author Tarik F.
@@ -60,6 +64,9 @@ public class OrderArticleLine extends BusinessEntity {
     @OneToOne
     @JoinColumn(name = "order_product_id")
     private OrderProduct orderProduct;
+
+    @OneToMany(mappedBy = "orderArticleLine", cascade = ALL, orphanRemoval = true)
+    private List<OrderPrice> orderArticleItems;
 
     /**
      * @return the order
@@ -137,5 +144,13 @@ public class OrderArticleLine extends BusinessEntity {
 
     public void setOrderProduct(OrderProduct orderProduct) {
         this.orderProduct = orderProduct;
+    }
+
+    public List<OrderPrice> getOrderArticleItems() {
+        return orderArticleItems;
+    }
+
+    public void setOrderArticleItems(List<OrderPrice> orderArticleItems) {
+        this.orderArticleItems = orderArticleItems;
     }
 }

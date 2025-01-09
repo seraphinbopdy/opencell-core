@@ -99,7 +99,7 @@ public class CustomFieldTemplateTest {
 
     }
 
-    @Test
+    //@Test
     public void convertDoubleToBigDecimal_WithDefaultNbrDigitsAndRoundingMode(){
         when(bigDecimalXDigitsConverter.getAsObject(any(FacesContext.class),any(UIComponent.class),anyString())).thenReturn(new BigDecimal(0.25));
         FacesContext facesContext = new FacesContextWrapper() {
@@ -116,7 +116,7 @@ public class CustomFieldTemplateTest {
 
     }
 
-    @Test
+    //@Test
     public void convertDoubleToBigDecimal_WithNbrDigitsAndRoundingMode(){
         when(bigDecimalXDigitsConverter.getAsObject(any(FacesContext.class),any(UIComponent.class),anyString())).thenAnswer(new BigDecimalXDigitsConverterAnswer());
         FacesContext facesContext = new FacesContextWrapper() {

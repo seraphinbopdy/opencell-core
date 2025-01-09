@@ -96,11 +96,11 @@ public class ProductManagementApiService extends BaseApi {
             // Duplicate existing price plan with new code as per spec
             String newPricePlanCode = postData.getPricePlanCode() + "_" + oneShotChargeTemplate.getCode();
             try {
-                pricePlanMatrixApi.duplicatePricePlan(postData.getPricePlanCode(), newPricePlanCode, 1, null);
+            	PricePlanMatrixDto pricePlanMatrixDto = pricePlanMatrixApi.duplicatePricePlan(postData.getPricePlanCode(), newPricePlanCode, 1, null);
                 pricePlanCode = newPricePlanCode;           
                 entityManager.flush();
                 
-                PricePlanMatrixDto pricePlanMatrixDto = pricePlanMatrixApi.find(pricePlanCode);
+                //PricePlanMatrixDto pricePlanMatrixDto = pricePlanMatrixApi.find(pricePlanCode);
                 pricePlanMatrixDto.setEventCode(oneShotChargeTemplate.getCode());
                 pricePlanMatrixApi.update(pricePlanMatrixDto);
             } catch (EntityDoesNotExistsException e) {

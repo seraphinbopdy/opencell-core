@@ -821,8 +821,6 @@ public class Invoice extends AuditableCFEntity implements ISearchable {
         this.paymentStatusDate = null;
         this.invoiceLines = new ArrayList<>();
         this.invoiceAgregates = new ArrayList<>();
-        this.isReminderLevelTriggered = copy.isReminderLevelTriggered;
-        this.relatedDunningCollectionPlan = copy.relatedDunningCollectionPlan;
         this.externalPurchaseOrderNumber = copy.externalPurchaseOrderNumber;
         this.subscription = copy.subscription;
     }

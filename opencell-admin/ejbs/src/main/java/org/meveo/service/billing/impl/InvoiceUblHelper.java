@@ -1780,20 +1780,4 @@ public class InvoiceUblHelper {
 		return endpointIDType;
 	}
 
-	private ProfileID getProfileID(List<InvoiceLine> invoiceLines) {
-		ProfileID profileID = objectFactorycommonBasic.createProfileID();
-		if(CollectionUtils.isNotEmpty(invoiceLines)) {
-			var physicalExist = invoiceLines.stream().filter(invoiceLine -> invoiceLine.getAccountingArticle() != null)
-					.map(InvoiceLine::getAccountingArticle).map(AccountingArticle::isPhysical).collect(Collectors.toSet());
-			if(physicalExist.contains(true) && physicalExist.contains(false)) {
-				profileID.setValue("M1");
-			}else if(physicalExist.contains(true)) {
-				profileID.setValue("B1");
-			}else if (physicalExist.contains(false)){
-				profileID.setValue("S1");
-			}else return null;
-
-		}
-		return profileID;
-	}
 }

@@ -87,7 +87,6 @@ import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.Part
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyName;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyTaxScheme;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PaymentMandate;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PaymentMeans;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PaymentTermsType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PeriodType;
@@ -532,6 +531,30 @@ public class InvoiceUblHelper {
 			}
 			paymentMeans.setPayeeFinancialAccount(payeeFinancialInstitution);
 		}
+		// PaymentMeans/PayeeFinancialInstitution
+		Provider provider = providerService.getProvider();
+		if (provider.getBankCoordinates() != null) {
+			FinancialAccountType payeeFinancialInstitution = objectFactoryCommonAggrement.createFinancialAccountType();
+			ID payeeFinancialInstitutionId = objectFactorycommonBasic.createID();
+			payeeFinancialInstitutionId.setValue(provider.getBankCoordinates().getIban());
+			payeeFinancialInstitution.setID(payeeFinancialInstitutionId);
+			if(seller.getName() != null) {
+				oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Name name = objectFactorycommonBasic.createName();
+				name.setValue(seller.getName().getFirstName());
+				payeeFinancialInstitution.setName(name);
+			}
+			if(StringUtils.isNotBlank(provider.getBankCoordinates().getBic())) {
+				BranchType branchType = objectFactoryCommonAggrement.createBranchType();
+				FinancialInstitution financialInstitution = objectFactoryCommonAggrement.createFinancialInstitution();
+				ID financialInstitutionId = objectFactorycommonBasic.createID();
+				financialInstitutionId.setValue(provider.getBankCoordinates().getBic());
+				financialInstitution.setID(financialInstitutionId);
+				branchType.setFinancialInstitution(financialInstitution);
+				payeeFinancialInstitution.setFinancialInstitutionBranch(branchType);
+			}
+			paymentMeans.setPayeeFinancialAccount(payeeFinancialInstitution);
+		}
+
 
 		if(paymentMeans.getPaymentMeansCode() != null || paymentMeans.getPayeeFinancialAccount() != null){
 			if(creditNote == null) {
@@ -1755,5 +1778,22 @@ public class InvoiceUblHelper {
 		endpointIDType.setSchemeID(code);
 		endpointIDType.setValue(value);
 		return endpointIDType;
+	}
+
+	private ProfileID getProfileID(List<InvoiceLine> invoiceLines) {
+		ProfileID profileID = objectFactorycommonBasic.createProfileID();
+		if(CollectionUtils.isNotEmpty(invoiceLines)) {
+			var physicalExist = invoiceLines.stream().filter(invoiceLine -> invoiceLine.getAccountingArticle() != null)
+					.map(InvoiceLine::getAccountingArticle).map(AccountingArticle::isPhysical).collect(Collectors.toSet());
+			if(physicalExist.contains(true) && physicalExist.contains(false)) {
+				profileID.setValue("M1");
+			}else if(physicalExist.contains(true)) {
+				profileID.setValue("B1");
+			}else if (physicalExist.contains(false)){
+				profileID.setValue("S1");
+			}else return null;
+
+		}
+		return profileID;
 	}
 }

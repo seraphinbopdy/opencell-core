@@ -1967,6 +1967,9 @@ public class AccountHierarchyApi extends BaseApi {
         }
 
         if (accountDto.getAddress() != null) {
+        	if (accountEntity.getAddress() == null) {
+        		accountEntity.setAddress(new AddressDto());
+        	}
             if (accountDto.getAddress().getAddress1() != null) {
                 accountEntity.getAddress().setAddress1(accountDto.getAddress().getAddress1());
             }

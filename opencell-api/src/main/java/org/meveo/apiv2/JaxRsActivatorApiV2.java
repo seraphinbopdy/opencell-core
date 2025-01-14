@@ -97,6 +97,7 @@ import org.meveo.apiv2.generic.exception.UnprocessableEntityExceptionMapper;
 import org.meveo.apiv2.generic.exception.UnrecognizedPropertyExceptionMapper;
 import org.meveo.apiv2.generic.exception.ValidationExceptionMapper;
 import org.meveo.apiv2.generic.services.GenericApiLoggingFilter;
+import org.meveo.apiv2.language.impl.LanguageResourceImpl;
 import org.meveo.apiv2.media.file.upload.FileUploadResourceImpl;
 import org.meveo.apiv2.mediation.impl.MediationSettingResourceImpl;
 import org.meveo.apiv2.ordering.resource.ooq.OpenOrderQuoteResourceImpl;
@@ -199,7 +200,8 @@ public class JaxRsActivatorApiV2 extends Application {
                 ElectronicInvoicingResourceImpl.class,PaymentResourceImpl.class, PriceListResourceImpl.class, SellerResourceImpl.class, PriceListLineResourceImpl.class, CatalogPriceListResourceImpl.class,
 				SignatureRequestResourceImpl.class, AuditDataConfigurationResourceImpl.class, AuditDataLogResourceImpl.class, EinvoiceResourceImpl.class, BatchEntityResourceImpl.class, FilesResourceImpl.class,
                 ProductManagementRsImpl.class, HugeEntityResourceImpl.class, PaymentTermResourceImpl.class, CustomActionResourceImpl.class,
-                BillingAccountV2ResourceImpl.class, AccountHierarchyV2ResourceImpl.class, CustomerV2ResourceImpl.class, CustomerAccountV2ResourceImpl.class, UserAccountsV2ResourceImpl.class
+                BillingAccountV2ResourceImpl.class, AccountHierarchyV2ResourceImpl.class, CustomerV2ResourceImpl.class, CustomerAccountV2ResourceImpl.class, UserAccountsV2ResourceImpl.class,
+                LanguageResourceImpl.class
         ));
 
         resources.add(GenericJacksonProvider.class);

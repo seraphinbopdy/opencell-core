@@ -96,9 +96,12 @@ public class OneShotRatingService extends RatingService implements Serializable 
             }
         }
 
+        // Skip rating if charge does not match filters
         if (!RatingService.isORChargeMatch(chargeInstance)) {
             log.debug("Not rating oneshot chargeInstance {}/{}, filter expression or service attributes evaluated to FALSE", chargeInstance.getId(), chargeInstance.getCode());
-            return new RatingResult();
+            RatingResult ratingResult = new RatingResult();
+            ratingResult.setWasRatingSkipped(true);
+            return ratingResult;
         }
         if (chargeInstance.getChargeTemplate() != null
                 && chargeInstance.getChargeTemplate().getQuantityAttribute() != null) {

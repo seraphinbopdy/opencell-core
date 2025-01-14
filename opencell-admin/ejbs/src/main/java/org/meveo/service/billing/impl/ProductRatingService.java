@@ -39,9 +39,12 @@ public class ProductRatingService extends RatingService implements Serializable 
      */
     public RatingResult rateProductCharge(ProductChargeInstance chargeInstance, boolean isVirtual, boolean failSilently) throws BusinessException, RatingException {
 
+        // Skip rating if charge does not match filters
         if (!RatingService.isORChargeMatch(chargeInstance)) {
             log.debug("Not rating product chargeInstance {}/{}, filter expression or service attributes evaluated to FALSE", chargeInstance.getId(), chargeInstance.getCode());
-            return new RatingResult();
+            RatingResult ratingResult = new RatingResult();
+            ratingResult.setWasRatingSkipped(true);
+            return ratingResult;
         }
 
         UserAccount userAccount = chargeInstance.getUserAccount();

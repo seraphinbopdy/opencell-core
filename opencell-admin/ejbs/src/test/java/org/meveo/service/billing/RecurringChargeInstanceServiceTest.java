@@ -437,4 +437,17 @@ public class RecurringChargeInstanceServiceTest {
         assertThat(chargeInstance.getChargedToDate()).isEqualTo("2019-08-01");
         assertThat(chargeInstance.getNextChargeDate()).isEqualTo("2019-09-01");
     }
+
+    @Test
+    public void test_applyRecurringCharge_skip_rating_as_filtering_fails() {
+
+        RecurringChargeInstance chargeInstance = getChargeInstance(null, DateUtils.newDate(2019, 5, 1, 0, 0, 0), true, false);
+
+        chargeInstance.getRecurringChargeTemplate().setFilterExpression("false");
+
+        RatingResult ratingResult = recurringChargeInstanceService.applyRecurringCharge(chargeInstance, DateUtils.newDate(2019, 4, 1, 0, 0, 0), false, false, null);
+
+        assertThat(ratingResult.isWasRatingSkipped()).isTrue();
+        verify(recurringRatingService, times(0)).rateReccuringCharge(rciCaptor.capture(), any(), anyBoolean(), any(), any(), anyBoolean(), anyBoolean());
+    }
 }

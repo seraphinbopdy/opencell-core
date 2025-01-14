@@ -316,8 +316,11 @@ public class RecurringChargeInstanceService extends BusinessService<RecurringCha
     public RatingResult applyRecurringCharge(RecurringChargeInstance recurringChargeInstance, Date maxDate, boolean isMaxDateInclusive, boolean isVirtual, ChargeApplicationModeEnum applicationMode)
             throws BusinessException {
 
+        // Skip rating if charge does not match filters
         if (!RecurringRatingService.isORChargeMatch(recurringChargeInstance)) {
-            return new RatingResult();
+            RatingResult ratingResult = new RatingResult();
+            ratingResult.setWasRatingSkipped(true);
+            return ratingResult;
         }
 
         if (applicationMode == null) {

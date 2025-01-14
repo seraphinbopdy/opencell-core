@@ -38,6 +38,11 @@ import org.meveo.model.rating.EDR;
 public class RatingResult {
 
     /**
+     * Indicates if rating was skipped altogether
+     */
+    private boolean wasRatingSkipped = false;
+    
+    /**
      * A list of EDRs that were triggered as part of this processing
      */
     private List<EDR> triggeredEDRs;
@@ -259,6 +264,18 @@ public class RatingResult {
 	public void setEligibleFixedDiscountItems(Set<DiscountPlanItem> eligibleFixedDiscountItems) {
 		this.eligibleFixedDiscountItems = eligibleFixedDiscountItems;
 	}
-	
-	
+
+    /**
+     * @return Indicates if rating was skipped altogether
+     */
+    public boolean isWasRatingSkipped() {
+        return wasRatingSkipped;
+    }
+
+    /**
+     * @param wasRatingSkipped Indicates if rating was skipped altogether
+     */
+    public void setWasRatingSkipped(boolean wasRatingSkipped) {
+        this.wasRatingSkipped = wasRatingSkipped;
+    }
 }

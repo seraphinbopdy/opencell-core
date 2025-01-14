@@ -8040,6 +8040,10 @@ public class InvoiceService extends PersistenceService<Invoice> {
 			invoice.setStartDate(invoice.getInvoiceDate());
 			}
 			invoice.setEndDate(invoice.getInvoiceDate());
+            if(invoice.getStartDate().compareTo(invoice.getEndDate()) > 0) {
+                invoice.setEndDate(invoice.getStartDate());
+                invoice.setStartDate(invoice.getInvoiceDate());
+            }
 			update(invoice);
 			return;
 		}

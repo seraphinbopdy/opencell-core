@@ -36,7 +36,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 
 @Stateless
-public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
+public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Long>> {
 
 	private static final long serialVersionUID = 8799763764569695857L;
 
@@ -78,7 +78,7 @@ public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
      * @param jobExecutionResult Job execution result
      * @return An iterator over a list of Wallet operation Ids to convert to Rated transactions
      */
-	private Optional<Iterator<List<Object[]>>> initJobAndGetDataToProcess(JobExecutionResultImpl jobExecutionResult) {
+	private Optional<Iterator<List<Long>>> initJobAndGetDataToProcess(JobExecutionResultImpl jobExecutionResult) {
 
 		useSamePricePlan = "justPrice".equalsIgnoreCase(jobExecutionResult.getJobInstance().getParametres());
 		
@@ -115,17 +115,17 @@ public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
 		NativeQuery nativeQuery = statelessSession.createNativeQuery(sql);
 		scrollableResults = nativeQuery.setReadOnly(true).setCacheable(false).setFetchSize(fetchSize).scroll(ScrollMode.FORWARD_ONLY);
 
-        return Optional.of(new SynchronizedMultiItemIterator<Object[]>(scrollableResults, nrOfInitialWOs.intValue(), true, null) {
+        return Optional.of(new SynchronizedMultiItemIterator<>(scrollableResults, nrOfInitialWOs.intValue(), true, null) {
 
 					long count = 0L;
 
 					@Override
-					public void initializeDecisionMaking(Object[] item) {
+					public void initializeDecisionMaking(Long item) {
 						count = 0L;
 					}
 
 					@Override
-					public boolean isIncludeItem(Object[] item) {
+					public boolean isIncludeItem(Long item) {
 						if (count ++ > nrPerTx) {
 							return false;
 						}
@@ -144,9 +144,9 @@ public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Object[]>> {
         useSamePricePlan = "justPrice".equalsIgnoreCase(jobExecutionResult.getJobInstance().getParametres());
     }
 
-	private void applyReRating(List<Object[]> reratingTree, JobExecutionResultImpl jobExecutionResult) {
+	private void applyReRating(List<Long> reratingTree, JobExecutionResultImpl jobExecutionResult) {
 		if (reratingTree != null) {
-			rerateByGroup(reratingTree.stream().map(x->((Number)x[0]).longValue()).collect(Collectors.toList()), jobExecutionResult);
+			rerateByGroup(reratingTree, jobExecutionResult);
 		}
 	}
 

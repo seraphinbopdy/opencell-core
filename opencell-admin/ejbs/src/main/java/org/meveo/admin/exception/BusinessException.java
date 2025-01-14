@@ -38,7 +38,7 @@ import jakarta.ejb.ApplicationException;
 public class BusinessException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
-    private static final boolean sendException;
+    private static boolean sendException;
 
     /**
      * An attribute name for capturing addition error information
@@ -62,10 +62,14 @@ public class BusinessException extends RuntimeException {
     private Map<String, Object> errorContext = null;
 
     static {
-        ParamBean paramBean = ParamBean.getInstance();
-        if (paramBean != null) {
-            sendException = "true".equals(ParamBean.getInstance().getProperty("monitoring.sendException", "true"));
-        } else {
+        try {
+            ParamBean paramBean = ParamBean.getInstance();
+            if (paramBean != null) {
+                sendException = "true".equals(ParamBean.getInstance().getProperty("monitoring.sendException", "true"));
+            } else {
+                sendException = false;
+            }
+        } catch (Exception e) {
             sendException = false;
         }
     }

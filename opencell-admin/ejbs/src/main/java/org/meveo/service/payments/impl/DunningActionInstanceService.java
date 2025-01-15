@@ -145,7 +145,7 @@ public class DunningActionInstanceService extends PersistenceService<DunningActi
      * @param actionInstance Action instance
      * @param collectionPlan Collection plan
      */
-    public void triggerAction(DunningActionInstance actionInstance, DunningCollectionPlan collectionPlan) {
+    public void triggerAction(DunningActionInstance actionInstance, Invoice pInvoice, DunningCollectionPlan collectionPlan) {
         // Execute script
         if (actionInstance.getActionType().equals(SCRIPT) && actionInstance.getDunningAction() != null) {
             executeScriptAction(dunningSettingsService.findLastOne(), actionInstance, collectionPlan);
@@ -153,7 +153,7 @@ public class DunningActionInstanceService extends PersistenceService<DunningActi
 
         // Send notification
         if (actionInstance.getActionType().equals(SEND_NOTIFICATION) && actionInstance.getDunningAction().getActionChannel().equals(EMAIL)) {
-            executeNotificationAction(dunningSettingsService.findLastOne(), actionInstance, collectionPlan);
+            executeNotificationAction(dunningSettingsService.findLastOne(), actionInstance, pInvoice, collectionPlan);
         }
 
         // Retry payment
@@ -188,9 +188,9 @@ public class DunningActionInstanceService extends PersistenceService<DunningActi
      * @param actionInstance Action instance
      * @param collectionPlan Collection plan
      */
-    private void executeNotificationAction(DunningSettings dunningSettings, DunningActionInstance actionInstance, DunningCollectionPlan collectionPlan) {
+    private void executeNotificationAction(DunningSettings dunningSettings, DunningActionInstance actionInstance, Invoice pInvoice, DunningCollectionPlan collectionPlan) {
         if(dunningSettings != null && dunningSettings.getDunningMode() == DunningModeEnum.INVOICE_LEVEL) {
-            sendEmail(actionInstance.getDunningAction().getActionNotificationTemplate(), collectionPlan.getRelatedInvoice(), collectionPlan.getLastActionDate());
+            sendEmail(actionInstance.getDunningAction().getActionNotificationTemplate(), collectionPlan != null && collectionPlan.getRelatedInvoice() != null ? collectionPlan.getRelatedInvoice() : pInvoice, collectionPlan != null && collectionPlan.getLastActionDate() != null ? collectionPlan.getLastActionDate() : null);
         } else if (dunningSettings != null && dunningSettings.getDunningMode() == DunningModeEnum.CUSTOMER_LEVEL) {
             customerAccountService.sendEmail(actionInstance.getDunningAction().getActionNotificationTemplate(), actionInstance.getCollectionPlan());
         }

@@ -950,7 +950,7 @@ public class CustomerAccountService extends AccountService<CustomerAccount> {
                                 invoice.getDueDate().toString(),
                                 invoice.getDueDate().toString(),
                                 operation.getUnMatchingAmount().toString(),
-                                invoice.getAmount().toString(),
+                                invoice.getAmount() != null ? invoice.getAmount().toString() : StringUtils.EMPTY,
                                 invoice.getBillingAccount().getCode(),
                                 invoice.getBillingAccount().getDescription()
                         ))

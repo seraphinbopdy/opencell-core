@@ -263,7 +263,7 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
                     markInvoiceAsReminderAlreadySent(invoice);
                     updateDunningLevelInstance(dunningLevelInstance);
                     processed = true;
-                } if (!dateToCompare.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().isAfter(today.toInstant().atZone(ZoneId.systemDefault()).toLocalDate())) {
+                } else if (!dateToCompare.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().isAfter(today.toInstant().atZone(ZoneId.systemDefault()).toLocalDate())) {
                     // Create a new level instance with status ignored
                     createIgnoredDunningLevelInstance(customerAccount, invoice, policyLevel);
                 } else {
@@ -326,7 +326,7 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
 
         for (DunningActionInstance action : reminderDunningLevelInstance.getActions()) {
             if (action.getActionMode().equals(AUTOMATIC) && (action.getActionType().equals(SCRIPT) || action.getActionType().equals(SEND_NOTIFICATION))) {
-                actionInstanceService.triggerAction(action, pDunningCollectionPlan);
+                actionInstanceService.triggerAction(action, pInvoice, pDunningCollectionPlan);
                 action.setActionStatus(DunningActionInstanceStatusEnum.DONE);
                 action.setExecutionDate(new Date());
             }

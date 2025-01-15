@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.billing.InvoiceAgregate;
 public class InvoicingItem {
 	private Long billingAccountId;
@@ -39,7 +40,7 @@ public class InvoicingItem {
 		this.invoiceKey = (String) fields[i++];
 		this.subscriptionIds = Pattern.compile(",").splitAsStream((String) fields[i++]).mapToLong(Long::parseLong).boxed().collect(Collectors.toList());
 		String purchaseOrderIds = (String) fields[i++];
-		if (!purchaseOrderIds.isEmpty()) {
+		if (!StringUtils.isBlank(purchaseOrderIds)) {
 			this.purchaseOrderIds = Pattern.compile(",").splitAsStream(purchaseOrderIds).mapToLong(Long::parseLong).boxed().collect(Collectors.toList());
 		}
 		this.useSpecificTransactionalAmount = (boolean) fields[i++];

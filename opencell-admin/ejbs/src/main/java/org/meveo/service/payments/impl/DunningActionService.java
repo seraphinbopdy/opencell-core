@@ -48,12 +48,20 @@ public class DunningActionService  extends BusinessService<DunningAction> {
         validateActionNotificationTemplate(dunningAction);
         validateDunningLevel(dunningAction);
         validateAssignedTo(dunningAction);
+
         if(ActionModeEnum.AUTOMATIC.equals(dunningAction.getActionMode())) {
         	if(dunningAction.getActionChannel() != null && !ActionChannelEnum.EMAIL.equals(dunningAction.getActionChannel())) {
                 throw new BusinessApiException("The only action channel for the automatic mode is Email.");
         	}    	
       		dunningAction.setActionChannel(ActionChannelEnum.EMAIL);
     	}
+
+        if(ActionTypeEnum.SEND_NOTIFICATION.equals(dunningAction.getActionType()) &&
+                ActionModeEnum.MANUAL.equals(dunningAction.getActionMode()) &&
+                (ActionChannelEnum.EMAIL.equals(dunningAction.getActionChannel()) || ActionChannelEnum.CALL.equals(dunningAction.getActionChannel())) &&
+                dunningAction.getAssignedTo() == null) {
+            throw new BusinessApiException("the assignedTo is required, when ActionType is of type Send Notification and ActionMode is Manual and ActionChannel is Email or Call.");
+        }
         
         if(ActionTypeEnum.SEND_NOTIFICATION.equals(dunningAction.getActionType()) && dunningAction.getActionChannel() == null){
             throw new BusinessApiException("the action channel is required, when ActionType is of type Send Notification.");
@@ -110,7 +118,12 @@ public class DunningActionService  extends BusinessService<DunningAction> {
             }
         }
     }
-    
+
+    /**
+     * Validate assigned to.
+     *
+     * @param dunningAction the dunning action
+     */
     private void validateAssignedTo(DunningAction dunningAction) {
         if(dunningAction.getAssignedTo() != null) {
             Long id = dunningAction.getAssignedTo().getId();

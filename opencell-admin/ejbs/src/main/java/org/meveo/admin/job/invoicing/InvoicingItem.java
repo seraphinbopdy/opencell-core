@@ -38,7 +38,10 @@ public class InvoicingItem {
 		this.ilIDs = Pattern.compile(",").splitAsStream((String) fields[i++]).mapToLong(Long::parseLong).boxed().collect(Collectors.toList());
 		this.invoiceKey = (String) fields[i++];
 		this.subscriptionIds = Pattern.compile(",").splitAsStream((String) fields[i++]).mapToLong(Long::parseLong).boxed().collect(Collectors.toList());
-		this.purchaseOrderIds = Pattern.compile(",").splitAsStream((String) fields[i++]).mapToLong(Long::parseLong).boxed().collect(Collectors.toList());
+		String purchaseOrderIds = (String) fields[i++];
+		if (!purchaseOrderIds.isEmpty()) {
+			this.purchaseOrderIds = Pattern.compile(",").splitAsStream(purchaseOrderIds).mapToLong(Long::parseLong).boxed().collect(Collectors.toList());
+		}
 		this.useSpecificTransactionalAmount = (boolean) fields[i++];
 		this.transactionalAmountWithoutTax = (BigDecimal) fields[i++];
 		this.transactionalAmountTax = (BigDecimal) fields[i++];

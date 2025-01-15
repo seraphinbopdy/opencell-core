@@ -142,16 +142,16 @@ import jakarta.validation.constraints.Size;
         @NamedQuery(name = "InvoiceLine.listByAssociatedInvoice", query = "SELECT il.id FROM InvoiceLine il where il.invoice.id in (:invoiceIds)"),
         @NamedQuery(name = "InvoiceLine.sumAmountByOpenOrderNumberAndBA", query = "SELECT SUM(il.amountWithTax) FROM InvoiceLine il WHERE il.status = 'BILLED' AND il.openOrderNumber = :openOrderNumber AND il.billingAccount.id = :billingAccountId"),
 		@NamedQuery(name = "InvoiceLine.linkToInvoice", query = "UPDATE InvoiceLine il set il.status=org.meveo.model.billing.InvoiceLineStatusEnum.BILLED, il.invoice=:invoice, il.invoiceAggregateF=:invoiceAgregateF where il.id in :ids"),
-        @NamedQuery(name = "InvoiceLine.getInvoicingItems", query = 
-    	"select il.billingAccount.id, il.accountingArticle.invoiceSubCategory.id, il.userAccount.id, il.tax.id, sum(il.amountWithoutTax), sum(il.amountWithTax), sum(il.amountTax), count(il.id), (string_agg(cast(il.id as text),',')),"
-    	+ " il.invoiceKey, string_agg_distinct(subs.id) as subscriptionIds, string_agg_distinct(pos.id) as purchaseOrderIds," +
-				" (CASE WHEN COUNT(CASE WHEN il.useSpecificPriceConversion is TRUE THEN 1 END) > 0 THEN TRUE ELSE FALSE END), sum(il.transactionalAmountWithoutTax), sum(il.transactionalAmountWithTax), sum(il.transactionalAmountTax) "
-    		+ " FROM InvoiceLine il "
-			+ " INNER JOIN il.subscriptions subs"
-			+ " INNER JOIN subs.purchaseOrders pos"
-    		+ " WHERE il.billingRun.id=:billingRunId AND il.billingAccount.id IN (:ids) AND il.status='OPEN' "
-    		+ " group by il.billingAccount.id, il.accountingArticle.invoiceSubCategory.id, il.userAccount.id, il.tax.id, il.invoiceKey "
-    		+ " order by il.billingAccount.id"),
+        @NamedQuery(name = "InvoiceLine.getInvoicingItems", query =
+				"select il.billingAccount.id, il.accountingArticle.invoiceSubCategory.id, il.userAccount.id, il.tax.id, sum(il.amountWithoutTax), sum(il.amountWithTax), sum(il.amountTax), count(il.id), (string_agg(cast(il.id as text),',')),"
+						+ " il.invoiceKey, string_agg_distinct(subs.id) as subscriptionIds, string_agg_distinct(pos.id) as purchaseOrderIds," +
+						" (CASE WHEN COUNT(CASE WHEN il.useSpecificPriceConversion IS DISTINCT FROM TRUE THEN 1 END) > 0 THEN TRUE ELSE FALSE END), sum(il.transactionalAmountWithoutTax), sum(il.transactionalAmountWithTax), sum(il.transactionalAmountTax) "
+						+ " FROM InvoiceLine il "
+						+ " INNER JOIN il.subscriptions subs"
+						+ " LEFT JOIN subs.purchaseOrders pos"
+						+ " WHERE il.billingRun.id=:billingRunId AND il.billingAccount.id IN (:ids) AND il.status='OPEN' "
+						+ " group by il.billingAccount.id, il.accountingArticle.invoiceSubCategory.id, il.userAccount.id, il.tax.id, il.invoiceKey "
+						+ " order by il.billingAccount.id"),
         @NamedQuery(name = "InvoiceLine.findByIdsAndAdjustmentStatus", query = "SELECT il from InvoiceLine il left join fetch il.invoice i left join fetch i.invoiceType WHERE il.adjustmentStatus = :status and il.id in (:invoiceLinesIds)"),
         @NamedQuery(name = "InvoiceLine.findByIdsAndOtherAdjustmentStatus", query = "SELECT il from InvoiceLine il  left join fetch il.invoice i left join fetch i.invoiceType WHERE il.adjustmentStatus <> :status and il.id in (:invoiceLinesIds)"),
         @NamedQuery(name = "InvoiceLine.findByAdjustmentStatus", query = "SELECT il from InvoiceLine il left join fetch il.invoice WHERE il.adjustmentStatus = :status"),

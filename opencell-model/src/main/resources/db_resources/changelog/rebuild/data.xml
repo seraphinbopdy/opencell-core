@@ -2910,6 +2910,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Deutsch" />
             <column name="language_code" value="DEU" />
+            <column name="description_i18n" value='{"ENG": "German", "FR": "Allemand"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="2" />
@@ -2917,6 +2918,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="English" />
             <column name="language_code" value="ENG" />
+			<column name="description_i18n" value='{"ENG": "English", "FR": "english"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="3" />
@@ -2924,6 +2926,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Arabic" />
             <column name="language_code" value="ARA" />
+            <column name="description_i18n" value='{"ENG": "Arabic", "FR": "arabic"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="4" />
@@ -2931,6 +2934,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Bulgarian" />
             <column name="language_code" value="BUL" />
+            <column name="description_i18n" value='{"ENG": "Bulgarian", "FR": "bulgarian"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="5" />
@@ -2938,6 +2942,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Catalan" />
             <column name="language_code" value="CAT" />
+            <column name="description_i18n" value='{"ENG": "Catalan", "FR": "catalan"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="6" />
@@ -2945,6 +2950,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Chinese" />
             <column name="language_code" value="ZHO" />
+            <column name="description_i18n" value='{"ENG": "Chinese", "FR": "chinese"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="7" />
@@ -2952,6 +2958,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Danish" />
             <column name="language_code" value="DAN" />
+            <column name="description_i18n" value='{"ENG": "Danish", "FR": "danish"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="8" />
@@ -2959,6 +2966,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Spanish" />
             <column name="language_code" value="SPA" />
+            <column name="description_i18n" value='{"ENG": "Spanish", "FR": "spanish"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="9" />
@@ -2966,6 +2974,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Estonian" />
             <column name="language_code" value="EST" />
+            <column name="description_i18n" value='{"ENG": "Estonian", "FR": "estonian"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="10" />
@@ -2973,6 +2982,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Faroese" />
             <column name="language_code" value="FAO" />
+            <column name="description_i18n" value='{"ENG": "Faroese", "FR": "faroese"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="11" />
@@ -2980,6 +2990,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Finnish" />
             <column name="language_code" value="FIN" />
+            <column name="description_i18n" value='{"ENG": "Finnish", "FR": "finnish"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="12" />
@@ -2987,6 +2998,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="French" />
             <column name="language_code" value="FRA" />
+            <column name="description_i18n" value='{"ENG": "French", "FR": "french"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="13" />
@@ -2994,6 +3006,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Greek" />
             <column name="language_code" value="ELL" />
+            <column name="description_i18n" value='{"ENG": "Greek", "FR": "greek"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="14" />
@@ -3001,6 +3014,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Hindi" />
             <column name="language_code" value="HIN" />
+            <column name="description_i18n" value='{"ENG": "Hindi", "FR": "hindi"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="15" />
@@ -3008,6 +3022,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Hungarian" />
             <column name="language_code" value="HUN" />
+            <column name="description_i18n" value='{"ENG": "Hungarian", "FR": "hungarian"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="16" />
@@ -3015,6 +3030,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Icelandic" />
             <column name="language_code" value="ISL" />
+            <column name="description_i18n" value='{"ENG": "Icelandic", "FR": "icelandic"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="17" />
@@ -3022,6 +3038,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Italian" />
             <column name="language_code" value="ITA" />
+            <column name="description_i18n" value='{"ENG": "Italian", "FR": "italian"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="18" />
@@ -3029,6 +3046,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Japanese" />
             <column name="language_code" value="JPN" />
+            <column name="description_i18n" value='{"ENG": "Japanese", "FR": "japanese"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="19" />
@@ -3036,6 +3054,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Latvian" />
             <column name="language_code" value="LAV" />
+            <column name="description_i18n" value='{"ENG": "Latvian", "FR": "latvian"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="20" />
@@ -3043,6 +3062,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Lithuanian" />
             <column name="language_code" value="LIT" />
+            <column name="description_i18n" value='{"ENG": "Lithuanian", "FR": "lithuanian"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="21" />
@@ -3050,6 +3070,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Dutch" />
             <column name="language_code" value="NLD" />
+            <column name="description_i18n" value='{"ENG": "Dutch", "FR": "dutch"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="22" />
@@ -3057,6 +3078,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Norwegian" />
             <column name="language_code" value="NOR" />
+            <column name="description_i18n" value='{"ENG": "Norwegian", "FR": "norwegian"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="23" />
@@ -3064,6 +3086,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Polish" />
             <column name="language_code" value="POL" />
+            <column name="description_i18n" value='{"ENG": "Polish", "FR": "polish"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="24" />
@@ -3071,6 +3094,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Portuguese" />
             <column name="language_code" value="POR" />
+            <column name="description_i18n" value='{"ENG": "Portuguese", "FR": "portuguese"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="25" />
@@ -3078,6 +3102,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Romanian" />
             <column name="language_code" value="RON" />
+            <column name="description_i18n" value='{"ENG": "Romanian", "FR": "romanian"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="26" />
@@ -3085,6 +3110,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Russian" />
             <column name="language_code" value="RUS" />
+            <column name="description_i18n" value='{"ENG": "Russian", "FR": "russian"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="27" />
@@ -3092,6 +3118,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Serbian" />
             <column name="language_code" value="SRP" />
+            <column name="description_i18n" value='{"ENG": "Serbian", "FR": "serbian"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="28" />
@@ -3099,6 +3126,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Slovak" />
             <column name="language_code" value="SLK" />
+            <column name="description_i18n" value='{"ENG": "Slovak", "FR": "slovak"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="29" />
@@ -3106,6 +3134,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Slovene" />
             <column name="language_code" value="SLV" />
+            <column name="description_i18n" value='{"ENG": "Slovene", "FR": "slovene"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="30" />
@@ -3113,6 +3142,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Swedish" />
             <column name="language_code" value="SWE" />
+            <column name="description_i18n" value='{"ENG": "Swedish", "FR": "swedish"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="31" />
@@ -3120,6 +3150,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Czech" />
             <column name="language_code" value="CES" />
+            <column name="description_i18n" value='{"ENG": "Czech", "FR": "czech"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="32" />
@@ -3127,6 +3158,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Turkish" />
             <column name="language_code" value="TUR" />
+            <column name="description_i18n" value='{"ENG": "Turkish", "FR": "turkish"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="33" />
@@ -3134,7 +3166,1536 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Croatian" />
             <column name="language_code" value="HRV" />
+            <column name="description_i18n" value='{"ENG": "Croatian", "FR": "croatian"}' />
         </insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Aghem"/>
+			<column name="language_code" value="AGQ"/>
+			<column name="description_i18n" value='{"ENG": "Aghem", "FR": "Aghem"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Akan"/>
+			<column name="language_code" value="AKA"/>
+			<column name="description_i18n" value='{"ENG": "Akan", "FR": "Akan"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Amharic"/>
+			<column name="language_code" value="AMH"/>
+			<column name="description_i18n" value='{"ENG": "Amharic", "FR": "Amharique"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Obolo"/>
+			<column name="language_code" value="ANN"/>
+			<column name="description_i18n" value='{"ENG": "Obolo", "FR": "Obolo"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Asu"/>
+			<column name="language_code" value="ASA"/>
+			<column name="description_i18n" value='{"ENG": "Asu", "FR": "Asu"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Assamese"/>
+			<column name="language_code" value="ASM"/>
+			<column name="description_i18n" value='{"ENG": "Assamese", "FR": "Assamais"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Asturian"/>
+			<column name="language_code" value="AST"/>
+			<column name="description_i18n" value='{"ENG": "Asturian", "FR": "Asturien"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Azerbaijani"/>
+			<column name="language_code" value="AZE"/>
+			<column name="description_i18n" value='{"ENG": "Azerbaijani", "FR": "Azerbaïdjanais"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Bambara"/>
+			<column name="language_code" value="BAM"/>
+			<column name="description_i18n" value='{"ENG": "Bambara", "FR": "Bambara"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Basaa"/>
+			<column name="language_code" value="BAS"/>
+			<column name="description_i18n" value='{"ENG": "Basaa", "FR": "Bassa"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Belarusian"/>
+			<column name="language_code" value="BEL"/>
+			<column name="description_i18n" value='{"ENG": "Belarusian", "FR": "Biélorusse"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Bemba"/>
+			<column name="language_code" value="BEM"/>
+			<column name="description_i18n" value='{"ENG": "Bemba", "FR": "Bemba"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Bangla"/>
+			<column name="language_code" value="BEN"/>
+			<column name="description_i18n" value='{"ENG": "Bangla", "FR": "Bengali"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Bena"/>
+			<column name="language_code" value="BEZ"/>
+			<column name="description_i18n" value='{"ENG": "Bena", "FR": "Bena"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Haryanvi"/>
+			<column name="language_code" value="BGC"/>
+			<column name="description_i18n" value='{"ENG": "Haryanvi", "FR": "Bgc"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Bhojpuri"/>
+			<column name="language_code" value="BHO"/>
+			<column name="description_i18n" value='{"ENG": "Bhojpuri", "FR": "Bhodjpouri"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Tibetan"/>
+			<column name="language_code" value="BOD"/>
+			<column name="description_i18n" value='{"ENG": "Tibetan", "FR": "Tibétain"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Bosnian"/>
+			<column name="language_code" value="BOS"/>
+			<column name="description_i18n" value='{"ENG": "Bosnian", "FR": "Bosniaque"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Breton"/>
+			<column name="language_code" value="BRE"/>
+			<column name="description_i18n" value='{"ENG": "Breton", "FR": "Breton"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Bodo"/>
+			<column name="language_code" value="BRX"/>
+			<column name="description_i18n" value='{"ENG": "Bodo", "FR": "Bodo"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Chakma"/>
+			<column name="language_code" value="CCP"/>
+			<column name="description_i18n" value='{"ENG": "Chakma", "FR": "Changma kodha"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Cebuano"/>
+			<column name="language_code" value="CEB"/>
+			<column name="description_i18n" value='{"ENG": "Cebuano", "FR": "Cebuano"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Chiga"/>
+			<column name="language_code" value="CGG"/>
+			<column name="description_i18n" value='{"ENG": "Chiga", "FR": "Kiga"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Chechen"/>
+			<column name="language_code" value="CHE"/>
+			<column name="description_i18n" value='{"ENG": "Chechen", "FR": "Tchétchène"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Cherokee"/>
+			<column name="language_code" value="CHR"/>
+			<column name="description_i18n" value='{"ENG": "Cherokee", "FR": "Cherokee"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Chuvash"/>
+			<column name="language_code" value="CHV"/>
+			<column name="description_i18n" value='{"ENG": "Chuvash", "FR": "Tchouvache"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Central Kurdish"/>
+			<column name="language_code" value="CKB"/>
+			<column name="description_i18n" value='{"ENG": "Central Kurdish", "FR": "Sorani"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Cornish"/>
+			<column name="language_code" value="COR"/>
+			<column name="description_i18n" value='{"ENG": "Cornish", "FR": "Cornique"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Welsh"/>
+			<column name="language_code" value="CYM"/>
+			<column name="description_i18n" value='{"ENG": "Welsh", "FR": "Gallois"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Taita"/>
+			<column name="language_code" value="DAV"/>
+			<column name="description_i18n" value='{"ENG": "Taita", "FR": "Taita"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Zarma"/>
+			<column name="language_code" value="DJE"/>
+			<column name="description_i18n" value='{"ENG": "Zarma", "FR": "Zarma"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Dogri"/>
+			<column name="language_code" value="DOI"/>
+			<column name="description_i18n" value='{"ENG": "Dogri", "FR": "Dogri"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Lower Sorbian"/>
+			<column name="language_code" value="DSB"/>
+			<column name="description_i18n" value='{"ENG": "Lower Sorbian", "FR": "Bas-sorabe"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Duala"/>
+			<column name="language_code" value="DUA"/>
+			<column name="description_i18n" value='{"ENG": "Duala", "FR": "Douala"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Jola-Fonyi"/>
+			<column name="language_code" value="DYO"/>
+			<column name="description_i18n" value='{"ENG": "Jola-Fonyi", "FR": "Diola-fogny"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Dzongkha"/>
+			<column name="language_code" value="DZO"/>
+			<column name="description_i18n" value='{"ENG": "Dzongkha", "FR": "Dzongkha"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Embu"/>
+			<column name="language_code" value="EBU"/>
+			<column name="description_i18n" value='{"ENG": "Embu", "FR": "Embu"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Esperanto"/>
+			<column name="language_code" value="EPO"/>
+			<column name="description_i18n" value='{"ENG": "Esperanto", "FR": "Espéranto"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Basque"/>
+			<column name="language_code" value="EUS"/>
+			<column name="description_i18n" value='{"ENG": "Basque", "FR": "Basque"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Ewe"/>
+			<column name="language_code" value="EWE"/>
+			<column name="description_i18n" value='{"ENG": "Ewe", "FR": "Éwé"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Ewondo"/>
+			<column name="language_code" value="EWO"/>
+			<column name="description_i18n" value='{"ENG": "Ewondo", "FR": "Éwondo"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Persian"/>
+			<column name="language_code" value="FAS"/>
+			<column name="description_i18n" value='{"ENG": "Persian", "FR": "Persan"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Filipino"/>
+			<column name="language_code" value="FIL"/>
+			<column name="description_i18n" value='{"ENG": "Filipino", "FR": "Filipino"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Northern Frisian"/>
+			<column name="language_code" value="FRR"/>
+			<column name="description_i18n" value='{"ENG": "Northern Frisian", "FR": "Frison septentrional"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Western Frisian"/>
+			<column name="language_code" value="FRY"/>
+			<column name="description_i18n" value='{"ENG": "Western Frisian", "FR": "Frison occidental"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Fula"/>
+			<column name="language_code" value="FUL"/>
+			<column name="description_i18n" value='{"ENG": "Fula", "FR": "Peul"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Friulian"/>
+			<column name="language_code" value="FUR"/>
+			<column name="description_i18n" value='{"ENG": "Friulian", "FR": "Frioulan"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Scottish Gaelic"/>
+			<column name="language_code" value="GLA"/>
+			<column name="description_i18n" value='{"ENG": "Scottish Gaelic", "FR": "Gaélique écossais"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Irish"/>
+			<column name="language_code" value="GLE"/>
+			<column name="description_i18n" value='{"ENG": "Irish", "FR": "Irlandais"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Galician"/>
+			<column name="language_code" value="GLG"/>
+			<column name="description_i18n" value='{"ENG": "Galician", "FR": "Galicien"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Manx"/>
+			<column name="language_code" value="GLV"/>
+			<column name="description_i18n" value='{"ENG": "Manx", "FR": "Mannois"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Swiss German"/>
+			<column name="language_code" value="GSW"/>
+			<column name="description_i18n" value='{"ENG": "Swiss German", "FR": "Suisse allemand"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Gujarati"/>
+			<column name="language_code" value="GUJ"/>
+			<column name="description_i18n" value='{"ENG": "Gujarati", "FR": "Goudjarati"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Gusii"/>
+			<column name="language_code" value="GUZ"/>
+			<column name="description_i18n" value='{"ENG": "Gusii", "FR": "Gusii"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Hausa"/>
+			<column name="language_code" value="HAU"/>
+			<column name="description_i18n" value='{"ENG": "Hausa", "FR": "Haoussa"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Hawaiian"/>
+			<column name="language_code" value="HAW"/>
+			<column name="description_i18n" value='{"ENG": "Hawaiian", "FR": "Hawaïen"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Hebrew"/>
+			<column name="language_code" value="HEB"/>
+			<column name="description_i18n" value='{"ENG": "Hebrew", "FR": "Hébreu"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Upper Sorbian"/>
+			<column name="language_code" value="HSB"/>
+			<column name="description_i18n" value='{"ENG": "Upper Sorbian", "FR": "Haut-sorabe"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Armenian"/>
+			<column name="language_code" value="HYE"/>
+			<column name="description_i18n" value='{"ENG": "Armenian", "FR": "Arménien"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Igbo"/>
+			<column name="language_code" value="IBO"/>
+			<column name="description_i18n" value='{"ENG": "Igbo", "FR": "Igbo"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Sichuan Yi"/>
+			<column name="language_code" value="III"/>
+			<column name="description_i18n" value='{"ENG": "Sichuan Yi", "FR": "Yi du Sichuan"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Interlingua"/>
+			<column name="language_code" value="INA"/>
+			<column name="description_i18n" value='{"ENG": "Interlingua", "FR": "Interlingua"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Indonesian"/>
+			<column name="language_code" value="IND"/>
+			<column name="description_i18n" value='{"ENG": "Indonesian", "FR": "Indonésien"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Javanese"/>
+			<column name="language_code" value="JAV"/>
+			<column name="description_i18n" value='{"ENG": "Javanese", "FR": "Javanais"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Ngomba"/>
+			<column name="language_code" value="JGO"/>
+			<column name="description_i18n" value='{"ENG": "Ngomba", "FR": "Ngomba"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Machame"/>
+			<column name="language_code" value="JMC"/>
+			<column name="description_i18n" value='{"ENG": "Machame", "FR": "Matchamé"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Kabyle"/>
+			<column name="language_code" value="KAB"/>
+			<column name="description_i18n" value='{"ENG": "Kabyle", "FR": "Kabyle"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Kalaallisut"/>
+			<column name="language_code" value="KAL"/>
+			<column name="description_i18n" value='{"ENG": "Kalaallisut", "FR": "Groenlandais"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Kamba"/>
+			<column name="language_code" value="KAM"/>
+			<column name="description_i18n" value='{"ENG": "Kamba", "FR": "Kamba"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Kannada"/>
+			<column name="language_code" value="KAN"/>
+			<column name="description_i18n" value='{"ENG": "Kannada", "FR": "Kannada"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Kashmiri"/>
+			<column name="language_code" value="KAS"/>
+			<column name="description_i18n" value='{"ENG": "Kashmiri", "FR": "Cachemiri"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Georgian"/>
+			<column name="language_code" value="KAT"/>
+			<column name="description_i18n" value='{"ENG": "Georgian", "FR": "Géorgien"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Kazakh"/>
+			<column name="language_code" value="KAZ"/>
+			<column name="description_i18n" value='{"ENG": "Kazakh", "FR": "Kazakh"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Makonde"/>
+			<column name="language_code" value="KDE"/>
+			<column name="description_i18n" value='{"ENG": "Makonde", "FR": "Makondé"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Kabuverdianu"/>
+			<column name="language_code" value="KEA"/>
+			<column name="description_i18n" value='{"ENG": "Kabuverdianu", "FR": "Capverdien"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Kaingang"/>
+			<column name="language_code" value="KGP"/>
+			<column name="description_i18n" value='{"ENG": "Kaingang", "FR": "Caingangue"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Khmer"/>
+			<column name="language_code" value="KHM"/>
+			<column name="description_i18n" value='{"ENG": "Khmer", "FR": "Khmer"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Koyra Chiini"/>
+			<column name="language_code" value="KHQ"/>
+			<column name="description_i18n" value='{"ENG": "Koyra Chiini", "FR": "Koyra chiini"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Kikuyu"/>
+			<column name="language_code" value="KIK"/>
+			<column name="description_i18n" value='{"ENG": "Kikuyu", "FR": "Kikuyu"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Kinyarwanda"/>
+			<column name="language_code" value="KIN"/>
+			<column name="description_i18n" value='{"ENG": "Kinyarwanda", "FR": "Kinyarwanda"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Kyrgyz"/>
+			<column name="language_code" value="KIR"/>
+			<column name="description_i18n" value='{"ENG": "Kyrgyz", "FR": "Kirghize"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Kako"/>
+			<column name="language_code" value="KKJ"/>
+			<column name="description_i18n" value='{"ENG": "Kako", "FR": "Kako"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Kalenjin"/>
+			<column name="language_code" value="KLN"/>
+			<column name="description_i18n" value='{"ENG": "Kalenjin", "FR": "Kalendjin"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Konkani"/>
+			<column name="language_code" value="KOK"/>
+			<column name="description_i18n" value='{"ENG": "Konkani", "FR": "Konkani"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Korean"/>
+			<column name="language_code" value="KOR"/>
+			<column name="description_i18n" value='{"ENG": "Korean", "FR": "Coréen"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Shambala"/>
+			<column name="language_code" value="KSB"/>
+			<column name="description_i18n" value='{"ENG": "Shambala", "FR": "Shambala"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Bafia"/>
+			<column name="language_code" value="KSF"/>
+			<column name="description_i18n" value='{"ENG": "Bafia", "FR": "Bafia"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Colognian"/>
+			<column name="language_code" value="KSH"/>
+			<column name="description_i18n" value='{"ENG": "Colognian", "FR": "Kölsch"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Kurdish"/>
+			<column name="language_code" value="KUR"/>
+			<column name="description_i18n" value='{"ENG": "Kurdish", "FR": "Kurde"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Langi"/>
+			<column name="language_code" value="LAG"/>
+			<column name="description_i18n" value='{"ENG": "Langi", "FR": "Langi"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Lao"/>
+			<column name="language_code" value="LAO"/>
+			<column name="description_i18n" value='{"ENG": "Lao", "FR": "Lao"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Lingala"/>
+			<column name="language_code" value="LIN"/>
+			<column name="description_i18n" value='{"ENG": "Lingala", "FR": "Lingala"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Lakota"/>
+			<column name="language_code" value="LKT"/>
+			<column name="description_i18n" value='{"ENG": "Lakota", "FR": "Lakota"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Northern Luri"/>
+			<column name="language_code" value="LRC"/>
+			<column name="description_i18n" value='{"ENG": "Northern Luri", "FR": "Lori du Nord"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Luxembourgish"/>
+			<column name="language_code" value="LTZ"/>
+			<column name="description_i18n" value='{"ENG": "Luxembourgish", "FR": "Luxembourgeois"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Luba-Katanga"/>
+			<column name="language_code" value="LUB"/>
+			<column name="description_i18n" value='{"ENG": "Luba-Katanga", "FR": "Luba-katanga (kiluba)"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Ganda"/>
+			<column name="language_code" value="LUG"/>
+			<column name="description_i18n" value='{"ENG": "Ganda", "FR": "Ganda"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Luo"/>
+			<column name="language_code" value="LUO"/>
+			<column name="description_i18n" value='{"ENG": "Luo", "FR": "Luo"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Luyia"/>
+			<column name="language_code" value="LUY"/>
+			<column name="description_i18n" value='{"ENG": "Luyia", "FR": "Luyia"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Maithili"/>
+			<column name="language_code" value="MAI"/>
+			<column name="description_i18n" value='{"ENG": "Maithili", "FR": "Maïthili"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Malayalam"/>
+			<column name="language_code" value="MAL"/>
+			<column name="description_i18n" value='{"ENG": "Malayalam", "FR": "Malayalam"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Marathi"/>
+			<column name="language_code" value="MAR"/>
+			<column name="description_i18n" value='{"ENG": "Marathi", "FR": "Marathi"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Masai"/>
+			<column name="language_code" value="MAS"/>
+			<column name="description_i18n" value='{"ENG": "Masai", "FR": "Maasaï"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Moksha"/>
+			<column name="language_code" value="MDF"/>
+			<column name="description_i18n" value='{"ENG": "Moksha", "FR": "Mokcha"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Meru"/>
+			<column name="language_code" value="MER"/>
+			<column name="description_i18n" value='{"ENG": "Meru", "FR": "Meru"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Morisyen"/>
+			<column name="language_code" value="MFE"/>
+			<column name="description_i18n" value='{"ENG": "Morisyen", "FR": "Créole mauricien"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Makhuwa-Meetto"/>
+			<column name="language_code" value="MGH"/>
+			<column name="description_i18n" value='{"ENG": "Makhuwa-Meetto", "FR": "Makua"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Macedonian"/>
+			<column name="language_code" value="MKD"/>
+			<column name="description_i18n" value='{"ENG": "Macedonian", "FR": "Macédonien"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Malagasy"/>
+			<column name="language_code" value="MLG"/>
+			<column name="description_i18n" value='{"ENG": "Malagasy", "FR": "Malgache"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Maltese"/>
+			<column name="language_code" value="MLT"/>
+			<column name="description_i18n" value='{"ENG": "Maltese", "FR": "Maltais"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Manipuri"/>
+			<column name="language_code" value="MNI"/>
+			<column name="description_i18n" value='{"ENG": "Manipuri", "FR": "Manipuri"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Mongolian"/>
+			<column name="language_code" value="MON"/>
+			<column name="description_i18n" value='{"ENG": "Mongolian", "FR": "Mongol"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Maori"/>
+			<column name="language_code" value="MRI"/>
+			<column name="description_i18n" value='{"ENG": "Maori", "FR": "Maori"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Malay"/>
+			<column name="language_code" value="MSA"/>
+			<column name="description_i18n" value='{"ENG": "Malay", "FR": "Malais"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Mundang"/>
+			<column name="language_code" value="MUA"/>
+			<column name="description_i18n" value='{"ENG": "Mundang", "FR": "Moundang"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Burmese"/>
+			<column name="language_code" value="MYA"/>
+			<column name="description_i18n" value='{"ENG": "Burmese", "FR": "Birman"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Mazanderani"/>
+			<column name="language_code" value="MZN"/>
+			<column name="description_i18n" value='{"ENG": "Mazanderani", "FR": "Mazandérani"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Nama"/>
+			<column name="language_code" value="NAQ"/>
+			<column name="description_i18n" value='{"ENG": "Nama", "FR": "Nama"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="North Ndebele"/>
+			<column name="language_code" value="NDE"/>
+			<column name="description_i18n" value='{"ENG": "North Ndebele", "FR": "Ndébélé du Nord"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Low German"/>
+			<column name="language_code" value="NDS"/>
+			<column name="description_i18n" value='{"ENG": "Low German", "FR": "Bas-allemand"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Nepali"/>
+			<column name="language_code" value="NEP"/>
+			<column name="description_i18n" value='{"ENG": "Nepali", "FR": "Népalais"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Kwasio"/>
+			<column name="language_code" value="NMG"/>
+			<column name="description_i18n" value='{"ENG": "Kwasio", "FR": "Ngoumba"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Ngiemboon"/>
+			<column name="language_code" value="NNH"/>
+			<column name="description_i18n" value='{"ENG": "Ngiemboon", "FR": "Ngiemboon"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Norwegian Nynorsk"/>
+			<column name="language_code" value="NNO"/>
+			<column name="description_i18n" value='{"ENG": "Norwegian Nynorsk", "FR": "Norvégien nynorsk"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Norwegian Bokmål"/>
+			<column name="language_code" value="NOB"/>
+			<column name="description_i18n" value='{"ENG": "Norwegian Bokmål", "FR": "Norvégien bokmål"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Nuer"/>
+			<column name="language_code" value="NUS"/>
+			<column name="description_i18n" value='{"ENG": "Nuer", "FR": "Nuer"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Nyankole"/>
+			<column name="language_code" value="NYN"/>
+			<column name="description_i18n" value='{"ENG": "Nyankole", "FR": "Nyankolé"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Occitan"/>
+			<column name="language_code" value="OCI"/>
+			<column name="description_i18n" value='{"ENG": "Occitan", "FR": "Occitan"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Odia"/>
+			<column name="language_code" value="ORI"/>
+			<column name="description_i18n" value='{"ENG": "Odia", "FR": "Odia"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Oromo"/>
+			<column name="language_code" value="ORM"/>
+			<column name="description_i18n" value='{"ENG": "Oromo", "FR": "Oromo"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Ossetic"/>
+			<column name="language_code" value="OSS"/>
+			<column name="description_i18n" value='{"ENG": "Ossetic", "FR": "Ossète"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Punjabi"/>
+			<column name="language_code" value="PAN"/>
+			<column name="description_i18n" value='{"ENG": "Punjabi", "FR": "Pendjabi"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Nigerian Pidgin"/>
+			<column name="language_code" value="PCM"/>
+			<column name="description_i18n" value='{"ENG": "Nigerian Pidgin", "FR": "Pidgin nigérian"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Pijin"/>
+			<column name="language_code" value="PIS"/>
+			<column name="description_i18n" value='{"ENG": "Pijin", "FR": "Pijin"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Pashto"/>
+			<column name="language_code" value="PUS"/>
+			<column name="description_i18n" value='{"ENG": "Pashto", "FR": "Pachto"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Quechua"/>
+			<column name="language_code" value="QUE"/>
+			<column name="description_i18n" value='{"ENG": "Quechua", "FR": "Quechua"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Rajasthani"/>
+			<column name="language_code" value="RAJ"/>
+			<column name="description_i18n" value='{"ENG": "Rajasthani", "FR": "Rajasthani"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Rombo"/>
+			<column name="language_code" value="ROF"/>
+			<column name="description_i18n" value='{"ENG": "Rombo", "FR": "Rombo"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Romansh"/>
+			<column name="language_code" value="ROH"/>
+			<column name="description_i18n" value='{"ENG": "Romansh", "FR": "Romanche"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Rundi"/>
+			<column name="language_code" value="RUN"/>
+			<column name="description_i18n" value='{"ENG": "Rundi", "FR": "Roundi"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Rwa"/>
+			<column name="language_code" value="RWK"/>
+			<column name="description_i18n" value='{"ENG": "Rwa", "FR": "Rwa"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Sango"/>
+			<column name="language_code" value="SAG"/>
+			<column name="description_i18n" value='{"ENG": "Sango", "FR": "Sango"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Yakut"/>
+			<column name="language_code" value="SAH"/>
+			<column name="description_i18n" value='{"ENG": "Yakut", "FR": "Iakoute"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Sanskrit"/>
+			<column name="language_code" value="SAN"/>
+			<column name="description_i18n" value='{"ENG": "Sanskrit", "FR": "Sanskrit"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Samburu"/>
+			<column name="language_code" value="SAQ"/>
+			<column name="description_i18n" value='{"ENG": "Samburu", "FR": "Samburu"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Santali"/>
+			<column name="language_code" value="SAT"/>
+			<column name="description_i18n" value='{"ENG": "Santali", "FR": "Santali"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Sangu"/>
+			<column name="language_code" value="SBP"/>
+			<column name="description_i18n" value='{"ENG": "Sangu", "FR": "Isangu"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Sena"/>
+			<column name="language_code" value="SEH"/>
+			<column name="description_i18n" value='{"ENG": "Sena", "FR": "Cisena"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Koyraboro Senni"/>
+			<column name="language_code" value="SES"/>
+			<column name="description_i18n" value='{"ENG": "Koyraboro Senni", "FR": "Koyraboro senni"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Tachelhit"/>
+			<column name="language_code" value="SHI"/>
+			<column name="description_i18n" value='{"ENG": "Tachelhit", "FR": "Chleuh"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Sinhala"/>
+			<column name="language_code" value="SIN"/>
+			<column name="description_i18n" value='{"ENG": "Sinhala", "FR": "Cingalais"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Northern Sami"/>
+			<column name="language_code" value="SME"/>
+			<column name="description_i18n" value='{"ENG": "Northern Sami", "FR": "Same du Nord"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Inari Sami"/>
+			<column name="language_code" value="SMN"/>
+			<column name="description_i18n" value='{"ENG": "Inari Sami", "FR": "Same d&#39;Inari"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Skolt Sami"/>
+			<column name="language_code" value="SMS"/>
+			<column name="description_i18n" value='{"ENG": "Skolt Sami", "FR": "Same skolt"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Shona"/>
+			<column name="language_code" value="SNA"/>
+			<column name="description_i18n" value='{"ENG": "Shona", "FR": "Shona"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Sindhi"/>
+			<column name="language_code" value="SND"/>
+			<column name="description_i18n" value='{"ENG": "Sindhi", "FR": "Sindhi"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Somali"/>
+			<column name="language_code" value="SOM"/>
+			<column name="description_i18n" value='{"ENG": "Somali", "FR": "Somali"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Albanian"/>
+			<column name="language_code" value="SQI"/>
+			<column name="description_i18n" value='{"ENG": "Albanian", "FR": "Albanais"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Sardinian"/>
+			<column name="language_code" value="SRD"/>
+			<column name="description_i18n" value='{"ENG": "Sardinian", "FR": "Sarde"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Sundanese"/>
+			<column name="language_code" value="SUN"/>
+			<column name="description_i18n" value='{"ENG": "Sundanese", "FR": "Soundanais"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Swahili"/>
+			<column name="language_code" value="SWA"/>
+			<column name="description_i18n" value='{"ENG": "Swahili", "FR": "Swahili"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Tamil"/>
+			<column name="language_code" value="TAM"/>
+			<column name="description_i18n" value='{"ENG": "Tamil", "FR": "Tamoul"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Tatar"/>
+			<column name="language_code" value="TAT"/>
+			<column name="description_i18n" value='{"ENG": "Tatar", "FR": "Tatar"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Telugu"/>
+			<column name="language_code" value="TEL"/>
+			<column name="description_i18n" value='{"ENG": "Telugu", "FR": "Télougou"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Teso"/>
+			<column name="language_code" value="TEO"/>
+			<column name="description_i18n" value='{"ENG": "Teso", "FR": "Teso"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Tajik"/>
+			<column name="language_code" value="TGK"/>
+			<column name="description_i18n" value='{"ENG": "Tajik", "FR": "Tadjik"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Thai"/>
+			<column name="language_code" value="THA"/>
+			<column name="description_i18n" value='{"ENG": "Thai", "FR": "Thaï"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Tigrinya"/>
+			<column name="language_code" value="TIR"/>
+			<column name="description_i18n" value='{"ENG": "Tigrinya", "FR": "Tigrigna"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Toki Pona"/>
+			<column name="language_code" value="TOK"/>
+			<column name="description_i18n" value='{"ENG": "Toki Pona", "FR": "Toki pona"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Tongan"/>
+			<column name="language_code" value="TON"/>
+			<column name="description_i18n" value='{"ENG": "Tongan", "FR": "Tongien"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Turkmen"/>
+			<column name="language_code" value="TUK"/>
+			<column name="description_i18n" value='{"ENG": "Turkmen", "FR": "Turkmène"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Tasawaq"/>
+			<column name="language_code" value="TWQ"/>
+			<column name="description_i18n" value='{"ENG": "Tasawaq", "FR": "Tasawaq"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Central Atlas Tamazight"/>
+			<column name="language_code" value="TZM"/>
+			<column name="description_i18n" value='{"ENG": "Central Atlas Tamazight", "FR": "Amazighe de l&#39;Atlas central"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Uyghur"/>
+			<column name="language_code" value="UIG"/>
+			<column name="description_i18n" value='{"ENG": "Uyghur", "FR": "Ouïghour"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Ukrainian"/>
+			<column name="language_code" value="UKR"/>
+			<column name="description_i18n" value='{"ENG": "Ukrainian", "FR": "Ukrainien"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Urdu"/>
+			<column name="language_code" value="URD"/>
+			<column name="description_i18n" value='{"ENG": "Urdu", "FR": "Ourdou"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Uzbek"/>
+			<column name="language_code" value="UZB"/>
+			<column name="description_i18n" value='{"ENG": "Uzbek", "FR": "Ouzbek"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Vai"/>
+			<column name="language_code" value="VAI"/>
+			<column name="description_i18n" value='{"ENG": "Vai", "FR": "Vaï"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Vietnamese"/>
+			<column name="language_code" value="VIE"/>
+			<column name="description_i18n" value='{"ENG": "Vietnamese", "FR": "Vietnamien"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Vunjo"/>
+			<column name="language_code" value="VUN"/>
+			<column name="description_i18n" value='{"ENG": "Vunjo", "FR": "Vunjo"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Walser"/>
+			<column name="language_code" value="WAE"/>
+			<column name="description_i18n" value='{"ENG": "Walser", "FR": "Walser"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Wolof"/>
+			<column name="language_code" value="WOL"/>
+			<column name="description_i18n" value='{"ENG": "Wolof", "FR": "Wolof"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Xhosa"/>
+			<column name="language_code" value="XHO"/>
+			<column name="description_i18n" value='{"ENG": "Xhosa", "FR": "Xhosa"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Soga"/>
+			<column name="language_code" value="XOG"/>
+			<column name="description_i18n" value='{"ENG": "Soga", "FR": "Soga"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Yangben"/>
+			<column name="language_code" value="YAV"/>
+			<column name="description_i18n" value='{"ENG": "Yangben", "FR": "Yangben"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Yiddish"/>
+			<column name="language_code" value="YID"/>
+			<column name="description_i18n" value='{"ENG": "Yiddish", "FR": "Yiddish"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Yoruba"/>
+			<column name="language_code" value="YOR"/>
+			<column name="description_i18n" value='{"ENG": "Yoruba", "FR": "Yoruba"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Nheengatu"/>
+			<column name="language_code" value="YRL"/>
+			<column name="description_i18n" value='{"ENG": "Nheengatu", "FR": "Nheengatou"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Cantonese"/>
+			<column name="language_code" value="YUE"/>
+			<column name="description_i18n" value='{"ENG": "Cantonese", "FR": "Cantonais"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Standard Moroccan Tamazight"/>
+			<column name="language_code" value="ZGH"/>
+			<column name="description_i18n" value='{"ENG": "Standard Moroccan Tamazight", "FR": "Amazighe standard marocain"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Zulu"/>
+			<column name="language_code" value="ZUL"/>
+			<column name="description_i18n" value='{"ENG": "Zulu", "FR": "Zoulou"}'/>
+		</insert>
     </changeSet>
         <changeSet author="AndriusKarpavicius" id="rebuild-data-countries">
         <insert tableName="adm_country">

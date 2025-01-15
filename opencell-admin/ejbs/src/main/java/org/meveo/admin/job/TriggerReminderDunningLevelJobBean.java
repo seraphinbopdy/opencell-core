@@ -10,21 +10,13 @@ import static org.meveo.model.payments.ActionTypeEnum.SCRIPT;
 import static org.meveo.model.payments.ActionTypeEnum.SEND_NOTIFICATION;
 import static org.meveo.model.shared.DateUtils.addDaysToDate;
 
-import java.io.File;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
-import org.meveo.admin.exception.BusinessException;
-import org.meveo.model.admin.Seller;
 import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.Invoice;
-import org.meveo.model.communication.email.EmailTemplate;
 import org.meveo.model.dunning.DunningActionInstance;
 import org.meveo.model.dunning.DunningActionInstanceStatusEnum;
 import org.meveo.model.dunning.DunningCollectionPlan;
@@ -39,10 +31,6 @@ import org.meveo.model.dunning.DunningSettings;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.model.payments.CustomerAccount;
-import org.meveo.model.scripts.ScriptInstance;
-import org.meveo.model.shared.ContactInformation;
-import org.meveo.model.shared.Name;
-import org.meveo.model.shared.Title;
 import org.meveo.service.billing.impl.BillingAccountService;
 import org.meveo.service.billing.impl.InvoiceService;
 import org.meveo.service.payments.impl.CustomerAccountService;
@@ -52,7 +40,6 @@ import org.meveo.service.payments.impl.DunningLevelInstanceService;
 import org.meveo.service.payments.impl.DunningLevelService;
 import org.meveo.service.payments.impl.DunningPolicyService;
 import org.meveo.service.payments.impl.DunningSettingsService;
-import org.meveo.service.script.ScriptInstanceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,22 +99,31 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
      */
     @TransactionAttribute(REQUIRED)
     public void execute(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance) {
-        List<DunningPolicy> policies = policyService.getPolicies(true);
+        // Sort policies by isDefaultPolicy and policyPriority
+        List<DunningPolicy> sortedPolicies = sortDunningPolicies(policyService.getPolicies(true));
         DunningSettings dunningSettings = dunningSettingsService.findLastOne();
+        List<Invoice> treatedInvoices = new ArrayList<>();
 
         try {
             int numberOFAllInvoicesProcessed = 0;
-            for (DunningPolicy policy : policies) {
+            for (DunningPolicy policy : sortedPolicies) {
                 DunningCollectionPlan dunningCollectionPlan = collectionPlanService.findByPolicy(policy);
                 boolean cpProcessed = false;
                 for (DunningPolicyLevel policyLevel : policy.getDunningLevels()) {
-                    if (policyLevel.getDunningLevel() != null && policyLevel.getDunningLevel().isReminder()) {
-                        List<Invoice> invoices = policyService.findEligibleInvoicesForPolicy(policy);
+                    List<Invoice> invoices = policyService.findEligibleInvoicesForPolicy(policy);
+
+                    if (policyLevel.getDunningLevel() != null && policyLevel.getDunningLevel().isReminder() && !invoices.isEmpty()) {
                         // Filter invoices by searching if there's a dunning level instance for the invoice
                         List<Invoice> filteredInvoices = getInvoices(invoices);
-                        cpProcessed = processInvoices(filteredInvoices, policyLevel, dunningCollectionPlan, dunningSettings, policy);
-                        jobExecutionResult.setNbItemsToProcess(jobExecutionResult.getNbItemsToProcess() + filteredInvoices.size());
-                        numberOFAllInvoicesProcessed += filteredInvoices.size();
+                        // Check filtered invoices if they are already processed
+                        filteredInvoices.removeIf(treatedInvoices::contains);
+
+                        if (!filteredInvoices.isEmpty()) {
+                            cpProcessed = processInvoices(filteredInvoices, policyLevel, dunningCollectionPlan, dunningSettings, policy);
+                            jobExecutionResult.setNbItemsToProcess(jobExecutionResult.getNbItemsToProcess() + filteredInvoices.size());
+                            numberOFAllInvoicesProcessed += filteredInvoices.size();
+                            treatedInvoices.addAll(filteredInvoices);
+                        }
                     }
                 }
 
@@ -159,6 +155,21 @@ public class TriggerReminderDunningLevelJobBean extends BaseJobBean {
         }
 
         return filteredInvoices;
+    }
+
+    /**
+     * Sort policies by isDefaultPolicy and policyPriority
+     * @param policies List of {@link DunningPolicy}
+     * @return Sorted list of {@link DunningPolicy}
+     */
+    private static List<DunningPolicy> sortDunningPolicies(List<DunningPolicy> policies) {
+        return policies
+                .stream()
+                .sorted(Comparator
+                        .comparing(DunningPolicy::getIsDefaultPolicy)
+                        .reversed()
+                        .thenComparing(DunningPolicy::getPolicyPriority, Comparator.nullsLast(Comparator.naturalOrder())))
+                .collect(Collectors.toList());
     }
 
     /**

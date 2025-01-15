@@ -647,7 +647,11 @@ public class ReratingService extends RatingService implements Serializable {
     public void rerateWalletOperationAndInstantiateTriggeredEDRs(WalletOperation operationToRerate, boolean useSamePricePlan, boolean update) {
     	rerateWalletOperationAndInstantiateTriggeredEDRs(operationToRerate, useSamePricePlan, update, false);
     }
-    
+
+    public void rerateWalletOperationAndInstantiateTriggeredEDRs(WalletOperation operationToRerate, boolean useSamePricePlan) {
+        rerateWalletOperationAndInstantiateTriggeredEDRs(operationToRerate, useSamePricePlan, false, true);
+    }
+
     /**
      * Rate a copy of Wallet operation to rerate, preserving or not a priceplan. New Wallet operation will be associated with a rerated WalletOperation. OldWalletOperation.reratedWalletOperation = new WalletOperation
      * If rateTriggeredEDR=true, triggeredEDR will be rated
@@ -770,7 +774,7 @@ public class ReratingService extends RatingService implements Serializable {
 		Map<String, List<Long>> errorsMap = new HashMap<>();
 		walletOperations.stream().forEach(operationToRerate -> {
 		    try {
-		    	reratingService.rerateWalletOperationAndInstantiateTriggeredEDRs(operationToRerate, useSamePricePlan, false, true);
+		    	reratingService.rerateWalletOperationAndInstantiateTriggeredEDRs(operationToRerate, useSamePricePlan);
 		    } catch (Exception e) {
 		        errorsMap.computeIfAbsent(e.getMessage(), k -> new ArrayList<>()).add(operationToRerate.getId());
 		    }

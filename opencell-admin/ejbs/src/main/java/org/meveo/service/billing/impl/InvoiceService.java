@@ -6236,7 +6236,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
                         if (existingInvoice != null) {
                             cleanInvoiceAggregates(existingInvoice.getId());
                             initAmounts(existingInvoice.getId());
-                            invoiceAggregateProcessingInfo.invoice = refreshOrRetrieve(existingInvoice);
+                            invoiceAggregateProcessingInfo.invoice = retrieveIfNotManaged(existingInvoice);
                         } else {
                             // TODO check instantiateInvoice(entityToInvoice
                             invoiceAggregateProcessingInfo.invoice = instantiateInvoice(entityToInvoice, invoiceLinesGroup.getBillingAccount(), invoiceLinesGroup.getSeller().getId(), billingRun, invoiceDate, isDraft,

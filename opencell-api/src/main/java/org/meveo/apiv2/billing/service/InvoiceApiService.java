@@ -84,9 +84,7 @@ import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
 
 public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
-	
-	public static final String ADV = "ADV";
-	
+
     @Inject
     private InvoiceService invoiceService;
 
@@ -109,12 +107,9 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
     protected RatedTransactionService ratedTransactionService;
 
 	@Inject
-	private LinkedInvoiceService linkedInvoiceService;
-
-	@Inject
 	private FinanceSettingsService financeSettingsService;
 	
-	private List<String> fieldToFetch = asList("invoiceLines");
+	private final List<String> fieldToFetch = List.of("invoiceLines");
 
 	@Inject
 	private InvoiceTypeService invoiceTypeService;

@@ -559,7 +559,7 @@ public class PricePlanRsImpl extends BaseRs implements PricePlanRs {
             List<PricePlanMatrix> pricePlans = pricePlanMatrixService.listByChargeCode(chargeCode);
             
             if (pricePlans == null || pricePlans.isEmpty()) {
-                throw new EntityDoesNotExistsException(PricePlanMatrix.class, chargeCode);
+            	throw new IllegalArgumentException("Charge " + chargeCode + " not found");
             }
             result.setChargeCode(chargeCode);
             // Filter by price plan code or get latest published version
@@ -568,7 +568,7 @@ public class PricePlanRsImpl extends BaseRs implements PricePlanRs {
                 pricePlan = pricePlans.stream()
                     .filter(pp -> pp.getCode().equals(pricePlanCode))
                     .findFirst()
-                    .orElseThrow(() -> new EntityDoesNotExistsException(PricePlanMatrix.class, pricePlanCode));
+                    .orElseThrow(() -> new IllegalArgumentException("Price plan " + pricePlanCode + " not found for charge " + chargeCode));
             } else {
                 // Get the price plan with latest published version
                 pricePlan = pricePlans.get(0); 

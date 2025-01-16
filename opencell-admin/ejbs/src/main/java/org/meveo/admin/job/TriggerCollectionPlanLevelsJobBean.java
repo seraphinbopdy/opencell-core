@@ -149,7 +149,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                 if(dunningSettings.getDunningMode().equals(DunningModeEnum.INVOICE_LEVEL)) {
                     jobBean.processInvoiceLevel(collectionPlan, jobExecutionResult);
                 } else if(dunningSettings.getDunningMode().equals(DunningModeEnum.CUSTOMER_LEVEL)) {
-                    jobBean.processCustomerLevel(collectionPlan, jobExecutionResult);
+                    jobBean.processCustomerLevel(collectionPlan, jobExecutionResult, dunningSettings);
                 }
 
                 // Check all processed collection plan to verify if the invoice is paid
@@ -377,8 +377,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
      * @param collectionPlan   Collection plan to process
      * @param jobExecutionResult Job execution result
      */
-    public void processCustomerLevel(DunningCollectionPlan collectionPlan, JobExecutionResultImpl jobExecutionResult) {
-        DunningSettings dunningSettings = dunningSettingsService.findLastOne();
+    public void processCustomerLevel(DunningCollectionPlan collectionPlan, JobExecutionResultImpl jobExecutionResult, DunningSettings dunningSettings) {
         Date dateToCompare;
         Date today = new Date();
         int index = 0;
@@ -398,7 +397,10 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
         if(collectionPlan.getStatus().getStatus() == ACTIVE && balance.compareTo(BigDecimal.valueOf(collectionPlan.getRelatedPolicy().getMinBalanceTrigger())) < 0) {
             finalizeCollectionPlan(collectionPlan);
         } else {
-            collectionPlan.getDunningLevelInstances().sort(Comparator.comparing(DunningLevelInstance::getSequence));
+            // sort collection by sequence and also with flag end of dunning
+            collectionPlan.getDunningLevelInstances().sort(Comparator
+                    .comparing(DunningLevelInstance::getSequence)
+                    .thenComparing(dli -> dli.getDunningLevel().isEndOfDunningLevel()));
             int nbLevelDone = 0;
             DunningLevelInstance levelInstance= null;
             List<DunningLevelInstance> levelInstances = collectionPlan.getDunningLevelInstances();
@@ -416,10 +418,11 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                     nbLevelDone++;
                 }
 
-                if (levelInstance.getLevelStatus().equals(DunningLevelInstanceStatusEnum.TO_BE_DONE) && balance.compareTo(BigDecimal.valueOf(collectionPlan.getRelatedPolicy().getMinBalanceTrigger())) > 0) {
-                LocalDate ldDateToCompare = dateToCompare.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-                LocalDate ldToday = today.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-                boolean isDateEquals =  ldDateToCompare.isBefore(ldToday) || ldDateToCompare.isEqual(ldToday);
+                if (levelInstance.getLevelStatus().equals(DunningLevelInstanceStatusEnum.TO_BE_DONE) &&
+                        balance.compareTo(BigDecimal.valueOf(collectionPlan.getRelatedPolicy().getMinBalanceTrigger())) > 0) {
+                    LocalDate ldDateToCompare = dateToCompare.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                    LocalDate ldToday = today.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                    boolean isDateEquals =  ldDateToCompare.isBefore(ldToday) || ldDateToCompare.isEqual(ldToday);
 
                     if ((isDateEquals
                             && collectionPlan.getRelatedPolicy().getDetermineLevelBy().equals(DunningDetermineLevelBy.DAYS_OVERDUE_AND_BALANCE_THRESHOLD)
@@ -444,6 +447,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                             }
                             actionInstanceService.update(actionInstance);
                         }
+
                         if (!registerKO) {
                             if (levelsIndex + 1 < levelInstances.size()) {
                                 for (int i = levelsIndex + 1; i < levelInstances.size(); i++) {
@@ -462,10 +466,13 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                             collectionPlanService.update(collectionPlan);
                             collectionPlanService.getEntityManager().flush();
                         }
+
                         updateCollectionPlan = true;
+
                         if(registerKO) {
                             jobExecutionResult.addNbItemsProcessedWithError(1L);
                         }
+
                         levelInstance = levelInstanceService.refreshOrRetrieve(levelInstance);
 
                         // Set current dunning level sequence
@@ -493,6 +500,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                         for (Invoice invoice : relatedInvoices) {
                             if (!invoice.getPaymentStatus().equals(PAID)) {
                                 allPaid = false;
+                                break;
                             }
                         }
 
@@ -503,7 +511,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                         }
 
                         setLevelAndActionStatus(levelInstance);
-                        }
+                    }
 
                     if (collectionPlan.getRelatedPolicy().getDetermineLevelBy().equals(DunningDetermineLevelBy.DAYS_OVERDUE_AND_BALANCE_THRESHOLD)
                             && (levelInstance.getDunningLevel().getMinBalance() == null || balance.compareTo(levelInstance.getDunningLevel().getMinBalance()) < 0)
@@ -518,6 +526,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                 }
                 index++;
             }
+
             if(nbLevelDone == collectionPlan.getDunningLevelInstances().size()) {
                 collectionPlan.setNextActionDate(null);
                 collectionPlan.setNextAction(null);
@@ -650,7 +659,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
      * @param actionInstance Action instance
      */
     private void triggerActionAndRefreshLevelsAndActions(DunningCollectionPlan collectionPlan, DunningLevelInstance levelInstance, DunningActionInstance actionInstance) {
-        actionInstanceService.triggerAction(actionInstance, collectionPlan);
+        actionInstanceService.triggerAction(actionInstance, null, collectionPlan);
         collectionPlan = collectionPlanService.refreshOrRetrieve(collectionPlan);
         actionInstance.setActionStatus(DunningActionInstanceStatusEnum.DONE);
         actionInstance.setExecutionDate(new Date());

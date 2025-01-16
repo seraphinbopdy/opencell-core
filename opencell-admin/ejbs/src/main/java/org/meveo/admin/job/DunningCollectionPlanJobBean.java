@@ -95,33 +95,33 @@ public class DunningCollectionPlanJobBean extends BaseJobBean {
      * @return Number of collection plan
      */
     private int processCollectionPlanForInvoiceLevel(List<DunningPolicy> policies) {
-            // Sort policies by isDefaultPolicy and policyPriority
+        // Sort policies by isDefaultPolicy and policyPriority
         List<DunningPolicy> sortedPolicies = sortDunningPolicies(policies);
         // Initialize a list of eligible invoices
         Map<DunningPolicy, List<Invoice>> eligibleInvoicesByPolicy = new HashMap<>();
 
-                for (DunningPolicy policy : sortedPolicies) {
+        for (DunningPolicy policy : sortedPolicies) {
             // Get the list of eligible invoices by policy
             List<Invoice> eligibleInvoice = dunningPolicyService.findEligibleInvoicesForPolicy(policy);
 
-                    if (eligibleInvoice != null && !eligibleInvoice.isEmpty()) {
-                        List<Invoice> invoicesWithDebitTransaction = new ArrayList<>();
-                        eligibleInvoice.forEach(invoice -> {
-                            List<AccountOperation> sdAOs = accountOperationService.listByInvoice(invoice);
-                            boolean isDebitTransaction = sdAOs.stream().anyMatch(ao -> ao.getTransactionCategory().equals(OperationCategoryEnum.DEBIT));
+            if (eligibleInvoice != null && !eligibleInvoice.isEmpty()) {
+                List<Invoice> invoicesWithDebitTransaction = new ArrayList<>();
+                eligibleInvoice.forEach(invoice -> {
+                    List<AccountOperation> sdAOs = accountOperationService.listByInvoice(invoice);
+                    boolean isDebitTransaction = sdAOs.stream().anyMatch(ao -> ao.getTransactionCategory().equals(OperationCategoryEnum.DEBIT));
                     if (isDebitTransaction && eligibleInvoicesByPolicy.values().stream().noneMatch(invoices -> invoices.contains(invoice))) {
-                                invoicesWithDebitTransaction.add(invoice);
+                            invoicesWithDebitTransaction.add(invoice);
                     }
-                        });
+                });
 
                 if (!invoicesWithDebitTransaction.isEmpty()) {
-                        eligibleInvoicesByPolicy.put(policy, invoicesWithDebitTransaction);
-                    }
+                    eligibleInvoicesByPolicy.put(policy, invoicesWithDebitTransaction);
                 }
             }
+        }
 
         return dunningPolicyService.processEligibleInvoice(eligibleInvoicesByPolicy);
-        }
+    }
 
     /**
      * Sort policies by isDefaultPolicy and policyPriority

@@ -1297,7 +1297,7 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
         }
 
         // trigger the action to execute dunning action instance
-        dunningActionInstanceService.triggerAction(dunningActionInstance, collectionPlan);
+        dunningActionInstanceService.triggerAction(dunningActionInstance, null, collectionPlan);
 
         // update the dunningActionInstance information's
         dunningActionInstance.setActionStatus(DunningActionInstanceStatusEnum.DONE);

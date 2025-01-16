@@ -2513,24 +2513,27 @@ public class InvoiceService extends PersistenceService<Invoice> {
      */
     public String getInvoiceXml(Invoice invoice) throws BusinessException {
 
-        if (invoice.isPrepaid()) {
-            throw new BusinessException("Invoice XML is disabled for prepaid invoice: " + invoice.getInvoiceNumber());
-        }
-        if(DRAFT.equals(invoice.getStatus()) || InvoiceStatusEnum.NEW.equals(invoice.getStatus()) || DRAFT.equals(invoice.getStatus()) ){
-    		produceInvoiceXmlNoUpdate(invoice, true);
-    	}
-        String xmlFileName = getFullXmlFilePath(invoice, false);
-        File xmlFile = new File(xmlFileName);
-        if (!xmlFile.exists()) {
-            produceInvoicePdfNoUpdate(invoice);        }
-        try {
-            return new String(Files.readAllBytes(Paths.get(xmlFileName)), StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            log.error("Error reading invoice XML file {} contents", xmlFileName, e);
-        }
+		if (invoice.isPrepaid()) {
+			throw new BusinessException("Invoice XML is disabled for prepaid invoice: " + invoice.getInvoiceNumber());
+		}
+		if (InvoiceStatusEnum.DRAFT.equals(invoice.getStatus()) || InvoiceStatusEnum.NEW.equals(invoice.getStatus())
+				|| InvoiceStatusEnum.SUSPECT.equals(invoice.getStatus())
+				|| InvoiceStatusEnum.REJECTED.equals(invoice.getStatus())) {
+			produceInvoiceXmlNoUpdate(invoice, true);
+		}
+		String xmlFileName = getFullXmlFilePath(invoice, false);
+		File xmlFile = new File(xmlFileName);
+		if (!xmlFile.exists()) {
+			produceInvoiceXmlNoUpdate(invoice, true);
+		}
+		try {
+			return new String(Files.readAllBytes(Paths.get(xmlFileName)), StandardCharsets.UTF_8);
+		} catch (Exception e) {
+			log.error("Error reading invoice XML file {} contents", xmlFileName, e);
+		}
 
-        return null;
-    }
+		return null;
+	}
    
 
     /**

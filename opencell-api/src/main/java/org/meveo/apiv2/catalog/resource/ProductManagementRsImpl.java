@@ -25,17 +25,12 @@ public class ProductManagementRsImpl extends BaseRs implements ProductManagement
     @Override
     public ActionStatus createProductSimpleOneshot(SimpleOneshotProductDto postData) {
 
-        try {
-            ProductDto productSimpleOneShot = productManagementApiService.createProductSimpleOneShot(postData);
+        
+        ProductDto productSimpleOneShot = productManagementApiService.createProductSimpleOneShot(postData);
 
-            SimpleChargeProductResponseDto simpleChargeProductResponseDto = new SimpleChargeProductResponseDto().setProduct(productSimpleOneShot);
-            simpleChargeProductResponseDto.setStatus(ActionStatusEnum.SUCCESS);
-            return simpleChargeProductResponseDto;
-        } catch (Exception e) {
-            ActionStatus status = new ActionStatus();
-            processException(e, status);
-            return status;
-        }
+        SimpleChargeProductResponseDto simpleChargeProductResponseDto = new SimpleChargeProductResponseDto().setProduct(productSimpleOneShot);
+        simpleChargeProductResponseDto.setStatus(ActionStatusEnum.SUCCESS);
+        return simpleChargeProductResponseDto;
     }
 
     @Override

@@ -500,6 +500,18 @@ public class SubscriptionApi extends BaseApi {
             }
             subscription.setOffer(offerTemplate);
         }
+        
+        if (postData.getOrderNumber() != null) {
+            if(StringUtils.isNotBlank(postData.getOrderNumber())) {
+                CommercialOrder order = commercialOrderService.findByOrderNumer(postData.getOrderNumber());
+                if(order == null) {
+                    throw new EntityDoesNotExistsException(CommercialOrder.class, postData.getOrderNumber());
+                }
+                subscription.setOrder(order);
+            } else {
+                subscription.setOrder(null);
+            }
+        }
 
         if (!StringUtils.isBlank(postData.getBillingCycle())) {
             BillingCycle billingCycle = billingCycleService.findByCode(postData.getBillingCycle());
@@ -3003,6 +3015,14 @@ public class SubscriptionApi extends BaseApi {
                 throw new EntityDoesNotExistsException(BillingCycle.class, postData.getBillingCycle());
             }
             subscription.setBillingCycle(billingCycle);
+        }
+
+        if(StringUtils.isNotBlank(postData.getOrderNumber())) {
+            CommercialOrder order = commercialOrderService.findByOrderNumer(postData.getOrderNumber());
+            if(order == null) {
+                throw new EntityDoesNotExistsException(CommercialOrder.class, postData.getOrderNumber());
+            }
+            subscription.setOrder(order);
         }
 
         if (Objects.nonNull(postData.getPaymentMethod())) {

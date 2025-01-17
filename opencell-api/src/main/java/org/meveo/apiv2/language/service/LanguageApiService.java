@@ -2,6 +2,7 @@ package org.meveo.apiv2.language.service;
 
 import jakarta.inject.Inject;
 
+import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.exception.EntityAlreadyExistsException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.apiv2.language.LanguageDto;
@@ -22,6 +23,10 @@ public class LanguageApiService {
             throw new EntityAlreadyExistsException(Language.class, languageDto.getCode());
         }
         
+        if(languageService.findByDescription(languageDto.getDescription()) != null) {
+            throw new BusinessException("Language with description " + languageDto.getDescription() + " already exists");
+        }
+
         Language entity = mapper.toEntity(languageDto);
         languageService.create(entity);
         return entity;

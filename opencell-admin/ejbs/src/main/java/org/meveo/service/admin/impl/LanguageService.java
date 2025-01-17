@@ -42,4 +42,17 @@ public class LanguageService extends PersistenceService<Language> {
             return null;
         }
     }
+
+    public Language findByDescription(String description) {
+        if (description == null) {
+            return null;
+        }
+        try {
+            return getEntityManager().createNamedQuery("Language.byDescription", Language.class)
+                                                .setParameter("description", description)
+                                                .getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
 }

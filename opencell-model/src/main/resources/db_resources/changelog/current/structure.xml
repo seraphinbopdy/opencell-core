@@ -17484,5 +17484,9 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
             <where>language_code = 'ZHO'</where>
         </update>
     </changeSet>
+    
+    <changeSet id="#INTRD-28652_Fix_language_name" author="a.rouaguebe_ext">
+        <sql>UPDATE adm_language SET description_i18n = jsonb_build_object('FRA', description_i18n->>'FR', 'ENG', description_i18n->'ENG')</sql>
+    </changeSet>
 
 </databaseChangeLog>

@@ -2,6 +2,7 @@ package org.meveo.apiv2.language;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Size;
 import org.immutables.value.Value;
 import org.meveo.apiv2.models.Resource;
 
@@ -15,6 +16,7 @@ public interface LanguageDto extends Resource {
 
     @Nullable
     @Schema(description = "Code of the language")
+    @Size(min = 1, max = 3)
     String getCode();
 
     @Nullable

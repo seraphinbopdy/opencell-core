@@ -1484,6 +1484,7 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
 
             ChargeInstance chargeInstance = operation.getChargeInstance();
             if (walletOperationToRerate.getRatedTransaction() != null) {
+                walletOperationToRerate.getRatedTransaction().setRejectReason("Origin wallet operation has been rerated");
                 walletOperationToRerate.getRatedTransaction().setStatus(CANCELED);
                 walletOperationToRerate.getRatedTransaction().setUpdater(currentUser.getUserName());
                 walletOperationToRerate.getRatedTransaction().setUpdated(new Date());

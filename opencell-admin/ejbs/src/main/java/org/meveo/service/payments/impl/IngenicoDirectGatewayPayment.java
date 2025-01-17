@@ -507,8 +507,7 @@ public class IngenicoDirectGatewayPayment implements GatewayPaymentInterface {
 	@Override
 	public String createSepaDirectDebitToken(CustomerAccount customerAccount, String alias, String accountHolderName,
 			String iban) throws BusinessException {
-		 /*reserved to GlobalCollect platform*/
-		 throw new UnsupportedOperationException();
+		return null;
 	}
 
 	@Override

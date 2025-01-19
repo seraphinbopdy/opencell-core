@@ -373,9 +373,14 @@ public class GenericFileExportManager {
                 return DateTimeFormatter.ofPattern(fieldDetail.getTransformation()).format((TemporalAccessor) value);
             }
         } else if (StringUtils.isNotBlank(decimalSeparator)) {
-        	if (value instanceof Long || value instanceof BigDecimal || value instanceof Double || value instanceof Float || value instanceof Integer) {
+        	if (value instanceof BigDecimal || value instanceof Double || value instanceof Float) {
                 DecimalFormatSymbols symbols = ",".equals(decimalSeparator) ? new DecimalFormatSymbols(Locale.FRENCH) : new DecimalFormatSymbols(Locale.ENGLISH);
                 DecimalFormat formatter = new DecimalFormat("0.00", symbols);
+                formatter.setGroupingUsed(false);
+                return formatter.format(value);
+            } else if (value instanceof Long || value instanceof Integer) {
+                DecimalFormatSymbols symbols = ",".equals(decimalSeparator) ? new DecimalFormatSymbols(Locale.FRENCH) : new DecimalFormatSymbols(Locale.ENGLISH);
+                DecimalFormat formatter = new DecimalFormat("0", symbols);
                 formatter.setGroupingUsed(false);
                 return formatter.format(value);
             }

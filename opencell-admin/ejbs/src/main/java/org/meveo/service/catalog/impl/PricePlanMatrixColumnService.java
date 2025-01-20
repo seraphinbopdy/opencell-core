@@ -52,7 +52,7 @@ public class PricePlanMatrixColumnService extends BusinessService<PricePlanMatri
     
     @Inject
     private AttributeService attributeService;
-	
+
 	@Inject
 	private AdvancedSettingsService advancedSettingsService;
 
@@ -250,18 +250,9 @@ public class PricePlanMatrixColumnService extends BusinessService<PricePlanMatri
 			List<TradingPricePlanMatrixLineDto> tppmlList = new ArrayList<TradingPricePlanMatrixLineDto>();
 			
 			line = scanner.nextLine();
-			if(line.isEmpty()) continue;
-			var startValue = 0;
-			var endValue = line.length() - 1;
-			if(line.startsWith(";\"")){
-				if(line.endsWith("\"\"")){
-					endValue = line.length() - 2;
-				}
-			}else {
-				startValue = 1;
-			}
-			String[] nextLine = line.substring(startValue, endValue).split(fieldSeparator + "\"");
-			
+			if (line.isEmpty()) continue;
+			String[] nextLine = line.replaceAll("^\"|\"$", "").split(";");
+
 			for(var columnIndex=0; columnIndex < columns.size() ; columnIndex++ ) {
 				PricePlanMatrixValueDto pricePlanMatrixValueDto = new PricePlanMatrixValueDto();
 				if (columns.get(columnIndex).toString().contains("|")) {

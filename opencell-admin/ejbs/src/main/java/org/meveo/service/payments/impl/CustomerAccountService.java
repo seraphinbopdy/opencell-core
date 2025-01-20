@@ -18,6 +18,8 @@
 package org.meveo.service.payments.impl;
 
 import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -107,6 +109,9 @@ public class CustomerAccountService extends AccountService<CustomerAccount> {
     private CustomerBalanceService customerBalanceService;
     @Inject
     private DunningCollectionPlanService collectionPlanService;
+
+    private final DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+
 
     /**
      * Checks if is customer account with id exists.
@@ -887,11 +892,11 @@ public class CustomerAccountService extends AccountService<CustomerAccount> {
         params.put("customerAccountDescription", customerAccount.getDescription());
         params.put("customerAccountEmail", customerAccount.getContactInformation() != null ? customerAccount.getContactInformation().getEmail() : "");
         params.put("id", collectionPlan.getId());
-        params.put("status", collectionPlan.getStatus());
-        params.put("lastAction", collectionPlan.getStatus());
-        params.put("lastActionDate", collectionPlan.getLastActionDate());
+        params.put("status", collectionPlan.getStatus().getStatus().name());
+        params.put("lastAction", collectionPlan.getStatus().getStatus().name());
+        params.put("lastActionDate", collectionPlan.getLastActionDate() != null ? formatter.format(collectionPlan.getLastActionDate()) : "");
         params.put("nextAction", collectionPlan.getNextAction());
-        params.put("nextActionDate", collectionPlan.getNextActionDate());
+        params.put("nextActionDate", collectionPlan.getNextActionDate() != null ? formatter.format(collectionPlan.getNextActionDate()) : "");
 
 
         // Dunning balance invoices: dunningBalanceInvoicesList : That will be replaced at the backend by the list of all invoices of dunning balance with the bellow details for each line:
@@ -908,7 +913,8 @@ public class CustomerAccountService extends AccountService<CustomerAccount> {
                 params.put("parentCustomerEmail", parentCustomer.getContactInformation().getEmail());
             }
         }
-        if(customerAccount.getContactInformation() != null && StringUtils.isNotBlank(customerAccount.getContactInformation().getEmail())){
+        if(customerAccount.getSeller().getContactInformation() != null && StringUtils.isNotBlank(customerAccount.getSeller().getContactInformation().getEmail()) &&
+                customerAccount.getContactInformation() != null && StringUtils.isNotBlank(customerAccount.getContactInformation().getEmail())){
             collectionPlanService.sendNotification(customerAccount.getSeller().getContactInformation().getEmail(),customerAccount.getContactInformation().getEmail(), customerAccount.getTradingLanguage().getLanguage().getLanguageCode(), emailTemplate, params);
         }
     }

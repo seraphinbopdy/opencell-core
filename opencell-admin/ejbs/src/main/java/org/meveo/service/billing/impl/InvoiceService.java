@@ -7861,7 +7861,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 							aoIds.add(aoOriginalInvoice.getId());
                             matchingCodeService.matchOperations(aoAdjInvoice.getCustomerAccount().getId(), aoAdjInvoice.getCustomerAccount().getCode(),
 		                            aoIds, aoOriginalInvoice.getId(),
-                                    MatchingTypeEnum.A, aoOriginalInvoice.getAmount());
+                                    MatchingTypeEnum.A, aoAdjInvoice.getAmount());
                             if(aoOriginalInvoice.getPaymentHistories() != null
                                     && !aoOriginalInvoice.getPaymentHistories().isEmpty()) {
                                 List<PaymentHistory> paymentHistories = aoOriginalInvoice.getPaymentHistories();

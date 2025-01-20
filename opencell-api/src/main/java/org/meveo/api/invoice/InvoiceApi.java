@@ -18,6 +18,7 @@
 
 package org.meveo.api.invoice;
 
+import static java.util.List.of;
 import static java.util.Optional.ofNullable;
 import static org.meveo.model.billing.InvoicePaymentStatusEnum.PENDING;
 import static org.meveo.model.billing.InvoicePaymentStatusEnum.UNPAID;
@@ -27,6 +28,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -588,10 +590,13 @@ public class InvoiceApi extends BaseApi {
             missingParameters.add("invoiceId");
         }
         handleMissingParameters();
-        Invoice invoice = ofNullable(invoiceService.findById(invoiceId))
+        Invoice invoice = ofNullable(invoiceService.findById(invoiceId, of("invoiceLines")))
                 .orElseThrow(() -> new EntityDoesNotExistsException("Invoice does not exists"));
         if(VALIDATED.equals(invoice.getStatus())) {
             throw new BadRequestException("Invoice already validated");
+        }
+        if(invoice.getInvoiceLines() == null || invoice.getInvoiceLines().isEmpty()) {
+            throw new BadRequestException("Invoice with no invoice line can not be validated.");
         }
 		List<Invoice> advList = invoice.getLinkedInvoices().stream().filter(linkedInvoice -> linkedInvoice.getLinkedInvoiceValue().getInvoiceType().getCode().equals("ADV")).map(LinkedInvoice::getLinkedInvoiceValue).collect(Collectors.toList());
 	    invoiceService.checkIfAllAdvArePaid(invoice, advList);

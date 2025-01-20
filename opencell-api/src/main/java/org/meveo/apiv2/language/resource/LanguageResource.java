@@ -1,5 +1,6 @@
 package org.meveo.apiv2.language.resource;
 
+import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -24,7 +25,7 @@ public interface LanguageResource {
                     @ApiResponse(responseCode = "400", description = "Language creation failed")
             }
     )
-    Response createLanguage(LanguageDto languageDto);
+    Response createLanguage(@Valid LanguageDto languageDto);
 
     @PUT
     @Path("/isoLanguage/{id}")

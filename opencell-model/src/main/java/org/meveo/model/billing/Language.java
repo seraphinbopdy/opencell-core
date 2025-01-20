@@ -19,6 +19,7 @@ package org.meveo.model.billing;
 
 import java.util.Map;
 
+import jakarta.persistence.NamedQuery;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
@@ -43,6 +44,7 @@ import jakarta.validation.constraints.Size;
 @ExportIdentifier("languageCode")
 @Table(name = "adm_language")
 @GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "adm_language_seq"), @Parameter(name = "increment_size", value = "1") })
+@NamedQuery(name = "Language.byDescription", query = "select l from Language l where l.descriptionEn = :description")
 public class Language extends AuditableEntity {
     private static final long serialVersionUID = 1L;
 

@@ -206,7 +206,7 @@ public class DunningActionInstanceService extends PersistenceService<DunningActi
      */
     private void sendEmail(EmailTemplate pEmailTemplate, DunningCollectionPlan pCollectionPlan, Invoice pInvoice) {
         // Get the invoice from collection plan
-        Invoice invoice = pCollectionPlan != null && pCollectionPlan.getRelatedInvoice() != null ? pCollectionPlan.getRelatedInvoice() : pInvoice;
+        Invoice invoice = pInvoice != null ? pInvoice : pCollectionPlan.getRelatedInvoice();
 
         if (invoice.getSeller() != null
                 && invoice.getSeller().getContactInformation() != null

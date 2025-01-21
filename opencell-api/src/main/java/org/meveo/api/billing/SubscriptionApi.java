@@ -654,7 +654,7 @@ public class SubscriptionApi extends BaseApi {
                 PurchaseOrder purchaseOrder = ofNullable(purchaseOrderService.findById(purchaseOrderId)).orElseThrow(() -> new EntityDoesNotExistsException(PurchaseOrder.class, purchaseOrderId));
 
                 //Check if the purchase order is linked to the subscription
-                if ((purchaseOrder.getBillingAccount() != null && !purchaseOrder.getBillingAccount().equals(subscription.getUserAccount().getBillingAccount()))
+                if ((purchaseOrder.getBillingAccount() != null && purchaseOrder.getBillingAccount().getId() != subscription.getUserAccount().getBillingAccount().getId())
                         || (purchaseOrder.getCustomerAccount() != null && !purchaseOrder.getCustomerAccount().equals(subscription.getUserAccount().getBillingAccount().getCustomerAccount()))
                         || (purchaseOrder.getCustomer() != null && !purchaseOrder.getCustomer().equals(subscription.getUserAccount().getBillingAccount().getCustomerAccount().getCustomer()))
                         || (purchaseOrder.getSeller() != null && !purchaseOrder.getSeller().equals(subscription.getUserAccount().getBillingAccount().getCustomerAccount().getCustomer().getSeller()))) {

@@ -512,15 +512,10 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
 		if(dunningLevelInstance.isEmpty()) {
 			throw new BusinessApiException("No dunning level instances found for the collection plan with id "+collectionPlanToResume.getId());
 		}
-		DunningCollectionPlanStatus collectionPlanStatus=null;
-		if(collectionPlanToResume.getPausedUntilDate() != null && collectionPlanToResume.getPausedUntilDate().after(DateUtils.addDaysToDate(collectionPlanToResume.getStartDate(), dunningLevelInstance.get().getDaysOverdue()))) {
-			collectionPlanStatus = dunningCollectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.FAILED);
-            collectionPlanToResume.setDaysOpen((int) daysBetween(collectionPlanToResume.getCloseDate(), new Date()) + 1);
-		} else {
-			collectionPlanStatus = dunningCollectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.ACTIVE);
-			collectionPlanToResume.setPauseReason(null);
-		}
+
+		DunningCollectionPlanStatus collectionPlanStatus = dunningCollectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.ACTIVE);
 		collectionPlanToResume.setStatus(collectionPlanStatus);
+        collectionPlanToResume.setPauseReason(null);
         int pause = collectionPlanToResume.getPauseDuration();
 		collectionPlanToResume.addPauseDuration((int) daysBetween(collectionPlanToResume.getPausedUntilDate(), new Date()));
         collectionPlanToResume.setNextActionDate(addDaysToDate(collectionPlanToResume.getNextActionDate(), (int) daysBetween(collectionPlanToResume.getPausedUntilDate(), new Date())));

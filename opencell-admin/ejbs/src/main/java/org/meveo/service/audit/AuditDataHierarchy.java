@@ -327,7 +327,7 @@ public class AuditDataHierarchy implements Serializable {
      */
     public static Object matchMapKeyRecursively(Map<String, ?> mapToInspect, String keyToMatch, boolean fullMatch, boolean isValuesChangedField) {
 
-        if(mapToInspect != null) {
+        if(mapToInspect != null && !mapToInspect.isEmpty()) {
             if (fullMatch && mapToInspect.containsKey(keyToMatch)) {
                 return mapToInspect.get(keyToMatch);
 

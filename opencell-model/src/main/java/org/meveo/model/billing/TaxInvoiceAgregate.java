@@ -152,6 +152,9 @@ public class TaxInvoiceAgregate extends InvoiceAgregate {
         if (this.getTax() == null) {
             return false;
         }
+        if(other.getTax() == null) {
+            return false;
+        }
 
         return this.getTax().getId().equals(other.getTax().getId()) && this.getTaxPercent().compareTo(other.getTaxPercent()) == 0;
     }

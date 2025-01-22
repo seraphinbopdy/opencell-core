@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -1527,7 +1528,7 @@ public class AuditDataLogServiceTest {
     @Test
     public void test_Aggregation_WithParent() {
 
-        when(entityManager.createQuery(any(), any())).thenAnswer(new Answer<QuerySimulation>() {
+    	lenient().when(entityManager.createQuery(any(), any())).thenAnswer(new Answer<QuerySimulation>() {
             public QuerySimulation answer(InvocationOnMock invocation) throws Throwable {
                 QuerySimulation query = new QuerySimulation();
                 return query;

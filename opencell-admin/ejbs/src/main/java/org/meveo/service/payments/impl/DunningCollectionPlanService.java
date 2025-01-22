@@ -502,9 +502,6 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
 			if(!dunningCollectionPlanStatus.getStatus().equals(DunningCollectionPlanStatusEnum.PAUSED)) {
 				throw new BusinessApiException("Collection Plan with id " + collectionPlanToResume.getId() + " cannot be resumed, the collection plan is not paused");
 			}
-			if(collectionPlanToResume.getPausedUntilDate() != null && collectionPlanToResume.getPausedUntilDate().before(new Date())) {
-				throw new BusinessApiException("Collection Plan with id " + collectionPlanToResume.getId() + " cannot be resumed, the field pause until is in the past");
-			}
 		}
 		
 		Optional<DunningLevelInstance> dunningLevelInstance = collectionPlanToResume.getDunningLevelInstances()

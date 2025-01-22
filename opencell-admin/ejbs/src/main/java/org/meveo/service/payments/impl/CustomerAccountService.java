@@ -909,12 +909,12 @@ public class CustomerAccountService extends AccountService<CustomerAccount> {
         // Billing accounts list:  billingAccountsList:  That will be replaced at the backend by the list of all billingAccounts of dunning invoices with this details for each line (code, description, emails)
         fillBillingAccountsList(customerAccount, params);
         // Parent customer:  parentCustomerCode, parentCustomerDescription, parentCustomerEmail
-        if(customerAccount.getCustomer() != null && customerAccount.getCustomer().getParentCustomer() != null){
-            var parentCustomer = customerAccount.getCustomer().getParentCustomer();
-            params.put("parentCustomerCode", parentCustomer.getCode());
-            params.put("parentCustomerDescription", parentCustomer.getDescription());
-            if(parentCustomer.getContactInformation() != null){
-                params.put("parentCustomerEmail", parentCustomer.getContactInformation().getEmail());
+        if(customerAccount.getCustomer() != null){
+            var customer = customerAccount.getCustomer();
+            params.put("parentCustomerCode", customer.getCode());
+            params.put("parentCustomerDescription", customer.getDescription());
+            if(customer.getContactInformation() != null){
+                params.put("parentCustomerEmail", customer.getContactInformation().getEmail());
             }
         }
 

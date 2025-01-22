@@ -26,8 +26,10 @@ import org.meveo.model.audit.AuditCrudActionEnum;
 import org.meveo.model.audit.AuditDataLog;
 import org.meveo.model.audit.AuditDataLogRecord;
 import org.meveo.model.audit.ChangeOriginEnum;
+import org.meveo.model.billing.Invoice;
 import org.meveo.model.billing.Subscription;
 import org.meveo.model.catalog.OfferTemplate;
+import org.meveo.model.payments.AccountOperation;
 import org.meveo.service.audit.logging.AuditDataLogService;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -1520,6 +1522,107 @@ public class AuditDataLogServiceTest {
         assertThat(subADeleteAL.getValuesOld().get("status")).isEqualTo("ACTIVE");
 
         assertThat(deleteQuerySimulated.getIdsParam().size()).isEqualTo(6);
+    }
+
+    @Test
+    public void test_Aggregation_WithParent() {
+
+        when(entityManager.createQuery(any(), any())).thenAnswer(new Answer<QuerySimulation>() {
+            public QuerySimulation answer(InvocationOnMock invocation) throws Throwable {
+                QuerySimulation query = new QuerySimulation();
+                return query;
+            }
+        });
+
+        List<AuditDataLogRecord> auditDataLogRecords = new ArrayList<>();
+
+        // Create Invoice A
+        AuditDataLogRecord auditDataLogRecord = new AuditDataLogRecord(800L, new Date(), "opencell.admin", "billing_invoice", 29L, 600L, "INSERT", "API", "/v2/billing/invoices/basicInvoices",
+                null, "{\"status\": \"NEW\", \"comment_text\": \"\", \"payment_status\": \"NONE\"}");
+        auditDataLogRecords.add(auditDataLogRecord);
+
+        // Create Invoice lines for invoice A
+        auditDataLogRecord = new AuditDataLogRecord(801L, new Date(), "opencell.admin", "billing_invoice", 29L, 601L, "UPDATE", "API", "/v2/billing/invoices/{id}/invoiceLines",
+                "{\"status\": \"NEW\"}", "{\"status\": \"DRAFT\"}");
+        auditDataLogRecords.add(auditDataLogRecord);
+
+        // Validate Invoice A
+        auditDataLogRecord = new AuditDataLogRecord(802L, new Date(), "opencell.admin", "billing_invoice", 29L, 602L, "UPDATE", "API", "/invoice/validate",
+                "{\"status\": \"DRAFT\"}", "{\"status\": \"VALIDATED\"}");
+        auditDataLogRecords.add(auditDataLogRecord);
+
+        auditDataLogRecord = new AuditDataLogRecord(803L, new Date(), "opencell.admin", "ar_account_operation", 29L, 603L, "INSERT", "API", "/invoice/validate",
+                null, "{\"collection_date\": \"2025-01-22T00:00:00\"}");
+        auditDataLogRecords.add(auditDataLogRecord);
+
+        auditDataLogRecord = new AuditDataLogRecord(804L, new Date(), "opencell.admin", "billing_invoice", 29L, 604L, "UPDATE", "API", "/invoice/validate",
+                "{\"payment_status\": \"NONE\"}", "{\"payment_status\": \"PENDING\"}");
+        auditDataLogRecords.add(auditDataLogRecord);
+
+
+        AuditDataHierarchy dataHierarchy = AuditDataConfigurationService.getAuditDataHierarchy(AccountOperation.class);
+        List<AuditDataLog> auditDataLogs = auditLogService.aggregateAuditLogs(dataHierarchy, auditDataLogRecords);
+
+        dataHierarchy = AuditDataConfigurationService.getAuditDataHierarchy(Invoice.class);
+        dataHierarchy.setActions("INSERT,UPDATE");
+        auditDataLogs.addAll(auditLogService.aggregateAuditLogs(dataHierarchy, auditDataLogRecords));
+
+        auditDataLogs.removeIf(e -> e.getEntityId() != 29L);
+
+        assertThat(auditDataLogs.size()).isEqualTo(5);
+
+        assertThat(auditDataLogs.get(0).getAction()).isEqualTo(AuditCrudActionEnum.INSERT);
+        assertThat(auditDataLogs.get(0).getEntityClass()).isEqualTo(AccountOperation.class.getName());
+        assertThat(auditDataLogs.get(0).getEntityId()).isEqualTo(29L);
+        assertThat(auditDataLogs.get(0).getTxId()).isEqualTo(603L);
+        assertThat(auditDataLogs.get(0).getOrigin()).isEqualTo(ChangeOriginEnum.API);
+        assertThat(auditDataLogs.get(0).getOriginName()).isEqualTo("/invoice/validate");
+        assertThat(auditDataLogs.get(0).getUserName()).isEqualTo("opencell.admin");
+        assertThat(auditDataLogs.get(0).getValuesOld()).isNull();
+        assertThat(auditDataLogs.get(0).getValuesChanged().get("collectionDate")).isEqualTo("2025-01-22T00:00:00");
+
+        assertThat(auditDataLogs.get(1).getAction()).isEqualTo(AuditCrudActionEnum.INSERT);
+        assertThat(auditDataLogs.get(1).getEntityClass()).isEqualTo(Invoice.class.getName());
+        assertThat(auditDataLogs.get(1).getEntityId()).isEqualTo(29L);
+        assertThat(auditDataLogs.get(1).getTxId()).isEqualTo(600L);
+        assertThat(auditDataLogs.get(1).getOrigin()).isEqualTo(ChangeOriginEnum.API);
+        assertThat(auditDataLogs.get(1).getOriginName()).isEqualTo("/v2/billing/invoices/basicInvoices");
+        assertThat(auditDataLogs.get(1).getUserName()).isEqualTo("opencell.admin");
+        assertThat(auditDataLogs.get(1).getValuesOld()).isNull();
+        assertThat(auditDataLogs.get(1).getValuesChanged().get("comment")).isEqualTo("");
+        assertThat(auditDataLogs.get(1).getValuesChanged().get("paymentStatus")).isEqualTo("NONE");
+        assertThat(auditDataLogs.get(1).getValuesChanged().get("status")).isEqualTo("NEW");
+
+        assertThat(auditDataLogs.get(2).getAction()).isEqualTo(AuditCrudActionEnum.UPDATE);
+        assertThat(auditDataLogs.get(2).getEntityClass()).isEqualTo(Invoice.class.getName());
+        assertThat(auditDataLogs.get(2).getEntityId()).isEqualTo(29L);
+        assertThat(auditDataLogs.get(2).getTxId()).isEqualTo(601L);
+        assertThat(auditDataLogs.get(2).getOrigin()).isEqualTo(ChangeOriginEnum.API);
+        assertThat(auditDataLogs.get(2).getOriginName()).isEqualTo("/v2/billing/invoices/{id}/invoiceLines");
+        assertThat(auditDataLogs.get(2).getUserName()).isEqualTo("opencell.admin");
+        assertThat(auditDataLogs.get(2).getValuesOld().get("status")).isEqualTo("NEW");
+        assertThat(auditDataLogs.get(2).getValuesChanged().get("status")).isEqualTo("DRAFT");
+
+        assertThat(auditDataLogs.get(3).getAction()).isEqualTo(AuditCrudActionEnum.UPDATE);
+        assertThat(auditDataLogs.get(3).getEntityClass()).isEqualTo(Invoice.class.getName());
+        assertThat(auditDataLogs.get(3).getEntityId()).isEqualTo(29L);
+        assertThat(auditDataLogs.get(3).getTxId()).isEqualTo(602L);
+        assertThat(auditDataLogs.get(3).getOrigin()).isEqualTo(ChangeOriginEnum.API);
+        assertThat(auditDataLogs.get(3).getOriginName()).isEqualTo("/invoice/validate");
+        assertThat(auditDataLogs.get(3).getUserName()).isEqualTo("opencell.admin");
+        assertThat(auditDataLogs.get(3).getValuesOld().get("status")).isEqualTo("DRAFT");
+        assertThat(auditDataLogs.get(3).getValuesChanged().get("status")).isEqualTo("VALIDATED");
+
+        assertThat(auditDataLogs.get(4).getAction()).isEqualTo(AuditCrudActionEnum.UPDATE);
+        assertThat(auditDataLogs.get(4).getEntityClass()).isEqualTo(Invoice.class.getName());
+        assertThat(auditDataLogs.get(4).getEntityId()).isEqualTo(29L);
+        assertThat(auditDataLogs.get(4).getTxId()).isEqualTo(604L);
+        assertThat(auditDataLogs.get(4).getOrigin()).isEqualTo(ChangeOriginEnum.API);
+        assertThat(auditDataLogs.get(4).getOriginName()).isEqualTo("/invoice/validate");
+        assertThat(auditDataLogs.get(4).getUserName()).isEqualTo("opencell.admin");
+        assertThat(auditDataLogs.get(4).getValuesOld().get("paymentStatus")).isEqualTo("NONE");
+        assertThat(auditDataLogs.get(4).getValuesChanged().get("paymentStatus")).isEqualTo("PENDING");
+
     }
 
     private class QuerySimulation implements TypedQuery<Long> {

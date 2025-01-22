@@ -156,6 +156,8 @@ public class JobExecutionService extends BaseService {
         if (countDown != null) {
             countDown.countDown();
             jobCompletionCountDowns.remove(jobInstance.getId());
+        }else{
+            countDown = new CountDownLatch(0);
         }
 
         // Launch job execution
@@ -164,7 +166,6 @@ public class JobExecutionService extends BaseService {
         // Wait for job to complete
         log.info("Waiting for a job {} with result ID {} to complete", jobInstance.getCode(), jobResultId);
 
-        countDown = new CountDownLatch(1);
         jobCompletionCountDowns.put(jobInstance.getId(), countDown);
 
         try {

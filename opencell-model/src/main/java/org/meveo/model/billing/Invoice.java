@@ -1943,9 +1943,20 @@ public class Invoice extends AuditableCFEntity implements ISearchable {
         this.amountTax = BigDecimal.ZERO;
         this.amountWithTax = BigDecimal.ZERO;
         this.amountWithoutTax = BigDecimal.ZERO;
-		this.transactionalAmountTax=BigDecimal.ZERO;
-		this.transactionalAmountWithTax=BigDecimal.ZERO;
-		this.transactionalAmountWithoutTax=BigDecimal.ZERO;
+		this.transactionalAmountTax = BigDecimal.ZERO;
+		this.transactionalAmountWithTax = BigDecimal.ZERO;
+		this.transactionalAmountWithoutTax = BigDecimal.ZERO;
+        this.netToPay = BigDecimal.ZERO;
+        this.dueBalance = BigDecimal.ZERO;
+        this.discountAmount = BigDecimal.ZERO;
+        this.invoiceBalance = BigDecimal.ZERO;
+        this.amountWithoutTaxBeforeDiscount = BigDecimal.ZERO;
+        this.rawAmount = BigDecimal.ZERO;
+        this.transactionalAmountWithoutTaxBeforeDiscount = BigDecimal.ZERO;
+        this.transactionalRawAmount = BigDecimal.ZERO;
+        this.transactionalDiscountAmount = BigDecimal.ZERO;
+        this.transactionalNetToPay = BigDecimal.ZERO;
+        this.transactionalInvoiceBalance = BigDecimal.ZERO;
     }
 
     public BigDecimal getInvoiceBalance() {

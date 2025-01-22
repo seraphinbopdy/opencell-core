@@ -104,7 +104,7 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
     @Inject
     private AccountOperationService accountOperationService;
 
-    private static final String STOP_REASON = "Changement de politique de recouvrement";
+    private static final String STOP_REASON = "STOP_POLITIQUE";
 
     public DunningCollectionPlan findByPolicy(DunningPolicy dunningPolicy) {
         List<DunningCollectionPlan> result = getEntityManager()

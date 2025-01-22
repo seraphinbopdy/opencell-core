@@ -3172,6 +3172,14 @@
 			<column name="id" valueSequenceNext="adm_language_seq" />
 			<column name="created" valueDate="NOW()"/>
 			<column name="version" valueNumeric="1"/>
+			<column name="description_en" value="Afrikaans"/>
+			<column name="language_code" value="AFR"/>
+			<column name="description_i18n" value='{"ENG": "Afrikaans", "FRA": "Afrikaans"}'/>
+		</insert>
+		<insert tableName="adm_language">
+			<column name="id" valueSequenceNext="adm_language_seq" />
+			<column name="created" valueDate="NOW()"/>
+			<column name="version" valueNumeric="1"/>
 			<column name="description_en" value="Aghem"/>
 			<column name="language_code" value="AGQ"/>
 			<column name="description_i18n" value='{"ENG": "Aghem", "FRA": "Aghem"}'/>

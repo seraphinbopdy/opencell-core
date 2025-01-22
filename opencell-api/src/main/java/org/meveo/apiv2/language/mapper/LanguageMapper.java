@@ -22,8 +22,12 @@ public class LanguageMapper extends ResourceMapper<LanguageDto, Language> {
     
     public Language toEntity(Language entity, LanguageDto resource) {
 
-        entity.setLanguageCode(resource.getCode());
-        entity.setDescriptionEn(resource.getDescription());
+        if(resource.getCode()!=null) {
+            entity.setLanguageCode(resource.getCode());
+        }
+        if(resource.getDescription() != null) {
+            entity.setDescriptionEn(resource.getDescription());
+        }
         if(resource.getLanguageDescriptions()!= null) {
             Map<String, String> languageDescriptions = new HashMap<>();
             resource.getLanguageDescriptions().forEach(languageDescription -> {

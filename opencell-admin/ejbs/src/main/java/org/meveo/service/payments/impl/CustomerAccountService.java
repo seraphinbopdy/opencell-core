@@ -105,10 +105,15 @@ public class CustomerAccountService extends AccountService<CustomerAccount> {
 
     @Inject
     private BillingAccountService billingAccountService;
+
     @Inject
     private CustomerBalanceService customerBalanceService;
+
     @Inject
     private DunningCollectionPlanService collectionPlanService;
+
+    @Inject
+    private DunningSettingsService dunningSettingsService;
 
     private final DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -877,7 +882,7 @@ public class CustomerAccountService extends AccountService<CustomerAccount> {
         params.put("currencySymbol", collectionPlan.getCustomerAccount().getTradingCurrency() != null ? collectionPlan.getCustomerAccount().getTradingCurrency().getSymbol() : null);
         // get default CustomerBalance
         List<Long> operrationIds = new ArrayList<>();
-        CustomerBalance customerBalance = customerBalanceService.getDefaultOne();
+        CustomerBalance customerBalance = dunningSettingsService.findLastOne().getCustomerBalance();
         if(customerBalance != null){
             params.put("dunningBalanceCode", customerBalance.getCode());
             params.put("dunningBalanceDescription", customerBalance.getDescription());
@@ -893,11 +898,10 @@ public class CustomerAccountService extends AccountService<CustomerAccount> {
         params.put("customerAccountEmail", customerAccount.getContactInformation() != null ? customerAccount.getContactInformation().getEmail() : "");
         params.put("id", collectionPlan.getId());
         params.put("status", collectionPlan.getStatus().getStatus().name());
-        params.put("lastAction", collectionPlan.getStatus().getStatus().name());
+        params.put("lastAction", collectionPlan.getLastAction());
         params.put("lastActionDate", collectionPlan.getLastActionDate() != null ? formatter.format(collectionPlan.getLastActionDate()) : "");
         params.put("nextAction", collectionPlan.getNextAction());
         params.put("nextActionDate", collectionPlan.getNextActionDate() != null ? formatter.format(collectionPlan.getNextActionDate()) : "");
-
 
         // Dunning balance invoices: dunningBalanceInvoicesList : That will be replaced at the backend by the list of all invoices of dunning balance with the bellow details for each line:
         //invoice number, due date, billing date, unMatchingAmount, original amount, biling account code, biling account name
@@ -905,14 +909,15 @@ public class CustomerAccountService extends AccountService<CustomerAccount> {
         // Billing accounts list:  billingAccountsList:  That will be replaced at the backend by the list of all billingAccounts of dunning invoices with this details for each line (code, description, emails)
         fillBillingAccountsList(customerAccount, params);
         // Parent customer:  parentCustomerCode, parentCustomerDescription, parentCustomerEmail
-        if(customerAccount.getCustomer() != null && customerAccount.getCustomer().getParentCustomer() != null){
-            var parentCustomer = customerAccount.getCustomer().getParentCustomer();
-            params.put("parentCustomerCode", parentCustomer.getCode());
-            params.put("parentCustomerDescription", parentCustomer.getDescription());
-            if(parentCustomer.getContactInformation() != null){
-                params.put("parentCustomerEmail", parentCustomer.getContactInformation().getEmail());
+        if(customerAccount.getCustomer() != null){
+            var customer = customerAccount.getCustomer();
+            params.put("parentCustomerCode", customer.getCode());
+            params.put("parentCustomerDescription", customer.getDescription());
+            if(customer.getContactInformation() != null){
+                params.put("parentCustomerEmail", customer.getContactInformation().getEmail());
             }
         }
+
         if(customerAccount.getSeller().getContactInformation() != null && StringUtils.isNotBlank(customerAccount.getSeller().getContactInformation().getEmail()) &&
                 customerAccount.getContactInformation() != null && StringUtils.isNotBlank(customerAccount.getContactInformation().getEmail())){
             collectionPlanService.sendNotification(customerAccount.getSeller().getContactInformation().getEmail(),customerAccount.getContactInformation().getEmail(), customerAccount.getTradingLanguage().getLanguage().getLanguageCode(), emailTemplate, params);

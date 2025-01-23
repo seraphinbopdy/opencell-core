@@ -288,6 +288,7 @@ public class InvoicingJobV3Bean extends BaseJobBean {
 						invoicesToNumberInfo.getInvoiceDate()));
 			}
 			// Assign invoice numbers
+			invoiceIds.removeIf(invoiceId -> invoiceService.isNotEligibleForValidation(invoiceId));
 			BiConsumer<Long, JobExecutionResultImpl> task = (invoiceId, jobResult) -> {
 				invoiceService.recalculateDates(invoiceId);
 				invoiceService.assignInvoiceNumber(invoiceId, invoicesToNumberInfo);

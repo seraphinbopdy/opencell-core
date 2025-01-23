@@ -17500,4 +17500,38 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
         </insert>
     </changeSet>
 
+    <changeSet id="#INTRD-28233_activate_sub" author="a.rouaguebe">
+        <addColumn tableName="advanced_settings">
+            <column name="long_description_i18n" type="${type.json}" />
+        </addColumn>
+        <addColumn tableName="billing_service_instance">
+            <column name="requested_activation_date" type="datetime" />
+        </addColumn>
+        <insert tableName="advanced_settings">
+            <column name="id" valueSequenceNext="advanced_settings_seq"/>
+            <column name="version" value="0"/>
+            <column name="disabled" valueNumeric="0"/>
+            <column name="created" valueComputed="${db.current.time}"/>
+            <column name="category" value="feature"/>
+            <column name="property_group" value="subscription"/>
+            <column name="property_type" value="java.lang.Boolean"/>
+            <column name="property_value" value="false"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="subscriptionActivation.waitForMandatoryServices"/>
+            <column name="description" value="Delay subscription activation until all its mandatory services are activated"/>
+            <column name="description_i18n">
+                <![CDATA[{
+                    "ENG":"Delay subscription activation until all its mandatory services are activated",
+                    "FRA":"Reporter l’activation d’une souscription jusqu'à ce que tous ses services obligatoires soient activés"
+                }]]>
+            </column>
+            <column name="long_description_i18n">
+                <![CDATA[{
+                    "ENG":"Services and subscription will be in a waiting status until all mandatory services are activated. The subscription and all pending services will be actually activated when all mandatory services are activated.",
+                    "FRA":"Les services et la souscription seront dans un statut d’attente jusqu'à ce que tous les services obligatoires soient activés. La souscription et tous les services en attente seront effectivement activés quand tous les services obligatoire sont activés."
+                }]]>
+            </column>
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>

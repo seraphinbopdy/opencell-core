@@ -3721,6 +3721,7 @@
             <column name="price_version_date" type="datetime" />
             <column name="order_product_id" type="bigint" />
             <column name="mrr" type="numeric(23, 12)" />
+            <column name="requested_activation_date" type="datetime" />
         </createTable>
     </changeSet>
     <changeSet author="AndriusKarpavicius" id="rebuild-str-tbl-192">
@@ -12757,8 +12758,9 @@
             <column name="property_value" type="VARCHAR(255)"/>
             <column name="property_type" type="VARCHAR(255)"/>
             <column name="description_i18n" type="${type.json}" />
-        </createTable>
-    </changeSet>
+            <column name="long_description_i18n" type="${type.json}" />
+	    </createTable>
+	</changeSet>
 
 
     <changeSet id="#INTRD-16031_20230508_rebuild" author="zelmeliani">
@@ -20901,6 +20903,7 @@
     <changeSet id="#INTRD-28289_20250108" author="a.rouaguebe"/>
     <changeSet id="#INTRD-28652_Fix_language_name" author="a.rouaguebe_ext" />
     <changeSet id="#INTRD-28777_missing_language" author="a.rouaguebe_ext" />
+    <changeSet id="#INTRD-28233_activate_sub" author="a.rouaguebe" />
     
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

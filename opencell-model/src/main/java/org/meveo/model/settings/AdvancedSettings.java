@@ -58,6 +58,13 @@ public class AdvancedSettings extends BusinessEntity {
     private Map<String, String> descriptionI18n;
 
     /**
+     * Translated Long descriptions in JSON format with language code as a key and translated description as a value
+     */
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "long_description_i18n", columnDefinition = "jsonb")
+    private Map<String, String> longDescriptionI18n;
+
+    /**
      * Get the old configuration origin.
      *
      * @return The old configuration origin.
@@ -153,5 +160,25 @@ public class AdvancedSettings extends BusinessEntity {
 
     public void setDescriptionI18n(Map<String, String> descriptionI18n) {
         this.descriptionI18n = descriptionI18n;
+    }
+
+    /**
+     * Gets the translated long descriptions in JSON format.
+     * The JSON contains language codes as keys and translated descriptions as values.
+     *
+     * @return A map containing the translated long descriptions.
+     */
+    public Map<String, String> getLongDescriptionI18n() {
+        return longDescriptionI18n;
+    }
+
+    /**
+     * Sets the translated long descriptions in JSON format.
+     * The JSON should contain language codes as keys and translated descriptions as values.
+     *
+     * @param longDescriptionI18n A map containing the translated long descriptions to set.
+     */
+    public void setLongDescriptionI18n(Map<String, String> longDescriptionI18n) {
+        this.longDescriptionI18n = longDescriptionI18n;
     }
 }

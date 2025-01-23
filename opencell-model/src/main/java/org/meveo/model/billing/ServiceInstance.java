@@ -370,6 +370,10 @@ public class ServiceInstance extends BusinessCFEntity implements IInvoicingMinim
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_product_id")
     private OrderProduct orderProduct;
+    
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "requested_activation_date")
+    private Date requestedActivationDate;
 
     
     /** MRR. */
@@ -1364,6 +1368,14 @@ public class ServiceInstance extends BusinessCFEntity implements IInvoicingMinim
 
     public void setMrr(BigDecimal mrr) {
         this.mrr = mrr;
+    }
+
+    public Date getRequestedActivationDate() {
+        return requestedActivationDate;
+    }
+
+    public void setRequestedActivationDate(Date requestedActivationDate) {
+        this.requestedActivationDate = requestedActivationDate;
     }
 
     @SuppressWarnings("rawtypes")

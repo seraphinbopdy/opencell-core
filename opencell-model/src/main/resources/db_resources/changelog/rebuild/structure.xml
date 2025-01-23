@@ -20901,7 +20901,6 @@
     <changeSet id="#INTRD-28289_20250108" author="a.rouaguebe"/>
     <changeSet id="#INTRD-28652_Fix_language_name" author="a.rouaguebe_ext" />
     <changeSet id="#INTRD-28777_missing_language" author="a.rouaguebe_ext" />
-    <changeSet id="#INTRD-28708_20250122_fix_language" author="a.rouaguebe_ext" />
     
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

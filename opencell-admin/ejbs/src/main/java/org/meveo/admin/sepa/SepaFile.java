@@ -77,6 +77,7 @@ import org.meveo.model.admin.Seller;
 import org.meveo.model.billing.BankCoordinates;
 import org.meveo.model.crm.Provider;
 import org.meveo.model.jobs.JobExecutionResultImpl;
+import org.meveo.model.payments.DDPaymentMethod;
 import org.meveo.model.payments.DDRequestItem;
 import org.meveo.model.payments.DDRequestLOT;
 import org.meveo.model.payments.MandateChangeAction;
@@ -483,7 +484,7 @@ public class SepaFile extends AbstractDDRequestBuilder {
 	 */
 	private void addTransaction(DDRequestItem dDRequestItem, PaymentInstructionInformation4 paymentInformation) {
 		Object[] paymentInformations = getPreferredPaymentMethod(dDRequestItem.getId());
-		if (!paymentInformations[3].equals("DIRECTDEBIT")) {
+		if (!((Class) paymentInformations[3]).isAssignableFrom(new DDPaymentMethod().getClass())) {
 			throw new BusinessException("Payment method not valid!");
 		}
 
@@ -684,7 +685,7 @@ public class SepaFile extends AbstractDDRequestBuilder {
 	 */
 	private void addSctTransaction(DDRequestItem dDRequestItem, PaymentInstructionInformation3 paymentInformation) {
 		Object[] paymentInformations = getPreferredPaymentMethod(dDRequestItem.getId());
-		if (!paymentInformations[3].equals("DIRECTDEBIT")) {
+		if (!((Class) paymentInformations[3]).isAssignableFrom(new DDPaymentMethod().getClass())) {
 			throw new BusinessException("Payment method not valid!");
 		}
 

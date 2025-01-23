@@ -1101,7 +1101,10 @@ public class AccountHierarchyApi extends BaseApi {
                                                         log.warn("code is null={}", subscriptionDto);
                                                         throw new MeveoApiException("Subscription's code is null");
                                                     }
-                                                    if (!StringUtils.isBlank(subscriptionDto.getUserAccount()) && !subscriptionDto.getUserAccount().equalsIgnoreCase(userAccountDto.getCode())) {
+                                                    Subscription subscription = subscriptionService.findByCode(subscriptionDto.getCode());
+                                                    if(subscription != null && !subscription.getUserAccount().getCode().equals(userAccountDto.getCode())) {
+                                                        throw new MeveoApiException("Subscription's code " + subscriptionDto.getCode() + " doesn't match with parent userAccount " + userAccountDto.getCode());
+                                                    } else if (!StringUtils.isBlank(subscriptionDto.getUserAccount()) && !subscriptionDto.getUserAccount().equalsIgnoreCase(userAccountDto.getCode())) {
                                                         throw new MeveoApiException(
                                                             "Subscription's userAccount " + subscriptionDto.getUserAccount() + " doesn't match with parent userAccount " + userAccountDto.getCode());
                                                     } else {

@@ -897,6 +897,10 @@ public class NativePersistenceService extends BaseService {
                                                                                     return explicitInnerJoinsForAggregation.replace(".dummy", "");
                                                                                 })
                                                                                 .collect(joining(","));
+
+        if (org.meveo.commons.utils.StringUtils.isBlank(fieldsPlaceHolder)) {
+            fieldsPlaceHolder = "*";
+        }
         
         queryBuilder.setQ(new StringBuilder(queryBuilder.getSqlStringBuffer().toString().replace("{fieldsPlaceHolder}", fieldsPlaceHolder)));
 

@@ -2908,7 +2908,7 @@
             <column name="id" valueNumeric="1" />
             <column name="created" valueDate="2015-03-19 00:03:59.123" />
             <column name="version" valueNumeric="1" />
-            <column name="description_en" value="Deutsch" />
+            <column name="description_en" value="German" />
             <column name="language_code" value="DEU" />
             <column name="description_i18n" value='{"ENG": "German", "FRA": "Allemand"}' />
         </insert>

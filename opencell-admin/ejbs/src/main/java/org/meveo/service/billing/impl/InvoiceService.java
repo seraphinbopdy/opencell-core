@@ -2911,6 +2911,8 @@ public class InvoiceService extends PersistenceService<Invoice> {
             invoice.getAuditable().setUpdated(new Date());
             invoice.getAuditable().setUpdater(currentUser.getUserName());
             invoice.initAmounts();
+            invoice.getInvoiceAgregates().forEach(invoiceAgregate -> invoiceAgregate.setInvoice(null));
+            invoice.getInvoiceAgregates().clear();
             super.update(invoice);
         }
         updateBillingRunStatistics(invoice);

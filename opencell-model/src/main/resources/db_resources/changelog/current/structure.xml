@@ -15716,36 +15716,35 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
         </dropColumn>
     </changeSet>
 
-
     <changeSet id="#INTRD-5220_20241205" author="AbdellatifBARI">
         <createTable tableName="billing_subscriptions_purchase_orders">
             <column name="subscription_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
-            <column name="purchaseOrder_id" type="BIGINT">
+            <column name="purchase_order_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        <sql>CREATE UNIQUE INDEX billing_subscriptions_purchase_orders_id_index ON billing_subscriptions_purchase_orders ("subscription_id", "purchaseOrder_id")</sql>
+        <sql>CREATE UNIQUE INDEX billing_subscriptions_purchase_orders_id_index ON billing_subscriptions_purchase_orders ("subscription_id", "purchase_order_id")</sql>
         <addForeignKeyConstraint baseColumnNames="subscription_id" baseTableName="billing_subscriptions_purchase_orders"
                                  constraintName="fk_subscription_id_billing_subscriptions_purchase_orders"
                                  deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
                                  referencedColumnNames="id" referencedTableName="billing_subscription"/>
-        <addForeignKeyConstraint baseColumnNames="purchaseOrder_id" baseTableName="billing_subscriptions_purchase_orders"
-                                 constraintName="fk_purchaseOrder_id_billing_subscriptions_purchase_orders"
+        <addForeignKeyConstraint baseColumnNames="purchase_order_id" baseTableName="billing_subscriptions_purchase_orders"
+                                 constraintName="fk_purchase_order_id_billing_subscriptions_purchase_orders"
                                  deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
                                  referencedColumnNames="id" referencedTableName="billing_purchase_order"/>
         <createTable tableName="billing_invoice_lines_subscriptions">
-            <column name="invoiceLine_id" type="BIGINT">
+            <column name="invoice_line_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
             <column name="subscription_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        <sql>CREATE UNIQUE INDEX billing_invoice_lines_subscriptions_id_index ON billing_invoice_lines_subscriptions ("invoiceLine_id", "subscription_id")</sql>
-        <addForeignKeyConstraint baseColumnNames="invoiceLine_id" baseTableName="billing_invoice_lines_subscriptions"
-                                 constraintName="fk_purchaseOrder_id_billing_invoice_lines_subscriptions"
+        <sql>CREATE UNIQUE INDEX billing_invoice_lines_subscriptions_id_index ON billing_invoice_lines_subscriptions ("invoice_line_id", "subscription_id")</sql>
+        <addForeignKeyConstraint baseColumnNames="invoice_line_id" baseTableName="billing_invoice_lines_subscriptions"
+                                 constraintName="fk_invoice_line_id_billing_invoice_lines_subscriptions"
                                  deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
                                  referencedColumnNames="id" referencedTableName="billing_invoice_line"/>
         <addForeignKeyConstraint baseColumnNames="subscription_id" baseTableName="billing_invoice_lines_subscriptions"
@@ -15756,20 +15755,21 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
             <column name="invoice_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
-            <column name="purchaseOrder_id" type="BIGINT">
+            <column name="purchase_order_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        <sql>CREATE UNIQUE INDEX billing_invoices_purchase_orders_id_index ON billing_invoices_purchase_orders ("invoice_id", "purchaseOrder_id")</sql>
+        <sql>CREATE UNIQUE INDEX billing_invoices_purchase_orders_id_index ON billing_invoices_purchase_orders ("invoice_id", "purchase_order_id")</sql>
         <addForeignKeyConstraint baseColumnNames="invoice_id" baseTableName="billing_invoices_purchase_orders"
                                  constraintName="fk_invoice_id_billing_invoices_purchase_orders" deferrable="false"
                                  initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
                                  referencedColumnNames="id" referencedTableName="billing_invoice"/>
-        <addForeignKeyConstraint baseColumnNames="purchaseOrder_id" baseTableName="billing_invoices_purchase_orders"
-                                 constraintName="fk_purchaseOrder_id_billing_invoices_purchase_orders" deferrable="false"
+        <addForeignKeyConstraint baseColumnNames="purchase_order_id" baseTableName="billing_invoices_purchase_orders"
+                                 constraintName="fk_purchase_order_id_billing_invoices_purchase_orders" deferrable="false"
                                  initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
                                  referencedColumnNames="id" referencedTableName="billing_purchase_order"/>
     </changeSet>
+    
     <changeSet id="#INTRD-5220_20241216" author="AndriusKarpavicius" failOnError="false">
         <renameColumn tableName="billing_invoices_purchase_orders" oldColumnName="purchaseOrder_id" newColumnName="purchase_order_id"/>
         <renameColumn tableName="billing_subscriptions_purchase_orders" oldColumnName="purchaseOrder_id" newColumnName="purchase_order_id"/>
@@ -17487,6 +17487,143 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
     
     <changeSet id="#INTRD-28652_Fix_language_name" author="a.rouaguebe_ext">
         <sql>UPDATE adm_language SET description_i18n = jsonb_build_object('FRA', description_i18n->>'FR', 'ENG', description_i18n->'ENG')</sql>
+    </changeSet>
+    
+    <changeSet id="#INTRD-28708_20250122_fix_language" author="a.rouaguebe_ext">
+        <update tableName="adm_language">
+            <column name="description_i18n" value='{"ENG": "Arabic", "FRA": "Arabe"}'/>
+            <where>language_code = 'ARA'</where>
+        </update>
+        <update tableName="adm_language">
+            <column name="description_i18n" value='{"ENG": "Bulgarian", "FRA": "Bulgare"}'/>
+            <where>language_code = 'BUL'</where>
+        </update>
+        <update tableName="adm_language">
+            <column name="description_i18n" value='{"ENG": "Catalan", "FRA": "Catalan"}'/>
+            <where>language_code = 'CAT'</where>
+        </update>
+        <update tableName="adm_language">
+            <column name="description_i18n" value='{"ENG": "Czech", "FRA": "Tchèque"}'/>
+            <where>language_code = 'CES'</where>
+        </update>
+        <update tableName="adm_language">
+            <column name="description_i18n" value='{"ENG": "Danish", "FRA": "Danois"}'/>
+            <where>language_code = 'DAN'</where>
+        </update>
+        <update tableName="adm_language">
+            <column name="description_en" value="German" />
+            <column name="description_i18n" value='{"ENG": "German", "FRA": "Allemand"}'/>
+            <where>language_code = 'DEU'</where>
+        </update>
+        <update tableName="adm_language">
+            <column name="description_i18n" value='{"ENG": "Greek", "FRA": "Grec"}'/>
+            <where>language_code = 'ELL'</where>
+        </update>
+        <update tableName="adm_language">
+            <column name="description_i18n" value='{"ENG": "English", "FRA": "Anglais"}'/>
+            <where>language_code = 'ENG'</where>
+        </update>
+        <update tableName="adm_language">
+            <column name="description_i18n" value='{"ENG": "Estonian", "FRA": "Estonien"}'/>
+            <where>language_code = 'EST'</where>
+        </update>
+        <update tableName="adm_language">
+            <column name="description_i18n" value='{"ENG": "Faroese", "FRA": "Féroïen"}'/>
+            <where>language_code = 'FAO'</where>
+        </update>
+        <update tableName="adm_language">
+            <column name="description_i18n" value='{"ENG": "Finnish", "FRA": "Finnois"}'/>
+            <where>language_code = 'FIN'</where>
+        </update>
+        <update tableName="adm_language">
+            <column name="description_i18n" value='{"ENG": "French", "FRA": "Français"}'/>
+            <where>language_code = 'FRA'</where>
+        </update>
+        <update tableName="adm_language">
+            <column name="description_i18n" value='{"ENG": "Hindi", "FRA": "Hindi"}'/>
+            <where>language_code = 'HIN'</where>
+        </update>
+        <update tableName="adm_language">
+            <column name="description_i18n" value='{"ENG": "Croatian", "FRA": "Croate"}'/>
+            <where>language_code = 'HRV'</where>
+        </update>
+        <update tableName="adm_language">
+            <column name="description_i18n" value='{"ENG": "Hungarian", "FRA": "Hongrois"}'/>
+            <where>language_code = 'HUN'</where>
+        </update>
+        <update tableName="adm_language">
+            <column name="description_i18n" value='{"ENG": "Icelandic", "FRA": "Islandais"}'/>
+            <where>language_code = 'ISL'</where>
+        </update>
+        <update tableName="adm_language">
+            <column name="description_i18n" value='{"ENG": "Italian", "FRA": "Italien"}'/>
+            <where>language_code = 'ITA'</where>
+        </update>
+        <update tableName="adm_language">
+            <column name="description_i18n" value='{"ENG": "Japanese", "FRA": "Japonais"}'/>
+            <where>language_code = 'JPN'</where>
+        </update>
+        <update tableName="adm_language">
+            <column name="description_i18n" value='{"ENG": "Latvian", "FRA": "Letton"}'/>
+            <where>language_code = 'LAV'</where>
+        </update>
+        <update tableName="adm_language">
+            <column name="description_i18n" value='{"ENG": "Lithuanian", "FRA": "Lituanien"}'/>
+            <where>language_code = 'LIT'</where>
+        </update>
+        <update tableName="adm_language">
+            <column name="description_i18n" value='{"ENG": "Dutch", "FRA": "Néerlandais"}'/>
+            <where>language_code = 'NLD'</where>
+        </update>
+        <update tableName="adm_language">
+            <column name="description_i18n" value='{"ENG": "Norwegian", "FRA": "Norvégien"}'/>
+            <where>language_code = 'NOR'</where>
+        </update>
+        <update tableName="adm_language">
+            <column name="description_i18n" value='{"ENG": "Polish", "FRA": "Polonais"}'/>
+            <where>language_code = 'POL'</where>
+        </update>
+        <update tableName="adm_language">
+            <column name="description_i18n" value='{"ENG": "Portuguese", "FRA": "Portugais"}'/>
+            <where>language_code = 'POR'</where>
+        </update>
+        <update tableName="adm_language">
+            <column name="description_i18n" value='{"ENG": "Romanian", "FRA": "Roumain"}'/>
+            <where>language_code = 'RON'</where>
+        </update>
+        <update tableName="adm_language">
+            <column name="description_i18n" value='{"ENG": "Russian", "FRA": "Russe"}'/>
+            <where>language_code = 'RUS'</where>
+        </update>
+        <update tableName="adm_language">
+            <column name="description_i18n" value='{"ENG": "Slovak", "FRA": "Slovaque"}'/>
+            <where>language_code = 'SLK'</where>
+        </update>
+        <update tableName="adm_language">
+            <column name="description_en" value="Slovenian" />
+            <column name="description_i18n" value='{"ENG": "Slovenian", "FRA": "Slovène"}'/>
+            <where>language_code = 'SLV'</where>
+        </update>
+        <update tableName="adm_language">
+            <column name="description_i18n" value='{"ENG": "Spanish", "FRA": "Espagnol"}'/>
+            <where>language_code = 'SPA'</where>
+        </update>
+        <update tableName="adm_language">
+            <column name="description_i18n" value='{"ENG": "Serbian", "FRA": "Serbe"}'/>
+            <where>language_code = 'SRP'</where>
+        </update>
+        <update tableName="adm_language">
+            <column name="description_i18n" value='{"ENG": "Swedish", "FRA": "Suédois"}'/>
+            <where>language_code = 'SWE'</where>
+        </update>
+        <update tableName="adm_language">
+            <column name="description_i18n" value='{"ENG": "Turkish", "FRA": "Turc"}'/>
+            <where>language_code = 'TUR'</where>
+        </update>
+        <update tableName="adm_language">
+            <column name="description_i18n" value='{"ENG": "Chinese", "FRA": "Chinois"}'/>
+            <where>language_code = 'ZHO'</where>
+        </update>
     </changeSet>
     
     <changeSet id="#INTRD-28777_missing_language" author="a.rouaguebe_ext">

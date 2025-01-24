@@ -15717,7 +15717,6 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
     </changeSet>
     
     <changeSet id="#INTRD-5220_20241205" author="AbdellatifBARI">
-    	<validCheckSum>9:4338c486a48e6133b8c76613b2752723</validCheckSum>
         <createTable tableName="billing_subscriptions_purchase_orders">
             <column name="subscription_id" type="BIGINT">
                 <constraints nullable="false"/>

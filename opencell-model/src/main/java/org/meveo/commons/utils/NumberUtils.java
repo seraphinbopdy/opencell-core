@@ -143,27 +143,19 @@ public class NumberUtils {
     public static BigDecimal[] computeDerivedAmounts(BigDecimal amountWithoutTax, BigDecimal amountWithTax, BigDecimal taxPercent, boolean isEnterprise, int rounding, RoundingMode roundingMode) {
 
         if (taxPercent == null || taxPercent.compareTo(BigDecimal.ZERO) == 0) {
-            if (isEnterprise) {
-                amountWithoutTax = amountWithoutTax.setScale(rounding, roundingMode);
-            } else {
-                amountWithTax = amountWithTax.setScale(rounding, roundingMode);
-            }
-            return new BigDecimal[] { isEnterprise ? amountWithoutTax : amountWithTax, isEnterprise ? amountWithoutTax : amountWithTax, BigDecimal.ZERO };
+            return new BigDecimal[] { isEnterprise ? amountWithoutTax.setScale(rounding, roundingMode) : amountWithTax.setScale(rounding, roundingMode), isEnterprise ? amountWithoutTax.setScale(rounding, roundingMode) : amountWithTax.setScale(rounding, roundingMode), BigDecimal.ZERO };
         }
 
         if (isEnterprise) {
-            amountWithoutTax = amountWithoutTax.setScale(rounding, roundingMode);
             amountWithTax = amountWithoutTax.add(amountWithoutTax.multiply(taxPercent).divide(new BigDecimal(100), rounding, roundingMode));
-
         } else {
-            amountWithTax = amountWithTax.setScale(rounding, roundingMode);
             BigDecimal percentPlusOne = BigDecimal.ONE.add(taxPercent.divide(NumberUtils.HUNDRED, BaseEntity.NB_DECIMALS, RoundingMode.HALF_UP));
             amountWithoutTax = amountWithTax.divide(percentPlusOne, rounding, roundingMode);
         }
 
         BigDecimal amountTax = amountWithTax.subtract(amountWithoutTax);
 
-        return new BigDecimal[] { amountWithoutTax, amountWithTax, amountTax };
+        return new BigDecimal[] { amountWithoutTax.setScale(rounding, roundingMode), amountWithTax.setScale(rounding, roundingMode), amountTax.setScale(rounding, roundingMode) };
     }
 
     /**

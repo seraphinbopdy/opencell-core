@@ -646,10 +646,10 @@ public class SubscriptionApi extends BaseApi {
         }
         updateSubscriptionVersions(postData.getNextVersion(), postData.getPreviousVersion(), subscription);
 
+        if (subscription.getPurchaseOrders() != null) {
+            subscription.getPurchaseOrders().clear();
+        }
         if (CollectionUtils.isNotEmpty(postData.getPurchaseOrders())) {
-            if (subscription.getPurchaseOrders() != null) {
-                subscription.getPurchaseOrders().clear();
-            }
             for (Long purchaseOrderId : postData.getPurchaseOrders()) {
                 PurchaseOrder purchaseOrder = ofNullable(purchaseOrderService.findById(purchaseOrderId)).orElseThrow(() -> new EntityDoesNotExistsException(PurchaseOrder.class, purchaseOrderId));
 

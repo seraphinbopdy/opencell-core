@@ -235,15 +235,13 @@ public class CountryApi extends BaseApi {
             if (language == null) {
                 throw new EntityDoesNotExistsException(Language.class, postData.getLanguageCode());
             }
+	        country.setLanguage(language);
         }
 
         if (!StringUtils.isBlank(postData.getName()) && (!postData.getName().equals(country.getDescription()) || !postData.getName().equals(tradingCountry.getDescription()))) {
             tradingCountry.setDescription(postData.getName());
             country.setCurrency(currency);
             country.setDescription(postData.getName());
-            if (language != null) {
-                country.setLanguage(language);
-            }
         }
 
         if(postData.getLanguageDescriptions() != null) {

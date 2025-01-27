@@ -27,6 +27,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.BooleanUtils;
@@ -43,6 +44,7 @@ import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.ChargeInstance;
 import org.meveo.model.billing.ServiceInstance;
 import org.meveo.model.billing.Subscription;
+import org.meveo.model.billing.TradingCurrency;
 import org.meveo.model.billing.WalletInstance;
 import org.meveo.model.billing.WalletOperation;
 import org.meveo.model.catalog.DiscountPlan;
@@ -252,7 +254,7 @@ public class DiscountPlanService extends BusinessService<DiscountPlan> {
 					discountWalletOperation.setAmountWithoutTax(amounts[0].multiply(walletOperation.getQuantity().abs()));
 					discountWalletOperation.setAmountWithTax(amounts[1].multiply(walletOperation.getQuantity().abs()));
 					discountWalletOperation.setAmountTax(amounts[2].multiply(walletOperation.getQuantity().abs()));
-					discountWalletOperation.setDiscountValue(discountValue.multiply(walletOperation.getQuantity().abs()));
+					discountWalletOperation.setDiscountValue(discountValue);
 				} else {
 					discountWalletOperation.setAmountWithoutTax(amounts[0]);
 					discountWalletOperation.setAmountWithTax(amounts[1]);
@@ -277,6 +279,13 @@ public class DiscountPlanService extends BusinessService<DiscountPlan> {
 					discountWalletOperation.setContract(walletOperation.getContract());
 					discountWalletOperation.setContractLine(walletOperation.getContractLine());
 				}
+			    BigDecimal rate = Optional.ofNullable(walletOperation.getTradingCurrency()).map(TradingCurrency::getCurrentRate).orElse(BigDecimal.ONE);
+			    discountWalletOperation.setTransactionalAmountTax(discountWalletOperation.getAmountTax().multiply(rate));
+			    discountWalletOperation.setTransactionalAmountWithTax(discountWalletOperation.getAmountWithTax().multiply(rate));
+			    discountWalletOperation.setTransactionalAmountWithoutTax(discountWalletOperation.getAmountWithoutTax().multiply(rate));
+			    discountWalletOperation.setTransactionalUnitAmountWithTax(discountWalletOperation.getUnitAmountWithTax().multiply(rate));
+			    discountWalletOperation.setTransactionalUnitAmountWithoutTax(discountWalletOperation.getUnitAmountWithoutTax().multiply(rate));
+			    discountWalletOperation.setTransactionalUnitAmountTax(discountWalletOperation.getUnitAmountTax().multiply(rate));
 				
 		        OrderInfo orderInfo = new OrderInfo();
 				orderInfo.setOrder(chargeInstance.getSubscription() != null ? chargeInstance.getSubscription().getOrder() : null);

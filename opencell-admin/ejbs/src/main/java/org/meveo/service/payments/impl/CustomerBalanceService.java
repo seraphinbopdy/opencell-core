@@ -301,7 +301,7 @@ public class CustomerBalanceService extends BusinessService<CustomerBalance> {
      * @param customerBalance The {@link CustomerBalance} used for filtering account operations.
      * @return A list of {@link AccountOperationDto} objects that meet the filtering criteria.
      */
-    private List<AccountOperationDto> filterAccountOperations(List<AccountOperation> accountOperations, CustomerBalance customerBalance) {
+    public List<AccountOperationDto> filterAccountOperations(List<AccountOperation> accountOperations, CustomerBalance customerBalance) {
         List<AccountOperationDto> filteredOperations = new ArrayList<>();
 
         for (AccountOperation operation : accountOperations) {

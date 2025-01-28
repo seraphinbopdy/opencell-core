@@ -19,9 +19,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.hibernate.proxy.HibernateProxy;
 import org.meveo.admin.exception.BusinessException;
+import org.meveo.api.dto.payment.AccountOperationDto;
 import org.meveo.api.exception.BusinessApiException;
 import org.meveo.jpa.JpaAmpNewTx;
 import org.meveo.model.billing.BillingAccount;
@@ -103,6 +105,9 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
 
     @Inject
     private AccountOperationService accountOperationService;
+
+    @Inject
+    private CustomerBalanceService customerBalanceService;
 
     private static final String STOP_REASON = "STOP_POLITIQUE";
 
@@ -705,7 +710,7 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
      * @param collectionPlanStatus Collection plan status
      */
     public void createCollectionPlanForCustomerLevel(CustomerAccount customerAccount, BigDecimal balance, DunningPolicy policy, DunningCollectionPlanStatus collectionPlanStatus,
-                                                     List<String> linkedOccTemplates) {
+                                                     List<String> linkedOccTemplates, CustomerBalance customerBalance) {
         customerAccount = customerAccountService.refreshOrRetrieve(customerAccount);
         DunningCollectionPlan collectionPlan = new DunningCollectionPlan();
         collectionPlan.setRelatedPolicy(policy);
@@ -721,7 +726,7 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
         collectionPlan.setCollectionPlanNumber("C" + collectionPlan.getId());
 
         // Get the related invoices
-        getRelatedInvoices(customerAccount, linkedOccTemplates, collectionPlan);
+        getRelatedInvoices(customerAccount, linkedOccTemplates, collectionPlan, customerBalance);
 
         // Check if there's already a dunning level instances already created => In the case of launching the reminder without creating a collection plan
         List<DunningLevelInstance> dunningLevelInstances = dunningLevelInstanceService.findByCustomerAccountAndEmptyCollectionPlan(customerAccount);
@@ -767,13 +772,22 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
      * @param linkedOccTemplates Linked occ templates
      * @param collectionPlan Collection plan
      */
-    private void getRelatedInvoices(CustomerAccount customerAccount, List<String> linkedOccTemplates, DunningCollectionPlan collectionPlan) {
+    private void getRelatedInvoices(CustomerAccount customerAccount, List<String> linkedOccTemplates, DunningCollectionPlan collectionPlan, CustomerBalance customerBalance) {
         List<AccountOperation> accountOperations = accountOperationService.getAccountOperations(customerAccount.getId(),
                 null,
                 linkedOccTemplates,
                 null);
-        if (accountOperations != null && !accountOperations.isEmpty()) {
-            accountOperations.forEach(accountOperation -> {
+        accountOperations = accountOperations.stream()
+                .filter(ao -> ao.getInvoices().stream().noneMatch(Invoice::isDunningCollectionPlanTriggered))
+                .filter(ao -> ao.getInvoices().stream().anyMatch(invoice -> invoice.getPaymentStatus() == InvoicePaymentStatusEnum.UNPAID))
+                .collect(Collectors.toList());
+
+        // Filter account operations based on customer balance
+        List<AccountOperationDto> result = customerBalanceService.filterAccountOperations(accountOperations, customerBalance);
+
+        result.forEach(accountOperationDto -> {
+            AccountOperation accountOperation = accountOperationService.findById(accountOperationDto.getId());
+            if (accountOperation != null) {
                 if (collectionPlan.getRelatedInvoices() == null) {
                     collectionPlan.setRelatedInvoices(new ArrayList<>());
                 }
@@ -783,7 +797,7 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
                     invoice.setDunningCollectionPlanTriggered(true);
                     invoiceService.update(invoice);
                 });
-            });
-        }
+            }
+        });
     }
 }

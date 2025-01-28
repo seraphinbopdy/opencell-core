@@ -1626,14 +1626,6 @@ public class WalletOperation extends CFEntity {
 		this.discountPlan = discountPlan;
 	}
 
-    public DiscountPlan getDiscountPlan() {
-        return discountPlan;
-    }
-
-    public void setDiscountPlan(DiscountPlan discountPlan) {
-        this.discountPlan = discountPlan;
-    }
-
     public BigDecimal getDiscountValue() {
         return discountValue;
     }

@@ -169,7 +169,7 @@ public class CounterTemplate extends EnableBusinessEntity {
 	/**
 	 * The field can be disable/enable accumulator counter automatic application
 	 */
-	@Type(type = "numeric_boolean")
+    @Convert(converter = NumericBooleanConverter.class)
 	@Column(name = "shared_counter")
 	private boolean sharedCounter = Boolean.FALSE;
 

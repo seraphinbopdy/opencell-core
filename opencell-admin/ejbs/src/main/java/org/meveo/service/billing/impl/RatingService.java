@@ -1691,7 +1691,7 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
         discountWalletOperation.setChargeInstance(chargeInstance);
         discountWalletOperation.setInputQuantity(quantity);
         discountWalletOperation.setCurrency(bareWalletOperation.getCurrency()!=null?bareWalletOperation.getCurrency():bareWalletOperation.getBillingAccount().getCustomerAccount().getTradingCurrency().getCurrency());
-        discountWalletOperation.setDiscountedWO(bareWalletOperation);
+        discountWalletOperation.setDiscountedWalletOperation(bareWalletOperation);
         discountWalletOperation.setDiscountPlanType(DiscountPlanItemTypeEnum.PERCENTAGE);
         discountWalletOperation.setDiscountValue(discountValue);
         discountWalletOperation.setDiscountedAmount(discountedAmount);
@@ -1958,7 +1958,7 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
 	
 	protected void checkDiscountedWalletOpertion(WalletOperation wo, List<WalletOperation> walletOperations) {
 		if(wo.getDiscountedAmount() != null){
-			var discountedWallerOperation = walletOperations.stream().filter(wos -> wos.getId() != null && wo.getUuid().equals(wos.getUuid())).findFirst().map(WalletOperation::getId).orElse(null);
+			var discountedWallerOperation = walletOperations.stream().filter(wos -> wos.getId() != null && wo.getUuid().equals(wos.getUuid())).findFirst().orElse(null);
             if (discountedWallerOperation!=null) {
                 wo.setUuid(null);
                 wo.setDiscountedWalletOperation(discountedWallerOperation);

@@ -590,8 +590,10 @@ public class WalletOperation extends CFEntity {
     /**
      * What Wallet operation the current Wallet operation, representing a discount amount, is related to - Points to an original Wallet operation with a full amount
      */
-    @Column(name = "discounted_wallet_operation_id")
-    private Long discountedWalletOperation;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "discounted_wallet_operation_id")
+    private WalletOperation discountedWalletOperation;
+    
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "discount_plan_id")
@@ -635,9 +637,6 @@ public class WalletOperation extends CFEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "contract_id")
     private Contract contract;
-
-    @Transient
-    private WalletOperation discountedWO;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "contract_line_id")
@@ -1611,13 +1610,21 @@ public class WalletOperation extends CFEntity {
         this.accountingArticle = accountingArticle;
     }
 
-    public Long getDiscountedWalletOperation() {
-        return discountedWalletOperation;
-    }
+	public WalletOperation getDiscountedWalletOperation() {
+		return discountedWalletOperation;
+	}
 
-    public void setDiscountedWalletOperation(Long discountedWalletOperation) {
-        this.discountedWalletOperation = discountedWalletOperation;
-    }
+	public void setDiscountedWalletOperation(WalletOperation discountedWalletOperation) {
+		this.discountedWalletOperation = discountedWalletOperation;
+	}
+	
+	public DiscountPlan getDiscountPlan() {
+		return discountPlan;
+	}
+	
+	public void setDiscountPlan(DiscountPlan discountPlan) {
+		this.discountPlan = discountPlan;
+	}
 
     public DiscountPlan getDiscountPlan() {
         return discountPlan;
@@ -1707,13 +1714,15 @@ public class WalletOperation extends CFEntity {
         this.contract = contract;
     }
 
-    public WalletOperation getDiscountedWO() {
-        return discountedWO;
-    }
+	@Deprecated
+	public WalletOperation getDiscountedWO() {
+		return getDiscountedWalletOperation();
+	}
 
-    public void setDiscountedWO(WalletOperation discountedWO) {
-        this.discountedWO = discountedWO;
-    }
+	@Deprecated
+	public void setDiscountedWO(WalletOperation discountedWO) {
+		setDiscountedWalletOperation(discountedWO);
+	}
 
     /**
      * @return the useSpecificPriceConversion

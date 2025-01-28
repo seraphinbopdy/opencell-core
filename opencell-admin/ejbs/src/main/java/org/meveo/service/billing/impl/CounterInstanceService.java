@@ -38,7 +38,6 @@ import org.meveo.interceptor.ConcurrencyLock;
 import org.meveo.jpa.EntityManagerWrapper;
 import org.meveo.jpa.JpaAmpNewTx;
 import org.meveo.jpa.MeveoJpa;
-import org.meveo.model.BusinessEntity;
 import org.meveo.model.CounterValueChangeInfo;
 import org.meveo.model.ICounterEntity;
 import org.meveo.model.RatingResult;

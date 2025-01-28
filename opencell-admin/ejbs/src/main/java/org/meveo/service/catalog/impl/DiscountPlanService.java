@@ -250,17 +250,11 @@ public class DiscountPlanService extends BusinessService<DiscountPlan> {
     		    log.trace("calculateDiscountplanItems walletOperationDiscountAmount{},unitAmountWithoutTax{} ,discountValue{} ,discountedAmount{} ",walletOperationDiscountAmount,unitAmountWithoutTax,discountValue,discountedAmount);
     			
     		    discountWalletOperation.setUnitAmountTax(walletOperationDiscountAmount);
-				if (discountPlanItem.getDiscountPlanItemType() == DiscountPlanItemTypeEnum.PERCENTAGE) {
-					discountWalletOperation.setAmountWithoutTax(amounts[0].multiply(walletOperation.getQuantity().abs()));
-					discountWalletOperation.setAmountWithTax(amounts[1].multiply(walletOperation.getQuantity().abs()));
-					discountWalletOperation.setAmountTax(amounts[2].multiply(walletOperation.getQuantity().abs()));
-					discountWalletOperation.setDiscountValue(discountValue);
-				} else {
-					discountWalletOperation.setAmountWithoutTax(amounts[0]);
-					discountWalletOperation.setAmountWithTax(amounts[1]);
-					discountWalletOperation.setAmountTax(amounts[2]);
-					discountWalletOperation.setDiscountValue(discountValue);
-				}
+				discountWalletOperation.setAmountWithoutTax(amounts[0].multiply(discountWalletOperation.getQuantity().abs()));
+				discountWalletOperation.setAmountWithTax(amounts[1].multiply(discountWalletOperation.getQuantity().abs()));
+				discountWalletOperation.setAmountTax(amounts[2].multiply(discountWalletOperation.getQuantity().abs()));
+				discountWalletOperation.setDiscountValue(discountValue);
+				
      			discountWalletOperation.setTaxPercent(taxPercent);
      			discountWalletOperation.setUnitAmountWithoutTax(unitAmounts[0]);
      			discountWalletOperation.setUnitAmountWithTax(unitAmounts[1]);

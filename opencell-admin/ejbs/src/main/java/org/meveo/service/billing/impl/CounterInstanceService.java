@@ -38,7 +38,6 @@ import org.meveo.interceptor.ConcurrencyLock;
 import org.meveo.jpa.EntityManagerWrapper;
 import org.meveo.jpa.JpaAmpNewTx;
 import org.meveo.jpa.MeveoJpa;
-import org.meveo.model.BusinessEntity;
 import org.meveo.model.CounterValueChangeInfo;
 import org.meveo.model.ICounterEntity;
 import org.meveo.model.RatingResult;
@@ -170,23 +169,23 @@ public class CounterInstanceService extends PersistenceService<CounterInstance> 
 		switch (counterTemplate.getCounterLevel()) {
 			case CUST:
 				
-				counterInstance = instantiateCounter(customerService, customerService.refreshOrRetrieve(serviceInstance.getSubscription().getUserAccount().getBillingAccount().getCustomerAccount().getCustomer()), counterTemplate, chargeInstance, isVirtual, counterInstance);
+                counterInstance = instantiateCounter(customerService, serviceInstance.getSubscription().getUserAccount().getBillingAccount().getCustomerAccount().getCustomer(), counterTemplate, chargeInstance, isVirtual, counterInstance);
 				break;
 			
 			case CA:
-				counterInstance = instantiateCounter(customerAccountService, customerAccountService.refreshOrRetrieve(serviceInstance.getSubscription().getUserAccount().getBillingAccount().getCustomerAccount()), counterTemplate, chargeInstance, isVirtual, counterInstance);
+                counterInstance = instantiateCounter(customerAccountService, serviceInstance.getSubscription().getUserAccount().getBillingAccount().getCustomerAccount(), counterTemplate, chargeInstance, isVirtual, counterInstance);
 				break;
 			
 			case BA:
-				counterInstance = instantiateCounter(billingAccountService, billingAccountService.refreshOrRetrieve(serviceInstance.getSubscription().getUserAccount().getBillingAccount()), counterTemplate, chargeInstance, isVirtual, counterInstance);
+                counterInstance = instantiateCounter(billingAccountService, serviceInstance.getSubscription().getUserAccount().getBillingAccount(), counterTemplate, chargeInstance, isVirtual, counterInstance);
 				break;
 			
 			case UA:
-				counterInstance = instantiateCounter(userAccountService, userAccountService.refreshOrRetrieve(serviceInstance.getSubscription().getUserAccount()), counterTemplate, chargeInstance, isVirtual, counterInstance);
+                counterInstance = instantiateCounter(userAccountService, serviceInstance.getSubscription().getUserAccount(), counterTemplate, chargeInstance, isVirtual, counterInstance);
 				break;
 			
 			case SU:
-				counterInstance = instantiateCounter(subscriptionService, subscriptionService.refreshOrRetrieve(serviceInstance.getSubscription()), counterTemplate, chargeInstance, isVirtual, counterInstance);
+                counterInstance = instantiateCounter(subscriptionService, serviceInstance.getSubscription(), counterTemplate, chargeInstance, isVirtual, counterInstance);
 				break;
 			
 			case SI:
@@ -255,9 +254,11 @@ public class CounterInstanceService extends PersistenceService<CounterInstance> 
 			
 			entity.getCounters().put(counterTemplate.getCode(), counterInstance);
 			
-			if (!isVirtual) {
-				service.update((BusinessEntity) entity);
-			}
+            // This can not be here because update might produce a new instance of the entity and if later trying to update entity again in case other counter is added, it might fail because of stale entity exception
+            // As entity is managed, it will be persisted automatically by hibernate
+//            if (!isVirtual) {
+//                service.update((BusinessEntity) entity);
+//            }
 		} else {
 			counterInstance = entity.getCounters().get(counterTemplate.getCode());
 		}

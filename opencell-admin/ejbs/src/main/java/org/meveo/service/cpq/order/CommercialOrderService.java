@@ -186,7 +186,7 @@ public class CommercialOrderService extends BusinessService<CommercialOrder> {
 			if(o.getProducts().isEmpty()) return false;
 			for(OrderProduct quoteProduct: o.getProducts()) {
 				if(quoteProduct.getProductVersion() != null) {
-					var product = productService.refreshOrRetrieve(quoteProduct.getProductVersion().getProduct());
+					Product product = quoteProduct.getProductVersion().getProduct();
 					for(ProductChargeTemplateMapping charge: product.getProductCharges()) {
 						if(charge.getChargeTemplate() != null) {
 							ChargeTemplate templateCharge = (ChargeTemplate) Hibernate.unproxy(charge.getChargeTemplate());
@@ -247,12 +247,12 @@ public class CommercialOrderService extends BusinessService<CommercialOrder> {
 				}
 				subscription.setEndAgreementDate(null);
 				subscription.setRenewed(true);
-				CustomerAccount customerAccount = customerAccountService.refreshOrRetrieve(order.getBillingAccount().getCustomerAccount());
+				CustomerAccount customerAccount = order.getBillingAccount().getCustomerAccount();
 				subscription.setPaymentMethod(customerAccount.getPaymentMethods().get(0));
 				subscription.setOrder(order);
 				subscription.setOrderOffer(offer);
 				subscription.setContract((offer.getContract() != null)? offer.getContract() : order.getContract());
-				OfferTemplate offerTemplate = offerTemplateService.refreshOrRetrieve(offer.getOfferTemplate());
+				OfferTemplate offerTemplate = offer.getOfferTemplate();
 				if (offerTemplate != null && offerTemplate.isDisabled() && offer.getQuoteOffer() == null && !orderCompleted) {
 		            throw new BusinessException(String.format("OfferTemplate[code=%s] is disabled and cannot be ordered. Please select another offer.", offerTemplate.getCode()));
 		        }
@@ -462,7 +462,7 @@ public class CommercialOrderService extends BusinessService<CommercialOrder> {
 	}
 	
 	public ServiceInstance processProductWithDiscount(Subscription subscription, OrderProduct orderProduct) {
-		var serviceInstance = processProduct(subscription, orderProduct.getProductVersion().getProduct(), orderProduct.getQuantity(), orderProductService.refreshOrRetrieve(orderProduct).getOrderAttributes(), orderProduct, null);
+		var serviceInstance = processProduct(subscription, orderProduct.getProductVersion().getProduct(), orderProduct.getQuantity(), orderProduct.getOrderAttributes(), orderProduct, null);
 		serviceInstance.setQuoteProduct(orderProduct.getQuoteProduct());
 		if(orderProduct.getDiscountPlan() != null) {
 			DiscountPlanInstance dpi = new DiscountPlanInstance();

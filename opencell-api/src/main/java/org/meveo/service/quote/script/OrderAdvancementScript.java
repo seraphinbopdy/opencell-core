@@ -205,8 +205,6 @@ OrderAdvancementScript extends ModuleScript {
         invoices.stream()
                 .forEach(
                         invoice -> {
-	                        invoiceService.getEntityManager().refresh(invoice);
-                            invoice = invoiceService.refreshOrRetrieve(invoice);
                             customFieldInstanceService.instantiateCFWithDefaultValue(invoice);
                             if(isDepositInvoice) {
 	                            try {

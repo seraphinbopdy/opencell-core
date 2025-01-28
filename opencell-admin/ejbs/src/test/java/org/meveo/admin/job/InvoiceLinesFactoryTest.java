@@ -141,8 +141,8 @@ public class InvoiceLinesFactoryTest {
         Assert.assertEquals(invoiceLine.getStatus(), OPEN);
         Assert.assertEquals(invoiceLine.getOrderNumber(), "1123456");
         Assert.assertEquals(invoiceLine.getBillingRun().getId(), Long.valueOf(1));
-        BigDecimal amountWithoutTax = new BigDecimal(100.124);
-        BigDecimal amountTax = new BigDecimal(10.012);
+        BigDecimal amountWithoutTax = new BigDecimal(100.123);
+        BigDecimal amountTax = new BigDecimal(10.013);
         BigDecimal amountWithTax = new BigDecimal(110.136);
         Assert.assertEquals(invoiceLine.getAmountWithoutTax(), amountWithoutTax.setScale(3, RoundingMode.HALF_UP));
         Assert.assertEquals(invoiceLine.getAmountTax(), amountTax.setScale(3, RoundingMode.HALF_UP));

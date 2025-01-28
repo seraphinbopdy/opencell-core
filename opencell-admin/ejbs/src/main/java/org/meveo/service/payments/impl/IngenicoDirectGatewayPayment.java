@@ -24,10 +24,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
 
 import com.ingenico.connect.gateway.sdk.java.ReferenceException;
 import com.onlinepayments.ApiException;

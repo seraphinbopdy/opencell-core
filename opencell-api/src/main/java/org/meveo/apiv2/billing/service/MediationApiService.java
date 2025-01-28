@@ -634,7 +634,7 @@ public class MediationApiService {
                     }
                     RatedTransaction ratedTransaction = ratedTransactionService.createRatedTransaction(walletOperation, false);
                     if (discountedRated.get(walletOperation.getDiscountedWalletOperation()) != null) {
-                        ratedTransaction.setDiscountedRatedTransaction(discountedRated.get(walletOperation.getDiscountedWalletOperation()).getId());
+                        ratedTransaction.setDiscountedRatedTransaction(discountedRated.get(walletOperation.getDiscountedWalletOperation().getId()).getId());
                     }
                     discountedRated.put(walletOperation.getId(), ratedTransaction);
                 }

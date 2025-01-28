@@ -297,8 +297,7 @@ public class DiscountPlanService extends BusinessService<DiscountPlan> {
     				discountWalletOperation.setSubscription(subscription);
     				discountWalletOperation.setUserAccount(subscription.getUserAccount());
     				if(walletOperation != null ) {
-    					discountWalletOperation.setDiscountedWalletOperation(walletOperation.getId());
-						discountWalletOperation.setDiscountedWO(walletOperation);
+						discountWalletOperation.setDiscountedWalletOperation(walletOperation);
     					walletOperation.setDiscountedAmount(discountedAmount);
     				}
     			}

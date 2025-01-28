@@ -380,12 +380,14 @@ public abstract class BaseApi {
                             if(cet != null && cet.isStoreAsTable()){
                                 recordExist = !customTableService.findById(cet.getDbTablename(), Long.parseLong(entityRefWrapper.getCode())).isEmpty();
                             }else{
-                                    Class entityRefClass = Class.forName(entityRefWrapper.getClassname());
-                                    if(BusinessEntity.class.isAssignableFrom(entityRefClass)) {
-                                        referencedEntity = businessEntityService.findByEntityClassAndCode(entityRefClass, entityRefWrapper.getCode());
-                                    } else {
-                                        referencedBaseEntity = businessEntityService.findByEntityClassAndId(entityRefClass, entityRefWrapper.getId());
-                                    }
+                                Class entityRefClass = Class.forName(entityRefWrapper.getClassname());
+                                if (!StringUtils.isBlank(entityRefWrapper.getCode()) && BusinessEntity.class.isAssignableFrom(entityRefClass)) {
+                                    referencedEntity = businessEntityService.findByEntityClassAndCode(entityRefClass, entityRefWrapper.getCode());
+                                } else if (BusinessEntity.class.isAssignableFrom(entityRefClass)) {
+                                    referencedEntity = (BusinessEntity) businessEntityService.findByEntityClassAndId(entityRefClass, entityRefWrapper.getId());
+                                } else {
+                                    referencedBaseEntity = businessEntityService.findByEntityClassAndId(entityRefClass, entityRefWrapper.getId());
+                                }
                             }
                         } catch (ClassNotFoundException e) {
                             throw new InvalidParameterException("Class " + entityRefWrapper.getClassname() + " not found" );

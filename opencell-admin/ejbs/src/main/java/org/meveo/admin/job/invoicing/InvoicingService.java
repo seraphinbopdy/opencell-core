@@ -709,7 +709,8 @@ public class InvoicingService extends PersistenceService<Invoice> {
         Integer delay = invoiceService.evaluateDueDelayExpression(dueDateDelayEL, billingAccount, invoice, order);
         Date dueDate = invoice.getInvoiceDate();
         if(isExceptionalBR && delay == null) {
-            delay = 0;
+        	//in exceptionalBR case, be sure the used billingCycle is the BA billin gCycle
+        	delay = invoiceService.evaluateDueDelayExpression(billingAccount.getBillingCycle().getDueDateDelayEL(), billingAccount, invoice, order);
         }
         if (delay != null) {
             dueDate = DateUtils.addDaysToDate(invoice.getInvoiceDate(), delay);

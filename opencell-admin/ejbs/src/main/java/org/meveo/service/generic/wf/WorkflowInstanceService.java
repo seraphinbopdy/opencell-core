@@ -96,14 +96,14 @@ public class WorkflowInstanceService extends PersistenceService<WorkflowInstance
 		
         params.put("entityClass", gwf.getTargetEntityClass());
 
-        List<BusinessEntity> listAllEntitiesWithoutWFInstance = (List<BusinessEntity>) executeSelectQuery(query, params);
+        List<BusinessEntity> allEntities = (List<BusinessEntity>) executeSelectQuery(query, params);
         if (gwf.getFilter() != null) {
             Filter filter = gwf.getFilter();
             List<BusinessEntity> listFilteredEntities = (List<BusinessEntity>) filterService.filteredListAsObjects(filter, null);
 
             List<Long> listIdAllEntitiesWithoutWFInstance = new ArrayList<>();
             Map<Long, BusinessEntity> mapAllEntitiesWithoutWFInstance = new HashMap<>();
-            for (BusinessEntity entity : listAllEntitiesWithoutWFInstance) {
+            for (BusinessEntity entity : allEntities) {
                 listIdAllEntitiesWithoutWFInstance.add(entity.getId());
                 mapAllEntitiesWithoutWFInstance.put(entity.getId(), entity);
             }
@@ -125,12 +125,12 @@ public class WorkflowInstanceService extends PersistenceService<WorkflowInstance
         } else {
             if (gwf.getTargetEntityClass().equals(CustomEntityInstance.class.getName())) {
                 GenericWorkflow finalGwf = gwf;
-                return listAllEntitiesWithoutWFInstance.stream()
+                return allEntities.stream()
                         .filter(entity
                                 -> ((CustomEntityInstance) entity).getCetCode().equals(finalGwf.getTargetCetCode()))
                         .collect(Collectors.toList());
             } else {
-                return listAllEntitiesWithoutWFInstance;
+                return allEntities;
             }
         }
     }

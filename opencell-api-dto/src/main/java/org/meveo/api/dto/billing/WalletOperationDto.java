@@ -310,7 +310,7 @@ public class WalletOperationDto extends BaseEntityDto implements IEntityDto {
             sortIndex = walletOperation.getSortIndex();
         }
         transactionalUnitAmountWithoutTax = walletOperation.getTransactionalUnitAmountWithoutTax();
-        transactionalUnitAmountWithTax = walletOperation.getTransactionalAmountWithTax();
+        transactionalUnitAmountWithTax = walletOperation.getTransactionalUnitAmountWithTax();
         transactionalUnitAmountTax = walletOperation.getTransactionalUnitAmountTax();
         transactionalAmountWithoutTax = walletOperation.getTransactionalAmountWithoutTax();
         transactionalAmountWithTax = walletOperation.getTransactionalAmountWithTax();

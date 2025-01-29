@@ -868,6 +868,7 @@ public class CustomerAccountService extends AccountService<CustomerAccount> {
 
         // Filter account operations based on customer balance
         List<AccountOperationDto> result = customerBalanceService.filterAccountOperations(accountOperations, customerBalance);
+
         // Calculate totals for credit, debit, and balance
         BigDecimal credit = result.stream()
                 .filter(aod -> aod.getTransactionCategory().equals(OperationCategoryEnum.CREDIT))

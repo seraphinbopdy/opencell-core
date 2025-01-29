@@ -46,7 +46,7 @@ public class InvoicingItem {
 		this.count = (Long) fields[i++];
 		this.ilIDs = ID_SPLIT_PATTERN.splitAsStream((String) fields[i++]).mapToLong(Long::parseLong).boxed().collect(toList());
 		this.invoiceKey = (String) fields[i++];
-		this.subscriptionIds = Pattern.compile(",").splitAsStream((String) fields[i++]).mapToLong(Long::parseLong).boxed().collect(Collectors.toList());
+		this.subscriptionIds = Pattern.compile(",").splitAsStream((String) fields[i++]).mapToLong(Long::parseLong).boxed().collect(toList());
 		String purchaseOrderIds = (String) fields[i++];
 		if (!StringUtils.isBlank(purchaseOrderIds)) {
 			this.purchaseOrderIds = ID_SPLIT_PATTERN.splitAsStream(purchaseOrderIds).mapToLong(Long::parseLong).boxed().collect(toList());

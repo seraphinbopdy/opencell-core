@@ -71,7 +71,12 @@ public class DunningActionService  extends BusinessService<DunningAction> {
         
         if(dunningSettings != null) {
         	dunningAction.setType(dunningSettings.getDunningMode());
-        } 
+        }
+
+        // Action type is script or retry payment, then action channel is script
+        if(dunningAction.getActionType().equals(ActionTypeEnum.SCRIPT) || dunningAction.getActionType().equals(ActionTypeEnum.RETRY_PAYMENT)) {
+            dunningAction.setActionChannel(ActionChannelEnum.SCRIPT);
+        }
         
         super.create(dunningAction);
     }

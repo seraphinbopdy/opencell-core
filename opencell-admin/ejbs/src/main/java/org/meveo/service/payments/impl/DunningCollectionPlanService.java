@@ -727,6 +727,8 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
 
         // Get the related invoices
         getRelatedInvoices(customerAccount, linkedOccTemplates, collectionPlan, customerBalance);
+        // Get the billing account
+        getBillingAccountForCollectionPlan(collectionPlan);
 
         // Check if there's already a dunning level instances already created => In the case of launching the reminder without creating a collection plan
         List<DunningLevelInstance> dunningLevelInstances = dunningLevelInstanceService.findByCustomerAccountAndEmptyCollectionPlan(customerAccount);
@@ -764,6 +766,21 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
 
         auditLogService.trackOperation("CREATE DunningCollectionPlan", new Date(), collectionPlan, collectionPlan.getCollectionPlanNumber());
         update(collectionPlan);
+    }
+
+    /**
+     * Get billing account for collection plan
+     * @param collectionPlan Collection plan
+     */
+    private void getBillingAccountForCollectionPlan(DunningCollectionPlan collectionPlan) {
+        List<BillingAccount> billingAccounts = collectionPlan.getRelatedInvoices().stream()
+                .map(Invoice::getBillingAccount)
+                .distinct()
+                .toList();
+
+        if (billingAccounts.size() == 1) {
+            collectionPlan.setBillingAccount(billingAccounts.getFirst());
+        }
     }
 
     /**

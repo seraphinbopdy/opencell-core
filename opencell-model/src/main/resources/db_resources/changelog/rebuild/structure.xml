@@ -4488,6 +4488,7 @@
             <column name="key_el" type="varchar(2000)"/>
             <column name="value_el" type="varchar(2000)"/>
             <column name="managed_byapp" type="${type.boolean}" defaultValueNumeric="1"><constraints nullable="false" /></column>
+            <column name="shared_counter"  type="${type.boolean}" defaultValueNumeric="0" />
         </createTable>
     </changeSet>
     <changeSet author="AndriusKarpavicius" id="rebuild-str-tbl-210">

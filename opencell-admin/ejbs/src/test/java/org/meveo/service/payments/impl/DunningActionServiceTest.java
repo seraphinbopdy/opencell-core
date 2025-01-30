@@ -21,7 +21,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import jakarta.ws.rs.BadRequestException;
+import javax.ws.rs.BadRequestException;
 
 import java.util.Arrays;
 

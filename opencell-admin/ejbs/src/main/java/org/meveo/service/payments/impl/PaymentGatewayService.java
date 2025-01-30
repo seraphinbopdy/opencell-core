@@ -127,6 +127,10 @@ public class PaymentGatewayService extends BusinessService<PaymentGateway> {
         if (customerAccount == null) {
             throw new BusinessException("CustomerAccount is null in getPaymentGateway");
         }
+        List<PaymentGateway> paymentGateways = listActive();
+        if(paymentGateways != null && paymentGateways.size() == 1) {
+        	return paymentGateways.get(0);
+        }
         try {        	 
             CreditCardTypeEnum cardTypeToCheck = null;
             if( paymentMethod instanceof CardPaymentMethod) {
@@ -144,7 +148,7 @@ public class PaymentGatewayService extends BusinessService<PaymentGateway> {
                 .setParameter("cardTypeValueIN", cardTypeToCheck)
                 .setParameter("sellerIN", seller);              
                  
-            List<PaymentGateway> paymentGateways = (List<PaymentGateway>) query.getResultList();
+            paymentGateways = (List<PaymentGateway>) query.getResultList();
             
             if (paymentGateways == null || paymentGateways.isEmpty()) {
                 return null;

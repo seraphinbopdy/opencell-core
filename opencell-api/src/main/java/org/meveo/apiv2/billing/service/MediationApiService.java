@@ -78,7 +78,6 @@ import org.meveo.model.rating.EDRStatusEnum;
 import org.meveo.security.CurrentUser;
 import org.meveo.security.MeveoUser;
 import org.meveo.security.keycloak.CurrentUserProvider;
-import org.meveo.service.base.ValueExpressionWrapper;
 import org.meveo.service.billing.impl.CounterInstanceService;
 import org.meveo.service.billing.impl.EdrService;
 import org.meveo.service.billing.impl.RatedTransactionService;
@@ -735,10 +734,6 @@ public class MediationApiService {
             cdr.setStatus(CDRStatusEnum.OPEN);
             cdr.setRejectReason(null);
             cdr.setStatusDate(new Date());
-            String originRecordEL = appProvider.getCdrDeduplicationKeyEL();
-            if(StringUtils.isNotBlank(originRecordEL)) {
-                cdr.setOriginRecord(ValueExpressionWrapper.evaluateExpression(originRecordEL, Map.of("cdr", cdr), String.class));
-            }
             // mandatory
             if (cdr.getEventDate() == null) {
                 error.add("eventDate");

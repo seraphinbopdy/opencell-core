@@ -1,10 +1,5 @@
 package org.meveo.service.payments.impl;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-
-import java.util.Arrays;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -17,25 +12,22 @@ import org.meveo.model.dunning.DunningLevel;
 import org.meveo.model.payments.ActionTypeEnum;
 import org.meveo.model.scripts.ScriptInstance;
 import org.meveo.model.scripts.ScriptInstanceCategory;
-import org.meveo.security.CurrentUser;
-import org.meveo.security.MeveoUser;
 import org.meveo.service.base.BaseEntityService;
+import org.meveo.service.base.BusinessService;
 import org.meveo.service.communication.impl.EmailTemplateService;
-import org.meveo.service.crm.impl.CustomFieldInstanceService;
 import org.meveo.service.script.ScriptInstanceService;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import jakarta.persistence.EntityManager;
-import jakarta.ws.rs.BadRequestException;
+import javax.ws.rs.BadRequestException;
+
+import java.util.Arrays;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DunningActionServiceTest {
 
-    @Spy
     @InjectMocks
     private DunningActionService dunningActionService;
 
@@ -47,19 +39,6 @@ public class DunningActionServiceTest {
 
     @Mock
     private BaseEntityService dunningLevelBusinessService;
-
-    @Mock
-    private DunningSettingsService dunningSettingsService;
-
-    @Mock
-    private CustomFieldInstanceService customFieldInstanceService;
-
-    @Mock
-    @CurrentUser
-    protected MeveoUser currentUser;
-
-    @Mock
-    private EntityManager entityManager;
 
     @Test(expected = EntityDoesNotExistsException.class)
     public void createWithEmailNotFoundTemplateTest() {
@@ -73,18 +52,16 @@ public class DunningActionServiceTest {
 
     @Test
     public void createWithEmailTemplateTest() {
-
+        DunningActionService businessService = Mockito.spy(dunningActionService);
         DunningAction dunningAction = new DunningAction();
         EmailTemplate actionNotificationTemplate = new EmailTemplate();
         EmailTemplate fetchedActionNotificationTemplate = new EmailTemplate();
         actionNotificationTemplate.setId(1L);
         dunningAction.setActionNotificationTemplate(actionNotificationTemplate);
+        dunningAction.setActionType(ActionTypeEnum.SCRIPT);
         Mockito.when(emailTemplateService.findById(1L)).thenReturn(fetchedActionNotificationTemplate);
-        doReturn(entityManager).when(dunningActionService).getEntityManager();
-        doNothing().when(entityManager).persist(any());
-
-        dunningActionService.create(dunningAction);
-
+        Mockito.doNothing().when((BusinessService)businessService).create(dunningAction);
+        businessService.create(dunningAction);
         Assert.assertEquals(fetchedActionNotificationTemplate, dunningAction.getActionNotificationTemplate());
     }
 
@@ -94,7 +71,7 @@ public class DunningActionServiceTest {
         DunningLevel dunningLevel = new DunningLevel();
         dunningLevel.setId(1L);
         dunningAction.setRelatedLevels(Arrays.asList(dunningLevel));
-        Mockito.when(dunningLevelBusinessService.tryToFindByEntityClassAndId(DunningLevel.class, 1L)).thenReturn(null);
+        Mockito.when(dunningLevelBusinessService.tryToFindByEntityClassAndId(DunningLevel.class,1L)).thenReturn(null);
         dunningActionService.create(dunningAction);
     }
 

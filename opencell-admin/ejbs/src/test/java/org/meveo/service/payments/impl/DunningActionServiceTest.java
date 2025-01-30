@@ -79,6 +79,7 @@ public class DunningActionServiceTest {
         EmailTemplate fetchedActionNotificationTemplate = new EmailTemplate();
         actionNotificationTemplate.setId(1L);
         dunningAction.setActionNotificationTemplate(actionNotificationTemplate);
+        dunningAction.setActionType(ActionTypeEnum.SCRIPT);
         Mockito.when(emailTemplateService.findById(1L)).thenReturn(fetchedActionNotificationTemplate);
         doReturn(entityManager).when(dunningActionService).getEntityManager();
         doNothing().when(entityManager).persist(any());

@@ -22,6 +22,7 @@ import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.exception.MissingParameterException;
 import org.meveo.apiv2.billing.service.MediationApiService;
 import org.meveo.commons.utils.ParamBeanFactory;
+import org.meveo.model.crm.Provider;
 import org.meveo.model.mediation.Access;
 import org.meveo.model.rating.CDR;
 import org.meveo.model.rating.CDRStatusEnum;
@@ -53,6 +54,9 @@ public class MediationApiServiceTest {
     public ExpectedException expectedEx = ExpectedException.none();
 
     private String ipAddress = "127.0.0.1";
+
+    @Mock
+    private Provider appProvider;
 
     @Before
     public void setup() {

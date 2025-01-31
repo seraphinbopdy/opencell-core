@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.Type;
 import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.EnableBusinessEntity;
 import org.meveo.model.ExportIdentifier;
@@ -164,6 +165,13 @@ public class CounterTemplate extends EnableBusinessEntity {
     @Convert(converter = NumericBooleanConverter.class)
     @Column(name = "managed_byapp")
     private boolean managedByApp = true;
+	
+	/**
+	 * The field can be disable/enable accumulator counter automatic application
+	 */
+    @Convert(converter = NumericBooleanConverter.class)
+	@Column(name = "shared_counter")
+	private boolean sharedCounter = Boolean.FALSE;
 
     public CounterTypeEnum getCounterType() {
         return counterType;
@@ -317,4 +325,12 @@ public class CounterTemplate extends EnableBusinessEntity {
         this.managedByApp = managedByApp;
     }
 
+    public boolean isSharedCounter() {
+		return sharedCounter;
+	}
+	
+	public void setSharedCounter(boolean sharedCounter) {
+		this.sharedCounter = sharedCounter;
+	}
+    
 }

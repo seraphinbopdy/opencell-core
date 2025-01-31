@@ -329,9 +329,7 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> imple
                     scriptInstanceError.setMessage(diagnostic.getMessage(Locale.getDefault()));
                     scriptInstanceError.setLineNumber(diagnostic.getLineNumber());
                     scriptInstanceError.setColumnNumber(diagnostic.getColumnNumber());
-                    if (diagnostic.getSource() != null) {
-                        scriptInstanceError.setSourceFile(diagnostic.getSource().toString());
-                    }
+                    scriptInstanceError.setSourceFile(diagnostic.getSource()!=null? diagnostic.getSource().toString():null);
                     // scriptInstanceError.setScript(scriptInstance);
                     scriptErrors.add(scriptInstanceError);
                     // scriptInstanceErrorService.create(scriptInstanceError, scriptInstance.getAuditable().getCreator());

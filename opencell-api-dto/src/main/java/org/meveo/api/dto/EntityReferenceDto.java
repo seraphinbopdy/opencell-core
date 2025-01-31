@@ -158,6 +158,6 @@ public class EntityReferenceDto implements Serializable {
      * @return True if classname or code are empty
      */
     public boolean isEmpty() {
-        return StringUtils.isBlank(classname) || StringUtils.isBlank(code);
+        return StringUtils.isBlank(classname) || (id == null && StringUtils.isBlank(code));
     }
 }

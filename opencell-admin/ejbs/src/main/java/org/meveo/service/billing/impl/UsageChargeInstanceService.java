@@ -17,10 +17,12 @@
  */
 package org.meveo.service.billing.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.cache.WalletCacheContainerProvider;
 import org.meveo.commons.utils.QueryBuilder;
@@ -32,6 +34,7 @@ import org.meveo.model.billing.Subscription;
 import org.meveo.model.billing.UsageChargeInstance;
 import org.meveo.model.billing.WalletInstance;
 import org.meveo.model.catalog.CounterTemplate;
+import org.meveo.model.catalog.CounterTemplateLevel;
 import org.meveo.model.catalog.ServiceChargeTemplateUsage;
 import org.meveo.model.catalog.WalletTemplate;
 import org.meveo.model.rating.EDR;
@@ -81,16 +84,35 @@ public class UsageChargeInstanceService extends BusinessService<UsageChargeInsta
         if (!isVirtual) {
             create(usageChargeInstance);
         }
-
-        if (((serviceUsageChargeTemplate.getAccumulatorCounterTemplates() != null && !serviceUsageChargeTemplate.getAccumulatorCounterTemplates().isEmpty()) || serviceUsageChargeTemplate.getCounterTemplate() != null) && serviceInstance.getId() != null) {
-            for (CounterTemplate counterTemplate : serviceUsageChargeTemplate.getAccumulatorCounterTemplates()) {
-                CounterInstance counterInstance = counterInstanceService.counterInstanciation(serviceInstance, counterTemplate, usageChargeInstance, isVirtual);
+	    
+	    if (((serviceUsageChargeTemplate.getAccumulatorCounterTemplates() != null && !serviceUsageChargeTemplate.getAccumulatorCounterTemplates().isEmpty()) || serviceUsageChargeTemplate.getCounterTemplate() != null) && serviceInstance.getId() != null) {
+            CounterInstance counterInstance = null;
+			for (CounterTemplate counterTemplate : serviceUsageChargeTemplate.getAccumulatorCounterTemplates()) {
+				if(counterTemplate.getAccumulator() == Boolean.TRUE && counterTemplate.isSharedCounter()){
+					counterInstance = counterInstanceService.counterInstanciation(serviceInstance, counterTemplate, usageChargeInstance, isVirtual, counterInstance);
+				}else{
+					counterInstance = counterInstanceService.counterInstanciation(serviceInstance, counterTemplate, usageChargeInstance, isVirtual);
+				}
                 log.debug("Accumulator counter instance {} will be added to charge instance {}", counterInstance, usageChargeInstance);
             }
             if (serviceUsageChargeTemplate.getCounterTemplate() != null) {
-                CounterInstance counterInstance = counterInstanceService.counterInstanciation(serviceInstance, serviceUsageChargeTemplate.getCounterTemplate(), usageChargeInstance, isVirtual);
+				if(serviceUsageChargeTemplate.getCounterTemplate().getAccumulator() == Boolean.TRUE && serviceUsageChargeTemplate.getCounterTemplate().isSharedCounter()){
+					var counterLevel = List.of(CounterTemplateLevel.SI, CounterTemplateLevel.SU);
+					List<Long> counters;
+					if(counterLevel.contains(serviceUsageChargeTemplate.getCounterTemplate().getCounterLevel())){
+						counters = counterInstanceService.findByCounterbyLevelShared(serviceUsageChargeTemplate.getCounterTemplate().getCode(), serviceUsageChargeTemplate.getCounterTemplate().getCounterLevel());
+					}else{
+						counters = counterInstanceService.findByCounterAndAccount(serviceUsageChargeTemplate.getCounterTemplate().getCode(), serviceUsageChargeTemplate.getCounterTemplate().getCounterLevel());
+					}
+					if(CollectionUtils.isNotEmpty(counters)){
+						counterInstance = counterInstanceService.findById(counters.get(0));
+					}
+				}
+                counterInstance = counterInstanceService.counterInstanciation(serviceInstance, serviceUsageChargeTemplate.getCounterTemplate(), usageChargeInstance, isVirtual, counterInstance);
                 log.debug("Counter instance {} will be added to charge instance {}", counterInstance, usageChargeInstance);
-                usageChargeInstance.setCounter(counterInstance);
+				if(counterInstance != null && ( counterInstance.getCounterTemplate().getAccumulator() == null || counterInstance.getCounterTemplate().getAccumulator() == Boolean.FALSE)){
+					usageChargeInstance.setCounter(counterInstance);
+				}
             }
             if (!isVirtual) {
                 update(usageChargeInstance);

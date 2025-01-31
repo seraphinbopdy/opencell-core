@@ -34,6 +34,7 @@ import org.meveo.model.dunning.DunningPolicyRuleLine;
 import org.meveo.model.dunning.PolicyConditionOperatorEnum;
 import org.meveo.model.dunning.PolicyConditionTargetEnum;
 import org.meveo.model.payments.CustomerAccount;
+import org.meveo.model.payments.CustomerBalance;
 import org.meveo.model.payments.DunningCollectionPlanStatusEnum;
 import org.meveo.model.payments.RecordedInvoice;
 import org.meveo.service.admin.impl.CurrencyService;
@@ -334,6 +335,7 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
                         .stream()
                         .filter(invoice -> !invoice.isDunningCollectionPlanTriggered())
                         .filter(invoice -> invoiceEligibilityCheck(invoice, policy, dayOverDue))
+                        .filter(invoice -> checkPolicyCurrency(policy, invoice))
                         .forEach(invoice -> {
                             dunningCollectionPlanNumber.incrementAndGet();
                             collectionPlanService.createCollectionPlanFrom(invoice, policy, collectionPlanStatus);
@@ -343,8 +345,26 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
             }
         }
         return dunningCollectionPlanNumber.get();
-        }
+    }
 
+    /**
+     * Check if policy currency is the same as invoice currency
+     * @param policy Dunning policy
+     * @param invoice Invoice
+     * @return true if policy currency is the same as invoice currency, false if not
+     */
+    private boolean checkPolicyCurrency(DunningPolicy policy, Invoice invoice) {
+        return Optional.ofNullable(policy.getMinBalanceTriggerCurrency())
+                .map(Currency::getCurrencyCode)
+                .map(code -> code.equals(invoice.getTradingCurrency().getCurrency().getCurrencyCode()))
+                .orElse(true);
+    }
+
+    /**
+     * Check if policy contains reminder
+     * @param dunningLevels Dunning levels
+     * @return true if policy contains reminder, false if not
+     */
     private boolean doesPolicyContainReminder(List<DunningPolicyLevel> dunningLevels) {
     	return dunningLevels.stream().anyMatch(policyLevel -> policyLevel.getDunningLevel().isReminder());
 	}
@@ -358,31 +378,30 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
      */
 	private boolean invoiceEligibilityCheck(Invoice invoice, DunningPolicy policy, Integer dayOverDue) {
         boolean dayOverDueAndThresholdCondition = false;
-
         try {
             List<DunningCollectionPlan> collectionPlansByInvoiceId = collectionPlanService.findByInvoiceId(invoice.getId());
 
             if (collectionPlansByInvoiceId.isEmpty()) {
                 // Refresh or retrieve invoice
-        invoice = invoiceService.refreshOrRetrieve(invoice);
+                invoice = invoiceService.refreshOrRetrieve(invoice);
                 // Get the current date and due date
                 Date today = simpleDateFormat.parse(simpleDateFormat.format(new Date()));
                 Date dueDate = simpleDateFormat.parse(simpleDateFormat.format(invoice.getDueDate()));
                 // Calculate the difference between the current date and due date
-        long daysDiff = TimeUnit.DAYS.convert((today.getTime() - dueDate.getTime()), TimeUnit.MILLISECONDS);
+                long daysDiff = TimeUnit.DAYS.convert((today.getTime() - dueDate.getTime()), TimeUnit.MILLISECONDS);
                 // Get the minimum balance
-            BigDecimal minBalance = ofNullable(invoice.getRecordedInvoice())
+                BigDecimal minBalance = ofNullable(invoice.getRecordedInvoice())
                     .map(RecordedInvoice::getUnMatchingAmount)
                     .orElse(BigDecimal.ZERO);
                 // Check if the invoice overdue days is less than or equal to the policy overdue days
                 // And the minimum balance is greater than or equal to the policy minimum balance trigger
-            dayOverDueAndThresholdCondition =
+                dayOverDueAndThresholdCondition =
                         (dayOverDue.longValue() <= daysDiff && minBalance.doubleValue() >= policy.getMinBalanceTrigger()) &&
                                 minBalance.compareTo(BigDecimal.ZERO) > 0;
-        }
+            }
         } catch (ParseException exception) {
             throw new BusinessException(exception);
-    }
+        }
 
         return dayOverDueAndThresholdCondition;
     }
@@ -514,7 +533,7 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
      * @param eligibleCustomerAccountsByPolicy Customer account by policy
      * @return Number of collection plans
      */
-    public int processEligibleCustomerAccounts(Map<DunningPolicy, Map<CustomerAccount, BigDecimal>> eligibleCustomerAccountsByPolicy, List<String> linkedOccTemplates) {
+    public int processEligibleCustomerAccounts(Map<DunningPolicy, Map<CustomerAccount, BigDecimal>> eligibleCustomerAccountsByPolicy, List<String> linkedOccTemplates, CustomerBalance customerBalance) {
         DunningCollectionPlanStatus collectionPlanStatus = collectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.ACTIVE);
         AtomicInteger dunningCollectionPlanNumber = new AtomicInteger(0);
         for (Map.Entry<DunningPolicy, Map<CustomerAccount, BigDecimal>> entry : eligibleCustomerAccountsByPolicy.entrySet()) {
@@ -529,7 +548,7 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
                 entry.getValue().forEach((customerAccount, minBalance) -> {
                     if(minBalance.compareTo(BigDecimal.valueOf(policy.getMinBalanceTrigger())) > 0) {
                         dunningCollectionPlanNumber.incrementAndGet();
-                        collectionPlanService.createCollectionPlanForCustomerLevel(customerAccount, minBalance, policy, collectionPlanStatus, linkedOccTemplates);
+                        collectionPlanService.createCollectionPlanForCustomerLevel(customerAccount, minBalance, policy, collectionPlanStatus, linkedOccTemplates, customerBalance);
                     }
                 });
             } else {

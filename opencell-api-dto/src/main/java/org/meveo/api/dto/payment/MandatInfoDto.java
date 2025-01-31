@@ -76,6 +76,9 @@ public class MandatInfoDto extends BaseResponse {
     
     /** The bank name. */
     private String bankName;
+    
+    /** The customer. */
+    private String customer;
 
     /**
      * Gets the id.
@@ -274,10 +277,20 @@ public class MandatInfoDto extends BaseResponse {
     public void setBankName(String bankName) {
         this.bankName = bankName;
     }
+    
+    
 
-    @Override
+    public String getCustomer() {
+		return customer;
+	}
+
+	public void setCustomer(String customer) {
+		this.customer = customer;
+	}
+
+	@Override
     public String toString() {
         return "MandatInfoDto [id=" + id + ", reference=" + reference + ", state=" + state + ", standard=" + standard + ", initialScore=" + initialScore + ", dateCreated="
-                + dateCreated + ", dateSigned=" + dateSigned + ", paymentScheme=" + paymentScheme + ", bic=" + bic + ", iban=" + iban + ", bankName=" + bankName + "]";
+                + dateCreated + ", dateSigned=" + dateSigned + ", paymentScheme=" + paymentScheme + ", bic=" + bic + ", iban=" + iban + ", bankName=" + bankName + ",customer="+ customer +" ]";
     }
 }

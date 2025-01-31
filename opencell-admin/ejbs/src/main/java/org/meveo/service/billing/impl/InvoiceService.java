@@ -294,7 +294,6 @@ import jakarta.persistence.Query;
 import jakarta.xml.bind.JAXBException;
 import net.sf.jasperreports.engine.DefaultJasperReportsContext;
 import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRPropertiesUtil;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -2911,6 +2910,9 @@ public class InvoiceService extends PersistenceService<Invoice> {
             invoice.setRejectReason(null);
             invoice.getAuditable().setUpdated(new Date());
             invoice.getAuditable().setUpdater(currentUser.getUserName());
+            invoice.initAmounts();
+            invoice.getInvoiceAgregates().forEach(invoiceAgregate -> invoiceAgregate.setInvoice(null));
+            invoice.getInvoiceAgregates().clear();
             super.update(invoice);
         }
         updateBillingRunStatistics(invoice);
@@ -8366,4 +8368,9 @@ public class InvoiceService extends PersistenceService<Invoice> {
 	public void validateInvoicesOfBRByStatus(BillingRun billingRun, List<InvoiceStatusEnum> toValidate, InvoiceStatusEnum validationStatus) {
 		getEntityManager().createNamedQuery("Invoice.validateInvoicesByStatusAndBr").setParameter("status",validationStatus).setParameter("billingRun", billingRun).setParameter("toValidate", toValidate).executeUpdate();
 	}
+
+    public boolean isNotEligibleForValidation(Long invoiceId) {
+        Invoice invoice = findById(invoiceId);
+        return REJECTED == invoice.getStatus() && BillingRunStatusEnum.REJECTED != invoice.getBillingRun().getStatus();
+    }
 }

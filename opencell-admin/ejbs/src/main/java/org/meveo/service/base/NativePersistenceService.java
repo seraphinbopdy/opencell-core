@@ -897,6 +897,10 @@ public class NativePersistenceService extends BaseService {
                                                                                     return explicitInnerJoinsForAggregation.replace(".dummy", "");
                                                                                 })
                                                                                 .collect(joining(","));
+
+        if (org.meveo.commons.utils.StringUtils.isBlank(fieldsPlaceHolder)) {
+            fieldsPlaceHolder = "*";
+        }
         
         queryBuilder.setQ(new StringBuilder(queryBuilder.getSqlStringBuffer().toString().replace("{fieldsPlaceHolder}", fieldsPlaceHolder)));
 
@@ -1271,7 +1275,7 @@ public class NativePersistenceService extends BaseService {
         QueryBuilder queryBuilder = getQuery(tableName, config, null, Boolean.FALSE);
         NativeQuery query = queryBuilder.getNativeQuery(getEntityManager(), true);
 
-        if (config.isCacheable()) {
+        if (config!=null && config.isCacheable()) {
 
             Map<String, CustomFieldTypeEnum> tableFieldTypes = fieldDataTypeMappings.get(tableName);
 

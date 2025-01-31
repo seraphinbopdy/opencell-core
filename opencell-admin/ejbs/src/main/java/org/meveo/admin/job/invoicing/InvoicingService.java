@@ -105,9 +105,9 @@ public class InvoicingService extends PersistenceService<Invoice> {
     private static final int MAX_IL_TO_UPDATE_PER_TRANSACTION = 10000;
     @Inject
     private InvoiceSubCategoryService invoiceSubCategoryService;
-    private Map<Long, Tax> taxes=new TreeMap<Long, Tax>();
-    private Map<Long, TradingLanguage> tradingLanguages=new TreeMap<Long, TradingLanguage>();
-    private Map<Long, DiscountPlan> discountPlans=new TreeMap<Long, DiscountPlan>();
+    private Map<Long, Tax> taxes=new TreeMap<>();
+    private Map<Long, TradingLanguage> tradingLanguages=new TreeMap<>();
+    private Map<Long, DiscountPlan> discountPlans=new TreeMap<>();
     private Map<String, String> descriptionMap = new HashMap<>();
 
 	@Inject
@@ -166,7 +166,7 @@ public class InvoicingService extends PersistenceService<Invoice> {
         return new AsyncResult<>("OK");
     }
 	private void validateInvoices(BillingRun billingRun, List<List<Invoice>> invoicesByBA) {
-        invoicesByBA.stream().forEach(invoices-> invoiceService.applyAutomaticInvoiceCheck(invoices, true, false, billingRun));
+        invoicesByBA.stream().forEach(invoices-> invoiceService.applyAutomaticInvoiceCheck(invoices, true, true, billingRun));
 	}
 
 	private List<List<Invoice>> generateInvoices(BillingRun billingRun, List<BillingAccountDetailsItem> invoicingItemsList,
@@ -709,7 +709,8 @@ public class InvoicingService extends PersistenceService<Invoice> {
         Integer delay = invoiceService.evaluateDueDelayExpression(dueDateDelayEL, billingAccount, invoice, order);
         Date dueDate = invoice.getInvoiceDate();
         if(isExceptionalBR && delay == null) {
-            delay = 0;
+        	//in exceptionalBR case, be sure the used billingCycle is the BA billin gCycle
+        	delay = invoiceService.evaluateDueDelayExpression(billingAccount.getBillingCycle().getDueDateDelayEL(), billingAccount, invoice, order);
         }
         if (delay != null) {
             dueDate = DateUtils.addDaysToDate(invoice.getInvoiceDate(), delay);

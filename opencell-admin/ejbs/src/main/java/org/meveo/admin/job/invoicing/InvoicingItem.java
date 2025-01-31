@@ -1,15 +1,23 @@
 package org.meveo.admin.job.invoicing;
+
+import static java.util.regex.Pattern.compile;
+import static java.util.stream.Collectors.toList;
+import static org.meveo.commons.utils.StringUtils.isNotBlank;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.billing.InvoiceAgregate;
+
 public class InvoicingItem {
+
+	private static final Pattern ID_SPLIT_PATTERN = compile(",");
+
 	private Long billingAccountId;
-	private Long count = 0l;
+	private Long count = 0L;
 	private Long invoiceSubCategoryId;
 	private Long userAccountId;
 	private Long taxId;
@@ -36,17 +44,24 @@ public class InvoicingItem {
 		this.amountWithTax = (BigDecimal) fields[i++];
 		this.amountTax = (BigDecimal) fields[i++];
 		this.count = (Long) fields[i++];
-		this.ilIDs = Pattern.compile(",").splitAsStream((String) fields[i++]).mapToLong(Long::parseLong).boxed().collect(Collectors.toList());
+		this.ilIDs = ID_SPLIT_PATTERN.splitAsStream((String) fields[i++]).mapToLong(Long::parseLong).boxed().collect(toList());
 		this.invoiceKey = (String) fields[i++];
-		this.subscriptionIds = Pattern.compile(",").splitAsStream((String) fields[i++]).mapToLong(Long::parseLong).boxed().collect(Collectors.toList());
+		this.subscriptionIds = Pattern.compile(",").splitAsStream((String) fields[i++]).mapToLong(Long::parseLong).boxed().collect(toList());
 		String purchaseOrderIds = (String) fields[i++];
 		if (!StringUtils.isBlank(purchaseOrderIds)) {
-			this.purchaseOrderIds = Pattern.compile(",").splitAsStream(purchaseOrderIds).mapToLong(Long::parseLong).boxed().collect(Collectors.toList());
+			this.purchaseOrderIds = ID_SPLIT_PATTERN.splitAsStream(purchaseOrderIds).mapToLong(Long::parseLong).boxed().collect(toList());
+		}
+		String subscriptionIds = (String) fields[i++];
+		if (isNotBlank(subscriptionIds)) {
+			this.subscriptionIds = ID_SPLIT_PATTERN.splitAsStream(purchaseOrderIds)
+					.mapToLong(Long::parseLong)
+					.boxed()
+					.collect(toList());
 		}
 		this.useSpecificTransactionalAmount = (boolean) fields[i++];
 		this.transactionalAmountWithoutTax = (BigDecimal) fields[i++];
 		this.transactionalAmountTax = (BigDecimal) fields[i++];
-		this.transactionalAmountWithTax = (BigDecimal) fields[i++];
+		this.transactionalAmountWithTax = (BigDecimal) fields[i];
 	}
 
 	/**

@@ -2908,7 +2908,7 @@
             <column name="id" valueNumeric="1" />
             <column name="created" valueDate="2015-03-19 00:03:59.123" />
             <column name="version" valueNumeric="1" />
-            <column name="description_en" value="Deutsch" />
+            <column name="description_en" value="German" />
             <column name="language_code" value="DEU" />
             <column name="description_i18n" value='{"ENG": "German", "FRA": "Allemand"}' />
         </insert>
@@ -2918,7 +2918,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="English" />
             <column name="language_code" value="ENG" />
-			<column name="description_i18n" value='{"ENG": "English", "FRA": "english"}' />
+			<column name="description_i18n" value='{"ENG": "English", "FRA": "Anglais"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="3" />
@@ -2926,7 +2926,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Arabic" />
             <column name="language_code" value="ARA" />
-            <column name="description_i18n" value='{"ENG": "Arabic", "FRA": "arabic"}' />
+            <column name="description_i18n" value='{"ENG": "Arabic", "FRA": "Arabe"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="4" />
@@ -2934,7 +2934,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Bulgarian" />
             <column name="language_code" value="BUL" />
-            <column name="description_i18n" value='{"ENG": "Bulgarian", "FRA": "bulgarian"}' />
+            <column name="description_i18n" value='{"ENG": "Bulgarian", "FRA": "Bulgare"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="5" />
@@ -2942,7 +2942,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Catalan" />
             <column name="language_code" value="CAT" />
-            <column name="description_i18n" value='{"ENG": "Catalan", "FRA": "catalan"}' />
+            <column name="description_i18n" value='{"ENG": "Catalan", "FRA": "Catalan"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="6" />
@@ -2950,7 +2950,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Chinese" />
             <column name="language_code" value="ZHO" />
-            <column name="description_i18n" value='{"ENG": "Chinese", "FRA": "chinese"}' />
+            <column name="description_i18n" value='{"ENG": "Chinese", "FRA": "Chinois"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="7" />
@@ -2958,7 +2958,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Danish" />
             <column name="language_code" value="DAN" />
-            <column name="description_i18n" value='{"ENG": "Danish", "FRA": "danish"}' />
+            <column name="description_i18n" value='{"ENG": "Danish", "FRA": "Danois"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="8" />
@@ -2966,7 +2966,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Spanish" />
             <column name="language_code" value="SPA" />
-            <column name="description_i18n" value='{"ENG": "Spanish", "FRA": "spanish"}' />
+            <column name="description_i18n" value='{"ENG": "Spanish", "FRA": "Espagnol"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="9" />
@@ -2974,7 +2974,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Estonian" />
             <column name="language_code" value="EST" />
-            <column name="description_i18n" value='{"ENG": "Estonian", "FRA": "estonian"}' />
+            <column name="description_i18n" value='{"ENG": "Estonian", "FRA": "Estonien"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="10" />
@@ -2982,7 +2982,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Faroese" />
             <column name="language_code" value="FAO" />
-            <column name="description_i18n" value='{"ENG": "Faroese", "FRA": "faroese"}' />
+            <column name="description_i18n" value='{"ENG": "Faroese", "FRA": "Féroïen"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="11" />
@@ -2990,7 +2990,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Finnish" />
             <column name="language_code" value="FIN" />
-            <column name="description_i18n" value='{"ENG": "Finnish", "FRA": "finnish"}' />
+            <column name="description_i18n" value='{"ENG": "Finnish", "FRA": "Finnois"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="12" />
@@ -2998,7 +2998,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="French" />
             <column name="language_code" value="FRA" />
-            <column name="description_i18n" value='{"ENG": "French", "FRA": "french"}' />
+            <column name="description_i18n" value='{"ENG": "French", "FRA": "Français"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="13" />
@@ -3006,7 +3006,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Greek" />
             <column name="language_code" value="ELL" />
-            <column name="description_i18n" value='{"ENG": "Greek", "FRA": "greek"}' />
+            <column name="description_i18n" value='{"ENG": "Greek", "FRA": "Grec"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="14" />
@@ -3014,7 +3014,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Hindi" />
             <column name="language_code" value="HIN" />
-            <column name="description_i18n" value='{"ENG": "Hindi", "FRA": "hindi"}' />
+            <column name="description_i18n" value='{"ENG": "Hindi", "FRA": "Hindi"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="15" />
@@ -3022,7 +3022,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Hungarian" />
             <column name="language_code" value="HUN" />
-            <column name="description_i18n" value='{"ENG": "Hungarian", "FRA": "hungarian"}' />
+            <column name="description_i18n" value='{"ENG": "Hungarian", "FRA": "Hongrois"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="16" />
@@ -3030,7 +3030,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Icelandic" />
             <column name="language_code" value="ISL" />
-            <column name="description_i18n" value='{"ENG": "Icelandic", "FRA": "icelandic"}' />
+            <column name="description_i18n" value='{"ENG": "Icelandic", "FRA": "Islandais"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="17" />
@@ -3038,7 +3038,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Italian" />
             <column name="language_code" value="ITA" />
-            <column name="description_i18n" value='{"ENG": "Italian", "FRA": "italian"}' />
+            <column name="description_i18n" value='{"ENG": "Italian", "FRA": "Italien"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="18" />
@@ -3046,7 +3046,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Japanese" />
             <column name="language_code" value="JPN" />
-            <column name="description_i18n" value='{"ENG": "Japanese", "FRA": "japanese"}' />
+            <column name="description_i18n" value='{"ENG": "Japanese", "FRA": "Japonais"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="19" />
@@ -3054,7 +3054,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Latvian" />
             <column name="language_code" value="LAV" />
-            <column name="description_i18n" value='{"ENG": "Latvian", "FRA": "latvian"}' />
+            <column name="description_i18n" value='{"ENG": "Latvian", "FRA": "Letton"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="20" />
@@ -3062,7 +3062,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Lithuanian" />
             <column name="language_code" value="LIT" />
-            <column name="description_i18n" value='{"ENG": "Lithuanian", "FRA": "lithuanian"}' />
+            <column name="description_i18n" value='{"ENG": "Lithuanian", "FRA": "Lituanien"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="21" />
@@ -3070,7 +3070,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Dutch" />
             <column name="language_code" value="NLD" />
-            <column name="description_i18n" value='{"ENG": "Dutch", "FRA": "dutch"}' />
+            <column name="description_i18n" value='{"ENG": "Dutch", "FRA": "Néerlandais"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="22" />
@@ -3078,7 +3078,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Norwegian" />
             <column name="language_code" value="NOR" />
-            <column name="description_i18n" value='{"ENG": "Norwegian", "FRA": "norwegian"}' />
+            <column name="description_i18n" value='{"ENG": "Norwegian", "FRA": "Norvégien"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="23" />
@@ -3086,7 +3086,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Polish" />
             <column name="language_code" value="POL" />
-            <column name="description_i18n" value='{"ENG": "Polish", "FRA": "polish"}' />
+            <column name="description_i18n" value='{"ENG": "Polish", "FRA": "Polonais"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="24" />
@@ -3094,7 +3094,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Portuguese" />
             <column name="language_code" value="POR" />
-            <column name="description_i18n" value='{"ENG": "Portuguese", "FRA": "portuguese"}' />
+            <column name="description_i18n" value='{"ENG": "Portuguese", "FRA": "Portugais"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="25" />
@@ -3102,7 +3102,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Romanian" />
             <column name="language_code" value="RON" />
-            <column name="description_i18n" value='{"ENG": "Romanian", "FRA": "romanian"}' />
+            <column name="description_i18n" value='{"ENG": "Romanian", "FRA": "Roumain"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="26" />
@@ -3110,7 +3110,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Russian" />
             <column name="language_code" value="RUS" />
-            <column name="description_i18n" value='{"ENG": "Russian", "FRA": "russian"}' />
+            <column name="description_i18n" value='{"ENG": "Russian", "FRA": "Russe"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="27" />
@@ -3118,7 +3118,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Serbian" />
             <column name="language_code" value="SRP" />
-            <column name="description_i18n" value='{"ENG": "Serbian", "FRA": "serbian"}' />
+            <column name="description_i18n" value='{"ENG": "Serbian", "FRA": "Serbe"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="28" />
@@ -3126,15 +3126,15 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Slovak" />
             <column name="language_code" value="SLK" />
-            <column name="description_i18n" value='{"ENG": "Slovak", "FRA": "slovak"}' />
+            <column name="description_i18n" value='{"ENG": "Slovak", "FRA": "Slovaque"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="29" />
             <column name="created" valueDate="2015-03-19 00:03:59.808" />
             <column name="version" valueNumeric="1" />
-            <column name="description_en" value="Slovene" />
+            <column name="description_en" value="Slovenian" />
             <column name="language_code" value="SLV" />
-            <column name="description_i18n" value='{"ENG": "Slovene", "FRA": "slovene"}' />
+            <column name="description_i18n" value='{"ENG": "Slovenian", "FRA": "Slovène"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="30" />
@@ -3142,7 +3142,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Swedish" />
             <column name="language_code" value="SWE" />
-            <column name="description_i18n" value='{"ENG": "Swedish", "FRA": "swedish"}' />
+            <column name="description_i18n" value='{"ENG": "Swedish", "FRA": "Suédois"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="31" />
@@ -3150,7 +3150,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Czech" />
             <column name="language_code" value="CES" />
-            <column name="description_i18n" value='{"ENG": "Czech", "FRA": "czech"}' />
+            <column name="description_i18n" value='{"ENG": "Czech", "FRA": "Tchèque"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="32" />
@@ -3158,7 +3158,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Turkish" />
             <column name="language_code" value="TUR" />
-            <column name="description_i18n" value='{"ENG": "Turkish", "FRA": "turkish"}' />
+            <column name="description_i18n" value='{"ENG": "Turkish", "FRA": "Turc"}' />
         </insert>
         <insert tableName="adm_language">
             <column name="id" valueNumeric="33" />
@@ -3166,7 +3166,7 @@
             <column name="version" valueNumeric="1" />
             <column name="description_en" value="Croatian" />
             <column name="language_code" value="HRV" />
-            <column name="description_i18n" value='{"ENG": "Croatian", "FRA": "croatian"}' />
+            <column name="description_i18n" value='{"ENG": "Croatian", "FRA": "Croate"}' />
         </insert>
 		<insert tableName="adm_language">
 			<column name="id" valueSequenceNext="adm_language_seq" />

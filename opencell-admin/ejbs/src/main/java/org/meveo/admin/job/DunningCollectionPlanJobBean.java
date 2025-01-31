@@ -145,11 +145,11 @@ public class DunningCollectionPlanJobBean extends BaseJobBean {
         List<String> linkedOccTemplates = getOccTemplateCodesToUse(customerBalance);
         Map<CustomerAccount, BigDecimal> customerAccountsBalance = new HashMap<>();
         customerAccounts.forEach(customerAccount -> {
-            BigDecimal balance = customerAccountService.getCustomerAccountBalance(customerAccount, linkedOccTemplates);
+            BigDecimal balance = customerAccountService.getCustomerAccountBalance(customerAccount, linkedOccTemplates, customerBalance);
             customerAccountsBalance.put(customerAccount, balance);
         });
         Map<DunningPolicy, Map<CustomerAccount, BigDecimal>> eligibleCustomerAccountsByPolicy = getEligibleCustomerAccount(sortedPolicies, customerAccountsBalance);
-        return dunningPolicyService.processEligibleCustomerAccounts(eligibleCustomerAccountsByPolicy, linkedOccTemplates);
+        return dunningPolicyService.processEligibleCustomerAccounts(eligibleCustomerAccountsByPolicy, linkedOccTemplates, customerBalance);
     }
 
     /**
@@ -184,15 +184,16 @@ public class DunningCollectionPlanJobBean extends BaseJobBean {
                 // Check if the customer account is not already added in the eligibleCustomerAccountsByPolicy and if the balance is greater than the minBalanceTrigger
                 if (eligibleCustomerAccountsByPolicy.values().stream().noneMatch(accounts -> accounts.containsKey(customerAccount)) &&
                         policy.getMinBalanceTrigger() != null &&
-                        balance.compareTo(BigDecimal.valueOf(policy.getMinBalanceTrigger())) >= 0) {
+                        balance.compareTo(BigDecimal.valueOf(policy.getMinBalanceTrigger())) >= 0 &&
+                        customerAccount.getTradingCurrency().getCurrency().getId().equals(policy.getMinBalanceTriggerCurrency().getId())) {
                     String rules = DunningUtils.getRules(policy);
                     Boolean isEligible = checkCustomerWithCondition(customerAccount, rules);
 
                     if (Boolean.TRUE.equals(isEligible)) {
-                    eligibleCustomerAccounts.put(customerAccount, balance);
+                        eligibleCustomerAccounts.put(customerAccount, balance);
                     } else {
                         log.info("Customer Account: {} is not eligible for policy rules: {}", customerAccount.getCode(), rules);
-                }
+                    }
                 }
             });
 

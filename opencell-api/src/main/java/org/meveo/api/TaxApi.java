@@ -234,6 +234,10 @@ public class TaxApi extends BaseApi {
             if (untdidTaxationCategory == null) {
                 throw new EntityDoesNotExistsException(UntdidTaxationCategory.class, postData.getTaxationCategory());
             }
+            //the taxation category cannot be “standard rate” if the tax is 0
+            if ("S".equalsIgnoreCase(postData.getTaxationCategory()) && tax.getPercent() == BigDecimal.ZERO) {
+                throw new BadRequestException("the taxation category cannot be \"standard rate\" when the tax is 0");
+            }
             tax.setUntdidTaxationCategory(untdidTaxationCategory);
         }
         if (!StringUtils.isBlank(postData.getVatex())) {

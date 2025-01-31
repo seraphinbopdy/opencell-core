@@ -16,8 +16,8 @@
 
         <h:form>
             <p:messages />
-            <p:dataTable id="datatable_caches" var="cacheInfo" value="#{cacheBean.summaryOfCaches}" paginator="true" rows="10" resizableColumns="true"
-                paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}" rowsPerPageTemplate="5,10,15" lazy="false"
+            <p:dataTable id="datatable_caches" var="cacheInfo" value="#{cacheBean.summaryOfCaches}" paginator="true" rows="50" resizableColumns="true"
+                paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}" rowsPerPageTemplate="20,30,50" lazy="false"
                 styleClass="custom-grid" rowIndexVar="rowIndex">
                 <p:column headerText="#{messages['cache.name']}" sortBy="#{cacheInfo['name']}">
                     <h:link outcome="cacheDetail" value="#{cacheInfo['name']}">

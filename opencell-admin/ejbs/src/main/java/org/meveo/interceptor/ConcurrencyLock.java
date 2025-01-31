@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 import jakarta.interceptor.InterceptorBinding;
 
 /**
- * Annotation to bind ConcurrencyLockInterceptor interceptor to apply concurrency lock based on Long parameter value
+ * Annotation to bind ConcurrencyLockInterceptor interceptor to apply concurrency lock based on Long, IEntity or String type parameter value
  * 
  * @author Andrius Karpavicius
  */
@@ -20,8 +20,14 @@ import jakarta.interceptor.InterceptorBinding;
 public @interface ConcurrencyLock {
 
     /**
-     * This attribute is used to indicate the index of a method parameter that will be used as a lock value. Parameter can point to Long type parameter or an IEntity, in which case an entitie's ID value will be used. In
-     * a case when a parameter point to some other data type of value is NULL, no lock will be applied.
+     * This attribute is used to indicate the index of a method parameter that will be used as a lock value. Parameter can point to:
+     * <ul>
+     * <li>Long type parameter</li>
+     * <li>IEntity, in which case an entitie's ID value will be used</li>
+     * <li>String type parameter, in which case a hash value of a sting will be used</li>
+     * </ul>
+     * 
+     * A case when a parameter point to some other data type of value is NULL, no lock will be applied.<br/>
      * 
      * e.g. if we annotate a method that was defined as:
      * 

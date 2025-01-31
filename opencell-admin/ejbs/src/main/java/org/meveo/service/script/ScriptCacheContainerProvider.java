@@ -17,8 +17,10 @@ import jakarta.inject.Inject;
  */
 public class ScriptCacheContainerProvider implements CacheContainerProvider, Serializable {
 
+    private static final long serialVersionUID = -1406610327757896373L;
+
     @Inject
-    private ScriptCompilerService scriptCompilerService;
+    private ScriptInstanceService scriptInstanceService;
 
     /**
      * Stores compiled scripts. Key format: &lt;cluster node code&gt;_&lt;scriptInstance code&gt;. Value is a compiled script class and class instance
@@ -50,8 +52,7 @@ public class ScriptCacheContainerProvider implements CacheContainerProvider, Ser
     public void refreshCache(String cacheName) {
 
         if (cacheName == null || cacheName.equals(compiledScripts.getName()) || cacheName.contains(compiledScripts.getName())) {
-            scriptCompilerService.clearCompiledScripts();
-            scriptCompilerService.compileAndInitializeAll();
+            scriptInstanceService.compileAndInitializeAll();
         }
     }
 
@@ -64,7 +65,7 @@ public class ScriptCacheContainerProvider implements CacheContainerProvider, Ser
     public void populateCache(String cacheName) {
 
         if (cacheName == null || cacheName.equals(compiledScripts.getName())) {
-            scriptCompilerService.compileAndInitializeAll();
+            scriptInstanceService.compileAndInitializeAll();
         }
     }
 }

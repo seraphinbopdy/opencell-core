@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import javax.enterprise.event.Event;
+import org.meveo.event.qualifier.StatusUpdated;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -188,6 +190,10 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
 
     @Inject
     private AdvancedSettingsService advancedSettingsService;
+    
+    @Inject
+    @StatusUpdated
+    protected Event<Subscription> subscriptionStatusUpdatedEvent;
 
     /**
      * Find a service instance list by subscription entity, service template code and service instance status list.
@@ -677,6 +683,7 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
 
             if(allMandatorySIActive) {
                 subscription.setStatus(SubscriptionStatusEnum.ACTIVE);
+                subscriptionStatusUpdatedEvent.fire(subscription);
             }
         }
         

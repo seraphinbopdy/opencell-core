@@ -49,6 +49,14 @@ public class TradingPricePlanVersion extends AuditableEntity {
     public TradingPricePlanVersion() {
 
     }
+	private PricePlanMatrixVersion pricePlanMatrixVersion;
+
+	@Column(name = "trading_price_el")
+	private String tradingPriceEl;
+
+	public TradingPricePlanVersion() {
+
+	}
 
     public TradingPricePlanVersion(TradingPricePlanVersion copy) {
         this.tradingPrice = copy.tradingPrice;
@@ -128,25 +136,37 @@ public class TradingPricePlanVersion extends AuditableEntity {
         this.pricePlanMatrixVersion = pricePlanMatrixVersion;
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + Objects.hash(tradingPrice, pricePlanMatrixVersion, rate, tradingCurrency, useForBillingAccounts);
-        return result;
-    }
+	public String getTradingPriceEl() {
+		return tradingPriceEl;
+	}
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (!super.equals(obj))
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        TradingPricePlanVersion other = (TradingPricePlanVersion) obj;
-        return Objects.equals(tradingPrice, other.tradingPrice) && Objects.equals(pricePlanMatrixVersion, other.pricePlanMatrixVersion) && Objects.equals(rate, other.rate)
-                && Objects.equals(tradingCurrency, other.tradingCurrency) && useForBillingAccounts == other.useForBillingAccounts;
-    }
+	public void setTradingPriceEl(String tradingPriceEl) {
+		this.tradingPriceEl = tradingPriceEl;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result
+				+ Objects.hash(tradingPrice, pricePlanMatrixVersion, rate, tradingCurrency, useForBillingAccounts, tradingPriceEl);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		TradingPricePlanVersion other = (TradingPricePlanVersion) obj;
+		return Objects.equals(tradingPrice, other.tradingPrice)
+				&& Objects.equals(pricePlanMatrixVersion, other.pricePlanMatrixVersion)
+				&& Objects.equals(rate, other.rate) && Objects.equals(tradingCurrency, other.tradingCurrency)
+				&& useForBillingAccounts == other.useForBillingAccounts
+				&& Objects.equals(tradingPriceEl, other.tradingPriceEl);
+	}
 
 }

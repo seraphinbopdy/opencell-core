@@ -459,19 +459,11 @@ public class CustomerAccountApi extends AccountEntityApi {
 				}
 			}
 
-			List<PaymentMethod> paymentMethodsFromDto = new ArrayList<>();
-            //workaround 550 case
-			boolean isFirst = true;
-
 			for (PaymentMethodDto paymentMethodDto : postData.getPaymentMethods()) {
                 if(paymentMethodDto.getPaymentMethodType() == null) {
                     throw new MissingParameterException("methodOfPayment.paymentMethodType");
                 }
 
-                if (isFirst) {
-					paymentMethodDto.setPreferred(true);
-					isFirst = false;
-				}
 				PaymentMethod paymentMethodFromDto = paymentMethodDto.fromDto(customerAccount, null, currentUser);
 				try {
 					populateCustomFields(paymentMethodDto.getCustomFields(), paymentMethodFromDto, false, true);
@@ -487,7 +479,6 @@ public class CustomerAccountApi extends AccountEntityApi {
 				int index = customerAccount.getPaymentMethods().indexOf(paymentMethodFromDto);
 				if (index < 0) {
 					customerAccount.addPaymentMethod(paymentMethodFromDto);
-					paymentMethodsFromDto.add(paymentMethodFromDto);
 				} else {
 					PaymentMethod paymentMethod = customerAccount.getPaymentMethods().get(index);
 					paymentMethod.updateWith(paymentMethodFromDto);
@@ -501,12 +492,16 @@ public class CustomerAccountApi extends AccountEntityApi {
                         log.error("Failed to associate custom field instance to an entity", e);
                         throw e;
                     }
-					paymentMethodsFromDto.add(paymentMethod);
 					customerAccount.addPaymentMethodToAudit(new Object() {
 					}.getClass().getEnclosingMethod().getName(), paymentMethod);
 				}
 
 			}
+            // check if still there is preferred PM, otherwise set the first as preferred
+            List<PaymentMethod> caPaymentMethods = customerAccount.getPaymentMethods();
+            if (!caPaymentMethods.isEmpty() && caPaymentMethods.stream().noneMatch(PaymentMethod::isPreferred)) {
+                caPaymentMethods.get(0).setPreferred(true);
+            }
 		}
 	}
 

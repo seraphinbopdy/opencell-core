@@ -38,6 +38,7 @@ import org.meveo.model.generic.wf.GenericWorkflow;
 import org.meveo.model.generic.wf.WFStatus;
 import org.meveo.model.generic.wf.WorkflowInstance;
 import org.meveo.model.generic.wf.WorkflowInstanceHistory;
+import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.service.base.BusinessEntityService;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.base.ValueExpressionWrapper;
@@ -108,18 +109,20 @@ public class GenericWorkflowService extends BusinessService<GenericWorkflow> {
             throw new BusinessException("No workflow instance for business entity " + businessEntity.getId());
         }
 
-        return executeWorkflow(businessEntity, workflowInstance, genericWorkflow);
+        return executeWorkflow(businessEntity, workflowInstance, genericWorkflow, null);
     }
 
     /**
      * Execute workflow for wf instance
      *
-     * @param workflowInstance a workflow instance
-     * @param genericWorkflow  a generic workflow
-     * @return workflowInstance an updated workflow instance
-     * @throws BusinessException
+     * @param iwfEntity  workflow interface entity
+     * @param workflowInstance workflow instance
+     * @param genericWorkflow generic workflow
+     * @param jobExecutionResult job execution result
+     * @return the workflow instance
+     * @throws BusinessException business exception
      */
-    public WorkflowInstance executeWorkflow(BusinessEntity iwfEntity, WorkflowInstance workflowInstance, GenericWorkflow genericWorkflow) throws BusinessException {
+    public WorkflowInstance executeWorkflow(BusinessEntity iwfEntity, WorkflowInstance workflowInstance, GenericWorkflow genericWorkflow, JobExecutionResultImpl jobExecutionResult) throws BusinessException {
         log.debug("Executing generic workflow script:{} on instance {}", genericWorkflow.getCode(), workflowInstance);
         try {
 
@@ -137,7 +140,7 @@ public class GenericWorkflowService extends BusinessService<GenericWorkflow> {
                 for (GWFTransition gWFTransition : listByFromStatus) {
 
                     if (matchExpression(gWFTransition.getConditionEl(), iwfEntity) && isInSameBranch(gWFTransition, executedTransition, genericWorkflow)) {
-                        workflowInstance = gWFTransitionService.executeTransition(gWFTransition, iwfEntity, workflowInstance, genericWorkflow);
+                        workflowInstance = gWFTransitionService.executeTransition(gWFTransition, iwfEntity, workflowInstance, genericWorkflow, jobExecutionResult);
                         executedTransition.add(gWFTransition);
                         break;
                     }
@@ -219,7 +222,7 @@ public class GenericWorkflowService extends BusinessService<GenericWorkflow> {
         WorkflowInstance workflowInstance = ofNullable(workflowInstanceService.findByEntityIdAndGenericWorkflow(entity.getId(), genericWorkflow)).orElseThrow(
                 () -> new BusinessException("No workflow instance found for business entity " + entity.getId()));
         if (ignoreConditionEL) {
-            return gWFTransitionService.executeTransition(transition, entity, workflowInstance, genericWorkflow);
+            return gWFTransitionService.executeTransition(transition, entity, workflowInstance, genericWorkflow, null);
         } else {
             return executeTransitionWithConditionEL(transition, entity, workflowInstance, genericWorkflow);
         }
@@ -227,13 +230,13 @@ public class GenericWorkflowService extends BusinessService<GenericWorkflow> {
 
     public WorkflowInstance executeTransitionWithConditionEL(GWFTransition transition, BusinessEntity entity, WorkflowInstance workflowInstance, GenericWorkflow genericWorkflow) {
         if (matchExpression(transition.getConditionEl(), entity)) {
-            return gWFTransitionService.executeTransition(transition, entity, workflowInstance, genericWorkflow);
+            return gWFTransitionService.executeTransition(transition, entity, workflowInstance, genericWorkflow, null);
         } else {
             return null;
         }
     }
 
-    public void executeWorkflowWithLoop(BusinessEntity iwfEntity, WorkflowInstance workflowInstance, GenericWorkflow genericWorkflow) {
+    public void executeWorkflowWithLoop(BusinessEntity iwfEntity, WorkflowInstance workflowInstance, GenericWorkflow genericWorkflow, JobExecutionResultImpl jobExecutionResult) {
         log.debug("Executing generic workflow :{} on instance {}", genericWorkflow.getCode(), workflowInstance);
         try {
             String oldStatus = "";
@@ -244,7 +247,7 @@ public class GenericWorkflowService extends BusinessService<GenericWorkflow> {
                 if (oldStatus.equals(currentStatus)) {
                     break;
                 }
-                workflowInstance = executeWorkflow(iwfEntity, workflowInstance, genericWorkflow);
+                workflowInstance = executeWorkflow(iwfEntity, workflowInstance, genericWorkflow, jobExecutionResult);
                 oldStatus = currentStatus;
                 //refresh entity  if it was updated by previous transition
                 businessEntityService.setEntityClass((Class<BusinessEntity>) ReflectionUtils.getCleanClass(iwfEntity.getClass()));

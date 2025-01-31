@@ -163,8 +163,8 @@ public class GenericWorkflowJobBean extends IteratorBasedJobBean<Object[]> {
         boolean execWithLoop = paramBeanFactory.getInstance().getPropertyAsBoolean("wf.execution_with_loop", false);
 
         if (execWithLoop) {
-            genericWorkflowService.executeWorkflowWithLoop(be, workflowInstance, genericWf);
+            genericWorkflowService.executeWorkflowWithLoop(be, workflowInstance, genericWf, jobExecutionResult);
         } else
-            genericWorkflowService.executeWorkflow(be, workflowInstance, genericWf);
+            genericWorkflowService.executeWorkflow(be, workflowInstance, genericWf, jobExecutionResult);
     }
 }

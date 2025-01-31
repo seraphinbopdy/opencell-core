@@ -23,6 +23,7 @@ import static org.meveo.admin.job.GenericWorkflowJob.GENERIC_WF;
 import static org.meveo.admin.job.GenericWorkflowJob.IWF_ENTITY;
 import static org.meveo.admin.job.GenericWorkflowJob.WF_ACTUAL_TRANSITION;
 import static org.meveo.admin.job.GenericWorkflowJob.WF_INS;
+import static org.meveo.admin.job.GenericWorkflowJob.WF_JOB_EXECUTION_RESULT;
 import static org.meveo.api.dto.generic.wf.ActionTypesEnum.ACTION_SCRIPT;
 import static org.meveo.api.dto.generic.wf.ActionTypesEnum.LOG;
 import static org.meveo.api.dto.generic.wf.ActionTypesEnum.NOTIFICATION;
@@ -47,6 +48,7 @@ import org.meveo.model.generic.wf.GenericWorkflow;
 import org.meveo.model.generic.wf.WFStatus;
 import org.meveo.model.generic.wf.WorkflowInstance;
 import org.meveo.model.generic.wf.WorkflowInstanceHistory;
+import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.notification.Notification;
 import org.meveo.model.scripts.ScriptInstance;
 import org.meveo.service.base.PersistenceService;
@@ -147,7 +149,7 @@ public class GWFTransitionService extends PersistenceService<GWFTransition> {
     }
     
     private void executeActionScript(BusinessEntity iwfEntity, WorkflowInstance workflowInstance, GenericWorkflow genericWorkflow,
-                                     GWFTransition gWFTransition, String scriptCode) {
+                                     GWFTransition gWFTransition, String scriptCode, JobExecutionResultImpl jobExecutionResult) {
         ScriptInterface script = scriptInstanceService.getScriptInstance(scriptCode);
         Map<String, Object> methodContext = new HashMap<>();
         methodContext.put(GENERIC_WF, genericWorkflow);
@@ -155,6 +157,7 @@ public class GWFTransitionService extends PersistenceService<GWFTransition> {
         methodContext.put(IWF_ENTITY, iwfEntity);
         methodContext.put(Script.CONTEXT_ACTION, scriptCode);
         methodContext.put(WF_ACTUAL_TRANSITION, gWFTransition);
+        methodContext.put(WF_JOB_EXECUTION_RESULT, jobExecutionResult);
         if (script == null) {
             log.error("Script is null");
             throw new BusinessException("script is null");
@@ -163,7 +166,7 @@ public class GWFTransitionService extends PersistenceService<GWFTransition> {
     }
     
     public void executeActions(BusinessEntity entity, WorkflowInstance workflowInstance,
-            GenericWorkflow genericWorkflow, GWFTransition transition) {
+            GenericWorkflow genericWorkflow, GWFTransition transition, JobExecutionResultImpl jobExecutionResult) {
         Map<Object, Object> context = new HashMap<>();
         context.put("entity", entity);
         context.put("transition", transition);
@@ -172,9 +175,9 @@ public class GWFTransitionService extends PersistenceService<GWFTransition> {
         for (GWFTransitionAction action : transition.getActions()) {
             try {
                 if(action.isAsynchronous()) {
-                    asyncExecution(entity, workflowInstance, genericWorkflow, transition, action, context);
+                    asyncExecution(entity, workflowInstance, genericWorkflow, transition, action, context, jobExecutionResult);
                 } else {
-                    syncExecution(entity, workflowInstance, genericWorkflow, transition, action, context);
+                    syncExecution(entity, workflowInstance, genericWorkflow, transition, action, context, jobExecutionResult);
                 }
             } catch (Exception exception) {
                 log.error(format("Action failed priority [%d] description : %s",
@@ -187,7 +190,7 @@ public class GWFTransitionService extends PersistenceService<GWFTransition> {
     @JpaAmpNewTx
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public WorkflowInstance executeTransition(GWFTransition transition, BusinessEntity entity,
-            WorkflowInstance workflowInstance, GenericWorkflow genericWorkflow) {
+            WorkflowInstance workflowInstance, GenericWorkflow genericWorkflow, JobExecutionResultImpl jobExecutionResult) {
         workflowInstance = workflowInstanceService.refreshOrRetrieve(workflowInstance);
 
         if (genericWorkflow.isEnableHistory()) {
@@ -196,7 +199,7 @@ public class GWFTransitionService extends PersistenceService<GWFTransition> {
         }
 
         if(transition.getActions() != null && !transition.getActions().isEmpty()) {
-            executeActions(entity, workflowInstance, genericWorkflow, transition);
+            executeActions(entity, workflowInstance, genericWorkflow, transition, jobExecutionResult);
         }
         WFStatus toStatus = wfStatusService.findByCodeAndGWF(transition.getToStatus(), genericWorkflow);
         workflowInstance.setCurrentStatus(toStatus);
@@ -207,12 +210,12 @@ public class GWFTransitionService extends PersistenceService<GWFTransition> {
     @Asynchronous
     private void asyncExecution(BusinessEntity entity, WorkflowInstance workflowInstance,
             GenericWorkflow genericWorkflow, GWFTransition transition, GWFTransitionAction action,
-            Map<Object, Object> context) {
+            Map<Object, Object> context, JobExecutionResultImpl jobExecutionResult) {
         try {
             if(action.getType().equalsIgnoreCase(ACTION_SCRIPT.name())) {
                 ScriptInstance scriptInstance = action.getActionScript();
                 String scriptCode = scriptInstance.getCode();
-                executeActionScript(entity, workflowInstance, genericWorkflow, transition, scriptCode);
+                executeActionScript(entity, workflowInstance, genericWorkflow, transition, scriptCode, jobExecutionResult);
             }
             if(action.getType().equalsIgnoreCase(LOG.name())) {
                 String inputToLog = evaluateExpression(action.getValueEL(), context, String.class);
@@ -234,12 +237,12 @@ public class GWFTransitionService extends PersistenceService<GWFTransition> {
     @JpaAmpNewTx
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     private void syncExecution(BusinessEntity entity, WorkflowInstance workflowInstance, GenericWorkflow genericWorkflow,
-            GWFTransition transition, GWFTransitionAction action, Map<Object, Object> context) {
+            GWFTransition transition, GWFTransitionAction action, Map<Object, Object> context, JobExecutionResultImpl jobExecutionResult) {
 
         if(action.getType().equalsIgnoreCase(ACTION_SCRIPT.name())) {
             ScriptInstance scriptInstance = action.getActionScript();
             String scriptCode = scriptInstance.getCode();
-            executeActionScript(entity, workflowInstance, genericWorkflow, transition, scriptCode);
+            executeActionScript(entity, workflowInstance, genericWorkflow, transition, scriptCode, jobExecutionResult);
         }
         if(action.getType().equalsIgnoreCase(LOG.name())) {
             String inputToLog = evaluateExpression(action.getValueEL(), context, String.class);

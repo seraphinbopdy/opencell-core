@@ -640,7 +640,7 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
         } else {
             serviceInstance.setStatus(InstanceStatusEnum.WAITING_MANDATORY);
         }
-        serviceInstance.setRequestedActivationDate(new Date());
+        serviceInstance.setRequestedActivationDate(serviceInstance.getSubscriptionDate());
         serviceInstance = update(serviceInstance);
 
         // execute subscription script
@@ -668,6 +668,7 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
         
         
         final boolean useSiRequestedDate = Boolean.TRUE.equals(advancedSettingsService.getParameter("subscriptionActivation.useActualServiceActivationDate"));
+        final Date subscriptionDate = serviceInstance.getSubscriptionDate();
         if(!waitForMandatory && !SubscriptionStatusEnum.ACTIVE.equals(subscription.getStatus())) {
             subscription.setStatus(SubscriptionStatusEnum.ACTIVE);
         } else if(waitForMandatory && !SubscriptionStatusEnum.ACTIVE.equals(subscription.getStatus())) {
@@ -682,7 +683,7 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
             boolean allMandatorySIWaiting = mandatoryProducts.isEmpty() || subscription.getServiceInstances()
                                                                                       .stream()
                                                                                       .filter(si -> mandatoryProducts.contains(si.getProductVersion().getProduct().getCode()))
-                                                                                      .allMatch(si -> InstanceStatusEnum.WAITING_MANDATORY.equals(si.getStatus()));
+                                                                                      .allMatch(si -> InstanceStatusEnum.WAITING_MANDATORY.equals(si.getStatus()) || InstanceStatusEnum.ACTIVE.equals(si.getStatus()));
 
             if(allMandatorySIWaiting) {
                 subscription.setStatus(SubscriptionStatusEnum.ACTIVE);
@@ -692,7 +693,9 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
                             .forEach(si -> {
                                 si.setStatus(InstanceStatusEnum.ACTIVE);
                                 if(!useSiRequestedDate) {
-                                    si.setStatusDate(si.getRequestedActivationDate());
+                                    si.setSubscriptionDate(si.getRequestedActivationDate());
+                                } else {
+                                    si.setSubscriptionDate(subscriptionDate);
                                 }
                             });
             } else {

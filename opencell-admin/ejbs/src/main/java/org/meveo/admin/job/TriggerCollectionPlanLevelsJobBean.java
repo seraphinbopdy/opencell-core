@@ -1,25 +1,15 @@
 package org.meveo.admin.job;
 
-import static java.util.Arrays.asList;
-import static java.util.Optional.ofNullable;
 import static org.meveo.model.billing.InvoicePaymentStatusEnum.PAID;
 import static org.meveo.model.dunning.DunningActionInstanceStatusEnum.DONE;
 import static org.meveo.model.dunning.DunningActionInstanceStatusEnum.TO_BE_DONE;
-import static org.meveo.model.payments.ActionChannelEnum.EMAIL;
-import static org.meveo.model.payments.ActionChannelEnum.LETTER;
 import static org.meveo.model.payments.ActionModeEnum.AUTOMATIC;
-import static org.meveo.model.payments.ActionTypeEnum.RETRY_PAYMENT;
-import static org.meveo.model.payments.ActionTypeEnum.SCRIPT;
-import static org.meveo.model.payments.ActionTypeEnum.SEND_NOTIFICATION;
 import static org.meveo.model.payments.DunningCollectionPlanStatusEnum.ACTIVE;
 import static org.meveo.model.payments.DunningCollectionPlanStatusEnum.FAILED;
 import static org.meveo.model.payments.DunningCollectionPlanStatusEnum.SUCCESS;
-import static org.meveo.model.payments.PaymentMethodEnum.CARD;
-import static org.meveo.model.payments.PaymentMethodEnum.DIRECTDEBIT;
 import static org.meveo.model.shared.DateUtils.addDaysToDate;
 import static org.meveo.model.shared.DateUtils.daysBetween;
 
-import java.io.File;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -29,24 +19,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.hibernate.proxy.HibernateProxy;
 import org.meveo.admin.exception.BusinessException;
-import org.meveo.api.dto.CurrencyDto;
-import org.meveo.api.dto.account.CustomerAccountDto;
-import org.meveo.apiv2.payments.AccountOperationsDetails;
-import org.meveo.apiv2.payments.ImmutableAccountOperationsDetails;
-import org.meveo.apiv2.payments.ImmutableCustomerBalance;
-import org.meveo.jpa.JpaAmpNewTx;
-import org.meveo.model.admin.Seller;
-import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.Invoice;
 import org.meveo.model.billing.InvoicePaymentStatusEnum;
-import org.meveo.model.communication.email.EmailTemplate;
 import org.meveo.model.dunning.DunningActionInstance;
 import org.meveo.model.dunning.DunningActionInstanceStatusEnum;
 import org.meveo.model.dunning.DunningCollectionPlan;
@@ -57,28 +35,16 @@ import org.meveo.model.dunning.DunningModeEnum;
 import org.meveo.model.dunning.DunningSettings;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
-import org.meveo.model.payments.CardPaymentMethod;
 import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.payments.CustomerBalance;
 import org.meveo.model.payments.DunningCollectionPlanStatusEnum;
 import org.meveo.model.payments.OCCTemplate;
-import org.meveo.model.payments.PaymentGateway;
-import org.meveo.model.payments.PaymentMethod;
-import org.meveo.model.shared.Name;
-import org.meveo.model.shared.Title;
-import org.meveo.service.billing.impl.BillingAccountService;
-import org.meveo.service.billing.impl.InvoiceService;
-import org.meveo.service.payments.impl.AccountOperationService;
 import org.meveo.service.payments.impl.CustomerAccountService;
-import org.meveo.service.payments.impl.CustomerBalanceService;
 import org.meveo.service.payments.impl.DunningActionInstanceService;
 import org.meveo.service.payments.impl.DunningCollectionPlanService;
 import org.meveo.service.payments.impl.DunningCollectionPlanStatusService;
 import org.meveo.service.payments.impl.DunningLevelInstanceService;
 import org.meveo.service.payments.impl.DunningSettingsService;
-import org.meveo.service.payments.impl.PaymentService;
-import org.meveo.service.script.Script;
-import org.meveo.service.script.ScriptInstanceService;
 
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
@@ -88,9 +54,6 @@ import jakarta.inject.Inject;
 
 @Stateless
 public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
-
-    @Inject
-    private BillingAccountService billingAccountService;
 
     @Inject
     private CustomerAccountService customerAccountService;
@@ -105,12 +68,6 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
     private DunningLevelInstanceService levelInstanceService;
 
     @Inject
-    private ScriptInstanceService scriptInstanceService;
-
-    @Inject
-    private InvoiceService invoiceService;
-
-    @Inject
     private DunningActionInstanceService actionInstanceService;
 
     @Inject
@@ -119,18 +76,9 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
     @EJB
     private TriggerCollectionPlanLevelsJobBean jobBean;
 
-    @Inject
-    private PaymentService paymentService;
-
     private final DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
     private static final String COLLECTION_PLAN_ID_MESSAGE = "Collection plan ID : ";
-    
-    @Inject
-    private CustomerBalanceService customerBalanceService;
-
-    @Inject
-    private AccountOperationService accountOperationService;
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void execute(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance) {
@@ -541,7 +489,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
             }
         }
 
-        updateCollectionPlan(collectionPlan, updateCollectionPlan);
+        updateCollectionPlan = updateCollectionPlan(collectionPlan, updateCollectionPlan);
 
         if (updateCollectionPlan) {
             collectionPlanService.update(collectionPlan);
@@ -628,9 +576,10 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
             collectionPlan.setStatus(collectionPlanStatusService.findByStatus(SUCCESS));
             collectionPlan.setNextAction(null);
             collectionPlan.setNextActionDate(null);
-            updateCollectionPlan = true;
         }
 
+        collectionPlan.setDaysOpen((int) daysBetween(collectionPlan.getStartDate(), new Date()) + 1);
+        updateCollectionPlan = true;
         return updateCollectionPlan;
     }
 
@@ -663,11 +612,13 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
         collectionPlan = collectionPlanService.refreshOrRetrieve(collectionPlan);
         actionInstance.setActionStatus(DunningActionInstanceStatusEnum.DONE);
         actionInstance.setExecutionDate(new Date());
+
         if (levelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.TO_BE_DONE) {
             levelInstance.setLevelStatus(DunningLevelInstanceStatusEnum.IN_PROGRESS);
             levelInstance.setExecutionDate(new Date());
             levelInstanceService.update(levelInstance);
         }
+
         collectionPlan.setLastActionDate(new Date());
         collectionPlan.setLastAction(actionInstance.getDunningAction().getCode());
     }

@@ -52,6 +52,8 @@ public class GenericWorkflowJob extends Job {
     public final static String WF_INS = "WF_INS";
     public final static String IWF_ENTITY = "IWF_ENTITY";
     public final static String WF_ACTUAL_TRANSITION = "WF_ACTUAL_TRANSITION";
+    public final static String WF_JOB_EXECUTION_RESULT = "WF_JOB_EXECUTION_RESULT";
+
 
     /** The generic workflow job bean. */
     @Inject

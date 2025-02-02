@@ -137,19 +137,19 @@ import jakarta.validation.constraints.Size;
 		@NamedQuery(name = "Invoice.abandoneInvoices", query = "UPDATE Invoice inv SET inv.paymentStatus = 'ABANDONED' WHERE inv.id in (:ids)"),
 })
 @NamedNativeQueries({
-        @NamedNativeQuery(name = "Invoice.rollbackAdvance", query = "update billing_invoice set invoice_balance = invoice_balance + li.amount from (select bli.linked_invoice_id, bli.amount from billing_linked_invoices bli join billing_invoice i on i.id = bli.id where i.billing_run_id = :billingRunId and bli.type = 'ADVANCEMENT_PAYMENT') li where li.linked_invoice_id = id"),
-        @NamedNativeQuery(name = "Invoice.linkWithSubscriptionsByID", query = "INSERT INTO billing_invoices_subscriptions (invoice_id, subscription_id) "
-                + "	SELECT DISTINCT il.invoice_id, rt.subscription_id FROM billing_rated_transaction rt " + "	INNER JOIN billing_invoice_line il ON rt.invoice_line_id = il.id "
-                + "	WHERE il.status = 'BILLED' and il.invoice_id=:invoiceId"),
-        @NamedNativeQuery(name = "Invoice.linkWithPurchaseOrdersByID", query = "INSERT INTO billing_invoices_purchase_orders (invoice_id, purchase_order_id) "
-                + "	SELECT DISTINCT il.invoice_id, po_sub.purchase_order_id FROM billing_rated_transaction rt "
-                + " INNER JOIN billing_invoice_line il ON rt.invoice_line_id = il.id "
-                + " INNER JOIN billing_subscription sub ON sub.id = rt.subscription_id "
-                + " INNER JOIN billing_subscriptions_purchase_orders po_sub ON po_sub.subscription_id = sub.id "
-                + "	WHERE il.status = 'BILLED' and il.invoice_id=:invoiceId"),
-        @NamedNativeQuery(name = "Invoice.linkWithSubscriptionsByBR", query = "INSERT INTO billing_invoices_subscriptions (invoice_id, subscription_id) "
-                + "	SELECT DISTINCT il.invoice_id, rt.subscription_id FROM billing_rated_transaction rt " + "	INNER JOIN billing_invoice_line il ON rt.invoice_line_id = il.id "
-                + "	WHERE il.status = 'BILLED' and il.billing_run_id=:billingRunId")
+	    @NamedNativeQuery(name = "Invoice.rollbackAdvance", query = "update billing_invoice set invoice_balance = invoice_balance + li.amount from (select bli.linked_invoice_id, bli.amount from billing_linked_invoices bli join billing_invoice i on i.id = bli.id where i.billing_run_id = :billingRunId and bli.type = 'ADVANCEMENT_PAYMENT') li where li.linked_invoice_id = id"),
+	    @NamedNativeQuery(name = "Invoice.linkWithSubscriptionsByID", query = "INSERT INTO billing_invoices_subscriptions (invoice_id, subscription_id) "
+	            + "	SELECT DISTINCT il.invoice_id, sub.subscription_id FROM billing_invoice_line il  " 
+	            + " INNER JOIN billing_invoice_lines_subscriptions sub ON sub.invoice_line_id = il.id "
+	            + "	WHERE il.invoice_id=:invoiceId"),
+	    @NamedNativeQuery(name = "Invoice.linkWithPurchaseOrdersByID", query = "INSERT INTO billing_invoices_purchase_orders (invoice_id, purchase_order_id) "
+	            + "	SELECT DISTINCT il.invoice_id, po_sub.purchase_order_id FROM billing_invoice_line il "
+	            + " INNER JOIN billing_invoice_lines_subscriptions sub ON sub.invoice_line_id = il.id "
+	            + " INNER JOIN billing_subscriptions_purchase_orders po_sub ON po_sub.subscription_id = sub.subscription_id "
+	            + "	WHERE il.invoice_id=:invoiceId"),
+	    @NamedNativeQuery(name = "Invoice.linkWithSubscriptionsByBR", query = "INSERT INTO billing_invoices_subscriptions (invoice_id, subscription_id) "
+	            + "	SELECT DISTINCT il.invoice_id, rt.subscription_id FROM billing_rated_transaction rt " + "	INNER JOIN billing_invoice_line il ON rt.invoice_line_id = il.id "
+	            + "	WHERE il.status = 'BILLED' and il.billing_run_id=:billingRunId")
 
 })
 public class Invoice extends AuditableCFEntity implements ISearchable {

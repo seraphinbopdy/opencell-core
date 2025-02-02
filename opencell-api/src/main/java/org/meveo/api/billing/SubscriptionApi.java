@@ -3401,7 +3401,7 @@ public class SubscriptionApi extends BaseApi {
         
         List<OrderAttribute> orderAttributes = productDto.getAttributeInstances().stream()
                 .map(ai -> {
-                	long count = productDto.getAttributeInstances().stream().filter(e -> ai.getOrderAttributeCode().equals(e.getOrderAttributeCode())).count();
+                	long count = productDto.getAttributeInstances().stream().filter(e -> (ai.getOrderAttributeCode()!=null ?ai.getOrderAttributeCode() : ai.getAttributeCode()).equals(e.getOrderAttributeCode()!=null ? e.getOrderAttributeCode():e.getAttributeCode() )).count();
                 	if(count > 1) {
                 		throw new InvalidParameterException("Cannot instantiate twice the same attribute {" + ai.getOrderAttributeCode() + "}");
                 	}

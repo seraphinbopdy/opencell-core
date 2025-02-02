@@ -29,7 +29,6 @@ import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonReader;
 
-import com.ingenico.connect.gateway.sdk.java.ReferenceException;
 import com.onlinepayments.ApiException;
 import com.onlinepayments.Client;
 import com.onlinepayments.CommunicatorConfiguration;
@@ -358,7 +357,7 @@ public class IngenicoDirectGatewayPayment implements GatewayPaymentInterface {
 				 mandatInfoDto.setReference(mandatResponse.getUniqueMandateReference());
 				 mandatInfoDto.setCustomer(mandatResponse.getCustomerReference());
 			 }  
-		 }catch(ReferenceException  e) {
+		 }catch(ApiException  e) {
 			 JsonReader reader = Json.createReader(new StringReader(e.getResponseBody()));
 			 JsonObject jsonObject = reader.readObject();
 			 JsonArray errorsArray = jsonObject.getJsonArray("errors");
@@ -528,7 +527,7 @@ public class IngenicoDirectGatewayPayment implements GatewayPaymentInterface {
 	@Override
 	public String createSepaDirectDebitToken(CustomerAccount customerAccount, String alias, String accountHolderName,
 			String iban) throws BusinessException {
-		return null;
+		 return null;
 	}
 
 	
@@ -566,17 +565,19 @@ public class IngenicoDirectGatewayPayment implements GatewayPaymentInterface {
 			throws BusinessException {	
 		
 		try {
-			String customerCode=customerAccount.getExternalRef1();
-			MandatInfoDto mandateDto=checkMandat(mandateReference, null);
-			if(customerCode!=null&& mandateDto.getReference()!=null && mandateDto.getCustomer()!=null) {
-				if(!customerCode.equals(mandateDto.getCustomer())) {
-					throw new EntityAlreadyExistsException("The mandate: " + mandateReference+ " already exist and is attached to another customer"); 
-				}else {
-					log.info("The mandate: {} already exist for this customer: {}",mandateReference,customerCode);
-					return;
+			try {
+				String customerCode=customerAccount.getExternalRef1();
+				MandatInfoDto mandateDto=checkMandat(mandateReference, null);
+				if(customerCode!=null&& mandateDto.getReference()!=null && mandateDto.getCustomer()!=null) {
+					if(!customerCode.equals(mandateDto.getCustomer())) {
+						throw new EntityAlreadyExistsException("The mandate: " + mandateReference+ " already exist and is attached to another customer"); 
+					}else {
+						log.info("The mandate: {} already exist for this customer: {}",mandateReference,customerCode);
+						return;
+					}		
 				}		
-			}		
-		
+			}catch(EntityDoesNotExistsException e) {	 
+			}
             BankAccountIban bankAccountIban = new BankAccountIban();
             bankAccountIban.setIban(iban);
 
@@ -631,17 +632,15 @@ public class IngenicoDirectGatewayPayment implements GatewayPaymentInterface {
             CreateMandateResponse response = getClient().merchant(paymentGateway.getMarchandId()).mandates().createMandate(body);
             log.info("createMandate RESPONSE:" + marshaller.marshal(response));
            
-		}catch(EntityDoesNotExistsException ex) {
-			throw new EntityDoesNotExistsException(ex.getMessage());
 		}catch (ApiException ev) { 
-		JsonReader reader = Json.createReader(new StringReader(ev.getResponseBody()));
-		JsonObject jsonObject = reader.readObject();
-		JsonArray errorsArray = jsonObject.getJsonArray("errors");
-		JsonObject firstError = errorsArray.getJsonObject(0);
-		String message = firstError.getString("message");
-		throw new MeveoApiException(message);
+			JsonReader reader = Json.createReader(new StringReader(ev.getResponseBody()));
+			JsonObject jsonObject = reader.readObject();
+			JsonArray errorsArray = jsonObject.getJsonArray("errors");
+			JsonObject firstError = errorsArray.getJsonObject(0);
+			String message = firstError.getString("message");
+			throw new MeveoApiException(message);
 	   }catch (Exception e) { 
-		throw new MeveoApiException(e.getMessage());
+		   throw new MeveoApiException(e.getMessage());
 		
 		
 	}

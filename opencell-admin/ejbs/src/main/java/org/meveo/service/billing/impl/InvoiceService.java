@@ -3828,7 +3828,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         if(invoice.getBillingRun() == null
                 && (invoice.getSubscriptions() == null || invoice.getSubscriptions().isEmpty())) {
         	linkInvoiceSubscriptions(invoice);
-            linkInvoicePurchaseOrderss(invoice);
+            linkInvoicePurchaseOrders(invoice);
         }
 
         entityCreatedEventProducer.fire((BaseEntity) invoice);
@@ -4333,6 +4333,9 @@ public class InvoiceService extends PersistenceService<Invoice> {
             invoice.setAmountWithoutTax(BigDecimal.ZERO);
             invoice.setAmountWithTax(BigDecimal.ZERO);
             invoice.setAmountTax(BigDecimal.ZERO);
+            invoice.setTransactionalAmountWithTax(BigDecimal.ZERO);
+            invoice.setTransactionalAmountWithoutTax(BigDecimal.ZERO);
+            invoice.setTransactionalAmountTax(BigDecimal.ZERO);
             for (TaxInvoiceAgregate taxAggregate : taxAggregates.values()) {
                 invoice.addAmountWithoutTax(taxAggregate.getAmountWithoutTax());
                 invoice.addAmountWithTax(taxAggregate.getAmountWithTax());
@@ -4412,7 +4415,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
     	getEntityManager().createNamedQuery("Invoice.linkWithSubscriptionsByID").setParameter("invoiceId", invoice.getId()).executeUpdate();
 	}
 
-    private void linkInvoicePurchaseOrderss(Invoice invoice) {
+    private void linkInvoicePurchaseOrders(Invoice invoice) {
         getEntityManager().createNamedQuery("Invoice.linkWithPurchaseOrdersByID").setParameter("invoiceId", invoice.getId()).executeUpdate();
     }
     
@@ -6485,7 +6488,8 @@ public class InvoiceService extends PersistenceService<Invoice> {
         Tax defaultTax = isExonerated ? taxService.getZeroTax() : null;
 
         // InvoiceType.taxScript will calculate all tax aggregates at once.
-        boolean calculateTaxOnSubCategoryLevel = invoice.getInvoiceType().getTaxScript() == null;
+        InvoiceType invoiceType= (InvoiceType) Hibernate.unproxy(invoice.getInvoiceType());
+        boolean calculateTaxOnSubCategoryLevel = invoiceType.getTaxScript() == null;
 
         // Should tax calculation on subcategory level be done externally
         // boolean calculateExternalTax = "YES".equalsIgnoreCase((String) appProvider.getCfValue("OPENCELL_ENABLE_TAX_CALCULATION"));

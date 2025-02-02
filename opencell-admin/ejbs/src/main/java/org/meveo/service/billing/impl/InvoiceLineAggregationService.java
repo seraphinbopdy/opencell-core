@@ -96,7 +96,16 @@ public class InvoiceLineAggregationService implements Serializable {
         Map<String, Object> bcFilter = billingCycle != null ? billingCycle.getFilters() : billingRun.getFilters();
         if (bcFilter == null && billingRun.getBillingCycle() != null) {
             bcFilter = new HashMap<>();
-            bcFilter.put("billingAccount.billingCycle.id", billingRun.getBillingCycle().getId());
+            switch(billingRun.getBillingCycle().getType()) {
+            	case BILLINGACCOUNT: 
+            		bcFilter.put("billingAccount.billingCycle.id", billingRun.getBillingCycle().getId());
+            		break;
+            	case SUBSCRIPTION: 
+            		bcFilter.put("subscription.billingCycle.id", billingRun.getBillingCycle().getId());	
+            		break;
+            	case ORDER: 
+            		bcFilter.put("orderInfo.commercialOrder.billingCycle.id", billingRun.getBillingCycle().getId());	
+                   }
         }
         if (bcFilter == null) {
             throw new BusinessException("No filter found for billingRun " + billingRun.getId());

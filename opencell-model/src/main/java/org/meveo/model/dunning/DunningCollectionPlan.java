@@ -408,4 +408,23 @@ public class DunningCollectionPlan extends AuditableEntity {
     public void setRelatedInvoices(List<Invoice> relatedInvoices) {
         this.relatedInvoices = relatedInvoices;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        } else if (obj == null) {
+            return false;
+        } else if (!(obj instanceof DunningCollectionPlan)) {
+            return false;
+        }
+
+        DunningCollectionPlan other = (DunningCollectionPlan) obj;
+
+        if (getId() != null && other.getId() != null && getId().equals(other.getId())) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

@@ -127,6 +127,9 @@ import org.meveo.service.payments.impl.CustomerAccountService;
 import org.meveo.service.payments.impl.PaymentMethodService;
 import org.meveo.service.script.offer.OfferModelScriptService;
 import org.meveo.service.securityDeposit.impl.FinanceSettingsService;
+import jakarta.enterprise.event.Event;
+import org.meveo.event.qualifier.StatusUpdated;
+
 
 import jakarta.annotation.Resource;
 import jakarta.ejb.EJB;
@@ -199,6 +202,10 @@ public class SubscriptionService extends BusinessService<Subscription> {
     private MethodCallingUtils methodCallingUtils;
     @Inject
     private BillingAccountService billingAccountService;
+    
+    @Inject
+    @StatusUpdated
+    protected Event<Subscription> subscriptionStatusUpdatedEvent;
 
     @MeveoAudit
     @Override
@@ -303,6 +310,7 @@ public class SubscriptionService extends BusinessService<Subscription> {
         subscription.setTerminationDate(cancelationDate);
         subscription.setStatus(CANCELED);
         subscription = update(subscription);
+        subscriptionStatusUpdatedEvent.fire(subscription);
 
         return subscription;
     }
@@ -332,6 +340,7 @@ public class SubscriptionService extends BusinessService<Subscription> {
         subscription.setTerminationDate(suspensionDate);
         subscription.setStatus(SubscriptionStatusEnum.SUSPENDED);
         subscription = update(subscription);
+        subscriptionStatusUpdatedEvent.fire(subscription);
         for (Access access : subscription.getAccessPoints()) {
             accessService.disable(access);
         }
@@ -363,6 +372,7 @@ public class SubscriptionService extends BusinessService<Subscription> {
         }
 
         subscription = update(subscription);
+        subscriptionStatusUpdatedEvent.fire(subscription);
 
         for (Access access : subscription.getAccessPoints()) {
             accessService.enable(access);
@@ -503,6 +513,7 @@ public class SubscriptionService extends BusinessService<Subscription> {
         subscription.setToValidity(terminationDate);
         subscription.setStatus(SubscriptionStatusEnum.RESILIATED);
         subscription = update(subscription);
+        subscriptionStatusUpdatedEvent.fire(subscription);
 
         for (Access access : subscription.getAccessPoints()) {
             access.setEndDate(terminationDate);
@@ -633,6 +644,7 @@ public class SubscriptionService extends BusinessService<Subscription> {
             } else {
                 sub.setStatus(ACTIVE);
                 update(sub);
+                subscriptionStatusUpdatedEvent.fire(sub);
             }
         }
         return ratingResult;

@@ -631,13 +631,13 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
 
     /**
      * Launch payment Action or retry payment
-     * @param collectionPlan
+     * @param collectionPlan DunningCollectionPlan
      */
     public void launchPaymentAction(DunningCollectionPlan collectionPlan) {
         PaymentMethod preferredPaymentMethod = null;
         CustomerAccount customerAccount = null;
 
-        if (collectionPlan.getBillingAccount() != null && collectionPlan.getBillingAccount().getCustomerAccount() != null && collectionPlan.getBillingAccount().getCustomerAccount().getPaymentMethods() != null) {
+        if (collectionPlan != null && collectionPlan.getBillingAccount() != null && collectionPlan.getBillingAccount().getCustomerAccount() != null && collectionPlan.getBillingAccount().getCustomerAccount().getPaymentMethods() != null) {
             preferredPaymentMethod = collectionPlan
                     .getBillingAccount()
                     .getCustomerAccount()
@@ -647,7 +647,7 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
                     .findFirst()
                     .orElseThrow(() -> new BusinessException("No preferred payment method found for customer account"
                             + collectionPlan.getBillingAccount().getCustomerAccount().getCode()));
-        } else if(collectionPlan.getCustomerAccount() != null && collectionPlan.getCustomerAccount().getPaymentMethods() != null) {
+        } else if(collectionPlan != null &&  collectionPlan.getCustomerAccount() != null && collectionPlan.getCustomerAccount().getPaymentMethods() != null) {
             customerAccount = collectionPlan.getCustomerAccount();
             preferredPaymentMethod = collectionPlan
                     .getCustomerAccount()
@@ -659,7 +659,7 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
                             + collectionPlan.getCustomerAccount().getCode()));
         }
 
-        if (customerAccount != null && preferredPaymentMethod != null) {
+        if (collectionPlan != null && customerAccount != null && preferredPaymentMethod != null) {
             //PaymentService.doPayment consider amount to pay in cent so amount should be * 100
             //long amountToPay = collectionPlan.getRelatedInvoice().getNetToPay().multiply(BigDecimal.valueOf(100)).longValue();
             if (collectionPlan.getRelatedInvoices() != null && !collectionPlan.getRelatedInvoices().isEmpty()) {

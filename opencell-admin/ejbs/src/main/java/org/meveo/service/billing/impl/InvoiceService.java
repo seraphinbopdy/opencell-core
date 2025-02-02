@@ -6370,7 +6370,6 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
                     if (!ilMassUpdates.isEmpty() || !ilUpdates.isEmpty()) {
                         em.flush();
-                        em.clear();
                     }
                 }
             }

@@ -127,7 +127,9 @@ import org.meveo.service.payments.impl.CustomerAccountService;
 import org.meveo.service.payments.impl.PaymentMethodService;
 import org.meveo.service.script.offer.OfferModelScriptService;
 import org.meveo.service.securityDeposit.impl.FinanceSettingsService;
-import javax.enterprise.event.Event;
+import jakarta.enterprise.event.Event;
+import org.meveo.event.qualifier.StatusUpdated;
+
 
 import jakarta.annotation.Resource;
 import jakarta.ejb.EJB;
@@ -200,7 +202,6 @@ public class SubscriptionService extends BusinessService<Subscription> {
     private MethodCallingUtils methodCallingUtils;
     @Inject
     private BillingAccountService billingAccountService;
-    import org.meveo.event.qualifier.StatusUpdated;
     
     @Inject
     @StatusUpdated

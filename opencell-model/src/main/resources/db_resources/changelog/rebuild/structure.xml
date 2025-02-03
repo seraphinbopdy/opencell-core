@@ -13792,6 +13792,7 @@
             </column>
             <column name="rate" type="numeric(23, 12)" />
             <column name="use_for_billing_accounts" type="${type.boolean}" />
+            <column name="trading_price_el" type="varchar(2000)" />
         </createTable>
     </changeSet>
 
@@ -14330,14 +14331,14 @@
             <column name="status" type="varchar(20)"><constraints nullable="false"/></column>
             <column name="transaction_date" type="datetime"><constraints nullable="false" /></column>
             <column name="capture_date" type="datetime"><constraints nullable="true" /></column>
-            <column name="cancel_date" type="datetime"><constraints nullable="true" /></column>           
-            <column name="reference" type="varchar(255)"><constraints nullable="false" unique="true" /></column>  
-            <column name="amount" type="numeric(23, 12)" ><constraints nullable="false" /></column>  
-            <column name="amount_captured" type="numeric(23, 12)" ><constraints nullable="true" /></column>  
+            <column name="cancel_date" type="datetime"><constraints nullable="true" /></column>
+            <column name="reference" type="varchar(255)"><constraints nullable="false" unique="true" /></column>
+            <column name="amount" type="numeric(23, 12)" ><constraints nullable="false" /></column>
+            <column name="amount_captured" type="numeric(23, 12)" ><constraints nullable="true" /></column>
             <column name="error_detail" type="varchar(2000)"/>
             <column name="customer_account_id" type="bigint" />
             <column name="card_payment_method_id" type="bigint" ><constraints nullable="false" /></column>
-            <column name="payment_gateway_id" type="bigint" ><constraints nullable="false" /></column>           
+            <column name="payment_gateway_id" type="bigint" ><constraints nullable="false" /></column>
         </createTable>
     </changeSet>
 
@@ -20905,7 +20906,9 @@
     <changeSet id="#INTRD-28777_missing_language" author="a.rouaguebe_ext" />
     <changeSet id="#INTRD-28708_20250122_fix_language" author="a.rouaguebe_ext" />
     <changeSet id="#INTRD-26593_20241129" author="TarikFA." />
-    
+    <changeSet id="#INTRD-29012_20250131" author="TarikFA." />
+
+
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 
 </databaseChangeLog>

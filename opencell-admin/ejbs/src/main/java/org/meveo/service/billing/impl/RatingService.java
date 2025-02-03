@@ -1775,10 +1775,22 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
             if (!pricePlanMatrixVersion.isMatrix()) {
                 TradingPricePlanVersion tradingPPVersion = getTradingPPVersionFrom(pricePlanMatrixVersion, tradingCurrency);
                 if (tradingPPVersion != null) {
-                    if (appProvider.isEntreprise()) {
-                        priceWithoutTax = tradingPPVersion.getTradingPrice();
-                    } else {
-                        priceWithTax = tradingPPVersion.getTradingPrice();
+                    if(StringUtils.isNotBlank(tradingPPVersion.getTradingPriceEl())) {
+                        BigDecimal priceTemp = elUtils.evaluateAmountExpression(tradingPPVersion.getTradingPriceEl(), walletOperation, walletOperation.getWallet().getUserAccount(), null, priceWithoutTax);
+                        if (priceTemp == null) {
+                            throw new BusinessException("Can't evaluate price for price plan " + pricePlan.getId() + " EL:" + tradingPPVersion.getTradingPriceEl());
+                        }
+                        if (appProvider.isEntreprise()) {
+                            priceWithoutTax = priceTemp;
+                        } else {
+                            priceWithTax = priceTemp;
+                        }
+                    }else {
+                        if (appProvider.isEntreprise()) {
+                            priceWithoutTax = tradingPPVersion.getTradingPrice();
+                        } else {
+                            priceWithTax = tradingPPVersion.getTradingPrice();
+                        }
                     }
                     walletOperation.setUseSpecificPriceConversion(true);
                 } else {

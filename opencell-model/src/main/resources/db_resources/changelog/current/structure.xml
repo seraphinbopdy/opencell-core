@@ -17643,4 +17643,10 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
         </addColumn>
     </changeSet>
 
+    <changeSet id="#INTRD-29012_20250131" author="TarikFA." >
+        <addColumn tableName="cpq_trading_price_plan_version">
+            <column name="trading_price_el" type="varchar(2000)" />
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

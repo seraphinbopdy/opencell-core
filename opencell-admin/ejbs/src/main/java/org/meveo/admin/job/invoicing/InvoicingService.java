@@ -194,7 +194,7 @@ public class InvoicingService extends PersistenceService<Invoice> {
     private void createAggregatesAndInvoiceFromInvoicingItems(BillingAccountDetailsItem billingAccountDetailsItem, BillingRun billingRun, List<Invoice> invoices, BillingCycle billingCycle, BillingAccount billingAccount, boolean isFullAutomatic){
 
     	for (List<InvoicingItem> groupedItems : billingAccountDetailsItem.getInvoicingItems()) {
-	        final Invoice invoice = initInvoice(billingAccountDetailsItem, billingRun, billingAccount, billingCycle, isFullAutomatic);
+	        final Invoice invoice = initInvoice(billingAccountDetailsItem, billingRun, billingAccount, billingCycle, isFullAutomatic, groupedItems);
 	        Set<SubCategoryInvoiceAgregate> invoiceSCAs = createInvoiceAgregates(billingAccountDetailsItem, billingAccount, invoice, groupedItems);
 	        evalDueDate(invoice, billingCycle, null, billingAccountDetailsItem.getCaDueDateDelayEL(), billingRun.isExceptionalBR());
 	        invoiceService.setInitialCollectionDate(invoice, billingCycle, billingRun);
@@ -293,13 +293,12 @@ public class InvoicingService extends PersistenceService<Invoice> {
         addInvoiceAggregateWithAmounts(invoice, scAggregate);
         itemsBySubCategory.put(scAggregate,items);
     }
-    private Invoice initInvoice(BillingAccountDetailsItem billingAccountDetailsItem, BillingRun billingRun, BillingAccount billingAccount, BillingCycle billingCycle, boolean isFullAutomatic) {
-        InvoiceType invoiceType = invoiceTypeService.retrieveIfNotManaged(invoiceService.determineInvoiceType(false, false, false, billingCycle, billingRun, billingAccount));
+    private Invoice initInvoice(BillingAccountDetailsItem billingAccountDetailsItem, BillingRun billingRun, BillingAccount billingAccount, BillingCycle billingCycle, boolean isFullAutomatic, List<InvoicingItem> groupedItems) {
         Invoice invoice = new Invoice();
         invoice.setBillingAccount(billingAccount);
         invoice.setSeller(billingAccountDetailsItem.getSellerId() != null ? getEntityManager().getReference(Seller.class, billingAccountDetailsItem.getSellerId()) : null);
         invoice.setStatus(isFullAutomatic?InvoiceStatusEnum.VALIDATED:InvoiceStatusEnum.DRAFT);
-        invoice.setInvoiceType(invoiceType);
+        
         invoice.setInvoiceDate(billingRun.getInvoiceDate());
         if (billingRun != null) {
             invoice.setBillingRun(billingRun);
@@ -317,6 +316,9 @@ public class InvoicingService extends PersistenceService<Invoice> {
 		invoice.setDueBalance(balance.setScale(getInvoiceRounding(), getRoundingMode()));
         invoice.setNewInvoicingProcess(true);
         populateCustomFieldDefaultValues(invoice);
+        invoice.setInvoiceKey(groupedItems.get(0).getInvoiceKey());
+        InvoiceType invoiceType = invoiceTypeService.retrieveIfNotManaged(invoiceService.determineInvoiceType(false, false, false, billingCycle, billingRun, billingAccount, invoice));
+        invoice.setInvoiceType(invoiceType);
         return invoice;
     }
 

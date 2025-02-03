@@ -3299,7 +3299,31 @@ public class InvoiceService extends PersistenceService<Invoice> {
      * @return Applicable invoice type
      * @throws BusinessException General business exception
      */
+    @Deprecated
     public InvoiceType determineInvoiceType(boolean isPrepaid, boolean isDraft, boolean isDepositInvoice, BillingCycle billingCycle, BillingRun billingRun, BillingAccount billingAccount) throws BusinessException {
+    	return determineInvoiceType(isPrepaid, isDraft, isDepositInvoice, billingCycle, billingRun, billingAccount, null);
+    }
+    
+    /**
+     * Determine invoice type given the following criteria
+     *
+     * If is a prepaid invoice, default prepaid type is used.<br/>
+     * If is a draft invoice, default draft type is used.<br/>
+     * Otherwise invoice type is determined in the following order:<br/>
+     * 1. billingCycle.invoiceTypeEl expression evaluated with billingRun and billingAccount a parameters, <br/>
+     * 2. bilingCycle.invoiceType, <br/>
+     * 3. Default commercial invoice type
+     *
+     * @param isPrepaid Is it for prepaid invoice. If True, default prepaid type is used. Excludes other criteria.
+     * @param isDraft Is it a draft invoice. If true, default draft type is used. Excludes other criteria.
+     * @param billingCycle Billing cycle
+     * @param billingRun Billing run
+     * @param billingAccount Billing account
+     * @param Invoice current invoice to calculate type
+     * @return Applicable invoice type
+     * @throws BusinessException General business exception
+     */
+	public InvoiceType determineInvoiceType(boolean isPrepaid, boolean isDraft, boolean isDepositInvoice, BillingCycle billingCycle, BillingRun billingRun, BillingAccount billingAccount, Invoice invoice) {
         InvoiceType invoiceType = null;
 
         if (billingRun != null && billingRun.getInvoiceType() != null) {
@@ -3311,7 +3335,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
             invoiceType = invoiceTypeService.getDefaultDeposit();
         } else {
             if (billingCycle != null && !org.apache.commons.lang3.StringUtils.isBlank(billingCycle.getInvoiceTypeEl())) {
-                String invoiceTypeCode = evaluateInvoiceType(billingCycle.getInvoiceTypeEl(), billingRun, billingAccount);
+                String invoiceTypeCode = evaluateInvoiceType(billingCycle.getInvoiceTypeEl(), billingRun, billingAccount, invoice);
                 invoiceType = invoiceTypeService.findByCode(invoiceTypeCode);
             }
             if (billingCycle != null && invoiceType == null) {
@@ -3322,13 +3346,19 @@ public class InvoiceService extends PersistenceService<Invoice> {
             }
         }
         return invoiceType;
-    }
+	}
 
-    public String evaluateInvoiceType(String expression, BillingRun billingRun, BillingAccount billingAccount) {
+	@Deprecated
+	public String evaluateInvoiceType(String expression, BillingRun billingRun, BillingAccount billingAccount) {
+		return evaluateInvoiceType(expression, billingRun, billingAccount, null);
+	}
+	
+    public String evaluateInvoiceType(String expression, BillingRun billingRun, BillingAccount billingAccount, Invoice invoice) {
         String invoiceTypeCode = null;
 
         if (!isBlank(expression)) {
             Map<Object, Object> contextMap = new HashMap<>();
+            contextMap.put("invoice", invoice);
             contextMap.put("br", billingRun);
             contextMap.put("ba", billingAccount);
 

@@ -46,11 +46,6 @@ public class TradingPricePlanVersion extends AuditableEntity {
     @JoinColumn(name = "price_plan_matrix_version_id")
     private PricePlanMatrixVersion pricePlanMatrixVersion;
 
-    public TradingPricePlanVersion() {
-
-    }
-	private PricePlanMatrixVersion pricePlanMatrixVersion;
-
 	@Column(name = "trading_price_el")
 	private String tradingPriceEl;
 

@@ -6487,8 +6487,8 @@ public class InvoiceService extends PersistenceService<Invoice> {
         Tax defaultTax = isExonerated ? taxService.getZeroTax() : null;
 
         // InvoiceType.taxScript will calculate all tax aggregates at once.
-        InvoiceType invoiceType= (InvoiceType) Hibernate.unproxy(invoice.getInvoiceType());
-        boolean calculateTaxOnSubCategoryLevel = invoiceType.getTaxScript() == null;
+        Hibernate.initialize(invoice.getInvoiceType());
+        boolean calculateTaxOnSubCategoryLevel = invoice.getInvoiceType().getTaxScript() == null;
 
         // Should tax calculation on subcategory level be done externally
         // boolean calculateExternalTax = "YES".equalsIgnoreCase((String) appProvider.getCfValue("OPENCELL_ENABLE_TAX_CALCULATION"));

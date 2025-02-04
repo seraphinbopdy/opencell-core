@@ -23,6 +23,8 @@ public class TradingPricePlanVersionDto extends BaseEntityDto {
 
 	private CurrencyDto tradingCurrency;
 
+	private String tradingPriceEl;
+
 	/**
 	 * @return the pricePlanMatrixVersionId
 	 */
@@ -93,4 +95,11 @@ public class TradingPricePlanVersionDto extends BaseEntityDto {
 		this.tradingCurrency = tradingCurrency;
 	}
 
+	public String getTradingPriceEl() {
+		return tradingPriceEl;
+	}
+
+	public void setTradingPriceEl(String tradingPriceEl) {
+		this.tradingPriceEl = tradingPriceEl;
+	}
 }

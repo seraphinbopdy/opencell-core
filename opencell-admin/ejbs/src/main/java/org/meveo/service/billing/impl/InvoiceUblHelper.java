@@ -1,7 +1,113 @@
 package org.meveo.service.billing.impl;
 
 
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.*;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.AdditionalStreetName;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.AllowanceChargeReason;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.AllowanceChargeReasonCode;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Amount;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.BaseAmount;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.BaseQuantity;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.BuildingNumber;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ChargeIndicator;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CityName;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CompanyID;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CompanyLegalForm;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CountrySubentity;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CreditNoteTypeCode;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CreditedQuantity;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CountrySubentityCode;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CustomizationID;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Department;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Description;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.DescriptionCode;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.DocumentCurrencyCode;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.DueDate;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ElectronicMail;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.EndDate;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.EndpointID;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.FamilyName;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.FirstName;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ID;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.IdentificationCode;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.InvoiceTypeCode;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.InvoicedQuantity;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.IssueDate;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.JobTitle;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Line;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.LineExtensionAmount;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Note;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PayableAmount;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PaymentMeansCode;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Percent;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PostalZone;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PrepaidAmount;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PriceAmount;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ProfileID;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.RegistrationName;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.SalesOrderID;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.StartDate;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.StreetName;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxAmount;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxCurrencyCode;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxExclusiveAmount;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxExemptionReason;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxExemptionReasonCode;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxInclusiveAmount;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxTypeCode;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxableAmount;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Telephone;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.UBLVersionID;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.IndustryClassificationCode;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PrimaryAccountNumberID;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.HolderName;
+import oasis.names.specification.ubl.schema.xsd.creditnote_2.CreditNote;
+import oasis.names.specification.ubl.schema.xsd.invoice_2.Invoice;
+import oasis.names.specification.ubl.schema.xsd.invoice_2.ObjectFactory;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.logging.log4j.util.Strings;
+import org.hibernate.Hibernate;
+import org.meveo.admin.exception.BusinessException;
+import org.meveo.admin.storage.StorageFactory;
+import org.meveo.api.exception.EntityDoesNotExistsException;
+import org.meveo.commons.utils.EjbUtils;
+import org.meveo.commons.utils.ParamBean;
+import org.meveo.commons.utils.StringUtils;
+import org.meveo.model.RegistrationNumber;
+import org.meveo.model.admin.Seller;
+import org.meveo.model.article.AccountingArticle;
+import org.meveo.model.billing.BillingAccount;
+import org.meveo.model.billing.InvoiceLine;
+import org.meveo.model.billing.InvoiceType;
+import org.meveo.model.billing.InvoiceTypeEnum;
+import org.meveo.model.billing.IsoIcd;
+import org.meveo.model.billing.LinkedInvoice;
+import org.meveo.model.billing.SubCategoryInvoiceAgregate;
+import org.meveo.model.billing.Tax;
+import org.meveo.model.billing.TaxInvoiceAgregate;
+import org.meveo.model.billing.TradingCurrency;
+import org.meveo.model.billing.UntdidAllowanceCode;
+import org.meveo.model.billing.UntdidTaxationCategory;
+import org.meveo.model.billing.UserAccount;
+import org.meveo.model.billing.VatDateCodeEnum;
+import org.meveo.model.cpq.commercial.CommercialOrder;
+import org.meveo.model.crm.Provider;
+import org.meveo.model.payments.*;
+import org.meveo.model.shared.Address;
+import org.meveo.model.shared.ContactInformation;
+import org.meveo.model.shared.Name;
+import org.meveo.model.shared.Title;
+import org.meveo.service.admin.impl.TradingCurrencyService;
+import org.meveo.service.base.ValueExpressionWrapper;
+import org.meveo.service.cpq.order.CommercialOrderService;
+import org.meveo.service.crm.impl.ProviderService;
 
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -19,161 +125,22 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.hibernate.Hibernate;
-import org.meveo.admin.exception.BusinessException;
-import org.meveo.admin.storage.StorageFactory;
-import org.meveo.commons.utils.EjbUtils;
-import org.meveo.commons.utils.ParamBean;
-import org.meveo.commons.utils.StringUtils;
-import org.meveo.model.RegistrationNumber;
-import org.meveo.model.admin.Seller;
-import org.meveo.model.article.AccountingArticle;
-import org.meveo.model.billing.BillingAccount;
-import org.meveo.model.billing.InvoiceLine;
-import org.meveo.model.billing.InvoiceType;
-import org.meveo.model.billing.InvoiceTypeEnum;
-import org.meveo.model.billing.IsoIcd;
-import org.meveo.model.billing.LinkedInvoice;
-import org.meveo.model.billing.SubCategoryInvoiceAgregate;
-import org.meveo.model.billing.Tax;
-import org.meveo.model.billing.TaxInvoiceAgregate;
-import org.meveo.model.billing.UntdidTaxationCategory;
-import org.meveo.model.billing.UserAccount;
-import org.meveo.model.billing.VatDateCodeEnum;
-import org.meveo.model.cpq.commercial.CommercialOrder;
-import org.meveo.model.crm.Provider;
-import org.meveo.model.payments.CardPaymentMethod;
-import org.meveo.model.payments.CheckPaymentMethod;
-import org.meveo.model.payments.CustomerAccount;
-import org.meveo.model.payments.DDPaymentMethod;
-import org.meveo.model.payments.PaymentMethod;
-import org.meveo.model.shared.Address;
-import org.meveo.model.shared.ContactInformation;
-import org.meveo.model.shared.Name;
-import org.meveo.model.shared.Title;
-import org.meveo.service.base.ValueExpressionWrapper;
-import org.meveo.service.cpq.order.CommercialOrderService;
-import org.meveo.service.crm.impl.ProviderService;
-
-import jakarta.xml.bind.JAXBContext;
-import jakarta.xml.bind.JAXBException;
-import jakarta.xml.bind.Marshaller;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.AddressLine;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.AddressType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.AllowanceChargeType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.BillingReference;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.BranchType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.CardAccount;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.ContactType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.CountryType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.CreditNoteLineType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.CustomerPartyType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.DeliveryType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.DocumentReferenceType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.FinancialAccountType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.FinancialInstitution;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.InvoiceLineType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.ItemType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.LocationType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.MonetaryTotalType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.OrderReference;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyIdentification;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyLegalEntity;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyName;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyTaxScheme;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PartyType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PaymentMeans;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PaymentTermsType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PeriodType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PersonType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.PriceType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.ServiceProviderParty;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.SupplierPartyType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.TaxCategoryType;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.TaxScheme;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.TaxSubtotal;
-import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.TaxTotalType;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.AdditionalStreetName;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.AllowanceChargeReason;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.AllowanceChargeReasonCode;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Amount;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.BaseAmount;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.BaseQuantity;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ChargeIndicator;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CityName;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CompanyID;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CompanyLegalForm;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CountrySubentity;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CountrySubentityCode;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CreditNoteTypeCode;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CreditedQuantity;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.CustomizationID;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Department;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Description;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.DescriptionCode;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.DocumentCurrencyCode;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.DueDate;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ElectronicMail;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.EndDate;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.EndpointID;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.FamilyName;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.FirstName;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.HolderName;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ID;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.IdentificationCode;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.IndustryClassificationCode;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.InvoiceTypeCode;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.InvoicedQuantity;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.IssueDate;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.JobTitle;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Line;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.LineExtensionAmount;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Note;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PayableAmount;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PaymentMeansCode;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Percent;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PostalZone;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PrepaidAmount;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PriceAmount;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.PrimaryAccountNumberID;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ProfileID;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.RegistrationName;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.SalesOrderID;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.StartDate;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.StreetName;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxAmount;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxCurrencyCode;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxExclusiveAmount;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxExemptionReason;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxExemptionReasonCode;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxInclusiveAmount;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxTypeCode;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxableAmount;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Telephone;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.UBLVersionID;
-import oasis.names.specification.ubl.schema.xsd.creditnote_2.CreditNote;
-import oasis.names.specification.ubl.schema.xsd.invoice_2.Invoice;
-import oasis.names.specification.ubl.schema.xsd.invoice_2.ObjectFactory;
-
+import static org.meveo.model.billing.InvoiceTypeEnum.ADVANCEMENT_PAYMENT;
 
 public class InvoiceUblHelper {
-	
-	
+
+
 	private final static InvoiceUblHelper INSTANCE = new InvoiceUblHelper();
 	private final static oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ObjectFactory objectFactorycommonBasic;
 	private final static oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.ObjectFactory objectFactoryCommonAggrement;
-	
+
 	private final static UntdidAllowanceCodeService untdidAllowanceCodeService;
 	private final static InvoiceAgregateService invoiceAgregateService;
 	private final static PaymentTermService paymentTermService;
 	private final static EinvoiceSettingService einvoiceSettingService;
 	private final static ProviderService providerService;
 	private final static CommercialOrderService commercialOrderService;
+	private final static TradingCurrencyService tradingCurrencyService;
 
 	private static final String XUN = "XUN";
 	public static final String ISO_IEC_6523 = "ISO/IEC 6523";
@@ -181,10 +148,10 @@ public class InvoiceUblHelper {
 	public static final String SIREN = "0002";
 	private static final String IV = "IV";
 	private static final String UNCL_3035 = "UNCL 3035";
-	
+
 	private Map<String, String> descriptionMap = new HashMap<>();
 	private static int rounding = 2;
-	
+
 	static {
 		objectFactorycommonBasic = new oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ObjectFactory();
 		objectFactoryCommonAggrement = new oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_2.ObjectFactory();
@@ -194,16 +161,17 @@ public class InvoiceUblHelper {
 		einvoiceSettingService = (EinvoiceSettingService) EjbUtils.getServiceInterface(EinvoiceSettingService.class.getSimpleName());
 		providerService = (ProviderService) EjbUtils.getServiceInterface(ProviderService.class.getSimpleName());
 		commercialOrderService = (CommercialOrderService) EjbUtils.getServiceInterface(CommercialOrderService.class.getSimpleName());
+		tradingCurrencyService = (TradingCurrencyService) EjbUtils.getServiceInterface(TradingCurrencyService.class.getSimpleName());
 		Provider provider = providerService.getProvider();
 		if(provider != null) {
 			rounding = provider.getInvoiceRounding();
+		}
 	}
-	}
-	
+
 	private InvoiceUblHelper(){}
-	
+
 	public static InvoiceUblHelper getInstance(){ return  INSTANCE; }
-	
+
 	public Path createInvoiceUBL(org.meveo.model.billing.Invoice invoice){
 		Invoice invoiceXml = new ObjectFactory().createInvoice();
 		InvoiceType invoiceType = invoice.getInvoiceType();
@@ -213,17 +181,18 @@ public class InvoiceUblHelper {
 			creditNote = new oasis.names.specification.ubl.schema.xsd.creditnote_2.ObjectFactory().createCreditNote();
 		}
 		String invoiceLanguageCode = invoice.getBillingAccount().getTradingLanguage() != null ? invoice.getBillingAccount().getTradingLanguage().getLanguage() != null ?
-																								invoice.getBillingAccount().getTradingLanguage().getLanguage().getLanguageCode() : null : null;
+				invoice.getBillingAccount().getTradingLanguage().getLanguage().getLanguageCode() : null : null;
 		setUblExtension(invoiceXml, creditNote);
-		setAllowanceCharge(invoice, invoiceXml, creditNote);
-		
-		
+
+		List<TaxInvoiceAgregate> taxInvoiceAgregates = null;
+
 		if (CollectionUtils.isNotEmpty(invoice.getInvoiceAgregates())) {
-			List<TaxInvoiceAgregate> taxInvoiceAgregates = invoice.getInvoiceAgregates().stream().filter(invAgg -> "T".equals(invAgg.getDescriminatorValue()))
+			taxInvoiceAgregates = invoice.getInvoiceAgregates().stream().filter(invAgg -> "T".equals(invAgg.getDescriminatorValue()))
 					.map(invAgg -> (TaxInvoiceAgregate) invAgg)
 					.collect(Collectors.toList());
 			setTaxTotal(taxInvoiceAgregates, invoice.getAmountTax(), invoiceXml, creditNote,  invoice.getTradingCurrency() != null ? invoice.getTradingCurrency().getCurrencyCode() : null);
 		}
+		setAllowanceCharge(invoice, invoiceXml, creditNote, taxInvoiceAgregates);
 		setPaymentTerms(invoice, invoiceXml, creditNote, invoice.getInvoiceType(), invoiceLanguageCode);
 		setAccountingSupplierParty(invoice.getSeller(), invoiceXml, creditNote, invoiceLanguageCode);
 		setAccountingCustomerParty(invoice.getBillingAccount(), invoiceXml, creditNote);
@@ -231,18 +200,24 @@ public class InvoiceUblHelper {
 		String curreny = invoice.getTradingCurrency() != null ? invoice.getTradingCurrency().getCurrencyCode():null;
 		BigDecimal amountWithoutTax = invoice.getAmountWithoutTax();
 		BigDecimal amountWithTax = invoice.getAmountWithTax();
-		BigDecimal totalPrepaidAmount = invoice.getLinkedInvoices().stream().filter(li -> li.getType() == InvoiceTypeEnum.ADVANCEMENT_PAYMENT).map(LinkedInvoice::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+		BigDecimal totalPrepaidAmount = invoice.getLinkedInvoices().stream().filter(li -> li.getType() == ADVANCEMENT_PAYMENT).map(LinkedInvoice::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
 		BigDecimal lineExtensionAmount = invoice.getInvoiceLines()
-												.stream()
-												.map(InvoiceLine::getAmountWithTax)
-												.reduce(BigDecimal.ZERO, BigDecimal::add);
+				.stream()
+				.map(InvoiceLine::getAmountWithoutTax)
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
 		var profileID = getProfileID(invoice.getInvoiceLines());
-		BigDecimal payableAmount = invoice.getNetToPay();
+		BigDecimal payableAmount = calculePayableAmount(invoice.getLinkedInvoices(), amountWithTax);
 		BigDecimal discountAmount = invoice.getDiscountAmount();
 		if (creditNote != null) {
 			setGeneralInfo(invoice, creditNote);
 			setBillingReference(invoice, creditNote);
+			setOrderReference(invoice, creditNote);
 			setInvoiceLine(invoice.getInvoiceLines(), creditNote, invoiceLanguageCode);
+			if(payableAmount.compareTo(BigDecimal.ZERO) > 0) {
+				DueDate dueDate = objectFactorycommonBasic.createDueDate();
+				dueDate.setValue(toXmlDate(invoice.getDueDate()));
+				creditNote.setDueDate(dueDate);
+			}
 			creditNote.setLegalMonetaryTotal(setTaxExclusiveAmount(totalPrepaidAmount, curreny, amountWithoutTax , amountWithTax, lineExtensionAmount, payableAmount, discountAmount));
 			creditNote.setProfileID(profileID);
 		} else {
@@ -256,8 +231,8 @@ public class InvoiceUblHelper {
 			setBillingReferenceForInvoice(commercialorderIds, invoiceXml);
 			invoiceXml.setProfileID(profileID);
 		}
-		
-		
+
+
 		// check directory if exist
 		ParamBean paramBean = ParamBean.getInstance();
 		File ublDirectory = new File(paramBean.getChrootDir("") + File.separator + paramBean.getProperty("meveo.ubl.directory", "/invoices/ubl"));
@@ -310,7 +285,7 @@ public class InvoiceUblHelper {
 		//marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2");
 		marshaller.marshal(invoiceXml, absoluteFileName);
 	}
-	
+
 	private void setPaymentTerms(org.meveo.model.billing.Invoice source, Invoice target, CreditNote creditNote, InvoiceType invoiceType, String invoiceLanguageCode) {
 		if(invoiceType != null && invoiceType.getUntdidInvoiceCodeType() != null && invoiceType.getUntdidInvoiceCodeType().getCode().equals("380")) {
 			PaymentTermsType paymentTermsType = objectFactoryCommonAggrement.createPaymentTermsType();
@@ -329,7 +304,7 @@ public class InvoiceUblHelper {
 			}
 		}
 	}
-	
+
 	private void setUblExtension(Invoice target, CreditNote creditNote){
 		UBLVersionID ublVersionID = objectFactorycommonBasic.createUBLVersionID();
 		ublVersionID.setValue("2.2");
@@ -338,9 +313,9 @@ public class InvoiceUblHelper {
 		}else{
 			target.setUBLVersionID(ublVersionID);
 		}
-		
+
 	}
-	
+
 	private static void setGeneralInfo(org.meveo.model.billing.Invoice source, Invoice target){
 		if(source.getInvoiceType() != null && source.getInvoiceType().getUntdidInvoiceCodeType() != null) {
 			InvoiceType invoiceType = source.getInvoiceType();
@@ -352,15 +327,15 @@ public class InvoiceUblHelper {
 		ID id = objectFactorycommonBasic.createID();
 		id.setValue(source.getInvoiceNumber());
 		target.setID(id);
-		
+
 		IssueDate issueDate = getIssueDate(source.getInvoiceDate());
 		target.setIssueDate(issueDate);
-		
+
 		if(source.getStartDate() != null){
 			PeriodType periodType = objectFactoryCommonAggrement.createPeriodType();
 			StartDate startDate = objectFactorycommonBasic.createStartDate();
 			EndDate endDate = objectFactorycommonBasic.createEndDate();
-			
+
 			startDate.setValue(toXmlDate(source.getStartDate()));
 			endDate.setValue(toXmlDate(source.getEndDate()));
 			periodType.setStartDate(startDate);
@@ -378,21 +353,22 @@ public class InvoiceUblHelper {
 			target.getDeliveries().add(getDeliveryType(source));
 		}
 
-		if(StringUtils.isNotBlank(source.getComment())){
-		Note note = objectFactorycommonBasic.createNote();
-		note.setValue(source.getComment());
-		target.getNotes().add(note);
+		if(StringUtils.isNotBlank(source.getComment())) {
+			Note note = objectFactorycommonBasic.createNote();
+			note.setValue(source.getComment());
+			target.getNotes().add(note);
 		}
+
 		CustomizationID customizationID = objectFactorycommonBasic.createCustomizationID();
 		customizationID.setValue("urn:cen.eu:en16931:2017#conformant#urn:ubl.eu:1p0:extended-ctc-fr");
 		target.setCustomizationID(customizationID);
 
 		setTaxCurrencyCodeAndDocumentCurrencyCode(objectFactorycommonBasic, source, target);
-		
+
 		DueDate dueDate = objectFactorycommonBasic.createDueDate();
 		dueDate.setValue(toXmlDate(source.getDueDate()));
 		target.setDueDate(dueDate);
-		
+
 		var monetaryTotalType = objectFactoryCommonAggrement.createMonetaryTotalType();
 		var taxInclusiveAmount = objectFactorycommonBasic.createTaxInclusiveAmount();
 		final String currencyId = source.getTradingCurrency() != null ? source.getTradingCurrency().getCurrencyCode() : null;
@@ -421,15 +397,15 @@ public class InvoiceUblHelper {
 		ID id = objectFactorycommonBasic.createID();
 		id.setValue(source.getInvoiceNumber());
 		target.setID(id);
-		
+
 		IssueDate issueDate = getIssueDate(source.getInvoiceDate());
 		target.setIssueDate(issueDate);
-		
+
 		if(source.getStartDate() != null){
 			PeriodType periodType = objectFactoryCommonAggrement.createPeriodType();
 			StartDate startDate = objectFactorycommonBasic.createStartDate();
 			EndDate endDate = objectFactorycommonBasic.createEndDate();
-			
+
 			startDate.setValue(toXmlDate(source.getStartDate()));
 			endDate.setValue(toXmlDate(source.getEndDate()));
 			periodType.setStartDate(startDate);
@@ -439,24 +415,23 @@ public class InvoiceUblHelper {
 
 		// Invoice/Delivery/DeliveryLocation/Address
 		if (source.getBillingAccount() != null && source.getBillingAccount().getUsersAccounts() != null && source.getBillingAccount().getUsersAccounts().size() == 1 &&
-			 source.getBillingAccount().getUsersAccounts().get(0).getAddress() != null) {
+				source.getBillingAccount().getUsersAccounts().get(0).getAddress() != null) {
 			target.getDeliveries().add(getDeliveryType(source));
 		}
-		
-		if(StringUtils.isNotBlank(source.getComment())){
-		Note note = objectFactorycommonBasic.createNote();
-		note.setValue(source.getComment());
-		target.getNotes().add(note);
+
+		if(StringUtils.isNotBlank(source.getComment())) {
+			Note note = objectFactorycommonBasic.createNote();
+			note.setValue(source.getComment());
+			target.getNotes().add(note);
 		}
-		
-		
+
 		CustomizationID customizationID = objectFactorycommonBasic.createCustomizationID();
 		customizationID.setValue("urn:cen.eu:en16931:2017#conformant#urn:ubl.eu:1p0:extended-ctc-fr");
 		target.setCustomizationID(customizationID);
-		
+
 		setTaxCurrencyCodeAndDocumentCurrencyCode(objectFactorycommonBasic, source, target);
-		
-		
+
+
 		var monetaryTotalType = objectFactoryCommonAggrement.createMonetaryTotalType();
 		var taxInclusiveAmount = objectFactorycommonBasic.createTaxInclusiveAmount();
 		final String currencyId = source.getTradingCurrency() != null ? source.getTradingCurrency().getCurrencyCode() : null;
@@ -492,34 +467,35 @@ public class InvoiceUblHelper {
 			paymentMeansCode.setValue(paymentMethod.getPaymentMeans() != null ? paymentMethod.getPaymentMeans().getCode() : "59");
 			paymentMeans.setPaymentMeansCode(paymentMeansCode);
 		}
-		
+
 		//check
-		if(Hibernate.unproxy(paymentMethod) instanceof CheckPaymentMethod) {
+		/*if(Hibernate.unproxy(paymentMethod) instanceof CheckPaymentMethod) {
 			ID payerFinancialAccountId = objectFactorycommonBasic.createID();
 			payerFinancialAccountId.setValue("no IBAN");
 			FinancialAccountType payerFinancialAccount = objectFactoryCommonAggrement.createFinancialAccountType();
 			payerFinancialAccount.setID(payerFinancialAccountId);
 			paymentMeans.setPayerFinancialAccount(payerFinancialAccount);
-		}
-
+		}*/
 		// DirectDebit
 		if(Hibernate.unproxy(paymentMethod) instanceof DDPaymentMethod) {
 			DDPaymentMethod bank = (DDPaymentMethod) Hibernate.unproxy(paymentMethod);
-			setPaymentMeansForSEPA(bank, paymentMeans, seller);
+			setPaymentMeansForSEPA(bank, paymentMeans);
 		}
-
 		// PaymentMeans/PayeeFinancialInstitution
+
 		Provider provider = providerService.getProvider();
+
 		if (provider.getBankCoordinates() != null) {
 			FinancialAccountType payeeFinancialInstitution = objectFactoryCommonAggrement.createFinancialAccountType();
 			ID payeeFinancialInstitutionId = objectFactorycommonBasic.createID();
 			payeeFinancialInstitutionId.setValue(provider.getBankCoordinates().getIban());
 			payeeFinancialInstitution.setID(payeeFinancialInstitutionId);
-			if(seller.getName() != null) {
+			/*if(StringUtils.isNotBlank(seller.getDescription())) {
 				oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Name name = objectFactorycommonBasic.createName();
-				name.setValue(seller.getName().getFirstName());
+				name.setValue(seller.getDescription());
 				payeeFinancialInstitution.setName(name);
-			}
+			}*/
+
 			if(StringUtils.isNotBlank(provider.getBankCoordinates().getBic())) {
 				BranchType branchType = objectFactoryCommonAggrement.createBranchType();
 				FinancialInstitution financialInstitution = objectFactoryCommonAggrement.createFinancialInstitution();
@@ -531,7 +507,6 @@ public class InvoiceUblHelper {
 			}
 			paymentMeans.setPayeeFinancialAccount(payeeFinancialInstitution);
 		}
-
 		if(paymentMeans.getPaymentMeansCode() != null || paymentMeans.getPayeeFinancialAccount() != null){
 			if(creditNote == null) {
 				target.getPaymentMeans().add(paymentMeans);
@@ -585,8 +560,8 @@ public class InvoiceUblHelper {
 	 */
 	// We can use this method in the future when we will have only the direct debit payment method
 	private static void setPaymentMeansForDirectDebit(DDPaymentMethod bank, PaymentMeans paymentMeans) {
-		//paymentMeans.getPaymentMeansCode().setName("DirectDebit");
-		//paymentMeans.getPaymentMeansCode().setValue("49");
+		paymentMeans.getPaymentMeansCode().setName("DirectDebit");
+		paymentMeans.getPaymentMeansCode().setValue("49");
 		FinancialAccountType financialAccountType = objectFactoryCommonAggrement.createFinancialAccountType();
 
 		// PaymentMeans/PayeeFinancialAccount/ID
@@ -635,26 +610,35 @@ public class InvoiceUblHelper {
 	 * @param bank the bank
 	 * @param paymentMeans the payment means
 	 */
-	private static void setPaymentMeansForSEPA(DDPaymentMethod bank, PaymentMeans paymentMeans, Seller seller) {
+	private static void setPaymentMeansForSEPA(DDPaymentMethod bank, PaymentMeans paymentMeans) {
 		if (paymentMeans.getPaymentMeansCode() == null) {
 			PaymentMeansCode paymentMeansCode = objectFactorycommonBasic.createPaymentMeansCode();
 			paymentMeans.setPaymentMeansCode(paymentMeansCode);
 		}
 
 		paymentMeans.getPaymentMeansCode().setListID("UN/ECE 4461");
-		paymentMeans.getPaymentMeansCode().setName("SEPA");
+		//paymentMeans.getPaymentMeansCode().setName("SEPA");
 		paymentMeans.getPaymentMeansCode().setValue("59");
 
 		Provider provider = providerService.getProvider();
-		
-		/*PaymentMandate paymentMandate = objectFactoryCommonAggrement.createPaymentMandate();
+		PaymentMandate paymentMandate = objectFactoryCommonAggrement.createPaymentMandate();
+
 		// PaymentMeans/PaymentMandate
 		if (StringUtils.isNotBlank(bank.getMandateIdentification())) {
 			ID mandateID = objectFactorycommonBasic.createID();
 			mandateID.setValue(bank.getMandateIdentification());
 			paymentMandate.setID(mandateID);
-			
-		}*/
+			paymentMeans.setPaymentMandate(paymentMandate);
+		}
+
+		// PaymentMeans/PartyIdentification
+		/*if (provider != null && (StringUtils.isNotBlank(provider.getBankCoordinates().getIban()) || StringUtils.isNotBlank(provider.getBankCoordinates().getBankId()))) {
+			PartyIdentification partyIdentification = objectFactoryCommonAggrement.createPartyIdentification();
+			ID partyIdentificationId = objectFactorycommonBasic.createID();
+			partyIdentificationId.setValue(StringUtils.isNotBlank(provider.getBankCoordinates().getIban()) ? provider.getBankCoordinates().getIban() : provider.getBankCoordinates().getBankId());
+			partyIdentification.setID(partyIdentificationId);
+			paymentMeans.setPartyIdentification(partyIdentification);
+		} */
 
 		// PaymentMeans/PayeeFinancialAccount
 		if (bank.getBankCoordinates() != null) {
@@ -662,18 +646,24 @@ public class InvoiceUblHelper {
 			ID payerFinancialAccountId = objectFactorycommonBasic.createID();
 			payerFinancialAccountId.setValue(bank.getBankCoordinates().getIban());
 			payerFinancialAccount.setID(payerFinancialAccountId);
-			//paymentMandate.setPayerFinancialAccount(payerFinancialAccount);
+			paymentMeans.setPayerFinancialAccount(payerFinancialAccount);
 		}
-		//paymentMeans.setPaymentMandate(paymentMandate);
-
-
+		paymentMeans.setPaymentMandate(paymentMandate);
+		// PaymentMeans/PayeeFinancialInstitution
+		if (provider.getBankCoordinates() != null) {
+			FinancialAccountType payeeFinancialInstitution = objectFactoryCommonAggrement.createFinancialAccountType();
+			ID payeeFinancialInstitutionId = objectFactorycommonBasic.createID();
+			payeeFinancialInstitutionId.setValue(provider.getBankCoordinates().getIban());
+			payeeFinancialInstitution.setID(payeeFinancialInstitutionId);
+			paymentMeans.setPayeeFinancialAccount(payeeFinancialInstitution);
+		}
 	}
 
 	private void setInvoiceLine(List<InvoiceLine> invoiceLines, Invoice target, String invoiceLanguageCode){
 		invoiceLines.forEach(invoiceLine -> {
-			if(invoiceLine.getAccountingArticle() == null || (invoiceLine.getAccountingArticle().getAllowanceCode() != null && !"Standard".equalsIgnoreCase(invoiceLine.getAccountingArticle().getAllowanceCode().getDescription()))) {
+			/*if(invoiceLine.getAccountingArticle() == null || (invoiceLine.getAccountingArticle().getAllowanceCode() != null && !"Standard".equalsIgnoreCase(invoiceLine.getAccountingArticle().getAllowanceCode().getDescription()))) {
 				return;
-			}
+			}*/
 			// InvoiceLine/ Item/ ClassifiedTaxCategory/ Percent
 			InvoiceLineType invoiceLineType = objectFactoryCommonAggrement.createInvoiceLineType();
 			ItemType itemType = getItemTyp(invoiceLine, invoiceLanguageCode);
@@ -689,9 +679,9 @@ public class InvoiceUblHelper {
 	}
 	private void setInvoiceLine(List<InvoiceLine> invoiceLines, CreditNote target, String invoiceLanguageCode){
 		invoiceLines.forEach(invoiceLine -> {
-			if(invoiceLine.getAccountingArticle() == null || (invoiceLine.getAccountingArticle().getAllowanceCode() != null && !"Standard".equalsIgnoreCase(invoiceLine.getAccountingArticle().getAllowanceCode().getDescription()))) {
+			/*if(invoiceLine.getAccountingArticle() == null || (invoiceLine.getAccountingArticle().getAllowanceCode() != null && !"Standard".equalsIgnoreCase(invoiceLine.getAccountingArticle().getAllowanceCode().getDescription()))) {
 				return;
-			}
+			}*/
 			// InvoiceLine/ Item/ ClassifiedTaxCategory/ Percent
 			CreditNoteLineType invoiceLineType = objectFactoryCommonAggrement.createCreditNoteLineType();
 			ItemType itemType = getItemTyp(invoiceLine, invoiceLanguageCode);
@@ -705,7 +695,7 @@ public class InvoiceUblHelper {
 			target.getCreditNoteLines().add(invoiceLineType);
 		});
 	}
-	
+
 	private void setPriceAndCreditLine(InvoiceLine invoiceLine, Object invoiceLineType, ItemType itemType) {
 		// InvoiceLine/ Price/ BaseQuantity
 		PriceType priceType = getPriceType(invoiceLine);
@@ -714,36 +704,43 @@ public class InvoiceUblHelper {
 		// InvoiceLine/ Note
 		ID id = objectFactorycommonBasic.createID();
 		id.setValue(invoiceLine.getId().toString());
-		Note note = objectFactorycommonBasic.createNote();
-		note.setValue(invoiceLine.getLabel());
+		Note note = null;
+		if (StringUtils.isNotBlank(invoiceLine.getLabel())){
+			note = objectFactorycommonBasic.createNote();
+			note.setValue(invoiceLine.getLabel());
+		}
 		if(invoiceLineType instanceof  CreditNoteLineType){
 			CreditNoteLineType CreditlineType = (CreditNoteLineType) invoiceLineType;
 			CreditlineType.setID(id);
 			CreditlineType.setPrice(priceType);
 			CreditlineType.setLineExtensionAmount(lineExtensionAmount);
-			CreditlineType.getNotes().add(note);
+			if(note != null){
+				CreditlineType.getNotes().add(note);
+			}
 			CreditlineType.setItem(itemType);
 		}else{
 			InvoiceLineType lineType = (InvoiceLineType) invoiceLineType;
 			lineType.setID(id);
 			lineType.setPrice(priceType);
 			lineType.setLineExtensionAmount(lineExtensionAmount);
-			lineType.getNotes().add(note);
+			if(note != null){
+				lineType.getNotes().add(note);
+			}
 			lineType.setItem(itemType);
 		}
 	}
-	
+
 	private static LineExtensionAmount getLineExtensionAmount(InvoiceLine invoiceLine) {
 		LineExtensionAmount lineExtensionAmount = objectFactorycommonBasic.createLineExtensionAmount();
 		lineExtensionAmount.setCurrencyID(invoiceLine.getInvoice().getTradingCurrency().getCurrencyCode());
-		lineExtensionAmount.setValue(invoiceLine.getAmountWithTax().setScale(rounding, RoundingMode.HALF_UP));
+		lineExtensionAmount.setValue(invoiceLine.getAmountWithoutTax().setScale(rounding, RoundingMode.HALF_UP));
 		return lineExtensionAmount;
 	}
-	
+
 	private ItemType getItemTyp(InvoiceLine invoiceLine, String invoiceLanguageCode){
 		ItemType itemType = objectFactoryCommonAggrement.createItemType();
 		TaxCategoryType taxCategoryType = objectFactoryCommonAggrement.createTaxCategoryType();
-		
+
 		//id.setValue();
 		String untdidTaxationCategory = invoiceLine.getTax() != null ? invoiceLine.getTax().getUntdidTaxationCategory() != null ?  invoiceLine.getTax().getUntdidTaxationCategory().getCode() : null: null;
 		if(untdidTaxationCategory != null) {
@@ -761,18 +758,16 @@ public class InvoiceUblHelper {
 		TaxTypeCode taxTypeCode = objectFactorycommonBasic.createTaxTypeCode();
 		taxTypeCode.setValue(invoiceLine.getTax().getCode());
 		taxScheme.setTaxTypeCode(taxTypeCode);
-
 		ID id = objectFactorycommonBasic.createID();
 		id.setSchemeID("UN/ECE 5153");
 		id.setSchemeAgencyID("6");
 		id.setValue("VAT");
 		taxScheme.setID(id);
-
 		taxCategoryType.setTaxScheme(taxScheme);
 		itemType.getClassifiedTaxCategories().add(taxCategoryType);
 		//InvoiceLine/ Item/ Description
 		Description description = objectFactorycommonBasic.createDescription();
-		
+
 		// InvoiceLine/ Item/ Name
 		oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Name name = objectFactorycommonBasic.createName();
 		name.setValue(invoiceLine.getLabel());
@@ -782,13 +777,13 @@ public class InvoiceUblHelper {
 
 		return itemType;
 	}
-	
+
 	private PriceType getPriceType(InvoiceLine invoiceLine){
 		PriceType priceType = objectFactoryCommonAggrement.createPriceType();
 		BaseQuantity baseQuantity = objectFactorycommonBasic.createBaseQuantity();
 		baseQuantity.setValue(new BigDecimal(1));
 		priceType.setBaseQuantity(baseQuantity);
-		
+
 		final String currencyCode = invoiceLine.getInvoice().getTradingCurrency().getCurrencyCode();
 		// InvoiceLine/ Price/ PriceAmount
 		PriceAmount priceAmount = objectFactorycommonBasic.createPriceAmount();
@@ -797,104 +792,90 @@ public class InvoiceUblHelper {
 		priceType.setPriceAmount(priceAmount);
 		return priceType;
 	}
-	private void setAccountingCustomerParty(BillingAccount billingAccount, Invoice target, CreditNote creditNote) {
-        // AccountingCustomerParty/Party
-        CustomerPartyType customerPartyType = objectFactoryCommonAggrement.createCustomerPartyType();
-        PartyType partyType = objectFactoryCommonAggrement.createPartyType();
+	private void setAccountingCustomerParty(BillingAccount billingAccount, Invoice target, CreditNote creditNote){
+		// AccountingCustomerParty/Party
+		CustomerPartyType customerPartyType = objectFactoryCommonAggrement.createCustomerPartyType();
+		PartyType partyType = objectFactoryCommonAggrement.createPartyType();
 
-        Address address = billingAccount.getAddress();
-        if (billingAccount.getAddress() != null) {
-            AddressType postalAddress = objectFactoryCommonAggrement.createAddressType();
-            // AccountingCustomerParty/Party/PostalAddress/CityName
-            if (StringUtils.isNotBlank(address.getCity())) {
-                CityName cityName = objectFactorycommonBasic.createCityName();
-                cityName.setValue(address.getCity());
-                postalAddress.setCityName(cityName);
-            }
-            //AccountingCustomerParty/Party/PostalAddress/PostalZone
-            if (StringUtils.isNotBlank(address.getZipCode())) {
-                PostalZone postalZone = objectFactorycommonBasic.createPostalZone();
-                postalZone.setValue(address.getZipCode());
-                postalAddress.setPostalZone(postalZone);
-            }
-            //AccountingCustomerParty/Party/PostalAddress/Country
-            if (address.getCountry() != null) {
-                CountryType countryType = objectFactoryCommonAggrement.createCountryType();
-                IdentificationCode identificationCode = objectFactorycommonBasic.createIdentificationCode();
-				identificationCode.setListID("ISO3166-1");
-				identificationCode.setListAgencyID("6");
-                identificationCode.setValue(address.getCountry().getCode());
-                countryType.setIdentificationCode(identificationCode);
-                postalAddress.setCountry(countryType);
-            }
-            //AccountingCustomerParty/Party/PostalAddress/PostalAddress
-            if (StringUtils.isNotBlank(address.getAddress1())) {
-                StreetName streetName = objectFactorycommonBasic.createStreetName();
-                streetName.setValue(address.getAddress1());
-                postalAddress.setStreetName(streetName);
-            }
-            partyType.setPostalAddress(postalAddress);
-        }
-        // AccountingCustomerParty/Party/PartyTaxScheme/CompanyID
-        if (StringUtils.isNotBlank(billingAccount.getVatNo()) || (billingAccount.getSeller() != null && billingAccount.getSeller().getVatNo() != null)) {
-            // AccountingSupplierParty/Party/PartyTaxScheme/CompanyID
-            var vatNo = StringUtils.isNotBlank(billingAccount.getVatNo()) ? billingAccount.getVatNo() : billingAccount.getSeller().getVatNo();
-            PartyTaxScheme partyTaxScheme = objectFactoryCommonAggrement.createPartyTaxScheme();
-            CompanyID companyID = objectFactorycommonBasic.createCompanyID();
-            companyID.setSchemeAgencyID("ZZZ");
-            companyID.setSchemeID(address != null && address.getCountry() != null ? address.getCountry().getCountryCode() : null);
-            companyID.setValue(vatNo);
-            partyTaxScheme.setCompanyID(companyID);
-            partyTaxScheme.setTaxScheme(getTaxSheme());
-            partyType.getPartyTaxSchemes().add(partyTaxScheme);
-            //TODO : AccountingCustomerParty/Party/PartyTaxScheme/TaxScheme/ID ask @Emmanuel for this field INTRD-12578
-        }
-        // AccountingCustomerParty/Party/PartyLegalEntity
-        PartyLegalEntity partyLegalEntity = objectFactoryCommonAggrement.createPartyLegalEntity();
+		Address address = billingAccount.getAddress();
+		if(billingAccount.getAddress() != null) {
+			AddressType postalAddress = objectFactoryCommonAggrement.createAddressType();
+			// AccountingCustomerParty/Party/PostalAddress/CityName
+			if(StringUtils.isNotBlank(address.getCity())){
+				CityName cityName = objectFactorycommonBasic.createCityName();
+				cityName.setValue(address.getCity());
+				postalAddress.setCityName(cityName);
+			}
+			//AccountingCustomerParty/Party/PostalAddress/PostalZone
+			if(StringUtils.isNotBlank(address.getZipCode())){
+				PostalZone postalZone = objectFactorycommonBasic.createPostalZone();
+				postalZone.setValue(address.getZipCode());
+				postalAddress.setPostalZone(postalZone);
+			}
+			//AccountingCustomerParty/Party/PostalAddress/Country
+			if (address.getCountry() != null) {
+				CountryType countryType = objectFactoryCommonAggrement.createCountryType();
+				IdentificationCode identificationCode = objectFactorycommonBasic.createIdentificationCode();
+				identificationCode.setValue(address.getCountry().getCode());
+				countryType.setIdentificationCode(identificationCode);
+				postalAddress.setCountry(countryType);
+			}
+			//AccountingCustomerParty/Party/PostalAddress/PostalAddress
+			if(StringUtils.isNotBlank(address.getAddress1())){
+				StreetName streetName = objectFactorycommonBasic.createStreetName();
+				streetName.setValue(address.getAddress1());
+				postalAddress.setStreetName(streetName);
+			}
+			partyType.setPostalAddress(postalAddress);
+		}
+		// AccountingCustomerParty/Party/PartyTaxScheme/CompanyID
+		if(StringUtils.isNotBlank(billingAccount.getVatNo()) || ( billingAccount.getSeller() != null && billingAccount.getVatNo() != null)){
+			// AccountingSupplierParty/Party/PartyTaxScheme/CompanyID
+			PartyTaxScheme partyTaxScheme = objectFactoryCommonAggrement.createPartyTaxScheme();
+			CompanyID companyID = objectFactorycommonBasic.createCompanyID();
+			companyID.setSchemeAgencyID("ZZZ");
+			companyID.setSchemeID(address.getCountry() != null ? address.getCountry().getCountryCode() : null );
+			companyID.setValue(billingAccount.getVatNo());
+			partyTaxScheme.setCompanyID(companyID);
+			partyTaxScheme.setTaxScheme(getTaxSheme());
+			partyType.getPartyTaxSchemes().add(partyTaxScheme);
+			//TODO : AccountingCustomerParty/Party/PartyTaxScheme/TaxScheme/ID ask @Emmanuel for this field INTRD-12578
+		}
+		// AccountingCustomerParty/Party/PartyLegalEntity
+		PartyLegalEntity partyLegalEntity = objectFactoryCommonAggrement.createPartyLegalEntity();
 
-		PartyName partyName = objectFactoryCommonAggrement.createPartyName();
-		oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Name name = objectFactorycommonBasic.createName();
-		name.setValue(StringUtils.isNotBlank(billingAccount.getCustomerAccount().getDescription()) ? billingAccount.getCustomerAccount().getDescription() : "-");
-		partyName.setName(name);
-		partyType.getPartyNames().add(partyName);
+		// AccountingCustomerParty/Party/PartyLegalEntity/RegistrationName
+		if(StringUtils.isNotBlank(billingAccount.getDescription())){
+			RegistrationName registrationName = objectFactorycommonBasic.createRegistrationName();
+			registrationName.setValue(billingAccount.getDescription());
+			partyLegalEntity.setRegistrationName(registrationName);
+		}
+		if(billingAccount.getAddress() != null){
+			// AccountingCustomerParty/Party/PartyLegalEntity/RegistrationAddress
+			AddressType addressType = getRegistrationAddress(billingAccount.getAddress());
+			partyLegalEntity.setRegistrationAddress(addressType);
+		}
 
-        // AccountingCustomerParty/Party/PartyLegalEntity/RegistrationName
-        if (StringUtils.isNotBlank(billingAccount.getDescription())) {
-            RegistrationName registrationName = objectFactorycommonBasic.createRegistrationName();
-            registrationName.setValue(billingAccount.getDescription());
-            partyLegalEntity.setRegistrationName(registrationName);
-        }
-        if (billingAccount.getAddress() != null) {
-            // AccountingCustomerParty/Party/PartyLegalEntity/RegistrationAddress
-            AddressType addressType = getRegistrationAddress(billingAccount.getAddress());
-            partyLegalEntity.setRegistrationAddress(addressType);
-        }
+		partyType.getPartyLegalEntities().add(partyLegalEntity);
 
-
-
-		addPartyIdentifications(billingAccount.getRegistrationNumbers(), partyType);
-        partyType.getPartyLegalEntities().add(partyLegalEntity);
-
-        // AccountingCustomerParty/Party/PartyLegalEntity/Contact
-        // todo : Check this contact namespace is correct
-        if (billingAccount.getContactInformation() != null) {
-            ContactType contactType = getContactInformation(billingAccount.getContactInformation());
-			if(billingAccount.getName() != null ) {
-				name = objectFactorycommonBasic.createName();
-				if(StringUtils.isNotBlank(billingAccount.getName().getFirstName())) {
-					name.setValue(billingAccount.getName().getFirstName() + " " + (billingAccount.getName().getLastName() != null ? billingAccount.getName().getLastName() : ""));
-				}
+		// AccountingCustomerParty/Party/PartyLegalEntity/Contact
+		// todo : Check this contact namespace is correct
+		if(billingAccount.getContactInformation() != null){
+			ContactType contactType = getContactInformation(billingAccount.getContactInformation());
+			if(billingAccount.getName() != null && billingAccount.getName().getFullName() != null) {
+				oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Name name = objectFactorycommonBasic.createName();
+				name.setValue(billingAccount.getName().getFirstName() + " " + (billingAccount.getName().getLastName() != null ? billingAccount.getName().getLastName() : ""));
 				contactType.setName(name);
 			}
-            partyType.setContact(contactType);
-        }
-        // AccountingCustomerParty/Party/PartyLegalEntity/Person
+			partyType.setContact(contactType);
+		}
+		// AccountingCustomerParty/Party/PartyLegalEntity/Person
 
-        if (billingAccount.getName() != null) {
-            // AccountingSupplierParty/Party/Person/FirstName
-            PersonType personType = getPersonType(billingAccount.getName());
-            partyType.getPersons().add(personType);
-        }
+		if(billingAccount.getName() != null) {
+			// AccountingSupplierParty/Party/Person/FirstName
+			PersonType personType = getPersonType(billingAccount.getName());
+			partyType.getPersons().add(personType);
+		}
 
 		//AccountingCustomerParty/Party/ServiceProviderParty
 		var icd00225Exist = billingAccount.getCustomerAccount().getRegistrationNumbers().stream().anyMatch(rn -> {
@@ -907,15 +888,16 @@ public class InvoiceUblHelper {
 			return false;
 		});
 		if(icd00225Exist){
-		partyType.getServiceProviderParties().add(getServiceProviderParty(billingAccount));
+			partyType.getServiceProviderParties().add(getServiceProviderParty(billingAccount));
 		}
+		addPartyIdentifications(billingAccount.getRegistrationNumbers(), partyType, "0225", true);
 
-        customerPartyType.setParty(partyType);
-        if (creditNote == null)
-            target.setAccountingCustomerParty(customerPartyType);
-        else
-            creditNote.setAccountingCustomerParty(customerPartyType);
-    }
+		customerPartyType.setParty(partyType);
+		if(creditNote == null)
+			target.setAccountingCustomerParty(customerPartyType);
+		else
+			creditNote.setAccountingCustomerParty(customerPartyType);
+	}
 
 	private TaxScheme getTaxSheme(){
 		TaxScheme taxScheme = objectFactoryCommonAggrement.createTaxScheme();
@@ -944,7 +926,7 @@ public class InvoiceUblHelper {
 		}
 		return personType;
 	}
-	
+
 	private AddressType getRegistrationAddress(Address address){
 		if(address == null) return null;
 		AddressType addressType = objectFactoryCommonAggrement.createAddressType();
@@ -988,7 +970,6 @@ public class InvoiceUblHelper {
 		SupplierPartyType supplierPartyType = objectFactoryCommonAggrement.createSupplierPartyType();
 		//AccountingSupplierParty/Party
 		PartyType partyType = objectFactoryCommonAggrement.createPartyType();
-
 		// AccountingSupplierParty/Party/PartyLegalEntity
 		PartyLegalEntity partyLegalEntity = objectFactoryCommonAggrement.createPartyLegalEntity();
 		// AccountingSupplierParty/Party/PartyLegalEntity/RegistrationName
@@ -1053,7 +1034,7 @@ public class InvoiceUblHelper {
 			taxScheme.setTaxScheme(getTaxSheme());
 			partyType.getPartyTaxSchemes().add(taxScheme);
 		}
-		
+
 		if(seller.getContactInformation() != null) {
 			//AccountingSupplierParty/Party/Contact/Telephone
 			ContactType contactType = getContactInformation(seller.getContactInformation());
@@ -1088,13 +1069,12 @@ public class InvoiceUblHelper {
 			}
 			partyType.getPersons().add(personType);
 		}
-		addPartyIdentifications(seller.getRegistrationNumbers(), partyType);
+		addPartyIdentifications(seller.getRegistrationNumbers(), partyType, "0225", true);
 		if(seller.getLegalEntityType() != null) {
 			// AccountingSupplierParty/Party/PartyLegalEntity/CompanyLegalForm
 			CompanyLegalForm companyLegalForm = objectFactorycommonBasic.createCompanyLegalForm();
 			companyLegalForm.setValue(seller.getLegalEntityType().getCode());
 			partyLegalEntity.setCompanyLegalForm(companyLegalForm);
-			partyLegalEntity.setHeadOfficeParty(null);
 		}
 
 		PartyName partyName = objectFactoryCommonAggrement.createPartyName();
@@ -1102,13 +1082,11 @@ public class InvoiceUblHelper {
 		name.setValue(seller.getDescriptionOrCode());
 		partyName.setName(name);
 		partyType.getPartyNames().add(partyName);
-
 		var siren = seller.getRegistrationNumbers().stream().filter(registrationNumber -> registrationNumber.getIsoIcd() != null && SIREN.equalsIgnoreCase(registrationNumber.getIsoIcd().getCode())).findFirst();
 		if(siren.isPresent()){
 			CompanyID companyID = objectFactorycommonBasic.createCompanyID();
 			companyID.setValue(siren.get().getRegistrationNo());
 			companyID.setSchemeID(siren.get().getIsoIcd().getCode());
-			partyLegalEntity.setCompanyID(companyID);
 			partyLegalEntity.setCompanyID(companyID);
 		}
 		partyType.getPartyLegalEntities().add(partyLegalEntity);
@@ -1117,9 +1095,9 @@ public class InvoiceUblHelper {
 			target.setAccountingSupplierParty(supplierPartyType);
 		else
 			creditNote.setAccountingSupplierParty(supplierPartyType);
-		
+
 	}
-	
+
 	private ContactType getContactInformation(ContactInformation contactInformation) {
 		ContactType contactType = objectFactoryCommonAggrement.createContactType();
 		if(StringUtils.isNotBlank(contactInformation.getPhone())) {
@@ -1135,7 +1113,7 @@ public class InvoiceUblHelper {
 		}
 		return contactType;
 	}
-	
+
 	private void setTaxTotal(List<TaxInvoiceAgregate> taxInvoiceAgregates, BigDecimal amountTax,  Invoice target, CreditNote creditNote,  String currency) {
 		if(CollectionUtils.isNotEmpty(taxInvoiceAgregates)) {
 			TaxTotalType taxTotalType = objectFactoryCommonAggrement.createTaxTotalType();
@@ -1149,7 +1127,7 @@ public class InvoiceUblHelper {
 					//TaxTotal/ TaxSubtotal / TaxCategory/ TaxScheme/ TaxTypeCode
 					TaxCategoryType taxCategoryType = setTaxCategory(taxInvoiceAgregate);
 					taxSubtotal.setTaxCategory(taxCategoryType);
-					
+
 				}
 				// TaxTotal/ TaxSubtotal / TaxableAmount
 				TaxableAmount taxableAmount = objectFactorycommonBasic.createTaxableAmount();
@@ -1175,7 +1153,7 @@ public class InvoiceUblHelper {
 			}
 		}
 	}
-	private void setAllowanceCharge(org.meveo.model.billing.Invoice invoice, Invoice target, CreditNote creditNote){
+	private void setAllowanceCharge(org.meveo.model.billing.Invoice invoice, Invoice target, CreditNote creditNote, List<TaxInvoiceAgregate> taxInvoiceAgregates){
 		final var currency = invoice.getTradingCurrency() != null ? invoice.getTradingCurrency().getCurrencyCode() : invoice.getBillingAccount().getTradingCurrency() != null ? invoice.getBillingAccount().getTradingCurrency().getCurrencyCode() : null;
 		List<SubCategoryInvoiceAgregate> subCategoryInvoiceAgregates = (List<SubCategoryInvoiceAgregate>) invoiceAgregateService.listByInvoiceAndType(invoice, SubCategoryInvoiceAgregate.class);
 		if(CollectionUtils.isNotEmpty(subCategoryInvoiceAgregates)){
@@ -1194,50 +1172,47 @@ public class InvoiceUblHelper {
 			chargeIndicator.setValue(false);
 			allowanceCharge.setChargeIndicator(chargeIndicator);
 			AllowanceChargeReasonCode allowanceChargeReasonCode = objectFactorycommonBasic.createAllowanceChargeReasonCode();
-			allowanceChargeReasonCode.setValue(subCategoryInvoiceAgregate.getDiscountPlanItem().getCode());
+			allowanceChargeReasonCode.setValue(subCategoryInvoiceAgregate.getDiscountPlanItem().getDiscountPlan().getAllowanceCode().getCode());
 			allowanceCharge.setAllowanceChargeReasonCode(allowanceChargeReasonCode);
-
 			AllowanceChargeReason allowanceChargeReason = objectFactorycommonBasic.createAllowanceChargeReason();
-			allowanceChargeReason.setValue(subCategoryInvoiceAgregate.getDiscountPlanItem().getDescription());
+			allowanceChargeReason.setValue(subCategoryInvoiceAgregate.getDiscountPlanItem().getDiscountPlan().getAllowanceCode().getDescription());
 			allowanceCharge.getAllowanceChargeReasons().add(allowanceChargeReason);
-
 
 			Amount amount = objectFactorycommonBasic.createAmount();
 			BaseAmount baseAmount = objectFactorycommonBasic.createBaseAmount();
-
 			amount.setCurrencyID(currency);
 			baseAmount.setCurrencyID(currency);
-
-			amount.setValue(totalWithTax.setScale(rounding, RoundingMode.HALF_UP));
+			amount.setValue(totalWithoutTax.setScale(rounding, RoundingMode.HALF_UP));
 			allowanceCharge.setAmount(amount);
-
 			baseAmount.setValue(totalWithoutTax.setScale(rounding, RoundingMode.HALF_UP));
 			allowanceCharge.setBaseAmount(baseAmount);
-
-
+			if(CollectionUtils.isNotEmpty(taxInvoiceAgregates)) {
+				taxInvoiceAgregates.forEach(taxInvoiceAgregate -> allowanceCharge.getTaxCategories().add(setTaxCategory(taxInvoiceAgregate)));
+			}
 			if(creditNote != null)
 				creditNote.getAllowanceCharges().add(allowanceCharge);
 			else
 				target.getAllowanceCharges().add(allowanceCharge);
+
 		}
-		
+
 	}
-	
+
 	private static IssueDate getIssueDate(Date date){
 		IssueDate issueDate = objectFactorycommonBasic.createIssueDate();
 		issueDate.setValue(toXmlDate(date));
 		return issueDate;
 	}
-	
-	private OrderReference getOrderReference(CommercialOrder commercialOrder, Date invoiceDate, String purchaseOrderNumber) {
-		if(commercialOrder == null) return null;
-		if(StringUtils.isBlank(purchaseOrderNumber)) return null;
 
+	private OrderReference getOrderReference(CommercialOrder commercialOrder, Date invoiceDate, String purchaseOrderNumber) {
+		if(StringUtils.isBlank(purchaseOrderNumber)) return null;
 		OrderReference orderReference = objectFactoryCommonAggrement.createOrderReference();
-		SalesOrderID salesOrderID = objectFactorycommonBasic.createSalesOrderID();
-		salesOrderID.setValue(commercialOrder.getOrderNumber());
-		orderReference.setSalesOrderID(salesOrderID);
-		orderReference.setIssueDate(getIssueDate(invoiceDate));
+		if(commercialOrder != null) {
+			SalesOrderID salesOrderID = objectFactorycommonBasic.createSalesOrderID();
+			salesOrderID.setValue(commercialOrder.getOrderNumber());
+			orderReference.setSalesOrderID(salesOrderID);
+		}
+		//orderReference.setIssueDate(getIssueDate(invoiceDate));
 		ID id = objectFactorycommonBasic.createID();
 		id.setValue(purchaseOrderNumber);
 		orderReference.setID(id);
@@ -1250,26 +1225,25 @@ public class InvoiceUblHelper {
 		if(StringUtils.isNotBlank(source.getExternalPurchaseOrderNumber())){
 			OrderReference orderReference = objectFactoryCommonAggrement.createOrderReference();
 			SalesOrderID salesOrderID = objectFactorycommonBasic.createSalesOrderID();
-			Optional<LinkedInvoice> documentReference = source.getLinkedInvoices().stream().filter(linkedInvoice -> linkedInvoice.getLinkedInvoiceValue().getInvoiceType().getCode().equalsIgnoreCase("COM")).findFirst();
+			//Optional<LinkedInvoice> documentReference = source.getLinkedInvoices().stream().filter(linkedInvoice -> linkedInvoice.getLinkedInvoiceValue().getInvoiceType().getCode().equalsIgnoreCase("COM")).findFirst();
 			ID id = objectFactorycommonBasic.createID();
 			id.setValue(source.getExternalPurchaseOrderNumber());
 			orderReference.setID(id);
-
-			if(documentReference.isPresent()){
-				salesOrderID.setValue(documentReference.get().getLinkedInvoiceValue().getInvoiceNumber());
+			if(source.getCommercialOrder() != null){
+				salesOrderID.setValue(source.getCommercialOrder().getOrderNumber());
 				orderReference.setSalesOrderID(salesOrderID);
-				orderReference.setIssueDate(getIssueDate(documentReference.get().getLinkedInvoiceValue().getDueDate()));
+				orderReference.setIssueDate(getIssueDate(source.getCommercialOrder().getOrderDate()));
 			}
-
 			target.setOrderReference(orderReference);
+
 		}
 	}
 	private void setBillingReference(org.meveo.model.billing.Invoice source, Invoice target){
 		source.getLinkedInvoices().forEach(linInv -> {
 			BillingReference billingReference = setBillingReference(linInv.getLinkedInvoiceValue());
 			if(billingReference != null &&
-							StringUtils.isNotBlank(billingReference.getInvoiceDocumentReference().getID().getValue()))
-			target.getBillingReferences().add(billingReference);
+					StringUtils.isNotBlank(billingReference.getInvoiceDocumentReference().getID().getValue()))
+				target.getBillingReferences().add(billingReference);
 		});
 	}
 	private void setBillingReference(org.meveo.model.billing.Invoice source, CreditNote target){
@@ -1277,7 +1251,7 @@ public class InvoiceUblHelper {
 			BillingReference billingReference = setBillingReference(linInv.getLinkedInvoiceValue());
 			if(billingReference != null &&
 					StringUtils.isNotBlank(billingReference.getInvoiceDocumentReference().getID().getValue()))
-			target.getBillingReferences().add(billingReference);
+				target.getBillingReferences().add(billingReference);
 		});
 	}
 	private BillingReference setBillingReference(org.meveo.model.billing.Invoice source){
@@ -1295,10 +1269,10 @@ public class InvoiceUblHelper {
 		billingReference.setInvoiceDocumentReference(documentReferenceType);
 		return billingReference;
 	}
-	
+
 	private static void setTaxCurrencyCodeAndDocumentCurrencyCode(oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ObjectFactory objectFactorycommonBasic,
-	                                                                        org.meveo.model.billing.Invoice source,
-	                                                                  Invoice target){
+																  org.meveo.model.billing.Invoice source,
+																  Invoice target){
 		TaxCurrencyCode taxCurrencyCode = objectFactorycommonBasic.createTaxCurrencyCode();
 		DocumentCurrencyCode documentCurrencyCode = objectFactorycommonBasic.createDocumentCurrencyCode();
 		getTaxCurrencyCodeAndDocumentCurrencyCode(source, taxCurrencyCode, documentCurrencyCode);
@@ -1306,15 +1280,15 @@ public class InvoiceUblHelper {
 		target.setTaxCurrencyCode(taxCurrencyCode);
 	}
 	private static void setTaxCurrencyCodeAndDocumentCurrencyCode(oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ObjectFactory objectFactorycommonBasic,
-	                                                              org.meveo.model.billing.Invoice source,
-	                                                              CreditNote target){
+																  org.meveo.model.billing.Invoice source,
+																  CreditNote target){
 		TaxCurrencyCode taxCurrencyCode = objectFactorycommonBasic.createTaxCurrencyCode();
 		DocumentCurrencyCode documentCurrencyCode = objectFactorycommonBasic.createDocumentCurrencyCode();
 		getTaxCurrencyCodeAndDocumentCurrencyCode(source, taxCurrencyCode, documentCurrencyCode);
 		target.setDocumentCurrencyCode(documentCurrencyCode);
 		target.setTaxCurrencyCode(taxCurrencyCode);
 	}
-	
+
 	private static void getTaxCurrencyCodeAndDocumentCurrencyCode(org.meveo.model.billing.Invoice source,  TaxCurrencyCode taxCurrencyCode, DocumentCurrencyCode documentCurrencyCode){
 		if(source.getTradingCurrency() != null && source.getTradingCurrency().getCurrencyCode() != null){
 			taxCurrencyCode.setValue(source.getTradingCurrency().getCurrencyCode());
@@ -1336,8 +1310,8 @@ public class InvoiceUblHelper {
 			throw new RuntimeException(e);
 		}
 	}
-	
-	
+
+
 	private TaxCategoryType setTaxCategory(TaxInvoiceAgregate taxInvoiceAgregate) {
 		TaxCategoryType taxCategoryType = objectFactoryCommonAggrement.createTaxCategoryType();
 		Tax tax = taxInvoiceAgregate.getTax();
@@ -1348,11 +1322,11 @@ public class InvoiceUblHelper {
 			id.setValue(taxInvoiceAgregate.getTax().getUntdidTaxationCategory().getCode());
 			taxCategoryType.setID(id);
 		}
-		
+
 		Percent percent = objectFactorycommonBasic.createPercent();
 		percent.setValue(taxInvoiceAgregate.getTaxPercent().setScale(rounding, RoundingMode.HALF_UP));
 		taxCategoryType.setPercent(percent);
-		
+
 		if(tax != null && tax.getUntdidTaxationCategory() != null) {
 			UntdidTaxationCategory untdidTaxationCategory = tax.getUntdidTaxationCategory();
 			if(!untdidTaxationCategory.getSemanticModel().equalsIgnoreCase("Standard rate")){
@@ -1362,13 +1336,13 @@ public class InvoiceUblHelper {
 			}
 			if(tax.getUntdidVatex() != null) {
 				TaxExemptionReasonCode taxExemptionReasonCode = objectFactorycommonBasic.createTaxExemptionReasonCode();
-				taxExemptionReasonCode.setListID("CWA 15577");
+				taxExemptionReasonCode.setListID("CEF VATEX");
 				taxExemptionReasonCode.setListAgencyID("ZZZ");
 				taxExemptionReasonCode.setValue(tax.getUntdidVatex().getCode());
 				taxCategoryType.setTaxExemptionReasonCode(taxExemptionReasonCode);
 			}
 		}
-		
+
 		TaxScheme taxScheme = objectFactoryCommonAggrement.createTaxScheme();
 		ID id = objectFactorycommonBasic.createID();
 		id.setSchemeID("UN/ECE 5153");
@@ -1378,11 +1352,10 @@ public class InvoiceUblHelper {
 		TaxTypeCode taxTypeCode = objectFactorycommonBasic.createTaxTypeCode();
 		taxTypeCode.setValue(taxInvoiceAgregate.getTax().getCode());
 		taxScheme.setTaxTypeCode(taxTypeCode);
-
 		taxCategoryType.setTaxScheme(taxScheme);
 		return taxCategoryType;
 	}
-	
+
 	private static MonetaryTotalType setTaxExclusiveAmount(BigDecimal totalPrepaidAmount, String currency, BigDecimal amountWithoutTax, BigDecimal amountWithTax, BigDecimal lineExtensionAmount, BigDecimal payableAmount, BigDecimal discountAmount) {
 		MonetaryTotalType moneyTotalType = objectFactoryCommonAggrement.createMonetaryTotalType();
 		TaxInclusiveAmount taxInclusiveAmount = objectFactorycommonBasic.createTaxInclusiveAmount();
@@ -1394,12 +1367,12 @@ public class InvoiceUblHelper {
 		taxExclusiveAmount.setCurrencyID(currency);
 		taxExclusiveAmount.setValue(amountWithoutTax.setScale(rounding, RoundingMode.HALF_UP));
 		moneyTotalType.setTaxExclusiveAmount(taxExclusiveAmount);
-		
+
 		LineExtensionAmount lineExtensionAmountType = objectFactorycommonBasic.createLineExtensionAmount();
 		lineExtensionAmountType.setCurrencyID(currency);
 		lineExtensionAmountType.setValue(lineExtensionAmount.setScale(rounding, RoundingMode.HALF_UP));
 		moneyTotalType.setLineExtensionAmount(lineExtensionAmountType);
-		
+
 		PayableAmount payableAmountType = objectFactorycommonBasic.createPayableAmount();
 		payableAmountType.setCurrencyID(currency);
 		payableAmountType.setValue(payableAmount.setScale(rounding, RoundingMode.HALF_UP));
@@ -1419,38 +1392,35 @@ public class InvoiceUblHelper {
 			moneyTotalType.setAllowanceTotalAmount(allowanceTotalAmount);
 		}
 
-
 		return moneyTotalType;
 
 	}
-	
-    private BillingReference setBillingReferenceForInvoice(Set<CommercialOrder> commercialOrders, Invoice target) {
-        BillingReference billingReference = null;
-        DocumentReferenceType documentReferenceType = null;
-        ID id = null;
-        if (CollectionUtils.isNotEmpty(commercialOrders)) {
-            for (CommercialOrder commercialOrder : commercialOrders) {
-                if (StringUtils.isBlank(commercialOrder.getOrderNumber())) {
-                    continue;
-                }
-                billingReference = objectFactoryCommonAggrement.createBillingReference();
-                documentReferenceType = objectFactoryCommonAggrement.createDocumentReferenceType();
-                id = objectFactorycommonBasic.createID();
-                id.setValue(commercialOrder.getOrderNumber());
-                documentReferenceType.setID(id);
-                billingReference.setInvoiceDocumentReference(documentReferenceType);
 
-                IssueDate dueDate = objectFactorycommonBasic.createIssueDate();
-                dueDate.setValue(toXmlDate(commercialOrder.getOrderDate()));
-                documentReferenceType.setIssueDate(dueDate);
+	private BillingReference setBillingReferenceForInvoice(Set<CommercialOrder> commercialOrders, Invoice target) {
+		BillingReference billingReference = null;
+		DocumentReferenceType documentReferenceType = null;
+		ID id = null;
+		if(CollectionUtils.isNotEmpty(commercialOrders)) {
+			for(CommercialOrder commercialOrder : commercialOrders) {
+				if(Strings.isBlank(commercialOrder.getOrderNumber())) continue;
+				billingReference = objectFactoryCommonAggrement.createBillingReference();
+				documentReferenceType = objectFactoryCommonAggrement.createDocumentReferenceType();
+				id = objectFactorycommonBasic.createID();
+				id.setValue(commercialOrder.getOrderNumber());
+				documentReferenceType.setID(id);
+				billingReference.setInvoiceDocumentReference(documentReferenceType);
 
-                target.getBillingReferences().add(billingReference);
-            }
-        }
+				IssueDate dueDate = objectFactorycommonBasic.createIssueDate();
+				dueDate.setValue(toXmlDate(commercialOrder.getOrderDate()));
+				documentReferenceType.setIssueDate(dueDate);
+
+				target.getBillingReferences().add(billingReference);
+			}
+		}
 
 		return billingReference;
 	}
-	
+
 	private String translateAccountingArticle(AccountingArticle accountingArticle, String invoiceLanguageCode){
 		if(accountingArticle == null) return null;
 		String accountingArticleKey = "AA_" + accountingArticle.getCode() + "_" + invoiceLanguageCode;
@@ -1466,7 +1436,7 @@ public class InvoiceUblHelper {
 		descriptionMap.put(accountingArticleKey, descTranslated);
 		return descTranslated;
 	}
-	
+
 	private String translateTitle(String invoiceLanguageCode, Title title){
 		if(title == null) return null;
 		if(StringUtils.isBlank(invoiceLanguageCode)) return title.getDescription();
@@ -1492,22 +1462,23 @@ public class InvoiceUblHelper {
 	private ServiceProviderParty getServiceProviderParty(BillingAccount billingAccount) {
 		PartyType partyType = objectFactoryCommonAggrement.createPartyType();
 		ServiceProviderParty serviceProviderParty = objectFactoryCommonAggrement.createServiceProviderParty();
+
 		if(billingAccount.getCustomerAccount() != null){
 			if (billingAccount.getCustomerAccount().getAddress() != null) {
 				partyType.setPostalAddress(getPostalAddress(billingAccount.getCustomerAccount()));
 			}
 
 			if (StringUtils.isNotBlank(billingAccount.getCustomerAccount().getDescription())) {
-				//serviceProviderParty.setPartyLegalEntity(getPartyLegalEntity(billingAccount.getCustomerAccount()));
 				partyType.getPartyNames().add(getPartyName(billingAccount.getCustomerAccount()));
 			}
 		}
-		billingAccount.getUsersAccounts().forEach(userAccount -> {
-			addPartyIdentifications(userAccount.getRegistrationNumbers(), partyType);
-		});
+
+		addPartyIdentifications(billingAccount.getCustomerAccount().getRegistrationNumbers(), partyType, "0225", false);
+
 
 		partyType.setIndustryClassificationCode(getIndustryClassificationCode());
 		serviceProviderParty.setParty(partyType);
+		//serviceProviderParty.setIndustryClassificationCode(getIndustryClassificationCode());
 		return serviceProviderParty;
 	}
 
@@ -1541,7 +1512,7 @@ public class InvoiceUblHelper {
 		AdditionalStreetName additionalStreetName = objectFactorycommonBasic.createAdditionalStreetName();
 		additionalStreetName.setValue(pCustomerAccount.getAddress().getAddress2());
 		addressType.setAdditionalStreetName(additionalStreetName);
-		
+
 		if(StringUtils.isNotBlank(pCustomerAccount.getAddress().getAddress3())){
 			AddressLine addressLine = objectFactoryCommonAggrement.createAddressLine();
 			Line line = objectFactorycommonBasic.createLine();
@@ -1549,6 +1520,7 @@ public class InvoiceUblHelper {
 			addressLine.setLine(line);
 			addressType.getAddressLines().add(addressLine);
 		}
+
 		// AccountingCustomerParty/Party/PostalAddress/Department
 		Department department = objectFactorycommonBasic.createDepartment();
 		department.setValue(pCustomerAccount.getAddress().getAddress4());
@@ -1575,7 +1547,7 @@ public class InvoiceUblHelper {
 		identificationCode.setListID("ISO3166-1");
 		identificationCode.setListAgencyID("6");
 		if(pCustomerAccount.getAddress() != null && pCustomerAccount.getAddress().getCountry() != null){
-		identificationCode.setValue(pCustomerAccount.getAddress().getCountry().getCode());
+			identificationCode.setValue(pCustomerAccount.getAddress().getCountry().getCode());
 		}
 		countryType.setIdentificationCode(identificationCode);
 		addressType.setCountry(countryType);
@@ -1623,19 +1595,19 @@ public class InvoiceUblHelper {
 		StreetName streetName = objectFactorycommonBasic.createStreetName();
 		streetName.setValue(pInvoice.getBillingAccount().getUsersAccounts().get(0).getAddress().getAddress1());
 		addressType.setStreetName(streetName);
-		
+
 		AdditionalStreetName additionalStreetName = objectFactorycommonBasic.createAdditionalStreetName();
 		additionalStreetName.setValue(pInvoice.getBillingAccount().getUsersAccounts().get(0).getAddress().getAddress2());
 		addressType.setAdditionalStreetName(additionalStreetName);
-		
+
 		CityName cityName = objectFactorycommonBasic.createCityName();
 		cityName.setValue(pInvoice.getBillingAccount().getUsersAccounts().get(0).getAddress().getCity());
 		addressType.setCityName(cityName);
-		
+
 		PostalZone postalZone = objectFactorycommonBasic.createPostalZone();
 		postalZone.setValue(pInvoice.getBillingAccount().getUsersAccounts().get(0).getAddress().getZipCode());
 		addressType.setPostalZone(postalZone);
-		
+
 		CountrySubentity countrySubentity = objectFactorycommonBasic.createCountrySubentity();
 		countrySubentity.setValue(pInvoice.getBillingAccount().getUsersAccounts().get(0).getAddress().getState());
 		addressType.setCountrySubentity(countrySubentity);
@@ -1648,24 +1620,21 @@ public class InvoiceUblHelper {
 			identificationCode.setListAgencyID("6");
 			countryType.setIdentificationCode(identificationCode);
 			addressType.setCountry(countryType);
-		}
-		
 
+		}
 
 		LocationType locationType = objectFactoryCommonAggrement.createLocationType();
 		locationType.setAddress(addressType);
 
 		DeliveryType deliveryType = objectFactoryCommonAggrement.createDeliveryType();
-
 		//cac:Delivery/cac:DeliveryParty/cac:PartyName/cbc:Name
 		PartyType partyType = objectFactoryCommonAggrement.createPartyType();
 		PartyName partyName = objectFactoryCommonAggrement.createPartyName();
 		oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Name name = objectFactorycommonBasic.createName();
 		UserAccount userAccount = pInvoice.getBillingAccount().getUsersAccounts().get(0);
 		var registrationNumbers = userAccount.getRegistrationNumbers()
-				.stream().filter(registrationNumber -> registrationNumber.getIsoIcd() != null && SIREN.equalsIgnoreCase(registrationNumber.getIsoIcd().getCode()))
-				.findFirst();
-		if(registrationNumbers.isPresent()){
+				.stream().findFirst();
+		if(userAccount.getIsCompany()){
 			name.setValue(userAccount.getDescription());
 		}else if(userAccount.getName() != null){
 			name.setValue(userAccount.getName().getFirstName() + " " + userAccount.getName().getLastName());
@@ -1674,34 +1643,32 @@ public class InvoiceUblHelper {
 		partyType.getPartyNames().add(partyName);
 		deliveryType.setDeliveryParty(partyType);
 		//cac:Delivery/cac:DeliveryLocation/cbc:ID
-		if(registrationNumbers.isPresent()){
+		/*  if(registrationNumbers.isPresent()){
 			ID id = objectFactorycommonBasic.createID();
 			id.setSchemeID(registrationNumbers.get().getIsoIcd().getCode());
 			id.setValue(registrationNumbers.get().getRegistrationNo());
 			locationType.setID(id);
-		}
-
+		}*/
 		deliveryType.setDeliveryLocation(locationType);
 
 		return deliveryType;
 	}
-	
+
 	private PeriodType setPeriodTypeInvoiceLine(org.meveo.model.billing.Invoice invoice, InvoiceLine invoiceLine) {
 		if(invoiceLine.getSubscription() == null || invoice == null) return null;
-		
+
 		PeriodType periodType = objectFactoryCommonAggrement.createPeriodType();
 		if(invoice.getStartDate() != null){
 			StartDate startDate = objectFactorycommonBasic.createStartDate();
 			startDate.setValue(toXmlDate(invoice.getStartDate()));
 			periodType.setStartDate(startDate);
 		}
-
 		if(invoice.getEndDate() != null){
 			EndDate endDate = objectFactorycommonBasic.createEndDate();
 			endDate.setValue(toXmlDate(invoice.getEndDate()));
 			periodType.setEndDate(endDate);
 		}
-		
+
 		VatDateCodeEnum vatDateCode = einvoiceSettingService.findEinvoiceSetting().getVatDateCode();
 		DescriptionCode descriptionCode = objectFactorycommonBasic.createDescriptionCode();
 		descriptionCode.setValue(String.valueOf(vatDateCode.getPaidToDays()));
@@ -1709,31 +1676,14 @@ public class InvoiceUblHelper {
 		return periodType;
 	}
 
-	private ProfileID getProfileID(List<InvoiceLine> invoiceLines) {
-		ProfileID profileID = objectFactorycommonBasic.createProfileID();
-		if(CollectionUtils.isNotEmpty(invoiceLines)) {
-			var physicalExist = invoiceLines.stream().filter(invoiceLine -> invoiceLine.getAccountingArticle() != null)
-									.map(InvoiceLine::getAccountingArticle).map(AccountingArticle::isPhysical).collect(Collectors.toSet());
-			if(physicalExist.contains(true) && physicalExist.contains(false)) {
-				profileID.setValue("M1");
-			}else if(physicalExist.contains(true)) {
-				profileID.setValue("B1");
-			}else if (physicalExist.contains(false)){
-					profileID.setValue("S1");
-			}else return null;
-
-}
-		return profileID;
-	}
-
-	private void addPartyIdentifications( List<RegistrationNumber> registrationNumbers, PartyType partyType) {
+	private void addPartyIdentifications( List<RegistrationNumber> registrationNumbers, PartyType partyType, String codeEndPoint, boolean displayIdentification) {
 		if (CollectionUtils.isNotEmpty(registrationNumbers)) {
 			for (RegistrationNumber registerNumber : registrationNumbers) {
 				if (registerNumber.getIsoIcd() == null) continue;
 				if (registerNumber.getIsoIcd().getCode() != null) {
-					if(registerNumber.getIsoIcd().getCode().equals("0230")){
+					if(registerNumber.getIsoIcd().getCode().equals(codeEndPoint)){
 						partyType.setEndpointID(setEndpointID(registerNumber.getIsoIcd().getCode(), registerNumber.getRegistrationNo()));
-					}else{
+					}else if(displayIdentification){
 						PartyIdentification partyIdentification = objectFactoryCommonAggrement.createPartyIdentification();
 						ID id = objectFactorycommonBasic.createID();
 						id.setSchemeID(registerNumber.getIsoIcd().getCode());
@@ -1741,9 +1691,9 @@ public class InvoiceUblHelper {
 						id.setValue(registerNumber.getRegistrationNo());
 						partyIdentification.setID(id);
 						partyType.getPartyIdentifications().add(partyIdentification);
+					}
 				}
 			}
-		}
 		}
 	}
 
@@ -1756,4 +1706,39 @@ public class InvoiceUblHelper {
 		return endpointIDType;
 	}
 
+	private ProfileID getProfileID(List<InvoiceLine> invoiceLines) {
+		ProfileID profileID = objectFactorycommonBasic.createProfileID();
+		if (CollectionUtils.isNotEmpty(invoiceLines)) {
+			var physicalExist = invoiceLines.stream().filter(invoiceLine -> invoiceLine.getAccountingArticle() != null)
+					.map(InvoiceLine::getAccountingArticle).map(AccountingArticle::isPhysical).collect(Collectors.toSet());
+			if (physicalExist.contains(true) && physicalExist.contains(false)) {
+				profileID.setValue("M1");
+			} else if (physicalExist.contains(true)) {
+				profileID.setValue("B1");
+			} else if (physicalExist.contains(false)) {
+				profileID.setValue("S1");
+			} else return null;
+		}
+		return profileID;
+	}
+	/*private void setTradingCurrency(String currentCode, TaxTotalType taxTotalType){
+		List<TradingCurrency> tradingCurrency = tradingCurrencyService.getEntityManager().createNamedQuery("TradingCurrency.getTradingWithoutCurrent")
+				.setParameter("currencyCode", currentCode)
+				.getResultList();
+		if(CollectionUtils.isNotEmpty(tradingCurrency)){
+			tradingCurrency.forEach(currency -> {
+				TaxAmount taxAmount = objectFactorycommonBasic.createTaxAmount();
+				taxAmount.setCurrencyID(currency.getCurrency().getCurrencyCode());
+				taxAmount.setValue(amountTax.setScale(rounding, RoundingMode.HALF_UP));
+			});
+		}
+	} */
+
+	private BigDecimal calculePayableAmount(Set<org.meveo.model.billing.LinkedInvoice> commercialInvoice, BigDecimal amountWithoutTaxfromAdjInv) {
+		BigDecimal advancedAmount = commercialInvoice.stream()
+				.filter(linkedInvoice -> ADVANCEMENT_PAYMENT.equals(linkedInvoice.getType()) && linkedInvoice.getAmount() != null)
+				.map(linkedInvoice -> linkedInvoice.getAmount())
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+		return amountWithoutTaxfromAdjInv.subtract(advancedAmount);
+	}
 }

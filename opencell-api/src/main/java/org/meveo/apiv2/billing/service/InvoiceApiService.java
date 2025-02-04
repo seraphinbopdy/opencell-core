@@ -23,6 +23,7 @@ import java.util.Optional;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.meveo.admin.exception.BusinessException;
+import org.meveo.admin.job.UpdateHugeEntityJob;
 import org.meveo.admin.util.ResourceBundle;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.api.BaseApi;
@@ -52,6 +53,7 @@ import org.meveo.apiv2.billing.impl.InvoiceMapper;
 import org.meveo.apiv2.common.HugeEntity;
 import org.meveo.apiv2.common.ImmutableHugeEntity;
 import org.meveo.apiv2.ordering.services.ApiService;
+import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.IBillableEntity;
 import org.meveo.model.ICustomFieldEntity;
@@ -63,6 +65,7 @@ import org.meveo.model.billing.RatedTransactionAction;
 import org.meveo.model.billing.WalletOperation;
 import org.meveo.model.catalog.DiscountPlan;
 import org.meveo.model.filter.Filter;
+import org.meveo.model.jobs.JobInstance;
 import org.meveo.model.payments.OperationCategoryEnum;
 import org.meveo.service.billing.impl.BatchEntityService;
 import org.meveo.service.billing.impl.InvoiceLineService;
@@ -71,6 +74,7 @@ import org.meveo.service.billing.impl.InvoiceTypeService;
 import org.meveo.service.billing.impl.LinkedInvoiceService;
 import org.meveo.service.billing.impl.RatedTransactionService;
 import org.meveo.service.filter.FilterService;
+import org.meveo.service.job.JobInstanceService;
 import org.meveo.service.securityDeposit.impl.FinanceSettingsService;
 import org.meveo.service.settings.impl.AdvancedSettingsService;
 
@@ -119,6 +123,9 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 
 	@Inject
 	private BatchEntityService batchEntityService;
+	
+	@Inject
+	private JobInstanceService jobInstanceService;
 
 	@Override
 	public List<Invoice> list(Long offset, Long limit, String sort, String orderBy, String filter) {
@@ -566,12 +573,27 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
     	            }
     	        }
 
-    	        HugeEntity batchEntity = ImmutableHugeEntity.builder()
-    	                .filters(filters)
-    	                .targetJob("MarkWOToRerateJob")
-    	                .build();
+				if(financeSettingsService.isEntityWithHugeVolume(WalletOperation.class.getSimpleName())) {
+					HugeEntity batchEntity = ImmutableHugeEntity.builder()
+							.filters(filters)
+							.targetJob("MarkWOToRerateJob")
+							.build();
+	
+					batchEntityService.create(batchEntity, batchEntity.getFilters(), WalletOperation.class.getSimpleName());
+				} else {
+					JobInstance jobInstance = jobInstanceService.findByCode("MarkWOToRerateJob");
 
-    	        batchEntityService.create(batchEntity, batchEntity.getFilters(), WalletOperation.class.getSimpleName());
+					String selectQuery = batchEntityService.getSelectQuery(WalletOperation.class, filters, null, false);
+					List<Long> ids = batchEntityService.getEntityManager().createQuery(selectQuery).getResultList();
+
+					StringBuilder updateQuery = new StringBuilder("UPDATE ").append(WalletOperation.class.getSimpleName())
+																			.append(" SET updated=")
+																			.append(QueryBuilder.paramToString(new Date()));
+
+					String fieldsToUpdate = (String) customFieldInstanceService.getCFValue(jobInstance, UpdateHugeEntityJob.CF_FIELDS_TO_UPDATE);
+					updateQuery.append(", ").append(fieldsToUpdate);
+					batchEntityService.update(updateQuery, ids);
+				}
     	    }
         } catch (Exception e) {
             throw new BusinessApiException(e);

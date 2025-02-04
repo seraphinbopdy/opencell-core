@@ -281,6 +281,8 @@ public class FlatFileProcessing {
 
                 } else if (FlatFileProcessingJob.ROLLBACK.equals(actionOnError)) {
                     log.warn("Processing of file {} will stop and any changes will be reverted as error was encountered", fileName);
+                    jobExecutionResult.setNbItemsCorrectlyProcessed(0);
+                    jobExecutionResult.setNbItemsProcessedWithError(jobExecutionResult.getNbItemsToProcess() >= 1 ? jobExecutionResult.getNbItemsToProcess()-1 : 0);
                     throw new BusinessException(e.getMessage());
                 }
                 if (scannedAllRecords) {

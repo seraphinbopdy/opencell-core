@@ -19,8 +19,9 @@ package org.meveo.model.billing;
 
 public enum SubscriptionStatusEnum {
 
-    CREATED(1, "AccountStatusEnum.created"), ACTIVE(1, "AccountStatusEnum.active"), CANCELED(2, "AccountStatusEnum.canceled"), RESILIATED(3, "AccountStatusEnum.resiliated"), CLOSED(4,
-            "AccountStatusEnum.closed"), SUSPENDED(5, "AccountStatusEnum.suspended"), PENDING(6, "AccountStatusEnum.pending");
+    CREATED(1, "AccountStatusEnum.created"), ACTIVE(1, "AccountStatusEnum.active"), CANCELED(2, "AccountStatusEnum.canceled"), RESILIATED(3,
+            "AccountStatusEnum.resiliated"), CLOSED(4, "AccountStatusEnum.closed"), SUSPENDED(5, "AccountStatusEnum.suspended"), PENDING(6, "AccountStatusEnum.pending"), 
+    WAITING_MANDATORY(7, "accountStatusEnum.waitingMandatory");
 
     private Integer id;
     private String label;

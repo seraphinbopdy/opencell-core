@@ -591,9 +591,9 @@ public class SubscriptionService extends BusinessService<Subscription> {
     public List<Long> getSubscriptionsToRenewOrNotify(Date untillDate) {
 
         List<Long> ids = getEntityManager().createNamedQuery("Subscription.getExpired", Long.class).setParameter("date", untillDate)
-                .setParameter("statuses", Arrays.asList(ACTIVE, SubscriptionStatusEnum.CREATED, SubscriptionStatusEnum.SUSPENDED)).getResultList();
+                .setParameter("statuses", Arrays.asList(ACTIVE, SubscriptionStatusEnum.CREATED, SubscriptionStatusEnum.WAITING_MANDATORY, SubscriptionStatusEnum.SUSPENDED)).getResultList();
         ids.addAll(getEntityManager().createNamedQuery("Subscription.getToNotifyExpiration", Long.class).setParameter("date", untillDate)
-                .setParameter("statuses", Arrays.asList(ACTIVE, SubscriptionStatusEnum.CREATED)).getResultList());
+                .setParameter("statuses", Arrays.asList(ACTIVE, SubscriptionStatusEnum.CREATED, SubscriptionStatusEnum.WAITING_MANDATORY)).getResultList());
 
         return ids;
     }

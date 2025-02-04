@@ -103,7 +103,7 @@ public class SubscriptionStatusJobBean extends IteratorBasedJobBean<Long> {
     	
         Subscription subscription = subscriptionService.findById(subscriptionId);
         // Handle subscription renewal or termination
-        if (subscription.isSubscriptionExpired() && (subscription.getStatus() == SubscriptionStatusEnum.ACTIVE || subscription.getStatus() == SubscriptionStatusEnum.CREATED || subscription.getStatus() == SubscriptionStatusEnum.SUSPENDED)) {
+        if (subscription.isSubscriptionExpired() && (subscription.getStatus() == SubscriptionStatusEnum.ACTIVE || subscription.getStatus() == SubscriptionStatusEnum.CREATED || subscription.getStatus() == SubscriptionStatusEnum.WAITING_MANDATORY || subscription.getStatus() == SubscriptionStatusEnum.SUSPENDED)) {
 
             if (subscription.getSubscriptionRenewal().isAutoRenew() && subscription.getStatus() != SubscriptionStatusEnum.SUSPENDED) {
                 Date subscribedTillDate = subscription.getSubscribedTillDate();
@@ -158,7 +158,7 @@ public class SubscriptionStatusJobBean extends IteratorBasedJobBean<Long> {
             }
 
             // Fire "soon to renew" notification
-        } else if (subscription.isFireRenewalNotice() && (subscription.getStatus() == SubscriptionStatusEnum.ACTIVE || subscription.getStatus() == SubscriptionStatusEnum.CREATED)) {
+        } else if (subscription.isFireRenewalNotice() && (subscription.getStatus() == SubscriptionStatusEnum.ACTIVE || subscription.getStatus() == SubscriptionStatusEnum.CREATED || subscription.getStatus() == SubscriptionStatusEnum.WAITING_MANDATORY)) {
             subscription.setRenewalNotifiedDate(new Date());
             subscription = subscriptionService.update(subscription);
             endOfTermEventProducer.fire(subscription);

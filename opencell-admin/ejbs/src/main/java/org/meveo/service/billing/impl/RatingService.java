@@ -526,7 +526,7 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
 
                 Subscription sub = null;
 
-                if (!StringUtils.isBlank(triggeredEDRTemplate.getSubscriptionEl())) {
+                if (!StringUtils.isBlank(triggeredEDRTemplate.getSubscriptionEl()) && !isVirtual) {
                     String subCode = elUtils.evaluateStringExpression(triggeredEDRTemplate.getSubscriptionEl(), walletOperation, ua, null, edr);
                     if (subCode != null) {
                         sub = subscriptionService.findByCode(subCode);

@@ -788,7 +788,7 @@ public class InvoiceUblHelper {
 		// InvoiceLine/ Price/ PriceAmount
 		PriceAmount priceAmount = objectFactorycommonBasic.createPriceAmount();
 		priceAmount.setCurrencyID(currencyCode);
-		priceAmount.setValue(invoiceLine.getUnitPrice().setScale(rounding, RoundingMode.HALF_UP));
+		priceAmount.setValue(invoiceLine.getUnitPrice().setScale(rounding, RoundingMode.HALF_UP).abs());
 		priceType.setPriceAmount(priceAmount);
 		return priceType;
 	}

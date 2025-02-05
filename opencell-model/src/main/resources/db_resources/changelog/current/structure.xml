@@ -17636,5 +17636,76 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
             <column name="description_i18n" value='{"ENG": "Afrikaans", "FRA": "Afrikaans"}'/>
         </insert>
     </changeSet>
+    
+   	<changeSet id="#INTRD-26593_20241129" author="TarikFA.">
+        <addColumn tableName="cat_counter_template">
+            <column name="shared_counter"  type="${type.boolean}" defaultValueNumeric="0" />
+        </addColumn>
+    </changeSet>
+    
+    <changeSet id="#INTRD-29012_20250131" author="TarikFA." >
+        <addColumn tableName="cpq_trading_price_plan_version">
+            <column name="trading_price_el" type="varchar(2000)" />
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="#INTRD-28233_activate_sub" author="a.rouaguebe">
+        <addColumn tableName="advanced_settings">
+            <column name="long_description_i18n" type="${type.json}" />
+        </addColumn>
+        <addColumn tableName="billing_service_instance">
+            <column name="requested_activation_date" type="datetime" />
+        </addColumn>
+        <insert tableName="advanced_settings">
+            <column name="id" valueSequenceNext="advanced_settings_seq"/>
+            <column name="version" value="0"/>
+            <column name="disabled" valueNumeric="0"/>
+            <column name="created" valueComputed="${db.current.time}"/>
+            <column name="category" value="feature"/>
+            <column name="property_group" value="subscription"/>
+            <column name="property_type" value="java.lang.Boolean"/>
+            <column name="property_value" value="false"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="subscriptionActivation.waitForMandatoryServices"/>
+            <column name="description" value="Delay subscription activation until all its mandatory services are activated"/>
+            <column name="description_i18n">
+                <![CDATA[{
+                    "ENG":"Delay subscription activation until all its mandatory services are activated",
+                    "FRA":"Reporter l’activation d’une souscription jusqu'à ce que tous ses services obligatoires soient activés"
+                }]]>
+            </column>
+            <column name="long_description_i18n">
+                <![CDATA[{
+                    "ENG":"Services and subscription will be in a waiting status until all mandatory services are activated. The subscription and all pending services will be actually activated when all mandatory services are activated.",
+                    "FRA":"Les services et la souscription seront dans un statut d’attente jusqu'à ce que tous les services obligatoires soient activés. La souscription et tous les services en attente seront effectivement activés quand tous les services obligatoire sont activés."
+                }]]>
+            </column>
+        </insert>
+        <insert tableName="advanced_settings">
+            <column name="id" valueSequenceNext="advanced_settings_seq"/>
+            <column name="version" value="0"/>
+            <column name="disabled" valueNumeric="0"/>
+            <column name="created" valueComputed="${db.current.time}"/>
+            <column name="category" value="feature"/>
+            <column name="property_group" value="subscription"/>
+            <column name="property_type" value="java.lang.Boolean"/>
+            <column name="property_value" value="false"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="code" value="subscriptionActivation.useActualServiceActivationDate"/>
+            <column name="description" value="Use actual activation date when activating service instance form the waiting status"/>
+            <column name="description_i18n">
+                <![CDATA[{
+                    "ENG":"Use actual activation date when activating service instance form the waiting status",
+                    "FRA":"Utiliser la date d’activation effective lors de l’activation d’un service depuis le statut d’attente"
+                }]]>
+            </column>
+            <column name="long_description_i18n">
+                <![CDATA[{
+                    "ENG":"This option allows to replace the activation date of a service activated from the waiting status with the actual activate date. Else, the initially requested activation is kept. Recurring charges are especially sensitive to this setting as they will start rating from the activation date.",
+                    "FRA":"Cette option permet de remplacer la date d’activation d’un service activé depuis le statut d’attente avec la date effective d’activation. Sinon, la date d’activation initiale est conservée. Les charges récurrents sont particulièrement sensibles à ce paramètre puisque qu’elles commenceront à être valorisées à la date d’activation."
+                }]]>
+            </column>
+        </insert>
+    </changeSet>
 
 </databaseChangeLog>

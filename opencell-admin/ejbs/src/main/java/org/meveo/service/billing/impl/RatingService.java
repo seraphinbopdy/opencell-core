@@ -526,7 +526,7 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
 
                 Subscription sub = null;
 
-                if (!StringUtils.isBlank(triggeredEDRTemplate.getSubscriptionEl())) {
+                if (!StringUtils.isBlank(triggeredEDRTemplate.getSubscriptionEl()) && !isVirtual) {
                     String subCode = elUtils.evaluateStringExpression(triggeredEDRTemplate.getSubscriptionEl(), walletOperation, ua, null, edr);
                     if (subCode != null) {
                         sub = subscriptionService.findByCode(subCode);
@@ -1691,7 +1691,7 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
         discountWalletOperation.setChargeInstance(chargeInstance);
         discountWalletOperation.setInputQuantity(quantity);
         discountWalletOperation.setCurrency(bareWalletOperation.getCurrency()!=null?bareWalletOperation.getCurrency():bareWalletOperation.getBillingAccount().getCustomerAccount().getTradingCurrency().getCurrency());
-        discountWalletOperation.setDiscountedWO(bareWalletOperation);
+        discountWalletOperation.setDiscountedWalletOperation(bareWalletOperation);
         discountWalletOperation.setDiscountPlanType(DiscountPlanItemTypeEnum.PERCENTAGE);
         discountWalletOperation.setDiscountValue(discountValue);
         discountWalletOperation.setDiscountedAmount(discountedAmount);
@@ -1775,10 +1775,22 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
             if (!pricePlanMatrixVersion.isMatrix()) {
                 TradingPricePlanVersion tradingPPVersion = getTradingPPVersionFrom(pricePlanMatrixVersion, tradingCurrency);
                 if (tradingPPVersion != null) {
-                    if (appProvider.isEntreprise()) {
-                        priceWithoutTax = tradingPPVersion.getTradingPrice();
-                    } else {
-                        priceWithTax = tradingPPVersion.getTradingPrice();
+                    if(StringUtils.isNotBlank(tradingPPVersion.getTradingPriceEl())) {
+                        BigDecimal priceTemp = elUtils.evaluateAmountExpression(tradingPPVersion.getTradingPriceEl(), walletOperation, walletOperation.getWallet().getUserAccount(), null, priceWithoutTax);
+                        if (priceTemp == null) {
+                            throw new BusinessException("Can't evaluate price for price plan " + pricePlan.getId() + " EL:" + tradingPPVersion.getTradingPriceEl());
+                        }
+                        if (appProvider.isEntreprise()) {
+                            priceWithoutTax = priceTemp;
+                        } else {
+                            priceWithTax = priceTemp;
+                        }
+                    }else {
+                        if (appProvider.isEntreprise()) {
+                            priceWithoutTax = tradingPPVersion.getTradingPrice();
+                        } else {
+                            priceWithTax = tradingPPVersion.getTradingPrice();
+                        }
                     }
                     walletOperation.setUseSpecificPriceConversion(true);
                 } else {
@@ -1958,7 +1970,7 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
 	
 	protected void checkDiscountedWalletOpertion(WalletOperation wo, List<WalletOperation> walletOperations) {
 		if(wo.getDiscountedAmount() != null){
-			var discountedWallerOperation = walletOperations.stream().filter(wos -> wos.getId() != null && wo.getUuid().equals(wos.getUuid())).findFirst().map(WalletOperation::getId).orElse(null);
+			var discountedWallerOperation = walletOperations.stream().filter(wos -> wos.getId() != null && wo.getUuid().equals(wos.getUuid())).findFirst().orElse(null);
             if (discountedWallerOperation!=null) {
                 wo.setUuid(null);
                 wo.setDiscountedWalletOperation(discountedWallerOperation);

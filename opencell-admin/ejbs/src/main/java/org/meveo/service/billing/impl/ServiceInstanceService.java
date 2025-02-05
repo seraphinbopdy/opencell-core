@@ -44,6 +44,7 @@ import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.PersistenceUtils;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.StringUtils;
+import org.meveo.event.qualifier.StatusUpdated;
 import org.meveo.model.RatingResult;
 import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.ChargeApplicationModeEnum;
@@ -98,8 +99,7 @@ import org.meveo.service.script.service.ServiceModelScriptService;
 import org.meveo.service.settings.impl.AdvancedSettingsService;
 
 import jakarta.ejb.Stateless;
-import jakarta.ejb.TransactionAttribute;
-import jakarta.ejb.TransactionAttributeType;
+import jakarta.enterprise.event.Event;
 import jakarta.inject.Inject;
 import jakarta.persistence.NoResultException;
 
@@ -188,6 +188,10 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
 
     @Inject
     private AdvancedSettingsService advancedSettingsService;
+    
+    @Inject
+    @StatusUpdated
+    protected Event<Subscription> subscriptionStatusUpdatedEvent;
 
     /**
      * Find a service instance list by subscription entity, service template code and service instance status list.
@@ -634,7 +638,13 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
         }
         
 
-        serviceInstance.setStatus(InstanceStatusEnum.ACTIVE);
+        boolean waitForMandatory = Boolean.TRUE.equals(advancedSettingsService.getParameter("subscriptionActivation.waitForMandatoryServices"));
+        if(!waitForMandatory) {
+            serviceInstance.setStatus(InstanceStatusEnum.ACTIVE);
+        } else {
+            serviceInstance.setStatus(InstanceStatusEnum.WAITING_MANDATORY);
+        }
+        serviceInstance.setRequestedActivationDate(serviceInstance.getSubscriptionDate());
         serviceInstance = update(serviceInstance);
 
         // execute subscription script
@@ -660,23 +670,42 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
             												serviceInstance.getCode(), subscription.getUserAccount().getWallet(), subscription.getOffer(), null, subscription, description, false, null, null, DiscountPlanTypeEnum.PRODUCT);
         }
         
-        if(!SubscriptionStatusEnum.ACTIVE.equals(subscription.getStatus())) {
-
+        
+        final boolean useSiRequestedDate = Boolean.TRUE.equals(advancedSettingsService.getParameter("subscriptionActivation.useActualServiceActivationDate"));
+        final Date subscriptionDate = serviceInstance.getSubscriptionDate();
+        if(!waitForMandatory && !SubscriptionStatusEnum.ACTIVE.equals(subscription.getStatus())) {
+            subscription.setStatus(SubscriptionStatusEnum.ACTIVE);
+            subscriptionStatusUpdatedEvent.fire(subscription);
+        } else if(waitForMandatory && !SubscriptionStatusEnum.ACTIVE.equals(subscription.getStatus())) {
+            
             List<String> mandatoryProducts = subscription.getOffer()
                                                          .getOfferComponents()
                                                          .stream()
                                                          .filter(OfferComponent::isMandatory)
-                                                         .map(oc -> oc.getProduct()
-                                                                      .getCode())
+                                                         .map(oc -> oc.getProduct().getCode())
                                                          .collect(Collectors.toList());
 
-            boolean allMandatorySIActive = mandatoryProducts.isEmpty() || subscription.getServiceInstances()
-                                                       .stream()
-                                                       .filter(si -> mandatoryProducts.contains(si.getProductVersion().getProduct().getCode()))
-                                                       .allMatch(si -> InstanceStatusEnum.ACTIVE.equals(si.getStatus()));
+            boolean allMandatorySIWaiting = mandatoryProducts.isEmpty() || subscription.getServiceInstances()
+                                                                                      .stream()
+                                                                                      .filter(si -> mandatoryProducts.contains(si.getProductVersion().getProduct().getCode()))
+                                                                                      .allMatch(si -> InstanceStatusEnum.WAITING_MANDATORY.equals(si.getStatus()) || InstanceStatusEnum.ACTIVE.equals(si.getStatus()));
 
-            if(allMandatorySIActive) {
+            if(allMandatorySIWaiting) {
                 subscription.setStatus(SubscriptionStatusEnum.ACTIVE);
+                subscriptionStatusUpdatedEvent.fire(subscription);
+                subscription.getServiceInstances()
+                            .stream()
+                            .filter(si -> InstanceStatusEnum.WAITING_MANDATORY.equals(si.getStatus()))
+                            .forEach(si -> {
+                                si.setStatus(InstanceStatusEnum.ACTIVE);
+                                if(!useSiRequestedDate) {
+                                    si.setSubscriptionDate(si.getRequestedActivationDate());
+                                } else {
+                                    si.setSubscriptionDate(subscriptionDate);
+                                }
+                            });
+            } else {
+                subscription.setStatus(SubscriptionStatusEnum.WAITING_MANDATORY);
             }
         }
         

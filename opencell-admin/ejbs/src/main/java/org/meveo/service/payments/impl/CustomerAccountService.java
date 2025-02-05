@@ -35,6 +35,7 @@ import org.meveo.admin.util.ResourceBundle;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.api.dto.CurrencyDto;
 import org.meveo.api.dto.account.CustomerAccountDto;
+import org.meveo.api.dto.payment.AccountOperationDto;
 import org.meveo.apiv2.payments.AccountOperationsDetails;
 import org.meveo.apiv2.payments.ImmutableAccountOperationsDetails;
 import org.meveo.apiv2.payments.ImmutableCustomerBalance;
@@ -45,6 +46,8 @@ import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.billing.BillingAccount;
 import org.meveo.model.billing.InstanceStatusEnum;
+import org.meveo.model.billing.Invoice;
+import org.meveo.model.billing.InvoicePaymentStatusEnum;
 import org.meveo.model.billing.ServiceInstance;
 import org.meveo.model.communication.email.EmailTemplate;
 import org.meveo.model.crm.Customer;
@@ -852,19 +855,28 @@ public class CustomerAccountService extends AccountService<CustomerAccount> {
      * @param linkedOccTemplates The linked OCC templates.
      * @return The balance of the customer account.
      */
-    public BigDecimal getCustomerAccountBalance(CustomerAccount customerAccount, List<String> linkedOccTemplates) {
+    public BigDecimal getCustomerAccountBalance(CustomerAccount customerAccount, List<String> linkedOccTemplates, CustomerBalance customerBalance) {
         List<AccountOperation> accountOperations = accountOperationService.getAccountOperations(customerAccount.getId(),
                 null,
                 linkedOccTemplates,
                 null);
+
+        accountOperations = accountOperations.stream()
+                .filter(ao -> ao.getInvoices().stream().noneMatch(Invoice::isDunningCollectionPlanTriggered))
+                .filter(ao -> ao.getInvoices().stream().anyMatch(invoice -> invoice.getPaymentStatus() == InvoicePaymentStatusEnum.UNPAID))
+                .collect(Collectors.toList());
+
+        // Filter account operations based on customer balance
+        List<AccountOperationDto> result = customerBalanceService.filterAccountOperations(accountOperations, customerBalance);
+
         // Calculate totals for credit, debit, and balance
-        BigDecimal credit = accountOperations.stream()
+        BigDecimal credit = result.stream()
                 .filter(aod -> aod.getTransactionCategory().equals(OperationCategoryEnum.CREDIT))
-                .map(AccountOperation::getAmount)
+                .map(AccountOperationDto::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal debit = accountOperations.stream()
+        BigDecimal debit = result.stream()
                 .filter(aod -> aod.getTransactionCategory().equals(OperationCategoryEnum.DEBIT))
-                .map(AccountOperation::getAmount)
+                .map(AccountOperationDto::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         return debit.subtract(credit);
     }

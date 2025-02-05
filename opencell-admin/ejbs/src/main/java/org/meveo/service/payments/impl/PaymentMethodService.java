@@ -469,7 +469,7 @@ public class PaymentMethodService extends PersistenceService<PaymentMethod> {
         }
 
         GatewayPaymentInterface gatewayPaymentInterface = null;
-        gatewayPaymentInterface = getGatewayPaymentInterface(customerAccount, seller);
+        gatewayPaymentInterface = getGatewayPaymentInterface(customerAccount, seller,PaymentMethodEnum.CARD);
         if(gatewayPaymentInterface == null) {
             throw new BusinessException("Can't found the gateway to use");
         }

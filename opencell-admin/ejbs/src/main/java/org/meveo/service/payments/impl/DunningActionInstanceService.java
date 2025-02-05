@@ -149,7 +149,7 @@ public class DunningActionInstanceService extends PersistenceService<DunningActi
     public void triggerAction(DunningActionInstance actionInstance, Invoice pInvoice, DunningCollectionPlan collectionPlan) {
         // Execute script
         if (actionInstance.getActionType().equals(SCRIPT) && actionInstance.getDunningAction() != null) {
-            executeScriptAction(dunningSettingsService.findLastOne(), actionInstance, collectionPlan);
+            executeScriptAction(dunningSettingsService.findLastOne(), actionInstance, pInvoice);
         }
 
         // Send notification
@@ -168,12 +168,12 @@ public class DunningActionInstanceService extends PersistenceService<DunningActi
      *
      * @param dunningSettings Dunning settings
      * @param actionInstance Action instance
-     * @param collectionPlan Collection plan
+     * @param pInvoice Invoice
      */
-    private void executeScriptAction(DunningSettings dunningSettings, DunningActionInstance actionInstance, DunningCollectionPlan collectionPlan) {
+    private void executeScriptAction(DunningSettings dunningSettings, DunningActionInstance actionInstance, Invoice pInvoice) {
         HashMap<String, Object> context = new HashMap<>();
-        context.put(Script.CONTEXT_ENTITY, collectionPlan.getRelatedInvoice());
-        context.put("customerAccount", collectionPlan.getCustomerAccount());
+        context.put(Script.CONTEXT_ENTITY, pInvoice);
+        context.put("customerAccount", pInvoice.getBillingAccount().getCustomerAccount());
 
         if (dunningSettings != null) {
             context.put("dunningMode", dunningSettings.getDunningMode());

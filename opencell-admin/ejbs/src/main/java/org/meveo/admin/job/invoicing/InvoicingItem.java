@@ -1,15 +1,21 @@
 package org.meveo.admin.job.invoicing;
+
+import static java.util.regex.Pattern.compile;
+import static java.util.stream.Collectors.toList;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
-import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.billing.InvoiceAgregate;
+
 public class InvoicingItem {
+
+	private static final Pattern ID_SPLIT_PATTERN = compile(",");
+
 	private Long billingAccountId;
-	private Long count = 0l;
+	private Long count = 0L;
 	private Long invoiceSubCategoryId;
 	private Long userAccountId;
 	private Long taxId;
@@ -19,8 +25,6 @@ public class InvoicingItem {
 	private List<Long> ilIDs = new ArrayList<>();
 	private String invoiceCategoryId;
 	private String invoiceKey;
-	private List<Long> subscriptionIds = new ArrayList<>();
-	private List<Long> purchaseOrderIds = new ArrayList<>();
 	private boolean useSpecificTransactionalAmount;
 	private BigDecimal transactionalAmountWithoutTax = BigDecimal.ZERO;
 	private BigDecimal transactionalAmountTax = BigDecimal.ZERO;
@@ -36,17 +40,12 @@ public class InvoicingItem {
 		this.amountWithTax = (BigDecimal) fields[i++];
 		this.amountTax = (BigDecimal) fields[i++];
 		this.count = (Long) fields[i++];
-		this.ilIDs = Pattern.compile(",").splitAsStream((String) fields[i++]).mapToLong(Long::parseLong).boxed().collect(Collectors.toList());
+		this.ilIDs = ID_SPLIT_PATTERN.splitAsStream((String) fields[i++]).mapToLong(Long::parseLong).boxed().collect(toList());
 		this.invoiceKey = (String) fields[i++];
-		this.subscriptionIds = Pattern.compile(",").splitAsStream((String) fields[i++]).mapToLong(Long::parseLong).boxed().collect(Collectors.toList());
-		String purchaseOrderIds = (String) fields[i++];
-		if (!StringUtils.isBlank(purchaseOrderIds)) {
-			this.purchaseOrderIds = Pattern.compile(",").splitAsStream(purchaseOrderIds).mapToLong(Long::parseLong).boxed().collect(Collectors.toList());
-		}
 		this.useSpecificTransactionalAmount = (boolean) fields[i++];
 		this.transactionalAmountWithoutTax = (BigDecimal) fields[i++];
 		this.transactionalAmountTax = (BigDecimal) fields[i++];
-		this.transactionalAmountWithTax = (BigDecimal) fields[i++];
+		this.transactionalAmountWithTax = (BigDecimal) fields[i];
 	}
 
 	/**
@@ -55,8 +54,6 @@ public class InvoicingItem {
 	public InvoicingItem(List<InvoicingItem> items) {
 		for (InvoicingItem item : items) {
 			this.ilIDs.addAll(item.getilIDs());
-			this.subscriptionIds.addAll(item.getSubscriptionIds());
-			this.purchaseOrderIds.addAll(item.getPurchaseOrderIds());
 			this.count = this.count + item.count;
 			this.amountTax = this.amountTax.add(item.getAmountTax());
 			this.amountWithTax = this.amountWithTax.add(item.getAmountWithTax());
@@ -202,14 +199,6 @@ public class InvoicingItem {
 	}
 	public void setInvoiceKey(String invoiceKey) {
 		this.invoiceKey = invoiceKey;
-	}
-
-	public List<Long> getSubscriptionIds() {
-		return subscriptionIds;
-	}
-
-	public List<Long> getPurchaseOrderIds() {
-		return purchaseOrderIds;
 	}
 
 	@Override

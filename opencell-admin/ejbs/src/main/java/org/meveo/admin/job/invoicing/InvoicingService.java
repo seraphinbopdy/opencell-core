@@ -62,6 +62,7 @@ import org.meveo.service.billing.impl.BillingAccountService;
 import org.meveo.service.billing.impl.InvoiceService;
 import org.meveo.service.billing.impl.PurchaseOrderService;
 import org.meveo.service.billing.impl.InvoiceTypeService;
+import org.meveo.service.billing.impl.PurchaseOrderService;
 import org.meveo.service.billing.impl.RejectedBillingAccountService;
 import org.meveo.service.billing.impl.ServiceSingleton;
 import org.meveo.service.billing.impl.SubscriptionService;
@@ -105,9 +106,9 @@ public class InvoicingService extends PersistenceService<Invoice> {
     private static final int MAX_IL_TO_UPDATE_PER_TRANSACTION = 10000;
     @Inject
     private InvoiceSubCategoryService invoiceSubCategoryService;
-    private Map<Long, Tax> taxes=new TreeMap<Long, Tax>();
-    private Map<Long, TradingLanguage> tradingLanguages=new TreeMap<Long, TradingLanguage>();
-    private Map<Long, DiscountPlan> discountPlans=new TreeMap<Long, DiscountPlan>();
+    private Map<Long, Tax> taxes=new TreeMap<>();
+    private Map<Long, TradingLanguage> tradingLanguages=new TreeMap<>();
+    private Map<Long, DiscountPlan> discountPlans=new TreeMap<>();
     private Map<String, String> descriptionMap = new HashMap<>();
 
 	@Inject
@@ -166,7 +167,7 @@ public class InvoicingService extends PersistenceService<Invoice> {
         return new AsyncResult<>("OK");
     }
 	private void validateInvoices(BillingRun billingRun, List<List<Invoice>> invoicesByBA) {
-        invoicesByBA.stream().forEach(invoices-> invoiceService.applyAutomaticInvoiceCheck(invoices, true, false, billingRun));
+        invoicesByBA.stream().forEach(invoices-> invoiceService.applyAutomaticInvoiceCheck(invoices, true, true, billingRun));
 	}
 
 	private List<List<Invoice>> generateInvoices(BillingRun billingRun, List<BillingAccountDetailsItem> invoicingItemsList,
@@ -209,9 +210,10 @@ public class InvoicingService extends PersistenceService<Invoice> {
         log.info("======== UPDATING ILs ========");
         invoicesbyBA.forEach(invoices -> invoices.forEach(invoice
                 -> invoice.getSubCategoryInvoiceAgregate().forEach(sca
-                -> updateInvoiceLines(invoice, billingRun, sca))));
+                -> updateInvoiceLinesAndLinkObjects(invoice, billingRun, sca))));
         validateInvoices(billingRun, invoicesbyBA);
     }
+    
     private void assignNumberAndCreate(BillingRun billingRun, boolean isFullAutomatic, List<Invoice> invoices, BillingCycle billingCycle) {
         if(!isFullAutomatic) {
             invoices.forEach(invoice->invoice.setTemporaryInvoiceNumber(serviceSingleton.getTempInvoiceNumber(billingRun.getId())));
@@ -227,14 +229,17 @@ public class InvoicingService extends PersistenceService<Invoice> {
             invoiceService.postCreate(invoice);
         });
     }
-    
-    private void updateInvoiceLines(Invoice invoice, BillingRun billingRun, SubCategoryInvoiceAgregate sca) {
+
+    private void updateInvoiceLinesAndLinkObjects(Invoice invoice, BillingRun billingRun, SubCategoryInvoiceAgregate sca) {
         final List<Long> largeList = sca.getIlIDs();
         for (List<Long> ilIDs : Lists.partition(largeList, MAX_IL_TO_UPDATE_PER_TRANSACTION)) {
             Query query = getEntityManager().createNamedQuery("InvoiceLine.linkToInvoice").setParameter("invoice", invoice).setParameter("invoiceAgregateF", sca).setParameter("ids", ilIDs);
             query.executeUpdate();
         }
+    	getEntityManager().createNamedQuery("Invoice.linkWithSubscriptionsByID").setParameter("invoiceId", invoice.getId()).executeUpdate();
+    	getEntityManager().createNamedQuery("Invoice.linkWithPurchaseOrdersByID").setParameter("invoiceId", invoice.getId()).executeUpdate();
     }
+    
     private Set<SubCategoryInvoiceAgregate> createInvoiceAgregates(BillingAccountDetailsItem billingAccountDetailsItem,
                                 BillingAccount billingAccount, Invoice invoice, List<InvoicingItem> groupedItems) {
         String languageCode = getTradingLanguageCode(billingAccountDetailsItem.getTradingLanguageId());
@@ -452,14 +457,6 @@ public class InvoicingService extends PersistenceService<Invoice> {
         if(invoiceAggregate instanceof SubCategoryInvoiceAgregate) {
             ((SubCategoryInvoiceAgregate)invoiceAggregate).addILs(summuryItem.getilIDs());
         }
-        /*
-        for (Long subscriptionId : summuryItem.getSubscriptionIds()) {
-            (invoiceAggregate.getInvoice().getInvoiceLines()).stream().forEach(invoiceLine -> invoiceLine.addSubscription(subscriptionService.findById(subscriptionId)));
-        }
-        for (Long purchaseOrderId : summuryItem.getPurchaseOrderIds()) {
-            invoiceAggregate.getInvoice().addPurchaseOrder(PurchaseOrderService.findById(purchaseOrderId));
-        }
-        */
     }
     
     private void addAggregationAmounts(InvoiceAgregate subTaxAggregate, InvoiceAgregate invoiceAggregate) {
@@ -709,7 +706,8 @@ public class InvoicingService extends PersistenceService<Invoice> {
         Integer delay = invoiceService.evaluateDueDelayExpression(dueDateDelayEL, billingAccount, invoice, order);
         Date dueDate = invoice.getInvoiceDate();
         if(isExceptionalBR && delay == null) {
-            delay = 0;
+        	//in exceptionalBR case, be sure the used billingCycle is the BA billin gCycle
+        	delay = invoiceService.evaluateDueDelayExpression(billingAccount.getBillingCycle().getDueDateDelayEL(), billingAccount, invoice, order);
         }
         if (delay != null) {
             dueDate = DateUtils.addDaysToDate(invoice.getInvoiceDate(), delay);

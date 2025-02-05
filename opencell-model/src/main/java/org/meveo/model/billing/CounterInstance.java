@@ -52,7 +52,9 @@ import jakarta.persistence.Table;
         @NamedQuery(name = "CounterInstance.findByCounterAndBillingAccount", query = "SELECT ci.id FROM CounterInstance ci left join ci.billingAccount ba where ba.status='ACTIVE' and ci.counterTemplate.code=:counterTemplateCode"),
         @NamedQuery(name = "CounterInstance.findByCounterAndUserAccount", query = "SELECT ci.id FROM CounterInstance ci left join ci.userAccount ua where ua.status='ACTIVE' and ci.counterTemplate.code=:counterTemplateCode"),
         @NamedQuery(name = "CounterInstance.findByCounterAndSubscription", query = "SELECT ci.id FROM CounterInstance ci left join ci.subscription su where su.status='ACTIVE' and ci.counterTemplate.code=:counterTemplateCode"),
-        @NamedQuery(name = "CounterInstance.findByCounterAndService", query = "SELECT ci.id FROM CounterInstance ci left join ci.serviceInstance si where si.status='ACTIVE' and ci.counterTemplate.code=:counterTemplateCode")
+        @NamedQuery(name = "CounterInstance.findByCounterAndService", query = "SELECT ci.id FROM CounterInstance ci left join ci.serviceInstance si where si.status='ACTIVE' and ci.counterTemplate.code=:counterTemplateCode"),
+		@NamedQuery(name = "CounterInstance.findByCounterAndSubscriptionShared", query = "SELECT ci.id FROM CounterInstance ci left join ci.subscription su where ci.counterTemplate.code=:counterTemplateCode"),
+		@NamedQuery(name = "CounterInstance.findByCounterAndServiceShared", query = "SELECT ci.id FROM CounterInstance ci left join ci.serviceInstance si where ci.counterTemplate.code=:counterTemplateCode")
 
 })
 public class CounterInstance extends BusinessEntity {

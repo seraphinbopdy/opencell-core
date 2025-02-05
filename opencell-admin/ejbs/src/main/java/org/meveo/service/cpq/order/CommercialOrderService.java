@@ -499,7 +499,7 @@ public class CommercialOrderService extends BusinessService<CommercialOrder> {
 		if (deliveryDate != null) {
 			serviceInstance.setDeliveryDate(deliveryDate);
 		} else {
-			serviceInstance.setDeliveryDate(getServiceDeliveryDate(subscription.getOrder(), subscription.getOrderOffer(), orderProduct));
+			serviceInstance.setDeliveryDate(getServiceDeliveryDate(subscription.getOrder(), subscription.getOrderOffer(), orderProduct,subscription));
 		}
 
 		serviceInstance.setSubscription(subscription);
@@ -610,14 +610,15 @@ public class CommercialOrderService extends BusinessService<CommercialOrder> {
 	public void updateProduct(OrderOffer offer, Product product, BigDecimal quantity, List<OrderAttribute> orderAttributes, OrderProduct orderProduct, Date deliveryDate, String subscriptionCode) {
 
 		ServiceInstance serviceInstance = orderProduct.getServiceInstance();
+		Subscription subscription =offer.getSubscription();
 		if (serviceInstance != null) {
 	        serviceInstance.setCode(product.getCode());
 			serviceInstance.setQuantity(quantity);
-			serviceInstance.setSubscriptionDate(offer.getSubscription().getSubscriptionDate());
+			serviceInstance.setSubscriptionDate(subscription.getSubscriptionDate());
 			if(AgreementDateSettingEnum.INHERIT.equals(orderProduct.getProductVersion().getProduct().getAgreementDateSetting())) {
-				serviceInstance.setEndAgreementDate(offer.getSubscription().getEndAgreementDate());
+				serviceInstance.setEndAgreementDate(subscription.getEndAgreementDate());
 			}
-			serviceInstance.setRateUntilDate(offer.getSubscription().getEndAgreementDate());
+			serviceInstance.setRateUntilDate(subscription.getEndAgreementDate());
 			ProductVersion productVersion = productService.getCurrentPublishedVersion(serviceInstance.getCode(),
 							deliveryDate != null ? deliveryDate : serviceInstance.getSubscriptionDate()).orElse(null);
 			serviceInstance.setProductVersion(productVersion);
@@ -625,10 +626,10 @@ public class CommercialOrderService extends BusinessService<CommercialOrder> {
 			if (deliveryDate != null) {
 				serviceInstance.setDeliveryDate(deliveryDate);
 			} else {
-				serviceInstance.setDeliveryDate(getServiceDeliveryDate(offer.getSubscription().getOrder(), offer.getSubscription().getOrderOffer(), orderProduct));
+				serviceInstance.setDeliveryDate(getServiceDeliveryDate(subscription.getOrder(), subscription.getOrderOffer(), orderProduct,subscription));
 			}
 
-			serviceInstance.setSubscription(offer.getSubscription());
+			serviceInstance.setSubscription(subscription);
 
 			serviceInstance.getAttributeInstances().clear();
 			Map<String,AttributeInstance> instantiatedAttributes=new HashMap<>();
@@ -636,7 +637,7 @@ public class CommercialOrderService extends BusinessService<CommercialOrder> {
 				if(orderAttribute.getAttribute()!=null  && !AttributeTypeEnum.EXPRESSION_LANGUAGE.equals(orderAttribute.getAttribute().getAttributeType())) {
 				AttributeInstance attributeInstance = new AttributeInstance(orderAttribute, currentUser);
 				attributeInstance.setServiceInstance(serviceInstance);
-				attributeInstance.setSubscription(offer.getSubscription());
+				attributeInstance.setSubscription(subscription);
 				instantiatedAttributes.put(orderAttribute.getAttribute().getCode(),attributeInstance);
 				}
 			}
@@ -648,7 +649,7 @@ public class CommercialOrderService extends BusinessService<CommercialOrder> {
 					attributeInstance = new AttributeInstance(currentUser);
 					attributeInstance.setAttribute(attribute);
 					attributeInstance.setServiceInstance(serviceInstance);
-					attributeInstance.setSubscription(offer.getSubscription());
+					attributeInstance.setSubscription(subscription);
 
 				}else {
 					attributeInstance=instantiatedAttributes.get(attribute.getCode());
@@ -694,7 +695,7 @@ public class CommercialOrderService extends BusinessService<CommercialOrder> {
 		}
 	}
 	
-	public Date getServiceDeliveryDate(CommercialOrder order, OrderOffer offer, OrderProduct product) {
+	public Date getServiceDeliveryDate(CommercialOrder order, OrderOffer offer, OrderProduct product,Subscription subscription) {
 		if (product != null && product.getDeliveryDate() != null) {
 			return product.getDeliveryDate();
 		}
@@ -703,7 +704,7 @@ public class CommercialOrderService extends BusinessService<CommercialOrder> {
 		}else if (order != null && order.getDeliveryDate() != null) {
 			return order.getDeliveryDate();
 		}else {
-			return new Date();
+			return subscription.getSubscriptionDate();
 		}
 	}
 	

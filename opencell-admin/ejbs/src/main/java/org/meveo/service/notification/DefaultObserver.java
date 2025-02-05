@@ -373,6 +373,11 @@ public class DefaultObserver {
         checkEvent(NotificationEventTypeEnum.STATUS_UPDATED, cpqQuote);
     }
     
+    public void subscriptionStatusUpdated(@Observes @StatusUpdated Subscription subscription) throws BusinessException {
+        log.trace("Defaut observer: check subscription status updated {}", subscription.getId());
+        checkEvent(NotificationEventTypeEnum.STATUS_UPDATED, subscription);
+    }
+    
     
     /**
      * Handle Quote PDF generated event

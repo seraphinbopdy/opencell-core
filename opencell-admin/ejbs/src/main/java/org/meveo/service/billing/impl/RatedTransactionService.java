@@ -893,11 +893,21 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
     }
 
     public int moveAndRerateNotBilledRTToUA(WalletInstance newWallet, Subscription subscription) {
-        return getEntityManager().createNamedQuery("RatedTransaction.moveAndRerateNotBilledRTToUA")
-                .setParameter("newWallet", newWallet)
-                .setParameter("newBillingAccount", newWallet.getUserAccount().getBillingAccount())
-                .setParameter("newUserAccount", newWallet.getUserAccount())
-                .setParameter("subscription", subscription).executeUpdate();
+        int count = getEntityManager().createNamedQuery("RatedTransaction.moveAndRerateToRerateRTToUA")
+                                  .setParameter("newWallet", newWallet)
+                                  .setParameter("newBillingAccount", newWallet.getUserAccount().getBillingAccount())
+                                  .setParameter("newUserAccount", newWallet.getUserAccount())
+                                  .setParameter("subscription", subscription)
+                                  .executeUpdate();
+        
+        count += getEntityManager().createNamedQuery("RatedTransaction.moveAndRerateOpenRTToUA")
+                                   .setParameter("newWallet", newWallet)
+                                   .setParameter("newBillingAccount", newWallet.getUserAccount().getBillingAccount())
+                                   .setParameter("newUserAccount", newWallet.getUserAccount())
+                                   .setParameter("subscription", subscription)
+                                   .executeUpdate();
+        
+        return count;
     }
 
     /**

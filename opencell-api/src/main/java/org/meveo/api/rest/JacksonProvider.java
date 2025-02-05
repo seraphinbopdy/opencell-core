@@ -19,9 +19,13 @@
 package org.meveo.api.rest;
 
 import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
+import org.meveo.api.MeveoApiErrorCodeEnum;
+import org.meveo.api.dto.ActionStatus;
+import org.meveo.api.dto.ActionStatusEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationModule;
@@ -29,10 +33,24 @@ import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationModu
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.ext.Provider;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.annotation.Annotation;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 @Provider
 public class JacksonProvider extends ResteasyJackson2Provider {
 
     private Logger log = LoggerFactory.getLogger(this.getClass());
+    
+    
+    public JacksonProvider() {
+        log.info("JacksonProvider initialized");
+    }
     
     @Override
     public ObjectMapper locateMapper(Class<?> arg0, MediaType arg1) {
@@ -41,10 +59,59 @@ public class JacksonProvider extends ResteasyJackson2Provider {
              mapper.setDateFormat(new StdDefaultDateFormat());
              mapper.enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
              mapper.registerModule(new JakartaXmlBindAnnotationModule());
+             
+             mapper.enable(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES);
+             
         } catch (Exception e) {
             log.error(" error setting ObjectMapper DateFormat ", e);
         }
         return mapper;
+    }
+
+    @Override
+    public Object readFrom(Class<Object> type, java.lang.reflect.Type genericType, Annotation[] annotations, 
+                          MediaType mediaType, MultivaluedMap<String, String> httpHeaders, 
+                          InputStream entityStream) throws IOException {
+        try {
+            return super.readFrom(type, genericType, annotations, mediaType, httpHeaders, entityStream);
+        } catch (IOException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof IllegalStateException) {
+                handleValidationError((IllegalStateException) cause);
+            }
+            throw e;
+        }
+    }
+
+    private void handleValidationError(IllegalStateException e) {
+        String message = e.getMessage();
+        if (message != null) {
+            int startIndex = message.indexOf("[");
+            int endIndex = message.indexOf("]");
+            
+            if (startIndex != -1 && endIndex != -1) {
+                String missingFields = message.substring(startIndex + 1, endIndex);
+                throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(new ActionStatus(
+                        ActionStatusEnum.FAIL,
+                        MeveoApiErrorCodeEnum.MISSING_PARAMETER,
+                        "Required fields are missing: " + missingFields
+                    ))
+                    .type(MediaType.APPLICATION_JSON)
+                    .build());
+            }
+        }
+        
+        throw new WebApplicationException(Response
+            .status(Response.Status.BAD_REQUEST)
+            .entity(new ActionStatus(
+                ActionStatusEnum.FAIL,
+                MeveoApiErrorCodeEnum.INVALID_PARAMETER,
+                "Invalid request parameters"
+            ))
+            .type(MediaType.APPLICATION_JSON)
+            .build());
     }
 }
 

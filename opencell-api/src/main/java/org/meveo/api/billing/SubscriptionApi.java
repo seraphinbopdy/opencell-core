@@ -646,10 +646,10 @@ public class SubscriptionApi extends BaseApi {
         }
         updateSubscriptionVersions(postData.getNextVersion(), postData.getPreviousVersion(), subscription);
 
+        if (subscription.getPurchaseOrders() != null) {
+            subscription.getPurchaseOrders().clear();
+        }
         if (CollectionUtils.isNotEmpty(postData.getPurchaseOrders())) {
-            if (subscription.getPurchaseOrders() != null) {
-                subscription.getPurchaseOrders().clear();
-            }
             for (Long purchaseOrderId : postData.getPurchaseOrders()) {
                 PurchaseOrder purchaseOrder = ofNullable(purchaseOrderService.findById(purchaseOrderId)).orElseThrow(() -> new EntityDoesNotExistsException(PurchaseOrder.class, purchaseOrderId));
 
@@ -3401,7 +3401,7 @@ public class SubscriptionApi extends BaseApi {
         
         List<OrderAttribute> orderAttributes = productDto.getAttributeInstances().stream()
                 .map(ai -> {
-                	long count = productDto.getAttributeInstances().stream().filter(e -> ai.getOrderAttributeCode().equals(e.getOrderAttributeCode())).count();
+                	long count = productDto.getAttributeInstances().stream().filter(e -> (ai.getOrderAttributeCode()!=null ?ai.getOrderAttributeCode() : ai.getAttributeCode()).equals(e.getOrderAttributeCode()!=null ? e.getOrderAttributeCode():e.getAttributeCode() )).count();
                 	if(count > 1) {
                 		throw new InvalidParameterException("Cannot instantiate twice the same attribute {" + ai.getOrderAttributeCode() + "}");
                 	}

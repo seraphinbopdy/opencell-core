@@ -171,8 +171,14 @@ public class OneShotChargeInstanceService extends BusinessService<OneShotChargeI
         }
 
         if (serviceChargeTemplate.getAccumulatorCounterTemplates() != null && !serviceChargeTemplate.getAccumulatorCounterTemplates().isEmpty()) {
+	        CounterInstance counterInstance = null;
             for (Object counterTemplate : serviceChargeTemplate.getAccumulatorCounterTemplates()) {
-                CounterInstance counterInstance = counterInstanceService.counterInstanciation(serviceInstance, (CounterTemplate) counterTemplate, oneShotChargeInstance, isVirtual);
+	            var counterTemplateChild = (CounterTemplate) counterTemplate;
+				if(counterTemplateChild.getAccumulator() == Boolean.TRUE && counterTemplateChild.isSharedCounter()) {
+					counterInstance = counterInstanceService.counterInstanciation(serviceInstance, counterTemplateChild, oneShotChargeInstance, isVirtual, counterInstance);
+				}else{
+					counterInstance = counterInstanceService.counterInstanciation(serviceInstance, counterTemplateChild, oneShotChargeInstance, isVirtual);
+				}
                 log.debug("Counter instance {} will be add to charge instance {}", counterInstance, oneShotChargeInstance);
             }
 

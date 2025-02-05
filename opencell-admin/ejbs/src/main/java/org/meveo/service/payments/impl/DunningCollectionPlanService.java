@@ -19,9 +19,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.hibernate.proxy.HibernateProxy;
 import org.meveo.admin.exception.BusinessException;
+import org.meveo.api.dto.payment.AccountOperationDto;
 import org.meveo.api.exception.BusinessApiException;
 import org.meveo.jpa.JpaAmpNewTx;
 import org.meveo.model.billing.BillingAccount;
@@ -103,6 +105,9 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
 
     @Inject
     private AccountOperationService accountOperationService;
+
+    @Inject
+    private CustomerBalanceService customerBalanceService;
 
     private static final String STOP_REASON = "STOP_POLITIQUE";
 
@@ -626,13 +631,13 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
 
     /**
      * Launch payment Action or retry payment
-     * @param collectionPlan
+     * @param collectionPlan DunningCollectionPlan
      */
     public void launchPaymentAction(DunningCollectionPlan collectionPlan) {
         PaymentMethod preferredPaymentMethod = null;
         CustomerAccount customerAccount = null;
 
-        if (collectionPlan.getBillingAccount() != null && collectionPlan.getBillingAccount().getCustomerAccount() != null && collectionPlan.getBillingAccount().getCustomerAccount().getPaymentMethods() != null) {
+        if (collectionPlan != null && collectionPlan.getBillingAccount() != null && collectionPlan.getBillingAccount().getCustomerAccount() != null && collectionPlan.getBillingAccount().getCustomerAccount().getPaymentMethods() != null) {
             preferredPaymentMethod = collectionPlan
                     .getBillingAccount()
                     .getCustomerAccount()
@@ -642,7 +647,7 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
                     .findFirst()
                     .orElseThrow(() -> new BusinessException("No preferred payment method found for customer account"
                             + collectionPlan.getBillingAccount().getCustomerAccount().getCode()));
-        } else if(collectionPlan.getCustomerAccount() != null && collectionPlan.getCustomerAccount().getPaymentMethods() != null) {
+        } else if(collectionPlan != null &&  collectionPlan.getCustomerAccount() != null && collectionPlan.getCustomerAccount().getPaymentMethods() != null) {
             customerAccount = collectionPlan.getCustomerAccount();
             preferredPaymentMethod = collectionPlan
                     .getCustomerAccount()
@@ -654,7 +659,7 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
                             + collectionPlan.getCustomerAccount().getCode()));
         }
 
-        if (customerAccount != null && preferredPaymentMethod != null) {
+        if (collectionPlan != null && customerAccount != null && preferredPaymentMethod != null) {
             //PaymentService.doPayment consider amount to pay in cent so amount should be * 100
             //long amountToPay = collectionPlan.getRelatedInvoice().getNetToPay().multiply(BigDecimal.valueOf(100)).longValue();
             if (collectionPlan.getRelatedInvoices() != null && !collectionPlan.getRelatedInvoices().isEmpty()) {
@@ -705,7 +710,7 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
      * @param collectionPlanStatus Collection plan status
      */
     public void createCollectionPlanForCustomerLevel(CustomerAccount customerAccount, BigDecimal balance, DunningPolicy policy, DunningCollectionPlanStatus collectionPlanStatus,
-                                                     List<String> linkedOccTemplates) {
+                                                     List<String> linkedOccTemplates, CustomerBalance customerBalance) {
         customerAccount = customerAccountService.refreshOrRetrieve(customerAccount);
         DunningCollectionPlan collectionPlan = new DunningCollectionPlan();
         collectionPlan.setRelatedPolicy(policy);
@@ -721,7 +726,9 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
         collectionPlan.setCollectionPlanNumber("C" + collectionPlan.getId());
 
         // Get the related invoices
-        getRelatedInvoices(customerAccount, linkedOccTemplates, collectionPlan);
+        getRelatedInvoices(customerAccount, linkedOccTemplates, collectionPlan, customerBalance);
+        // Get the billing account
+        getBillingAccountForCollectionPlan(collectionPlan);
 
         // Check if there's already a dunning level instances already created => In the case of launching the reminder without creating a collection plan
         List<DunningLevelInstance> dunningLevelInstances = dunningLevelInstanceService.findByCustomerAccountAndEmptyCollectionPlan(customerAccount);
@@ -762,18 +769,42 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
     }
 
     /**
+     * Get billing account for collection plan
+     * @param collectionPlan Collection plan
+     */
+    private void getBillingAccountForCollectionPlan(DunningCollectionPlan collectionPlan) {
+        List<BillingAccount> billingAccounts = collectionPlan.getRelatedInvoices().stream()
+                .map(Invoice::getBillingAccount)
+                .distinct()
+                .toList();
+
+        if (billingAccounts.size() == 1) {
+            collectionPlan.setBillingAccount(billingAccounts.getFirst());
+        }
+    }
+
+    /**
      * getRelatedInvoices
      * @param customerAccount Customer account
      * @param linkedOccTemplates Linked occ templates
      * @param collectionPlan Collection plan
      */
-    private void getRelatedInvoices(CustomerAccount customerAccount, List<String> linkedOccTemplates, DunningCollectionPlan collectionPlan) {
+    private void getRelatedInvoices(CustomerAccount customerAccount, List<String> linkedOccTemplates, DunningCollectionPlan collectionPlan, CustomerBalance customerBalance) {
         List<AccountOperation> accountOperations = accountOperationService.getAccountOperations(customerAccount.getId(),
                 null,
                 linkedOccTemplates,
                 null);
-        if (accountOperations != null && !accountOperations.isEmpty()) {
-            accountOperations.forEach(accountOperation -> {
+        accountOperations = accountOperations.stream()
+                .filter(ao -> ao.getInvoices().stream().noneMatch(Invoice::isDunningCollectionPlanTriggered))
+                .filter(ao -> ao.getInvoices().stream().anyMatch(invoice -> invoice.getPaymentStatus() == InvoicePaymentStatusEnum.UNPAID))
+                .collect(Collectors.toList());
+
+        // Filter account operations based on customer balance
+        List<AccountOperationDto> result = customerBalanceService.filterAccountOperations(accountOperations, customerBalance);
+
+        result.forEach(accountOperationDto -> {
+            AccountOperation accountOperation = accountOperationService.findById(accountOperationDto.getId());
+            if (accountOperation != null) {
                 if (collectionPlan.getRelatedInvoices() == null) {
                     collectionPlan.setRelatedInvoices(new ArrayList<>());
                 }
@@ -783,7 +814,7 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
                     invoice.setDunningCollectionPlanTriggered(true);
                     invoiceService.update(invoice);
                 });
-            });
-        }
+            }
+        });
     }
 }

@@ -3011,6 +3011,7 @@
             <column name="notification_levels" type="varchar(100)" />
             <column name="is_accumulator" type="${type.boolean}" defaultValueNumeric="0"/>
             <column name="accumulator_type" type="varchar(35)"/>
+            <column name="shared_counter"  type="${type.boolean}" defaultValueNumeric="0" />
         </createTable>
     </changeSet>
     <changeSet author="AndriusKarpavicius" id="rebuild-str-tbl-171">
@@ -3721,6 +3722,7 @@
             <column name="price_version_date" type="datetime" />
             <column name="order_product_id" type="bigint" />
             <column name="mrr" type="numeric(23, 12)" />
+            <column name="requested_activation_date" type="datetime" />
         </createTable>
     </changeSet>
     <changeSet author="AndriusKarpavicius" id="rebuild-str-tbl-192">
@@ -4487,6 +4489,7 @@
             <column name="key_el" type="varchar(2000)"/>
             <column name="value_el" type="varchar(2000)"/>
             <column name="managed_byapp" type="${type.boolean}" defaultValueNumeric="1"><constraints nullable="false" /></column>
+            <column name="shared_counter"  type="${type.boolean}" defaultValueNumeric="0" />
         </createTable>
     </changeSet>
     <changeSet author="AndriusKarpavicius" id="rebuild-str-tbl-210">
@@ -12757,8 +12760,9 @@
             <column name="property_value" type="VARCHAR(255)"/>
             <column name="property_type" type="VARCHAR(255)"/>
             <column name="description_i18n" type="${type.json}" />
-        </createTable>
-    </changeSet>
+            <column name="long_description_i18n" type="${type.json}" />
+	    </createTable>
+	</changeSet>
 
 
     <changeSet id="#INTRD-16031_20230508_rebuild" author="zelmeliani">
@@ -13790,6 +13794,7 @@
             </column>
             <column name="rate" type="numeric(23, 12)" />
             <column name="use_for_billing_accounts" type="${type.boolean}" />
+            <column name="trading_price_el" type="varchar(2000)" />
         </createTable>
     </changeSet>
 
@@ -14328,14 +14333,14 @@
             <column name="status" type="varchar(20)"><constraints nullable="false"/></column>
             <column name="transaction_date" type="datetime"><constraints nullable="false" /></column>
             <column name="capture_date" type="datetime"><constraints nullable="true" /></column>
-            <column name="cancel_date" type="datetime"><constraints nullable="true" /></column>           
-            <column name="reference" type="varchar(255)"><constraints nullable="false" unique="true" /></column>  
-            <column name="amount" type="numeric(23, 12)" ><constraints nullable="false" /></column>  
-            <column name="amount_captured" type="numeric(23, 12)" ><constraints nullable="true" /></column>  
+            <column name="cancel_date" type="datetime"><constraints nullable="true" /></column>
+            <column name="reference" type="varchar(255)"><constraints nullable="false" unique="true" /></column>
+            <column name="amount" type="numeric(23, 12)" ><constraints nullable="false" /></column>
+            <column name="amount_captured" type="numeric(23, 12)" ><constraints nullable="true" /></column>
             <column name="error_detail" type="varchar(2000)"/>
             <column name="customer_account_id" type="bigint" />
             <column name="card_payment_method_id" type="bigint" ><constraints nullable="false" /></column>
-            <column name="payment_gateway_id" type="bigint" ><constraints nullable="false" /></column>           
+            <column name="payment_gateway_id" type="bigint" ><constraints nullable="false" /></column>
         </createTable>
     </changeSet>
 
@@ -20902,6 +20907,9 @@
     <changeSet id="#INTRD-28652_Fix_language_name" author="a.rouaguebe_ext" />
     <changeSet id="#INTRD-28777_missing_language" author="a.rouaguebe_ext" />
     <changeSet id="#INTRD-28708_20250122_fix_language" author="a.rouaguebe_ext" />
+    <changeSet id="#INTRD-26593_20241129" author="TarikFA." />
+    <changeSet id="#INTRD-29012_20250131" author="TarikFA." />
+    <changeSet id="#INTRD-28233_activate_sub" author="a.rouaguebe" />
     
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

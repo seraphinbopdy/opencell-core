@@ -459,6 +459,10 @@ public class PricePlanMatrixVersionApi extends BaseCrudApi<PricePlanMatrixVersio
         entity.setTradingPrice(dtoData.getTradingPrice());
         entity.setUseForBillingAccounts(dtoData.isUseForBillingAccounts());
 
+        if(StringUtils.isNotBlank(dtoData.getTradingPriceEl())) {
+            entity.setTradingPriceEl(dtoData.getTradingPriceEl());
+        }
+
         tradingPricePlanVersionService.create(entity);
 
         return entity;
@@ -507,6 +511,10 @@ public class PricePlanMatrixVersionApi extends BaseCrudApi<PricePlanMatrixVersio
         cppv.setTradingPrice(dtoData.getTradingPrice());
         cppv.setUseForBillingAccounts(dtoData.isUseForBillingAccounts());
         cppv.setTradingCurrency(tradingCurrency);
+
+        if(StringUtils.isNotBlank(dtoData.getTradingPriceEl())) {
+            cppv.setTradingPriceEl(dtoData.getTradingPriceEl());
+        }
 
         tradingPricePlanVersionService.update(cppv);
 

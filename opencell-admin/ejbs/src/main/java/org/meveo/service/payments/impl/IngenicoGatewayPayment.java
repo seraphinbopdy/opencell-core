@@ -18,40 +18,17 @@
 
 package org.meveo.service.payments.impl;
 
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.http.client.utils.DateUtils;
-import org.meveo.admin.exception.BusinessException;
-import org.meveo.api.dto.payment.HostedCheckoutInput;
-import org.meveo.api.dto.payment.HostedCheckoutStatusResponseDto;
-import org.meveo.api.dto.payment.MandatInfoDto;
-import org.meveo.api.dto.payment.PaymentHostedCheckoutResponseDto;
-import org.meveo.api.dto.payment.PaymentResponseDto;
-import org.meveo.api.exception.MeveoApiException;
-import org.meveo.commons.utils.EjbUtils;
-import org.meveo.commons.utils.ParamBean;
-import org.meveo.commons.utils.ParamBeanFactory;
-import org.meveo.commons.utils.StringUtils;
-import org.meveo.model.billing.Invoice;
-import org.meveo.model.payments.CardPaymentMethod;
-import org.meveo.model.payments.CreditCardTypeEnum;
-import org.meveo.model.payments.CustomerAccount;
-import org.meveo.model.payments.DDPaymentMethod;
-import org.meveo.model.payments.DDRequestLOT;
-import org.meveo.model.payments.MandatStateEnum;
-import org.meveo.model.payments.PaymentGateway;
-import org.meveo.model.payments.PaymentMethodEnum;
-import org.meveo.model.payments.PaymentStatusEnum;
-import org.meveo.service.crm.impl.ProviderService;
-import org.meveo.service.script.ScriptInstanceService;
-import org.meveo.util.PaymentGatewayClass;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ingenico.connect.gateway.sdk.java.ApiException;
@@ -119,6 +96,37 @@ import com.ingenico.connect.gateway.sdk.java.domain.token.definitions.PersonalIn
 import com.ingenico.connect.gateway.sdk.java.domain.token.definitions.PersonalNameToken;
 import com.ingenico.connect.gateway.sdk.java.domain.token.definitions.TokenCard;
 import com.ingenico.connect.gateway.sdk.java.domain.token.definitions.TokenCardData;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.http.client.utils.DateUtils;
+import org.meveo.admin.exception.BusinessException;
+import org.meveo.api.dto.payment.HostedCheckoutInput;
+import org.meveo.api.dto.payment.HostedCheckoutStatusResponseDto;
+import org.meveo.api.dto.payment.MandatInfoDto;
+import org.meveo.api.dto.payment.PaymentHostedCheckoutResponseDto;
+import org.meveo.api.dto.payment.PaymentResponseDto;
+import org.meveo.api.exception.EntityAlreadyExistsException;
+import org.meveo.api.exception.EntityDoesNotExistsException;
+import org.meveo.api.exception.MeveoApiException;
+import org.meveo.commons.utils.EjbUtils;
+import org.meveo.commons.utils.ParamBean;
+import org.meveo.commons.utils.ParamBeanFactory;
+import org.meveo.commons.utils.StringUtils;
+import org.meveo.model.billing.Invoice;
+import org.meveo.model.payments.CardPaymentMethod;
+import org.meveo.model.payments.CreditCardTypeEnum;
+import org.meveo.model.payments.CustomerAccount;
+import org.meveo.model.payments.DDPaymentMethod;
+import org.meveo.model.payments.DDRequestLOT;
+import org.meveo.model.payments.MandatStateEnum;
+import org.meveo.model.payments.PaymentGateway;
+import org.meveo.model.payments.PaymentMethodEnum;
+import org.meveo.model.payments.PaymentStatusEnum;
+import org.meveo.service.crm.impl.ProviderService;
+import org.meveo.service.script.ScriptInstanceService;
+import org.meveo.util.PaymentGatewayClass;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The Class IngenicoGatewayPayment.
@@ -286,6 +294,19 @@ public class IngenicoGatewayPayment implements GatewayPaymentInterface {
     public void createMandate(CustomerAccount customerAccount,String iban,String mandateReference) throws BusinessException {
     	log.info("Ingenico createMandate CA={},mandatereference={}",customerAccount.getCode(),mandateReference);
     	try {
+    		
+    		try {
+    			String customerCode=customerAccount.getExternalRef1();
+    			MandatInfoDto mandateDto=checkMandat(mandateReference, null);
+    			if(customerCode!=null&& mandateDto.getReference()!=null && mandateDto.getCustomer()!=null && !customerCode.equals(mandateDto.getCustomer())) {
+    				throw new EntityAlreadyExistsException("The mandate: " + mandateReference+ " already exist and is attached to another customer"); 
+    			}else if (customerCode!=null && mandateDto.getReference()!=null && mandateDto.getCustomer()!=null && customerCode.equals(mandateDto.getCustomer())) {
+    				log.info("The mandate: {} already exist for this customer: {}",mandateReference,customerCode);
+    				return;
+    			}
+    		}catch(EntityDoesNotExistsException e) {	 
+    		}
+    		
     		BankAccountIban bankAccountIban=new BankAccountIban(); 
     		bankAccountIban.setIban(iban);
  
@@ -296,8 +317,11 @@ public class IngenicoGatewayPayment implements GatewayPaymentInterface {
     		MandateAddress address=new MandateAddress();
     		if (customerAccount.getAddress() != null) {
     		address.setCity(formatIngenicoData(customerAccount.getAddress().getCity(), true));
-    		address.setCountryCode(customerAccount.getAddress().getCountry() != null?customerAccount.getAddress().getCountry().getCountryCode():null); 
+    		address.setCountryCode(customerAccount.getAddress().getCountry() == null ? null : customerAccount.getAddress().getCountry().getCountryCode()); 
     		String address1=customerAccount.getAddress().getAddress1();
+    		  if (address1.length() > 50) {
+                  address1 = address1.substring(0, 50);
+              }
     		address.setStreet(formatIngenicoData(address1, false));
     		address.setZip(customerAccount.getAddress().getZipCode());
     		}
@@ -305,20 +329,9 @@ public class IngenicoGatewayPayment implements GatewayPaymentInterface {
     		MandatePersonalInformation  personalInformation =new MandatePersonalInformation();
     		boolean isEntreprise=getProviderService().getProvider().isEntreprise();
     		if (customerAccount.getName() != null) {
+    			name.setFirstName(isEntreprise?"-":formatIngenicoData(customerAccount.getName().getFirstName(), false));
     			name.setSurname(formatIngenicoData(customerAccount.getName().getLastName(), true)); 
-    			String title=null;
-    			String firstName=null;
-    			if(!isEntreprise) {
-    				firstName=formatIngenicoData(customerAccount.getName().getFirstName(), false);
-    				if(customerAccount.getName().getTitle()!=null){
-    					title=customerAccount.getName().getTitle().getDescription();
-    				}
-    			}else {
-    				title="Mr";
-    				firstName="-";	
-    			}
-    			name.setFirstName(firstName);
-    			personalInformation.setTitle(title);
+    			personalInformation.setTitle(isEntreprise?"Mr":(customerAccount.getName().getTitle() == null ? "" : customerAccount.getName().getTitle().getDescription()));
     		}  
     		
     		personalInformation.setName(name);
@@ -344,10 +357,15 @@ public class IngenicoGatewayPayment implements GatewayPaymentInterface {
     		ObjectMapper mapper = new ObjectMapper(); 
     		String jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(body);
     		log.info("createMandate body={}",jsonString);
-    		getClient().merchant(paymentGateway.getMarchandId()).mandates().create(body); 
+    	    getClient().merchant(paymentGateway.getMarchandId()).mandates().create(body); 
 
     	} catch (ApiException ev) { 
-    		throw new MeveoApiException("Connection to ingenico is not allowed");
+    		JsonReader reader = Json.createReader(new StringReader(ev.getResponseBody()));
+    		JsonObject jsonObject = reader.readObject();
+    		JsonArray errorsArray = jsonObject.getJsonArray("errors");
+    		JsonObject firstError = errorsArray.getJsonObject(0);
+    		String message = firstError.getString("message");
+    		throw new MeveoApiException(message);
     	} catch (Exception e) { 
     		throw new MeveoApiException(e.getMessage());
     	}
@@ -826,17 +844,26 @@ public class IngenicoGatewayPayment implements GatewayPaymentInterface {
     @Override
     public MandatInfoDto checkMandat(String mandatReference, String mandateId) throws BusinessException {
     	MandatInfoDto mandatInfoDto=new MandatInfoDto();
-    	GetMandateResponse response = getClient().merchant(paymentGateway.getMarchandId()).mandates().get(mandatReference); 
-    	MandateResponse mandatResponse=response.getMandate();
-    	if(mandatResponse!=null) { 
-    		if("WAITING_FOR_REFERENCE".equals(mandatResponse.getStatus())) {
-    			mandatInfoDto.setState(MandatStateEnum.waitingForReference); 
-    		}else {
-    			mandatInfoDto.setState(MandatStateEnum.valueOf(mandatResponse.getStatus().toLowerCase()));
-    		}
-    		mandatInfoDto.setReference(mandatResponse.getUniqueMandateReference());
-    	}  
-
+    	try {
+    		GetMandateResponse response = getClient().merchant(paymentGateway.getMarchandId()).mandates().get(mandatReference); 
+    		MandateResponse mandatResponse=response.getMandate();
+    		if(mandatResponse!=null) { 
+    			if("WAITING_FOR_REFERENCE".equals(mandatResponse.getStatus())) {
+    				mandatInfoDto.setState(MandatStateEnum.waitingForReference); 
+    			}else {
+    				mandatInfoDto.setState(MandatStateEnum.valueOf(mandatResponse.getStatus().toLowerCase()));
+    			}
+    			mandatInfoDto.setReference(mandatResponse.getUniqueMandateReference());
+    			mandatInfoDto.setCustomer(mandatResponse.getCustomerReference());
+    		}  
+    	}catch(ApiException  e) {
+    		JsonReader reader = Json.createReader(new StringReader(e.getResponseBody()));
+    		JsonObject jsonObject = reader.readObject();
+    		JsonArray errorsArray = jsonObject.getJsonArray("errors");
+    		JsonObject firstError = errorsArray.getJsonObject(0);
+    		String message = firstError.getString("message");
+    		throw new EntityDoesNotExistsException(message);
+    	}
     	return mandatInfoDto;
 
     } 

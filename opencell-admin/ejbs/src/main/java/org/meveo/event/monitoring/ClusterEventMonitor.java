@@ -145,8 +145,7 @@ public class ClusterEventMonitor implements MessageListener {
         currentUserProvider.forceAuthentication(eventDto.getUserName(), eventDto.getProviderCode());
 
         if (eventDto.getClazz().equals(ScriptInstance.class.getSimpleName())) {
-            scriptCompilerService.clearCompiledScripts(eventDto.getCode());
-            scriptInstanceService.clearScriptInstancePool(eventDto.getCode());
+            scriptInstanceService.clearCompiledScriptFromCacheAndPool(eventDto.getCode());
 
         } else if (eventDto.getClazz().equals(JobInstance.class.getSimpleName())) {
 

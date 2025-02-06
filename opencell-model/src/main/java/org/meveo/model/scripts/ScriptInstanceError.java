@@ -32,6 +32,21 @@ public class ScriptInstanceError implements Serializable {
     private String sourceFile;
 
     /**
+     * Constructor
+     */
+    public ScriptInstanceError() {
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param message Error message
+     */
+    public ScriptInstanceError(String message) {
+        this.message = message;
+    }
+
+    /**
      * @return the message
      */
     public String getMessage() {

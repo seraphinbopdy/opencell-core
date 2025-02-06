@@ -23,7 +23,6 @@ import java.io.Serializable;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -44,7 +43,9 @@ import org.meveo.admin.exception.InvalidScriptException;
 import org.meveo.cache.CacheKeyStr;
 import org.meveo.commons.utils.EjbUtils;
 import org.meveo.commons.utils.FileUtils;
+import org.meveo.commons.utils.MethodCallingUtils;
 import org.meveo.commons.utils.ParamBean;
+import org.meveo.interceptor.ConcurrencyLock;
 import org.meveo.jpa.JpaAmpNewTx;
 import org.meveo.model.scripts.ScriptInstance;
 import org.meveo.model.scripts.ScriptInstanceError;
@@ -53,11 +54,10 @@ import org.meveo.service.base.BusinessService;
 import org.slf4j.Logger;
 
 import jakarta.annotation.Resource;
-import jakarta.ejb.Lock;
-import jakarta.ejb.LockType;
-import jakarta.ejb.Singleton;
+import jakarta.ejb.Stateless;
 import jakarta.ejb.TransactionAttribute;
 import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 
@@ -70,8 +70,7 @@ import jakarta.persistence.NoResultException;
  * @lastModifiedVersion 7.2.0
  *
  */
-@Singleton
-@Lock(LockType.WRITE)
+@Stateless
 public class ScriptCompilerService extends BusinessService<ScriptInstance> implements Serializable {
 
     private static final long serialVersionUID = -2361674789184033495L;
@@ -82,50 +81,18 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> imple
     @Resource(lookup = "java:jboss/infinispan/cache/opencell/opencell-script-cache")
     private Cache<CacheKeyStr, Class<ScriptInterface>> compiledScripts;
 
-    private CharSequenceCompiler<ScriptInterface> compiler;
-
-    private String classpath = "";
+    @Inject
+    private MethodCallingUtils methodCallingUtils;
 
     /**
-     * Compile and initialize all scriptInstances.
+     * A constructed class path across all script compilations
      */
-    @JpaAmpNewTx
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public void compileAndInitializeAll() {
+    private static String classpath = "";
 
-        try {
-
-            // Initialize reusable scripts that are based on compiled and included JAVA class in the project
-            List<ScriptInstance> scriptInstances = findByType(ScriptSourceTypeEnum.JAVA_CLASS);
-
-            // Initialize scripts that are defined as java classe
-            for (ScriptInstance scriptInstance : scriptInstances) {
-                if (!scriptInstance.isUsePool()) {
-                    continue;
-                }
-                try {
-                    // Obtain a deployed script
-                    ScriptInterface script = (ScriptInterface) EjbUtils
-                        .getServiceInterface(scriptInstance.getCode().lastIndexOf('.') > 0 ? scriptInstance.getCode().substring(scriptInstance.getCode().lastIndexOf('.') + 1) : scriptInstance.getCode());
-                    if (script == null) {
-                        log.error("Script " + scriptInstance.getCode() + " was not found as a deployed script");
-                    } else {
-                        log.info("Initializing script " + scriptInstance.getCode());
-                        script.init(new HashMap<String, Object>());
-                    }
-                } catch (Exception e) {
-                    log.error("Failed to initialize a script " + scriptInstance.getCode(), e);
-                }
-            }
-
-            // Compile JAVA type classes
-            scriptInstances = findByType(ScriptSourceTypeEnum.JAVA);
-            compile(scriptInstances);
-
-        } catch (Exception e) {
-            log.error("Failed to compile and initialize scripts", e);
-        }
-    }
+    /**
+     * Just a variable to synchronize calls to classpath generation
+     */
+    private static String varForSync = "sync";
 
     /**
      * Get all script interfaces with compiling those that are not compiled yet
@@ -175,94 +142,46 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> imple
      */
     private void constructClassPath() throws IOException, URISyntaxException {
 
-        if (classpath.length() == 0) {
+        synchronized (varForSync) {
+            if (classpath.length() == 0) {
 
-            // Check if deploying an exploded archive or a compressed file
-            String thisClassfile = this.getClass().getProtectionDomain().getCodeSource().getLocation().getFile();
+                // Check if deploying an exploded archive or a compressed file
+                String thisClassfile = this.getClass().getProtectionDomain().getCodeSource().getLocation().getFile();
 
-            File realFile = new File(thisClassfile);
+                File realFile = new File(thisClassfile);
 
-            // Was deployed as exploded archive
-            if (realFile.exists()) {
-                File deploymentDir = realFile.getParentFile();
-                for (File file : deploymentDir.listFiles()) {
-                    if (file.getName().endsWith(".jar")) {
-                        classpath += file.getCanonicalPath() + File.pathSeparator;
+                // Was deployed as exploded archive
+                if (realFile.exists()) {
+                    File deploymentDir = realFile.getParentFile();
+                    for (File file : deploymentDir.listFiles()) {
+                        if (file.getName().endsWith(".jar")) {
+                            classpath += file.getCanonicalPath() + File.pathSeparator;
+                        }
+                    }
+
+                    // War was deployed as compressed archive
+                } else {
+
+                    // This returns
+                    // file:/C:/andrius/programs/wildfly-34.0.0.Final/standalone/tmp/vfs/temp/temp73e7f3d632ca2407/content-670181794bee3c03/WEB-INF/lib/opencell-admin-ejbs-17.0.0-SNAPSHOT.jar!/
+                    String vfsTmpPath = org.jboss.vfs.VFSUtils.getRootURL(org.jboss.vfs.VFS.getChild(thisClassfile)).getPath();
+                    vfsTmpPath = vfsTmpPath.substring(5, vfsTmpPath.lastIndexOf("lib") + 3);
+
+                    File physicalLibDir = new File(vfsTmpPath);
+
+                    log.info("Constructing class path from VFS. Location dir {}, deployment's lib dir {}", realFile, vfsTmpPath);
+
+                    for (File f : FileUtils.listFiles(physicalLibDir, "jar", "*", null)) {
+                        classpath += f.getCanonicalPath() + File.pathSeparator;
                     }
                 }
 
-                // War was deployed as compressed archive
-            } else {
-
-                org.jboss.vfs.VirtualFile vFile = org.jboss.vfs.VFS.getChild(thisClassfile);
-
-                // This returns
-                // file:/C:/andrius/programs/wildfly-34.0.0.Final/standalone/tmp/vfs/temp/temp73e7f3d632ca2407/content-670181794bee3c03/WEB-INF/lib/opencell-admin-ejbs-17.0.0-SNAPSHOT.jar!/
-                String vfsTmpPath = org.jboss.vfs.VFSUtils.getRootURL(org.jboss.vfs.VFS.getChild(thisClassfile)).getPath();
-                vfsTmpPath = vfsTmpPath.substring(5, vfsTmpPath.lastIndexOf("lib") + 3);
-
-                File physicalLibDir = new File(vfsTmpPath);
-
-                log.info("Constructing class path from VFS. Location dir {}, deployment's lib dir {}", realFile, vfsTmpPath);
-
-                for (File f : FileUtils.listFiles(physicalLibDir, "jar", "*", null)) {
-                    classpath += f.getCanonicalPath() + File.pathSeparator;
-                }
+                // Add classes that are usually used in scripts without a need to explicitly import them
+                addToClassPath(Logger.class.getName());
+                addToClassPath(EntityManager.class.getName());
             }
-
-            // Add classes that are usually used in scripts without a need to explicitly import them
-            addToClassPath(Logger.class.getName());
-            addToClassPath(EntityManager.class.getName());
+            log.info("Use classpath for script compilation: {}", classpath);
         }
-        log.info("Use classpath for script compilation: {}", classpath);
-
-    }
-
-    /**
-     * Build the classpath and compile all scripts.
-     * 
-     * @param scripts list of scripts
-     */
-    protected void compile(List<ScriptInstance> scripts) {
-        try {
-
-            constructClassPath();
-
-            for (ScriptInstance script : scripts) {
-                compileScript(script, false);
-            }
-        } catch (Exception e) {
-            log.error("Failed to construct a classpath for Script compilation", e);
-        }
-    }
-
-    /*
-     * Compile a script
-     */
-    public void refreshCompiledScript(String scriptCode) {
-
-        ScriptInstance script = findByCode(scriptCode);
-        if (script == null) {
-            clearCompiledScripts(scriptCode);
-        } else {
-            compileScript(script, false);
-        }
-        // detach(script);
-    }
-
-    /**
-     * Compile script, a and update script entity status with compilation errors. Successfully compiled script is added to a compiled script cache if active and not in test compilation mode. Script.init() method will be
-     * called during script instantiation (for cache) if script is marked as reusable.
-     * 
-     * @param script Script entity to compile
-     * @param testCompile Is it a compilation for testing purpose. Won't clear nor overwrite existing compiled script cache.
-     */
-    public void compileScript(ScriptInstance script, boolean testCompile) {
-
-        List<ScriptInstanceError> scriptErrors = compileScript(script.getCode(), script.getSourceTypeEnum(), script.getScript(), script.isActive(), script.isUsePool(), testCompile);
-
-        script.setError(scriptErrors != null && !scriptErrors.isEmpty());
-        script.setScriptErrors(scriptErrors);
     }
 
     /**
@@ -280,14 +199,19 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> imple
      * 
      * @return A list of compilation errors if not compiled
      */
-    private List<ScriptInstanceError> compileScript(String scriptCode, ScriptSourceTypeEnum sourceType, String sourceCode, boolean isActive, boolean initialize, boolean testCompile) {
+    @JpaAmpNewTx
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public List<ScriptInstanceError> compileScript(String scriptCode, ScriptSourceTypeEnum sourceType, String sourceCode, boolean isActive, boolean initialize, boolean testCompile) {
 
         log.debug("Compile script {}", scriptCode);
 
         try {
+
             if (!testCompile) {
-                clearCompiledScripts(scriptCode);
+                clearCompiledScript(scriptCode);
             }
+
+            constructClassPath();
 
             // For now no need to check source type if (sourceType==ScriptSourceTypeEnum.JAVA){
 
@@ -338,8 +262,12 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> imple
             }
             return scriptErrors;
 
+        } catch (IOException | URISyntaxException e) {
+            log.error("Failed to construct class path for script {}", scriptCode, e);
+            return null;
+
         } catch (Exception e) {
-            log.error("Failed while compiling script", e);
+            log.error("Failed while compiling script {}", scriptCode, e);
             List<ScriptInstanceError> scriptErrors = new ArrayList<>();
             ScriptInstanceError scriptInstanceError = new ScriptInstanceError();
             scriptInstanceError.setMessage(e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName());
@@ -364,7 +292,7 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> imple
 
         log.debug("Compile JAVA script {} with classpath {}", fullClassName, classpath);
 
-        compiler = new CharSequenceCompiler<ScriptInterface>(this.getClass().getClassLoader(), Arrays.asList(new String[] { "-cp", classpath }));
+        CharSequenceCompiler<ScriptInterface> compiler = new CharSequenceCompiler<ScriptInterface>(this.getClass().getClassLoader(), Arrays.asList(new String[] { "-cp", classpath }));
         final DiagnosticCollector<JavaFileObject> errs = new DiagnosticCollector<JavaFileObject>();
         Class<ScriptInterface> compiledScript = compiler.compile(fullClassName, javaSrc, errs, new Class<?>[] { ScriptInterface.class });
         return compiledScript;
@@ -399,6 +327,7 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> imple
 
         try {
             if (!className.startsWith("java.") && !className.startsWith("org.meveo")) {
+
                 @SuppressWarnings({ "rawtypes" })
                 Class clazz = Class.forName(className);
 
@@ -427,13 +356,15 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> imple
     }
 
     /**
-     * Compile the script class for a given script code if it is not compile yet.
+     * Compile the script class for a given script code if it is NOT COMPILED YET.
      * 
      * @param scriptCode Script code
      * @return Script class
      * @throws InvalidScriptException Were not able to instantiate or compile a script
      * @throws ElementNotFoundException Script not found
      */
+    @ConcurrencyLock
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED) // No TX added so that changes to compiledScripts cache, after calling compileScript(), is seen right away
     public Class<ScriptInterface> getOrCompileScript(String scriptCode) throws ElementNotFoundException, InvalidScriptException {
         CacheKeyStr cacheKey = new CacheKeyStr(currentUser.getProviderCode(), EjbUtils.getCurrentClusterNode() + "_" + scriptCode);
 
@@ -442,7 +373,7 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> imple
 
             log.warn("Script {} with cache key {} was NOT found in compiled script cache. Currently cache contains {}", scriptCode, cacheKey.toString(), compiledScripts.keySet());
 
-            ScriptInstance script = findByCode(scriptCode);
+            ScriptInstance script = findByCode(scriptCode, true);
             if (script == null) {
                 log.debug("ScriptInstance with {} does not exist", scriptCode);
                 throw new ElementNotFoundException(scriptCode, "ScriptInstance");
@@ -450,13 +381,17 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> imple
                 log.debug("ScriptInstance {} failed to compile. Errors: {}", scriptCode, script.getScriptErrors());
                 throw new InvalidScriptException(scriptCode, getEntityClass().getName());
             }
-            compileScript(script, false);
+            try {
+                methodCallingUtils.callCallableInNewTx(() -> compileScript(script.getCode(), script.getSourceTypeEnum(), script.getScript(), script.isActive(), script.isUsePool(), false));
+            } catch (Exception e) {
+                log.error("Failed while compiling script {}", script.getCode(), e);
+            }
 
             compiledScript = compiledScripts.get(cacheKey);
         }
 
         if (compiledScript == null) {
-            log.debug("ScriptInstance with {} does not exist", scriptCode);
+            log.debug("Failed to retrieve compiled script {}", scriptCode);
             throw new ElementNotFoundException(scriptCode, "ScriptInstance");
         }
 
@@ -468,7 +403,9 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> imple
      * 
      * @param scriptCode Script code
      */
-    public void clearCompiledScripts(String scriptCode) {
+    @JpaAmpNewTx
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public void clearCompiledScript(String scriptCode) {
 
         CacheKeyStr cacheKey = new CacheKeyStr(currentUser.getProviderCode(), EjbUtils.getCurrentClusterNode() + "_" + scriptCode);
 
@@ -480,6 +417,8 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> imple
     /**
      * Remove all compiled scripts for a current provider
      */
+    @JpaAmpNewTx
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void clearCompiledScripts() {
 
         String currentProvider = currentUser.getProviderCode();

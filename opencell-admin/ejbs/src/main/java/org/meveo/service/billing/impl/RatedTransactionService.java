@@ -2368,14 +2368,50 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
     public List<Object[]> getReportStatisticsDetails(List<Long> ratedTransactionIds, String namedQuery, int blockSize) {
         final int maxValue = getInstance().getPropertyAsInteger("database.number.of.inlist.limit", SHORT_MAX_VALUE);
         if (ratedTransactionIds.size() > maxValue) {
-            List<Object[]> statistics = new ArrayList<>();
+            Map<Object, Object[]> mergedResults = new HashMap<>();
             List<List<Long>> partitions = partition(ratedTransactionIds, maxValue);
-            partitions.forEach(subIdsList -> statistics.addAll(load(namedQuery, subIdsList, blockSize)));
-            return statistics;
+
+            for (List<Long> subIdsList : partitions) {
+                List<Object[]> partialResults = load(namedQuery, subIdsList, blockSize);
+                mergeResults(mergedResults, partialResults);
+            }
+
+            return new ArrayList<>(mergedResults.values());
         } else {
             return load(namedQuery, ratedTransactionIds, blockSize);
         }
     }
+    
+    private void mergeResults(Map<Object, Object[]> mergedResults, List<Object[]> partialResults) {
+        for (Object[] row : partialResults) {
+            Object key = row[0]; // Assuming the first column is the unique key of statistics, be sure it's the case in all named queries. all other columns must be numbers to sum
+
+            if (mergedResults.containsKey(key)) {
+                Object[] existingRow = mergedResults.get(key);
+                for (int i = 1; i < row.length; i++) {
+                    if (row[i] instanceof Number) {
+                        existingRow[i] = sumNumbers(existingRow[i], row[i]);
+                    }
+                }
+            } else {
+                mergedResults.put(key, row.clone()); 
+            }
+        }
+    }
+    
+    private Number sumNumbers(Object existing, Object newValue) {
+        if (existing instanceof Long && newValue instanceof Long) {
+            return (Long) existing + (Long) newValue;
+        } else if (existing instanceof Integer && newValue instanceof Integer) {
+            return (Integer) existing + (Integer) newValue;
+        } else if (existing instanceof Double || newValue instanceof Double) {
+            return ((Number) existing).doubleValue() + ((Number) newValue).doubleValue();
+        } else if (existing instanceof BigDecimal || newValue instanceof BigDecimal) {
+            return new BigDecimal(existing.toString()).add(new BigDecimal(newValue.toString()));
+        }
+        throw new IllegalArgumentException("Unsupported number types: " + existing.getClass() + " & " + newValue.getClass());
+    }
+
     private List<Object[]> load(String namedQuery, List<Long> rtIds, int blockSize) {
         Query query = getEntityManager()
                 .createNamedQuery(namedQuery)

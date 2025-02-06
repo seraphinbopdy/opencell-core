@@ -57,26 +57,28 @@ import org.meveo.service.cpq.TagService;
 @Stateless
 public class AttributeApi extends BaseCrudApi<Attribute, AttributeDTO> {
 
+	private static final String ATTRIBUTES_ALLOWED_REGEX = "\\d+(\\.\\d+)";
+
 	@Inject
 	private AttributeService attributeService;
 
 	@Inject
-	private ChargeTemplateService<ChargeTemplate>   chargeTemplateService;
-	
-	@Inject
-	private ProductVersionService  productVersionService;
-	
-	@Inject
-	private ProductService  productService;
-	
-	@Inject
-	private TagService  tagService;
-	
-    @Inject
-    private MediaService mediaService;
+	private ChargeTemplateService<ChargeTemplate> chargeTemplateService;
 
-    @Inject
-    private CommercialRuleLineService commercialRuleLineService;
+	@Inject
+	private ProductVersionService productVersionService;
+
+	@Inject
+	private ProductService productService;
+
+	@Inject
+	private TagService tagService;
+
+	@Inject
+	private MediaService mediaService;
+
+	@Inject
+	private CommercialRuleLineService commercialRuleLineService;
 
 	@Inject
 	private CustomGenericEntityCodeService customGenericEntityCodeService;
@@ -117,7 +119,7 @@ public class AttributeApi extends BaseCrudApi<Attribute, AttributeDTO> {
 				return;
 			}
 			for (String value : attribute.getAllowedValues()) {
-				if (!value.matches("\\d+")) {
+				if (!value.matches(ATTRIBUTES_ALLOWED_REGEX)) {
 					throw new MeveoApiException(value + " is not a valid number");
 				}
 			}
@@ -373,8 +375,4 @@ public class AttributeApi extends BaseCrudApi<Attribute, AttributeDTO> {
 		log.debug("populateGroupedAttributToDto CustomFields={}",result.getCustomFields()!=null && result.getCustomFields().getCustomField()!=null?result.getCustomFields().getCustomField().size():null);
 		return result;
 	}
-
-	
- 
-	
 }

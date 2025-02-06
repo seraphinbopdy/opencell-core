@@ -1119,7 +1119,7 @@ public class InvoiceLine extends AuditableCFEntity {
 			setTransactionalAmountTax(toTransactional(amountTax, appliedRate));
 			setTransactionalDiscountAmount(toTransactional(discountAmount, appliedRate));
 			setTransactionalRawAmount(toTransactional(rawAmount, appliedRate));
-			setTransactionalUnitPrice(toTransactional(unitPrice, appliedRate));
+			setTransactionalUnitPrice(unitPrice != null ? unitPrice.multiply(appliedRate) : ZERO);
 		} else if (this.useSpecificPriceConversion) {
 			setAmountWithoutTax(toFunctional(transactionalAmountWithoutTax, appliedRate));
 			setAmountWithTax(toFunctional(transactionalAmountWithTax, appliedRate));

@@ -35,6 +35,7 @@ import org.meveo.service.base.NativePersistenceService;
 import org.meveo.service.crm.impl.ProviderService;
 import org.meveo.service.job.JobExecutionService;
 import org.meveo.service.job.JobInstanceService;
+import org.meveo.service.script.ScriptCacheContainerProvider;
 import org.meveo.service.script.ScriptInstanceService;
 import org.slf4j.Logger;
 
@@ -166,6 +167,10 @@ public class ApplicationInitializer {
         String cachesToLoad = System.getProperty(CacheContainerProvider.SYSTEM_PROPERTY_CACHES_TO_LOAD);
 
         for (CacheContainerProvider cacheContainerProvider : cacheProviders) {
+            // Should ignore script cache as it was initialized by the scriptInstanceService.compileAndInitializeAll() method   
+            if (cacheContainerProvider instanceof ScriptCacheContainerProvider) {
+                continue;
+            }
             cacheContainerProvider.populateCache(cachesToLoad);
         }
 

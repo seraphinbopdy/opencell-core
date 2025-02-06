@@ -794,7 +794,7 @@ public class ScriptInstanceService extends BusinessService<ScriptInstance> imple
         try {
             return pool.borrowObject();
         } catch (Exception e) {
-            throw new InvalidScriptException("Failed to get a script instance from a pool", scriptCode, e);
+            throw new InvalidScriptException("Failed to get a script instance {} from a pool", scriptCode, e);
         }
     }
 

@@ -337,7 +337,7 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
      * @param invoiceAgregates Invoice agregates
      * @return user accounts list
      */
-    private Set<UserAccount> getUserAccounts(List<InvoiceAgregate> invoiceAgregates) {
+    protected Set<UserAccount> getUserAccounts(List<InvoiceAgregate> invoiceAgregates) {
         Set<UserAccount> userAccounts = new HashSet<>();
         if (invoiceAgregates != null && !invoiceAgregates.isEmpty()) {
             for (InvoiceAgregate invoiceAgregate : invoiceAgregates) {
@@ -423,7 +423,7 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
         return userAccountsTag;
     }
 
-    private void createUserAccountChildSection(Document doc, Invoice invoice, UserAccount parentUserAccount, List<RatedTransaction> ratedTransactions, boolean isVirtual, boolean ignoreUA, String invoiceLanguageCode,
+    protected void createUserAccountChildSection(Document doc, Invoice invoice, UserAccount parentUserAccount, List<RatedTransaction> ratedTransactions, boolean isVirtual, boolean ignoreUA, String invoiceLanguageCode,
             InvoiceConfiguration invoiceConfiguration, List<UserAccount> userAccounts, Element parentUserAccountTag) {
 
         Element childUserAccountsTag = doc.createElement("userAccounts");
@@ -443,7 +443,7 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
     	}
     }
 
-    private void createUserAccountChildSectionIL(Document doc, Invoice invoice, List<InvoiceLine> invoiceLines,
+    protected void createUserAccountChildSectionIL(Document doc, Invoice invoice, List<InvoiceLine> invoiceLines,
                                                  boolean isVirtual, String invoiceLanguageCode, InvoiceConfiguration invoiceConfiguration,
                                                  List<UserAccount> childUserAccounts, Element parentUserAccountTag, Map<String, String> mapTaxesIndexes) {
         Element childUserAccountsTag = doc.createElement("userAccounts");
@@ -1243,7 +1243,7 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
      * @param categoryInvoiceAgregate Category invoice aggregate
      * @return True if user account match
      */
-    private boolean isValidCategoryInvoiceAgregate(final UserAccount userAccount, final CategoryInvoiceAgregate categoryInvoiceAgregate) {
+    protected boolean isValidCategoryInvoiceAgregate(final UserAccount userAccount, final CategoryInvoiceAgregate categoryInvoiceAgregate) {
         if (userAccount == null) {
             return categoryInvoiceAgregate.getUserAccount() == null;
         } else {
@@ -1291,7 +1291,7 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
         return categoriesTag.getChildNodes().getLength() > 0 ? categoriesTag : null;
     }
 
-    private Map<String, String> buildTaxesIndexes(Invoice invoice) {
+    protected Map<String, String> buildTaxesIndexes(Invoice invoice) {
         Map<String, String> mapTaxesIndexes = new HashMap<>();
         int i = 1;
         for (InvoiceAgregate invoiceAgregate : invoice.getInvoiceAgregates()) {
@@ -1568,7 +1568,7 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
      * @param linkedInvoices Linked invoices
      * @return A space separated list of invoice numbers
      */
-    private String getLinkedInvoicesnumberAsString(List<LinkedInvoice> linkedInvoices) {
+    protected String getLinkedInvoicesnumberAsString(List<LinkedInvoice> linkedInvoices) {
         if (linkedInvoices == null || linkedInvoices.isEmpty()) {
             return "";
         }
@@ -1579,7 +1579,7 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
         return result.toString();
     }
 
-    private String getLinkedInvoicesNumberAndDateAsString(List<LinkedInvoice> linkedInvoices) {
+    protected String getLinkedInvoicesNumberAndDateAsString(List<LinkedInvoice> linkedInvoices) {
         if (CollectionUtils.isEmpty(linkedInvoices)) {
             return StringUtils.EMPTY;
         }
@@ -1602,7 +1602,7 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
         return result.toString();
     }
 
-    private String getTaxCodes(Tax tax) {
+    protected String getTaxCodes(Tax tax) {
         if (CollectionUtils.isEmpty(tax.getSubTaxes())) {
             return tax.getCode().replaceAll(",", "\n");
         } else {
@@ -1610,7 +1610,7 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
         }
     }
 
-    private String getTaxIndexes(Tax tax, Map<String, String> mapTaxesIndexes) {
+    protected String getTaxIndexes(Tax tax, Map<String, String> mapTaxesIndexes) {
         if (CollectionUtils.isEmpty(tax.getSubTaxes())) {
             String taxIndex = mapTaxesIndexes.get(tax.getCode());
             return StringUtils.isNotBlank(taxIndex) ? taxIndex.replaceAll(",", "\n") : StringUtils.EMPTY;
@@ -1619,7 +1619,7 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
         }
     }
 
-    private String getSubTaxesCodes(List<Tax> subTaxes) {
+    protected String getSubTaxesCodes(List<Tax> subTaxes) {
         if (CollectionUtils.isEmpty(subTaxes)) {
             return StringUtils.EMPTY;
         }
@@ -1640,7 +1640,7 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
         return result.toString();
     }
 
-    private String getSubTaxesIndexes(List<Tax> subTaxes, Map<String, String> mapTaxesIndexes) {
+    protected String getSubTaxesIndexes(List<Tax> subTaxes, Map<String, String> mapTaxesIndexes) {
         if (CollectionUtils.isEmpty(subTaxes)) {
             return StringUtils.EMPTY;
         }
@@ -1703,7 +1703,7 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
         return invoiceTag;
     }
 
-    private Element initInvoiceTag(Document doc, Invoice invoice, boolean isInvoiceAdjustment,
+    protected Element initInvoiceTag(Document doc, Invoice invoice, boolean isInvoiceAdjustment,
                                    DocumentBuilder docBuilder, InvoiceConfiguration invoiceConfiguration,
                                    Map<String, String> mapTaxesIndexes) {
         String invoiceDateFormat = paramBeanFactory.getInstance().getProperty(INVOICE_DATE_FORMAT, DEFAULT_DATE_PATTERN);
@@ -1972,7 +1972,7 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
         return customerTag;
     }
 
-    private String buildContactsCodes(List<Contract> contracts) {
+    protected String buildContactsCodes(List<Contract> contracts) {
         if(CollectionUtils.isEmpty(contracts)){
             return StringUtils.EMPTY;
         }
@@ -2131,7 +2131,7 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
         return amount;
     }
 
-    private Element createAndPopulateAdvancesSection(Document doc, Invoice invoice) {
+    protected Element createAndPopulateAdvancesSection(Document doc, Invoice invoice) {
 
         List<Object[]> advanceLinkedInvoices = invoiceService.findLinkedInvoicesByIdAndType(invoice.getId(), "ADV");
 
@@ -2142,7 +2142,7 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
         return null;
     }
 
-    private Element populateAdvancesSection(Document doc, List<Object[]> advanceLinkedInvoices) {
+    protected Element populateAdvancesSection(Document doc, List<Object[]> advanceLinkedInvoices) {
 
         Element advances = doc.createElement("advances");
 	    BigDecimal totalAdvanceAmount = BigDecimal.ZERO;
@@ -2239,7 +2239,7 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
     }
 
     // value from https://opencellsoft.atlassian.net/browse/INTRD-10546
-    private void buildInvoiceDates(Document doc, Element header, Invoice invoice, String invoiceDateFormat) {
+    protected void buildInvoiceDates(Document doc, Element header, Invoice invoice, String invoiceDateFormat) {
 
         Element invoiceDate = doc.createElement("invoiceDate");
         invoiceDate.setAttribute("format", "102"); // hardcoded value, related to default pattern yyyyMMdd
@@ -2273,7 +2273,7 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
     }
 
 
-    private String buildEventTimeCode2005(Invoice invoice) {
+    protected String buildEventTimeCode2005(Invoice invoice) {
         if (invoice.getStatus() == InvoiceStatusEnum.VALIDATED) {
             if (invoice.getPaymentStatus() == InvoicePaymentStatusEnum.PAID) {
                 return "432";
@@ -2289,7 +2289,7 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
     }
 
     // value from https://opencellsoft.atlassian.net/browse/INTRD-10546
-    private String buildEventTimeCode2475(Invoice invoice){
+    protected String buildEventTimeCode2475(Invoice invoice){
         if (invoice.getStatus() == InvoiceStatusEnum.VALIDATED) {
             if (invoice.getPaymentStatus() == InvoicePaymentStatusEnum.PAID) {
                 return "72";
@@ -2304,7 +2304,7 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
         return null;
     }
 
-    private Element createSubTotals(Document doc, InvoiceType invoiceType,
+    protected Element createSubTotals(Document doc, InvoiceType invoiceType,
                                     List<InvoiceLine> invoiceLines, TradingLanguage tradingLanguage) {
         Element subTotals = null;
         List<InvoiceSubTotals> invoiceSubTotals =
@@ -2359,7 +2359,7 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
         return detail;
     }
 
-    private void buildLinkedInvoicesData(Document doc, Element detailTag, Set<LinkedInvoice> linkedInvoices, boolean isInvoiceAdjustment) {
+    protected void buildLinkedInvoicesData(Document doc, Element detailTag, Set<LinkedInvoice> linkedInvoices, boolean isInvoiceAdjustment) {
         if(!isInvoiceAdjustment) {
             return;
         }
@@ -3038,13 +3038,13 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
         return line;
     }
 
-    private void buildExtraParamterNode(Document doc, RatedTransaction ratedItem, Element ratedItemNode) {
+    protected void buildExtraParamterNode(Document doc, RatedTransaction ratedItem, Element ratedItemNode) {
         Element parameterExtraNode = doc.createElement("parameterExtra");
         parameterExtraNode.appendChild(doc.createCDATASection(getDefaultIfNull(ratedItem.getParameterExtra(), " ")));
         ratedItemNode.appendChild(parameterExtraNode);
     }
 
-    private static void buildProductNode(Document doc, RatedTransaction ratedItem, Element ratedItemNode) {
+    protected static void buildProductNode(Document doc, RatedTransaction ratedItem, Element ratedItemNode) {
         if(ratedItem.getServiceInstance() != null && ratedItem.getServiceInstance().getProductVersion() != null){
            Product product = ratedItem.getServiceInstance().getProductVersion().getProduct();
            if(product != null){
@@ -3056,7 +3056,7 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
         }
     }
 
-    private static void buildRatedItemNodeAttributes(String invoiceDateFormat, RatedTransaction ratedItem, Element ratedItemNode) {
+    protected static void buildRatedItemNodeAttributes(String invoiceDateFormat, RatedTransaction ratedItem, Element ratedItemNode) {
         if(ratedItem.getUsageDate() != null){
             ratedItemNode.setAttribute("usageDate", DateUtils.formatDateWithPattern(ratedItem.getUsageDate(), invoiceDateFormat));
         }
@@ -3077,7 +3077,7 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
         }
     }
 
-    private void buildParametersNode(Document doc, RatedTransaction ratedItem, Element ratedItemNode) {
+    protected void buildParametersNode(Document doc, RatedTransaction ratedItem, Element ratedItemNode) {
         if(ratedItem.getParameter1() != null){
             Element parameter1Node = doc.createElement("parameter1");
             Text parameter1Text = this.createTextNode(doc, ratedItem.getParameter1());
@@ -3098,7 +3098,7 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
         }
     }
 
-    private static void buildSubscriptionNode(Document doc, Element ratedItemNode, ChargeInstance chargeInstance) {
+    protected static void buildSubscriptionNode(Document doc, Element ratedItemNode, ChargeInstance chargeInstance) {
         Subscription subscription = chargeInstance.getSubscription();
         if(subscription != null){
             Element subscriptionNode = doc.createElement("subscription");
@@ -3108,7 +3108,7 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
         }
     }
 
-    private Element createTaxDetailTag(TaxDetails taxDetails, Document doc, Map<String, String> mapTaxesIndexes) {
+    protected Element createTaxDetailTag(TaxDetails taxDetails, Document doc, Map<String, String> mapTaxesIndexes) {
         Element taxDetailTag = doc.createElement("taxDetail");
         taxDetailTag.setAttribute("code", taxDetails.getTaxCode());
         taxDetailTag.setAttribute("index", mapTaxesIndexes.get(taxDetails.getTaxCode()));
@@ -3374,18 +3374,18 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
         return subCategory;
     }
 
-    private Text createTextNode(Document doc, String data) {
+    protected Text createTextNode(Document doc, String data) {
         return doc.createTextNode(Objects.requireNonNullElse(data, ""));
     }
 
-	private String getRegisterNumberJoining(List<RegistrationNumber> registrationNumbers){
+    protected String getRegisterNumberJoining(List<RegistrationNumber> registrationNumbers){
 		if(CollectionUtils.isNotEmpty(registrationNumbers)){
 			return registrationNumbers.stream().map(RegistrationNumber::getRegistrationNo).collect(Collectors.joining(","));
 		}
 		return "";
 	}
 	
-	private Element createPartyIdentification(Document doc, List<RegistrationNumber> registrationNumbers) {
+    protected Element createPartyIdentification(Document doc, List<RegistrationNumber> registrationNumbers) {
 		final Element partyIdentification = doc.createElement("PartyIdentification");
 		registrationNumbers.forEach(registrationNumber -> {
 			Element companyId = doc.createElement("CompanyId");
@@ -3398,7 +3398,7 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
 		});
 		return partyIdentification;
 	}
-	private Element createPaymentTerm(Invoice invoice, Document doc, String invoiceLanguageCode){
+    protected Element createPaymentTerm(Invoice invoice, Document doc, String invoiceLanguageCode){
 		List<PaymentTerm> paymentTerms = paymentTermService.findAllEnabledPaymentTerm();
 		Element paymentTermNode = null;
 		if(CollectionUtils.isNotEmpty(paymentTerms)){

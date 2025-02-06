@@ -177,11 +177,11 @@
 		<field name="priceType" class="java.lang.String">
 			<description><![CDATA[@priceType]]></description>
 		</field>
-		<field name="amountWithTax" class="java.lang.Double">
+		<field name="amountWithTax" class="java.lang.String">
 			<description><![CDATA[amountWithTax]]></description>
 			<property name="net.sf.jasperreports.xpath.field.expression" value="amountWithTax"/>
 		</field>
-		<field name="taxAmount" class="java.lang.Double">
+		<field name="taxAmount" class="java.lang.String">
 			<description><![CDATA[taxAmount]]></description>
 		</field>
 		<field name="currencySymbol" class="java.lang.String">
@@ -190,16 +190,16 @@
 		<field name="billingAccountCode" class="java.lang.String">
 			<description><![CDATA[ancestor::billableAccounts/@billingAccountCode]]></description>
 		</field>
-		<field name="unitPriceWithoutTax" class="java.lang.Double">
+		<field name="unitPriceWithoutTax" class="java.lang.String">
 			<description><![CDATA[unitPriceWithoutTax]]></description>
 		</field>
-		<field name="taxRate" class="java.lang.Double">
+		<field name="taxRate" class="java.lang.String">
 			<description><![CDATA[taxRate]]></description>
 		</field>
 		<field name="taxIndex" class="java.lang.String">
 			<description><![CDATA[taxIndex]]></description>
 		</field>
-		<field name="amountWithoutTax" class="java.lang.Double">
+		<field name="amountWithoutTax" class="java.lang.String">
 			<description><![CDATA[amountWithoutTax]]></description>
 		</field>
 		<field name="label" class="java.lang.String">
@@ -236,7 +236,7 @@
 		<field name="code" class="java.lang.String">
 			<description><![CDATA[@code]]></description>
 		</field>
-		<field name="percent" class="java.lang.Double">
+		<field name="percent" class="java.lang.String">
 			<description><![CDATA[percent]]></description>
 			<property name="net.sf.jasperreports.xpath.field.expression" value="percent"/>
 		</field>
@@ -271,11 +271,11 @@
 		<field name="amountWithoutTax" class="java.lang.String">
 			<description><![CDATA[amountWithoutTax]]></description>
 		</field>
-		<field name="amountWithTax" class="java.lang.Double">
+		<field name="amountWithTax" class="java.lang.String">
 			<description><![CDATA[amountWithTax]]></description>
 			<property name="net.sf.jasperreports.xpath.field.expression" value="amountWithTax"/>
 		</field>
-		<field name="taxAmount" class="java.lang.Double">
+		<field name="taxAmount" class="java.lang.String">
 			<description><![CDATA[taxAmount]]></description>
 		</field>
 		<field name="taxRate" class="java.lang.String">
@@ -299,23 +299,23 @@
 		<field name="priceType" class="java.lang.String">
 			<description><![CDATA[@priceType]]></description>
 		</field>
-		<field name="amountWithTax" class="java.lang.Double">
+		<field name="amountWithTax" class="java.lang.String">
 			<description><![CDATA[amountWithTax]]></description>
 			<property name="net.sf.jasperreports.xpath.field.expression" value="amountWithTax"/>
 		</field>
 		<field name="currencySymbol" class="java.lang.String">
 			<description><![CDATA[currencySymbol]]></description>
 		</field>
-		<field name="unitPriceWithoutTax" class="java.lang.Double">
+		<field name="unitPriceWithoutTax" class="java.lang.String">
 			<description><![CDATA[unitPriceWithoutTax]]></description>
 		</field>
-		<field name="amountWithoutTax" class="java.lang.Double">
+		<field name="amountWithoutTax" class="java.lang.String">
 			<description><![CDATA[amountWithoutTax]]></description>
 		</field>
-		<field name="taxAmount" class="java.lang.Double">
+		<field name="taxAmount" class="java.lang.String">
 			<description><![CDATA[taxAmount]]></description>
 		</field>
-		<field name="taxRate" class="java.lang.Double">
+		<field name="taxRate" class="java.lang.String">
 			<description><![CDATA[taxRate]]></description>
 		</field>
 		<field name="taxIndex" class="java.lang.String">
@@ -348,23 +348,23 @@
 		<field name="priceType" class="java.lang.String">
 			<description><![CDATA[@priceType]]></description>
 		</field>
-		<field name="amountWithTax" class="java.lang.Double">
+		<field name="amountWithTax" class="java.lang.String">
 			<description><![CDATA[amountWithTax]]></description>
 			<property name="net.sf.jasperreports.xpath.field.expression" value="amountWithTax"/>
 		</field>
-		<field name="unitPriceWithoutTax" class="java.lang.Double">
+		<field name="unitPriceWithoutTax" class="java.lang.String">
 			<description><![CDATA[unitPriceWithoutTax]]></description>
 		</field>
-		<field name="amountWithoutTax" class="java.lang.Double">
+		<field name="amountWithoutTax" class="java.lang.String">
 			<description><![CDATA[amountWithoutTax]]></description>
 		</field>
-		<field name="taxAmount" class="java.lang.Double">
+		<field name="taxAmount" class="java.lang.String">
 			<description><![CDATA[taxAmount]]></description>
 		</field>
 		<field name="currencySymbol" class="java.lang.String">
 			<description><![CDATA[currencySymbol]]></description>
 		</field>
-		<field name="taxRate" class="java.lang.Double">
+		<field name="taxRate" class="java.lang.String">
 			<description><![CDATA[taxRate]]></description>
 		</field>
 		<field name="taxIndex" class="java.lang.String">
@@ -385,7 +385,7 @@
 		<field name="accountingArticleLabel" class="java.lang.String">
 			<description><![CDATA[ancestor::quoteLine/@accountingArticleLabel]]></description>
 		</field>
-		<field name="quantity" class="java.lang.Double">
+		<field name="quantity" class="java.lang.String">
 			<description><![CDATA[ancestor::quoteLine/@quantity]]></description>
 		</field>
 		<field name="country" class="java.lang.String">
@@ -409,23 +409,23 @@
 		<field name="priceType" class="java.lang.String">
 			<description><![CDATA[@priceType]]></description>
 		</field>
-		<field name="amountWithTax" class="java.lang.Double">
+		<field name="amountWithTax" class="java.lang.String">
 			<description><![CDATA[amountWithTax]]></description>
 			<property name="net.sf.jasperreports.xpath.field.expression" value="amountWithTax"/>
 		</field>
-		<field name="unitPriceWithoutTax" class="java.lang.Double">
+		<field name="unitPriceWithoutTax" class="java.lang.String">
 			<description><![CDATA[unitPriceWithoutTax]]></description>
 		</field>
-		<field name="amountWithoutTax" class="java.lang.Double">
+		<field name="amountWithoutTax" class="java.lang.String">
 			<description><![CDATA[amountWithoutTax]]></description>
 		</field>
-		<field name="taxAmount" class="java.lang.Double">
+		<field name="taxAmount" class="java.lang.String">
 			<description><![CDATA[taxAmount]]></description>
 		</field>
 		<field name="currencySymbol" class="java.lang.String">
 			<description><![CDATA[currencySymbol]]></description>
 		</field>
-		<field name="taxRate" class="java.lang.Double">
+		<field name="taxRate" class="java.lang.String">
 			<description><![CDATA[taxRate]]></description>
 		</field>
 		<field name="taxIndex" class="java.lang.String">
@@ -446,7 +446,7 @@
 		<field name="accountingArticleLabel" class="java.lang.String">
 			<description><![CDATA[ancestor::quoteLine/@accountingArticleLabel]]></description>
 		</field>
-		<field name="quantity" class="java.lang.Double">
+		<field name="quantity" class="java.lang.String">
 			<description><![CDATA[ancestor::quoteLine/@quantity]]></description>
 		</field>
 		<field name="country" class="java.lang.String">
@@ -475,36 +475,36 @@
 	<field name="quoteNumber" class="java.lang.String">
 		<description><![CDATA[/quote/details/quote/@quoteNumber]]></description>
 	</field>
-	<field name="unitPriceWithoutTax_recurring" class="java.lang.Double">
+	<field name="unitPriceWithoutTax_recurring" class="java.lang.String">
 		<description><![CDATA[/quote/details/quotePrices/price[@priceType='RECURRING']//unitPriceWithoutTax]]></description>
 	</field>
-	<field name="amountWithoutTax_recurring" class="java.lang.Double">
+	<field name="amountWithoutTax_recurring" class="java.lang.String">
 		<description><![CDATA[/quote/details/quotePrices/price[@priceType='RECURRING']/amountWithoutTax]]></description>
 	</field>
-	<field name="taxAmount_recurring" class="java.lang.Double">
+	<field name="taxAmount_recurring" class="java.lang.String">
 		<description><![CDATA[/quote/details/quotePrices/price[@priceType='RECURRING']//taxAmount]]></description>
 	</field>
-	<field name="taxRate_recurring" class="java.lang.Double">
+	<field name="taxRate_recurring" class="java.lang.String">
 		<description><![CDATA[/quote/details/quotePrices/price[@priceType='RECURRING']//taxRate]]></description>
 	</field>
-	<field name="amountWithTax_recurring" class="java.lang.Double">
+	<field name="amountWithTax_recurring" class="java.lang.String">
 		<description><![CDATA[/quote/details/quotePrices/price[@priceType='RECURRING']/amountWithTax]]></description>
 		<property name="net.sf.jasperreports.xpath.field.expression" value="/quote/details/quotePrices/price[@priceType='RECURRING']/amountWithTax"/>
 	</field>
-	<field name="amountWithoutTax_onshot" class="java.lang.Double">
+	<field name="amountWithoutTax_onshot" class="java.lang.String">
 		<description><![CDATA[/quote/details/quotePrices/price[@priceType='ONESHOT']/amountWithoutTax]]></description>
 	</field>
-	<field name="amountWithTax_oneshot" class="java.lang.Double">
+	<field name="amountWithTax_oneshot" class="java.lang.String">
 		<description><![CDATA[/quote/details/quotePrices/price[@priceType='ONESHOT']/amountWithTax]]></description>
 		<property name="net.sf.jasperreports.xpath.field.expression" value="/quote/details/quotePrices/price[@priceType='ONESHOT']/amountWithTax"/>
 	</field>
-	<field name="taxRate_oneshot" class="java.lang.Double">
+	<field name="taxRate_oneshot" class="java.lang.String">
 		<description><![CDATA[/quote/details/quotePrices/price[@priceType='ONESHOT']/taxRate]]></description>
 	</field>
-	<field name="unitPriceWithoutTax_oneshot" class="java.lang.Double">
+	<field name="unitPriceWithoutTax_oneshot" class="java.lang.String">
 		<description><![CDATA[/quote/details/quotePrices/price[@priceType='ONESHOT']/unitPriceWithoutTax]]></description>
 	</field>
-	<field name="taxAmount_oneshot" class="java.lang.Double">
+	<field name="taxAmount_oneshot" class="java.lang.String">
 		<description><![CDATA[/quote/details/quotePrices/price[@priceType='ONESHOT']/taxAmount]]></description>
 	</field>
 	<field name="recurrencePeriodicity" class="java.lang.String">
@@ -714,13 +714,13 @@
 		<description><![CDATA[/quote/header/taxDetail/vatex]]></description>
 		<property name="net.sf.jasperreports.xpath.field.expression" value="/quote/header/taxDetail/vatex"/>
 	</field>
-	<field name="totalTaxAmount" class="java.lang.Double">
+	<field name="totalTaxAmount" class="java.lang.String">
 		<description><![CDATA[/quote/header/taxDetail/totalAmountTax]]></description>
 	</field>
-	<field name="totalAmountWithoutTax" class="java.lang.Double">
+	<field name="totalAmountWithoutTax" class="java.lang.String">
 		<description><![CDATA[/quote/header/taxDetail/totalAmountWithoutTax]]></description>
 	</field>
-	<field name="totalAmountWithTax" class="java.lang.Double">
+	<field name="totalAmountWithTax" class="java.lang.String">
 		<description><![CDATA[/quote/header/taxDetail/totalAmountWithTax]]></description>
 	</field>
 	<field name="providerCurrencySymbol" class="java.lang.String">

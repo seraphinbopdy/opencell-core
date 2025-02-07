@@ -127,21 +127,30 @@ public class RoleService extends PersistenceService<Role> {
 
     }
 
+    /**
+     * Find or create a role in Opencell and if required - in Keycloak as well
+     * 
+     * @param name Role name
+     * @param parentRole Parent role details
+     * @return Created/found role entity in Opencell
+     */
     public Role findOrCreateRole(String name, Role parentRole) {
         Role role = null;
         try {
             role = getEntityManager().createNamedQuery("Role.getByName", Role.class).setParameter("name", name.toLowerCase()).setMaxResults(1).getSingleResult();
-            if (getRoleManagementMaster().isKcRoleWrite() && keycloakAdminClientService.findRole(name, true) == null) {
-                if (parentRole == null) {
-                    keycloakAdminClientService.createRole(name, name, true);
-                } else {
-                    keycloakAdminClientService.createRole(name, name, true, parentRole.getName(), parentRole.getDescription(), parentRole.isClientRole());
-                }
-            }
+
         } catch (NoResultException ex) {
-            create(new Role(name, name, true, parentRole));
+            role = new Role(name, name, false, parentRole);
+            create(role);
         }
 
+        if (getRoleManagementMaster().isKcRoleWrite() && keycloakAdminClientService.findRole(name, true) == null) {
+            if (parentRole == null) {
+                keycloakAdminClientService.createRole(name, name, true);
+            } else {
+                keycloakAdminClientService.createRole(name, name, true, parentRole.getName(), parentRole.getDescription(), parentRole.isClientRole());
+            }
+        }
         return role;
 
     }

@@ -298,7 +298,7 @@ public class EndpointServlet extends HttpServlet {
             if (endpointSecurityEnabled && !endpointApi.isUserAuthorized(endpoint)) {
                 endpointExecution.getResp().setStatus(403);
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.put("error", "You are not authorized to access this endpoint");
+                jsonObject.put("error", "You are not authorized to access this endpoint. User role "+ endpoint.getRoleName() + " is required");
                 endpointExecution.getResp().getWriter().print(jsonObject.toString());
                 return;
             }

@@ -567,6 +567,15 @@
           "attributes": {}
         },
         {
+          "id": "617cc9fc-c02e-4f6e-a5de-3a9b2a1df9af",
+          "name": "Custom_API-AccessAll",
+          "description": "Allows to access any Custom API endpoint",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "d4a3eb0d-a156-4f61-8d93-2298dc65af96",
+          "attributes": {}
+        },
+        {
           "id": "df2ec0e5-dfe1-4e62-92ed-fba9084f1735",
           "name": "inboundAccess",
           "description": "Inbound service access",
@@ -620,7 +629,8 @@
                 "inboundAccess",
                 "apiAdministrationManagement",
                 "apiUseScript",
-                "general_roleManagement"
+                "general_roleManagement",
+                "Custom_API-AccessAll"
               ]
             }
           },

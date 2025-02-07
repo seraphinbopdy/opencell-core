@@ -42,6 +42,9 @@ public class CustomerHierarchyDto extends BaseEntityDto {
     @XmlElement(required = true)
     private SellersDto sellers;
 
+    /** Option to replace existing access points. */
+    private Boolean overwriteAccessPoints;
+
     /**
      * Gets the sellers.
      *
@@ -60,4 +63,21 @@ public class CustomerHierarchyDto extends BaseEntityDto {
         this.sellers = sellers;
     }
 
+    /**
+     * Gets the overwrite access points.
+     *
+     * @return the overwrite access points
+     */
+    public Boolean getOverwriteAccessPoints() {
+        return overwriteAccessPoints;
+    }
+
+    /**
+     * Sets the overwrite access points.
+     *
+     * @param overwriteAccessPoints the new overwrite access points.
+     */
+    public void setOverwriteAccessPoints(Boolean overwriteAccessPoints) {
+        this.overwriteAccessPoints = overwriteAccessPoints;
+    }
 }

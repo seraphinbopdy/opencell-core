@@ -784,7 +784,8 @@ public class ScriptInstanceService extends BusinessService<ScriptInstance> imple
             synchronized (poolOfScriptInstances) {
 
                 // Double check in case of serialized calls to this method
-                if (poolOfScriptInstances.get(scriptCode) == null) {
+                pool = poolOfScriptInstances.get(scriptCode);
+                if (pool == null) {
                     pool = buildPool(scriptCode);
                     poolOfScriptInstances.put(scriptCode, pool);
                 }

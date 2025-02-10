@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "2315a7b4-61e7-44c7-95a1-83a5b873e9e2",
+		"_postman_id": "e0449c08-d7bd-44c4-928e-cf5670f8a199",
 		"name": "00_OPENCELL_V17.X - V1",
 		"description": "# Introduction\n\nThis configuration file is designed to be a basis for all configurations provided by Opencell.  \nIt merely contains most common general settings and a catalog of services implementing various rating models.\n\n# Configuring Opencell\n\nThere are 2 main ways for configuring _**Opencell**_:\n\n- GUI (_Administration GUI_ and _Marketing Manager_)\n    \n- API (all Opencell configuration and operations can be performed using our extensive API library)\n    \n\nThe most flexible way is using APIs which currently are available as **Rest** and **Soap**.  \nThe **Soap** API are deprecated, so will won't mention them anymore.\n\n## Tools\n\nAny tools able to send HTTP requests will do.  \nOne could even just script _curl_ calls using shell script.  \nBut of course, a more user friendly tool will make things easier.\n\nHere at _**Opencell**_, we prefer **Postman** ([https://getpostman.com](https://getpostman.com)):\n\n- it has a modern, friendly interface\n    \n- Sets of API request can be organized into collections, themselves structured into a folder tree.\n    \n- Collections can be exported as _JSON_ files or shared with other team members using collaboration features (payed version)\n    \n- it allows to uses variables at different levels (collection, environement, global) and to execute _Javascript_ scripts before and after executing API calls which allows great flexibility and API response testing.\n    \n\n# Configuration documentation guidelines\n\nIn order to document our configuration, we make full used of the internal documentation capabilities of the Markdown fields on Postman Objects\n\n## Default template for _Collection_ documentation\n\n## Default template for _Folder_ documentation\n\n## Default template for _Request_ documentation\n\n# Tips & guidelines\n\nHere follow a few tips for understanding this collection.\n\n## Collection pre-request script\n\n``` javascript\npm.globals.set(\"timestamp.iso\", (new Date()).toISOString());\npm.globals.set(\"request.label\", pm.info.requestName);\nvar parts = pm.info.requestName.split(\"|\");\nfor(let i=0; i    pm.globals.set(\"request.label.\"+i, parts[i]);\n}\n\n ```\n\n## Configuration guidelines\n\n## Entities\n\n__XXX\n\n### Custom Fields\n\nCF___ XXX\n\nwill be discarded for inherited\n\n#### Custom field visibility\n\nSE____XXX\n\nare used in CFT.applicableOnEl to show CFT on entities\n\n## Entity abbreviation\n\n| code | entity |\n| --- | --- |\n| P | Provider |\n| S | Seller |\n| C | Customer |\n| CA | Customer Account |\n| BA | Billing Account |\n| UA | User Account |\n| SU | Subscription |\n| AP | Access Point |\n| OF | Offer Template |\n| SE | Service Template and Instance |\n| CH | Charge Template |\n| PP | Price Plan |\n| CN | Counter |\n| ICAT | Invoice Category |\n| ISCAT | Invoice SubCategory |\n| CAL | Calendar |\n| BC | Billing Cycle |",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
@@ -1457,7 +1457,6 @@
 								{
 									"name": "Invoice Type",
 									"item": [
-										
 										{
 											"name": "electronicInvoicing_untdidVatPaymentOption",
 											"request": {
@@ -1466,7 +1465,6 @@
 													{
 														"key": "Content-Type",
 														"value": "application/json",
-														"name": "Content-Type",
 														"type": "text"
 													}
 												],
@@ -34929,6 +34927,2253 @@
 					]
 				}
 			]
+		},
+		{
+			"name": "Tests",
+			"item": [
+				{
+					"name": "Rating with script",
+					"item": [
+						{
+							"name": "Create charges and offer",
+							"item": [
+								{
+									"name": "Create Rating Script",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"script\": \"package org.meveo.service.script;\\r\\n\\r\\nimport java.util.Map;\\r\\nimport java.math.BigDecimal;\\r\\nimport org.meveo.admin.exception.BusinessException;\\r\\nimport org.slf4j.Logger;\\r\\nimport org.slf4j.LoggerFactory;\\r\\nimport org.meveo.model.billing.WalletOperation;\\r\\nimport org.meveo.service.catalog.impl.TaxService;\\r\\n\\r\\npublic class RatingScript extends org.meveo.service.script.Script {\\r\\n\\r\\n    private static final Logger log = LoggerFactory.getLogger(RatingScript.class);\\r\\n    \\r\\n    @Override\\r\\n    public void execute(Map<String, Object> context) {\\r\\n        log.info(\\\"Excuting rating script\\\");\\r\\n        \\r\\n      TaxService taxService = (TaxService)getServiceInterface(\\\"TaxService\\\");\\r\\n      \\r\\n      WalletOperation wo = (WalletOperation)context.get(Script.CONTEXT_ENTITY);\\r\\n      wo.setAmountWithTax(new BigDecimal(25));\\r\\n      wo.setAmountWithoutTax(new BigDecimal(23));\\r\\n      wo.setAmountTax(new BigDecimal(2));\\r\\n      wo.setTaxPercent(new BigDecimal(5));\\r\\n      wo.setTax(taxService.findById(-2L));\\r\\n    }\\r\\n}\\r\\n\",\n    \"pool\": {\n        \"usePool\": true,\n        \"min\": \"2\",\n        \"max\": \"5\",\n        \"maxIdleTime\": \"10\"\n    }\n}"
+										},
+										"url": {
+											"raw": "{{opencell.url}}/scriptInstance/createOrUpdate",
+											"host": [
+												"{{opencell.url}}"
+											],
+											"path": [
+												"scriptInstance",
+												"createOrUpdate"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "charge|CH_SCRIPT_RECURRING|desc=Simple Recurring Offer",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "{{auth}}"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"code\": \"{{request.label.1}}\",\r\n    \"description\": \"{{desc}}\",\r\n    \"invoiceSubCategory\": \"ISCAT_REC\",\r\n    \"taxClassCode\": \"NORMAL\",\r\n    \"disabled\": false,\r\n    \"unitNbDecimal\": 6,\r\n    \"roundingModeDtoEnum\": \"NEAREST\",\r\n    \"calendar\": \"CAL_MONTHLY_1ST\",\r\n    \"durationTermInMonth\": 24,\r\n    \"subscriptionProrata\": true,\r\n    \"terminationProrata\": true,\r\n    \"applyInAdvance\": true,\r\n    \"filterExpression\": \"\",\r\n    \"triggeredEdrs\": null,\r\n    \"ratingScriptCode\": \"org.meveo.service.script.RatingScript\"\r\n}"
+										},
+										"url": {
+											"raw": "{{opencell.url}}/catalog/recurringChargeTemplate/createOrUpdate",
+											"host": [
+												"{{opencell.url}}"
+											],
+											"path": [
+												"catalog",
+												"recurringChargeTemplate",
+												"createOrUpdate"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Price Plan for CH_SCRIPT_RECURRING",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"code\": \"PP_CH_SCRIPT_RECURRING\",\n    \"eventCode\": \"CH_SCRIPT_RECURRING\",\n    \"priority\": 0,\n    \"amountWithoutTax\": 500\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url}}/catalog/pricePlan",
+											"host": [
+												"{{opencell.url}}"
+											],
+											"path": [
+												"catalog",
+												"pricePlan"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Price Plan Matrix Version 1 for CH_SCRIPT_RECURRING",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"pricePlanMatrixCode\": \"PP_CH_SCRIPT_RECURRING\",\n    \"label\": \"Default Script Recurring pricing\",\n    \"amountWithoutTax\": 7500,\n    \"version\": 1,\n    \"isMatrix\": false,\n    \"validity\": {\n        \"from\": \"2020-01-01\",\n        \"to\": \"2030-12-30\"\n    }\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url}}/catalog/pricePlan/pricePlanMatrixVersion",
+											"host": [
+												"{{opencell.url}}"
+											],
+											"path": [
+												"catalog",
+												"pricePlan",
+												"pricePlanMatrixVersion"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Publish Price Plan Matrix Version 1 for CH_SCRIPT_RECURRING",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"url": {
+											"raw": "{{opencell.url}}/catalog/pricePlan/PP_CH_SCRIPT_RECURRING/pricePlanMatrixVersions/1/status/PUBLISHED",
+											"host": [
+												"{{opencell.url}}"
+											],
+											"path": [
+												"catalog",
+												"pricePlan",
+												"PP_CH_SCRIPT_RECURRING",
+												"pricePlanMatrixVersions",
+												"1",
+												"status",
+												"PUBLISHED"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "charge|CH_SCRIPT_RECURRING",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "PUT",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{opencell.url}}/catalog/chargeTemplates/{{request.label.1}}/status/ACTIVE",
+											"host": [
+												"{{opencell.url}}"
+											],
+											"path": [
+												"catalog",
+												"chargeTemplates",
+												"{{request.label.1}}",
+												"status",
+												"ACTIVE"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "PR|code=PR_SCRIPT_RATING|desc=Product with script rating",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"discountList\": [],\r\n    \"code\": \"{{code}}\",\r\n    \"label\": \"{{desc}}\",\r\n    \"status\": \"ACTIVE\",\r\n    \"modelChildren\": [],\r\n    \"discountFlag\": false,\r\n    \"packageFlag\": false,\r\n    \"discountListCodes\": [],\r\n    \"isModel\": false,\r\n    \"mediaCodes\": [\r\n        \"OC_TRAINING\"\r\n    ],\r\n    \"currentProductVersion\": {\r\n        \"productCode\": \"{{code}}\",\r\n        \"shortDescription\": \"{{desc}}\",\r\n        \"currentVersion\": 0,\r\n        \"status\": \"DRAFT\",\r\n        \"longDescription\": \"This is a long test description for product version\",\r\n        \"validity\": {\r\n            \"from\": \"2022-01-01\"\r\n        }\r\n    },\r\n    \"productChargeTemplateMappingDto\": [\r\n        {\r\n            \"chargeCode\": \"CH_SCRIPT_RECURRING\"\r\n        }\r\n    ]\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url}}/catalog/products",
+											"host": [
+												"{{opencell.url}}"
+											],
+											"path": [
+												"catalog",
+												"products"
+											]
+										},
+										"description": "Creation of the product"
+									},
+									"response": []
+								},
+								{
+									"name": "PR|code=PR_SCRIPT_RATING",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript"
+											}
+										},
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"url": {
+											"raw": "{{opencell.url}}/catalog/products/{{code}}/productVersions/1/status/PUBLISHED",
+											"host": [
+												"{{opencell.url}}"
+											],
+											"path": [
+												"catalog",
+												"products",
+												"{{code}}",
+												"productVersions",
+												"1",
+												"status",
+												"PUBLISHED"
+											]
+										},
+										"description": "Creation of the product"
+									},
+									"response": []
+								},
+								{
+									"name": "PR|code=PR_SCRIPT_RATING",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript"
+											}
+										},
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"url": {
+											"raw": "{{opencell.url}}/catalog/products/{{code}}/status/ACTIVE",
+											"host": [
+												"{{opencell.url}}"
+											],
+											"path": [
+												"catalog",
+												"products",
+												"{{code}}",
+												"status",
+												"ACTIVE"
+											]
+										},
+										"description": "Creation of the product"
+									},
+									"response": []
+								},
+								{
+									"name": "OF|code=OF_SCRIPT_RATING|name=Offer with script rating",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"code\": \"{{code}}\",\r\n    \"name\": \"{{name}}\",\r\n    \"description\": \"{{name}}\",\r\n    \"disabled\": false,\r\n    \"lifeCycleStatus\": \"ACTIVE\",\r\n    \"validFrom\": \"2022-01-01\",\r\n    \"isModel\": true,\r\n    \"offerProducts\": [\r\n        {\r\n            \"product\": {\r\n                \"code\": \"PR_SCRIPT_RATING\",\r\n                \"discountFlag\": false,\r\n                \"packageFlag\": false\r\n            },\r\n            \"mandatory\": true,\r\n            \"sequence\": 0\r\n        }\r\n    ]\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url}}/catalog/offerTemplate/createOrUpdate",
+											"host": [
+												"{{opencell.url}}"
+											],
+											"path": [
+												"catalog",
+												"offerTemplate",
+												"createOrUpdate"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "ScriptRating|Script Test|LicenceD Copy",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"var parts = pm.variables.get(\"request.label\").split(\"|\");",
+											"var index = pm.globals.get(\"index\");",
+											"",
+											"if (typeof index === 'undefined') {",
+											"    console.log(\"index global variable is undefined -> setting to \\\"00\\\"\");",
+											"    pm.globals.set(\"index\", \"00\");",
+											"    index = \"00\";",
+											"}",
+											"",
+											"var prefix = pm.variables.get(\"seller.code\") + \"-\";",
+											"var suffix = \" \" + prefix + index;",
+											"",
+											"switch (parts.length) {",
+											"    case 1:",
+											"        pm.globals.set(\"account.code\", prefix + parts[0]);",
+											"        pm.globals.set(\"account.description\", parts[0] + suffix);",
+											"        pm.globals.set(\"account.firstname\", \"\");",
+											"        pm.globals.set(\"account.lastname\", \"\");",
+											"        break;",
+											"    case 2:",
+											"        pm.globals.set(\"account.code\", prefix + parts[0]);",
+											"        pm.globals.set(\"account.description\", parts[1] + suffix);",
+											"        pm.globals.set(\"account.firstname\", \"\");",
+											"        pm.globals.set(\"account.lastname\", \"\");",
+											"        break;",
+											"    case 3:",
+											"        pm.globals.set(\"account.code\", prefix + parts[0]);",
+											"        pm.globals.set(\"account.description\", parts[1] + \" \" + parts[2] + suffix);",
+											"        pm.globals.set(\"account.firstname\", parts[1]);",
+											"        pm.globals.set(\"account.lastname\", parts[2]);",
+											"        break;",
+											"    case 4:",
+											"        pm.globals.set(\"account.code\", prefix + parts[0]);",
+											"        pm.globals.set(\"account.description\", parts[1] + suffix);",
+											"        pm.globals.set(\"account.firstname\", parts[2]);",
+											"        pm.globals.set(\"account.lastname\", parts[3]);",
+											"        break;",
+											"}",
+											"",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"crmAccountType\": \"C_UA\",\r\n    \"crmParentCode\": \"{{seller.code}}\",\r\n    \"code\": \"{{account.code}}\",\r\n    \"description\": \"{{request.label.1}}\",\r\n    \"isCompany\": true,\r\n    \"legalEntityType\": {\r\n        \"code\": \"CIE\"\r\n    },\r\n    \"name\": {\r\n        \"title\": \"CIE-SANDBOX\",\r\n        \"firstName\": \"{{account.firstname}}\",\r\n        \"lastName\": \"{{account.lastname}}\"\r\n    },\r\n    \"vatNo\": \"FR12345678901234\",\r\n    \"registrationNo\": \"12354678901234\",\r\n    \"address\": {\r\n        \"address1\": \"3 rue du passage des clous\",\r\n        \"address2\": \"Bâtiment A\",\r\n        \"address3\": \"Bureau D42\",\r\n        \"zipCode\": \"75001\",\r\n        \"city\": \"PARIS\",\r\n        \"country\": \"FR\"\r\n    },\r\n    \"contactInformation\": {\r\n        \"email\": \"{{seller.code}}@exemple.com\",\r\n        \"mobile\": \"+33123546789\"\r\n    },\r\n    \"email\": \"fr.fr@fr.com\",\r\n    \"language\": \"FRA\",\r\n    \"paymentMethod\": \"CHECK\",\r\n    \"customerCategory\": \"CLIENT\",\r\n    \"currency\": \"EUR\",\r\n    \"billingCycle\": \"BC_MONTHLY_1ST\",\r\n    \"country\": \"FR\",\r\n    \"electronicBilling\": \"true\",\r\n    \"customFields\": null\r\n}"
+								},
+								"url": {
+									"raw": "{{opencell.url}}/account/accountHierarchy/createOrUpdateCRMAccountHierarchy",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"account",
+										"accountHierarchy",
+										"createOrUpdateCRMAccountHierarchy"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create Subscription",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"OPENSOFT-ScriptRating_Sub\",\n    \"userAccount\": \"{{account.code}}\",\n    \"offerTemplate\": \"OF_SCRIPT_RATING\",\n    \"subscriptionDate\": \"2022-09-01\",\n    \"status\": \"ACTIVE\",\n    \"productToInstantiateDto\": [\n\n        {\n            \"productCode\": \"PR_SCRIPT_RATING\",\n            \"quantity\": 1.000000000000\n        }\n    ],\n    \"renewed\": false,\n    \"renewalRule\": {},\n    \"seller\": \"OPENSOFT\",\n    \"autoEndOfEngagement\": false,\n    \"electronicBilling\": false\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{opencell.url}}/billing/subscription/subscribeAndInstantiateProducts",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"billing",
+										"subscription",
+										"subscribeAndInstantiateProducts"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Activate Service",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"subscription\": \"OPENSOFT-ScriptRating_Sub\",\n    \"subscriptionValidityDate\": \"2022-09-01\",\n    \"servicesToActivate\": {\n        \"service\": [\n            {\n                \"code\": \"PR_SCRIPT_RATING\",\n                \"subscriptionDate\": \"2022-09-01\",\n                \"quantity\": 1\n            }\n        ]\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{opencell.url}}/billing/subscription/activateServices",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"billing",
+										"subscription",
+										"activateServices"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Rating Until Date RR Job",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"pm.globals.set(\"task.code\", pm.variables.get(\"request.label.1\"));"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"RR_Job\",\n    \"disabled\": true,\n    \"jobCategory\": \"RATING\",\n    \"jobTemplate\": \"RecurringRatingJob\",\n    \"active\": false,\n    \"customFields\": {\n        \"customField\": [\n            {\n                \"code\": \"nbRuns\",\n                \"description\": \"Number of parallel execution\",\n                \"fieldType\": \"LONG\",\n                \"longValue\": -1,\n                \"guiPosition\": \"tab:Configuration:0;field:0\"\n            },\n            {\n                \"code\": \"rateUntilDate\",\n                \"description\": \"Apply recurring charge up to date\",\n                \"fieldType\": \"DATE\",\n                \"dateValue\": \"{{timestamp.iso.add.30days}}\",\n                \"guiPosition\": \"tab:Configuration:0;field:2\"\n            },\n            {\n                \"code\": \"waitingMillis\",\n                \"description\": \"Waiting before next launch (ms)\",\n                \"fieldType\": \"LONG\",\n                \"longValue\": 0,\n                \"guiPosition\": \"tab:Configuration:0;field:1\"\n            }\n        ]\n    },\n    \"timerCode\": \"Hourly\",\n    \"limitToSingleNode\": true,\n    \"verboseReport\": true\n    }"
+								},
+								"url": {
+									"raw": "{{opencell.url}}/job/createOrUpdate",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"job",
+										"createOrUpdate"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Run|RR_Job",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"if( pm.response.code === 200) {",
+											"    var jsonData = JSON.parse(responseBody);",
+											"    pm.globals.set(\"jobRun.id\", jsonData.actionStatus.message);",
+											"}"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"pm.globals.set(\"task.code\", pm.variables.get(\"request.label.1\"));"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"{{request.label.1}}\",\n    \"waitToComplete\": true\n}"
+								},
+								"url": {
+									"raw": "{{opencell.url}}/job/execute",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"job",
+										"execute"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Check WO amounts",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"var jsonData = pm.response.json();\r",
+											"\r",
+											"pm.test(\"Amounts\", function () {\r",
+											"    pm.expect(jsonData.data[0].amountWithTax).to.eql(25);\r",
+											"    pm.expect(jsonData.data[0].amountWithoutTax).to.eql(23);\r",
+											"    pm.expect(jsonData.data[0].amountTax).to.eql(2);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"accept": true
+								}
+							},
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "{{opencell.password}}",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "{{opencell.username}}",
+											"type": "string"
+										},
+										{
+											"key": "saveHelperData",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "showPassword",
+											"value": false,
+											"type": "boolean"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"filters\": {\r\n        \"subscription.code\": \"OPENSOFT-ScriptRating_Sub\"\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{opencell.url}}/v2/generic/all/walletOperation",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"v2",
+										"generic",
+										"all",
+										"walletOperation"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Endpoint",
+					"item": [
+						{
+							"name": "Create Script ",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"org.meveo.script.ScriptEndpoint\",\n    \"script\": \"package org.meveo.script;\\r\\n\\r\\nimport java.util.Map;\\r\\nimport java.util.List;\\r\\nimport org.meveo.service.script.Script;\\r\\nimport org.meveo.admin.exception.BusinessException;\\r\\n\\r\\npublic class ScriptEndpoint extends Script { \\n\\tprivate int intValue;\\n\\tprivate boolean booleanValue;\\n\\tprivate double doubleValue;\\n\\tprivate long longValue;\\n\\tprivate String stringValue;\\n\\tprivate Integer integerValue;\\n\\tprivate Boolean booleanObjectValue;\\n\\tprivate Double doubleObjectValue;\\n\\tprivate Long longObjectValue;\\n\\tprivate List<String> listValue;\\n\\tprivate Map<String, Integer> mapValue;\\n\\tpublic int getIntValue() {\\n\\t\\treturn intValue;\\n\\t}\\n\\tpublic void setIntValue(int intValue) {\\n\\t\\tthis.intValue = intValue;\\n\\t}\\n\\tpublic boolean isBooleanValue() {\\n\\t\\treturn booleanValue;\\n\\t}\\n\\tpublic void setBooleanValue(boolean booleanValue) {\\n\\t\\tthis.booleanValue = booleanValue;\\n\\t}\\n\\tpublic double getDoubleValue() {\\n\\t\\treturn doubleValue;\\n\\t}\\n\\tpublic void setDoubleValue(double doubleValue) {\\n\\t\\tthis.doubleValue = doubleValue;\\n\\t}\\n\\tpublic long getLongValue() {\\n\\t\\treturn longValue;\\n\\t}\\n\\tpublic void setLongValue(long longValue) {\\n\\t\\tthis.longValue = longValue;\\n\\t}\\n\\tpublic String getStringValue() {\\n\\t\\treturn stringValue;\\n\\t}\\n\\tpublic void setStringValue(String stringValue) {\\n\\t\\tthis.stringValue = stringValue;\\n\\t}\\n\\tpublic Integer getIntegerValue() {\\n\\t\\treturn integerValue;\\n\\t}\\n\\tpublic void setIntegerValue(Integer integerValue) {\\n\\t\\tthis.integerValue = integerValue;\\n\\t}\\n\\tpublic Boolean getBooleanObjectValue() {\\n\\t\\treturn booleanObjectValue;\\n\\t}\\n\\tpublic void setBooleanObjectValue(Boolean booleanObjectValue) {\\n\\t\\tthis.booleanObjectValue = booleanObjectValue;\\n\\t}\\n\\tpublic Double getDoubleObjectValue() {\\n\\t\\treturn doubleObjectValue;\\n\\t}\\n\\tpublic void setDoubleObjectValue(Double doubleObjectValue) {\\n\\t\\tthis.doubleObjectValue = doubleObjectValue;\\n\\t}\\n\\tpublic Long getLongObjectValue() {\\n\\t\\treturn longObjectValue;\\n\\t}\\n\\tpublic void setLongObjectValue(Long longObjectValue) {\\n\\t\\tthis.longObjectValue = longObjectValue;\\n\\t}\\n\\tpublic List<String> getListValue() {\\n\\t\\treturn listValue;\\n\\t}\\n\\tpublic void setListValue(List<String> listValue) {\\n\\t\\tthis.listValue = listValue;\\n\\t}\\n\\tpublic Map<String, Integer> getMapValue() {\\n\\t\\treturn mapValue;\\n\\t}\\n\\tpublic void setMapValue(Map<String, Integer> mapValue) {\\n\\t\\tthis.mapValue = mapValue;\\n\\t}\\r\\n\\r\\n    @Override\\r\\n    public void execute(Map<String, Object> parameters) throws BusinessException { System.out.println(\\\"Executing endpoint script\\\"); int totalMapValues = 0; if (mapValue!=null && !mapValue.isEmpty()) { for(Object value : mapValue.values()){ totalMapValues = totalMapValues + (int)value; } } int totalListValues = 0; if (listValue!=null && !listValue.isEmpty()) { for(Object value : listValue){ totalListValues = totalListValues + Integer.valueOf((String)value).intValue(); } } parameters.put(\\\"stringValue\\\", \\\"Returning from param: \\\"+ longObjectValue + \\\" long value, \\\"+totalMapValues+\\\" map value, \\\"+totalListValues+ \\\" list value\\\"); stringValue= \\\"Returning from getter: \\\"+ longObjectValue + \\\" long value, \\\"+totalMapValues+\\\" map value, \\\"+totalListValues+ \\\" list value\\\"; }\\r\\n}\\r\\n\",\n    \"pool\": {\n        \"usePool\": true,\n        \"min\": \"2\",\n        \"max\": \"5\",\n        \"maxIdleTime\": \"10\"\n    }\n}"
+								},
+								"url": {
+									"raw": "{{opencell.url}}/scriptInstance/createOrUpdate",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"scriptInstance",
+										"createOrUpdate"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create Endpoint",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"value-endpoint\",\n    \"secured\": true,\n    \"serviceCode\": \"org.meveo.script.ScriptEndpoint\",\n    \"synchronous\": true,\n    \"method\": \"POST\",\n    \"parameterMappings\": [\n        {\n            \"scriptParameter\": \"booleanObjectValue\",\n            \"multivalued\": false,\n            \"parameterName\": \"booleanObjectParam\",\n            \"defaultValue\": null,\n            \"valueRequired\": true,\n            \"description\": \"Boolean type parameter\",\n            \"example\": \"True\"\n        },\n        {\n            \"scriptParameter\": \"booleanValue\",\n            \"multivalued\": false,\n            \"parameterName\": \"booleanPrimitiveParam\",\n            \"defaultValue\": null,\n            \"valueRequired\": false\n        },\n        {\n            \"scriptParameter\": \"doubleObjectValue\",\n            \"multivalued\": false,\n            \"parameterName\": \"doubleObjectParam\",\n            \"defaultValue\": null,\n            \"valueRequired\": false,\n            \"description\": \"Double type parameter\",\n            \"example\": \"5.897\"\n        },\n        {\n            \"scriptParameter\": \"integerValue\",\n            \"multivalued\": false,\n            \"parameterName\": \"integerObjectParam\",\n            \"defaultValue\": null,\n            \"valueRequired\": false\n        },\n        {\n            \"scriptParameter\": \"listValue\",\n            \"multivalued\": true,\n            \"parameterName\": \"listParam\",\n            \"defaultValue\": null,\n            \"valueRequired\": false\n        },\n        {\n            \"scriptParameter\": \"longObjectValue\",\n            \"multivalued\": false,\n            \"parameterName\": \"longObjectParam\",\n            \"defaultValue\": null,\n            \"valueRequired\": true\n        },\n        {\n            \"scriptParameter\": \"longValue\",\n            \"multivalued\": false,\n            \"parameterName\": \"longPrimitiveParam\",\n            \"defaultValue\": null,\n            \"valueRequired\": false,\n            \"description\": \"long primitive type parameter\",\n            \"example\": \"587998745\"\n        },\n        {\n            \"scriptParameter\": \"mapValue\",\n            \"multivalued\": true,\n            \"parameterName\": \"mapParam\",\n            \"defaultValue\": null,\n            \"valueRequired\": false\n        },\n        {\n            \"scriptParameter\": \"stringValue\",\n            \"multivalued\": false,\n            \"parameterName\": \"stringParam\",\n            \"defaultValue\": null,\n            \"valueRequired\": true\n        }\n    ],\n    \"pathParameters\": [\n        \"intValue\",\n        \"doubleValue\"\n    ],\n    \"returnedVariableName\": \"stringValue\",\n    \"returnedValueExample\": \"Total value is 887.89\",\n    \"serializeResult\": true,\n    \"contentType\": \"application/json\"\n}"
+								},
+								"url": {
+									"raw": "{{opencell.url}}/customization/endpoint",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"customization",
+										"endpoint"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create or update Endpoint - change path",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});\r",
+											"// Reset access token, so user would be authenticated again and role created by endpoint would be present in current user roles\r",
+											"pm.variables.unset(\"access_token\");"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": 2,\n    \"code\": \"value-endpoint\",\n    \"secured\": true,\n    \"serviceCode\": \"org.meveo.script.ScriptEndpoint\",\n    \"synchronous\": true,\n    \"method\": \"POST\",\n    \"pathParameters\": [\n        \"intValue\",\n        \"doubleValue\"\n    ],\n    \"returnedVariableName\": \"stringValue\",\n    \"returnedValueExample\": \"Total value is 887.89\",\n    \"serializeResult\": true,\n    \"contentType\": \"application/json\",\n    \"basePath\": \"value-endpoint\",\n    \"path\": \"/{intValue}/test/{doubleValue}\",\n    \"parameterMappings\": [\n        {\n            \"scriptParameter\": \"booleanObjectValue\",\n            \"multivalued\": false,\n            \"parameterName\": \"booleanObjectParam\",\n            \"defaultValue\": null,\n            \"valueRequired\": true,\n            \"description\": null,\n            \"example\": null\n        },\n        {\n            \"scriptParameter\": \"booleanValue\",\n            \"multivalued\": false,\n            \"parameterName\": \"booleanPrimitiveParam\",\n            \"defaultValue\": null,\n            \"valueRequired\": false,\n            \"description\": null,\n            \"example\": null\n        },\n        {\n            \"scriptParameter\": \"doubleObjectValue\",\n            \"multivalued\": false,\n            \"parameterName\": \"doubleObjectParam\",\n            \"defaultValue\": null,\n            \"valueRequired\": false,\n            \"description\": null,\n            \"example\": null\n        },\n        {\n            \"scriptParameter\": \"integerValue\",\n            \"multivalued\": false,\n            \"parameterName\": \"integerObjectParam\",\n            \"defaultValue\": null,\n            \"valueRequired\": false,\n            \"description\": null,\n            \"example\": null\n        },\n        {\n            \"scriptParameter\": \"listValue\",\n            \"multivalued\": true,\n            \"parameterName\": \"listParam\",\n            \"defaultValue\": null,\n            \"valueRequired\": false,\n            \"description\": null,\n            \"example\": null\n        },\n        {\n            \"scriptParameter\": \"longObjectValue\",\n            \"multivalued\": false,\n            \"parameterName\": \"longObjectParam\",\n            \"defaultValue\": null,\n            \"valueRequired\": true,\n            \"description\": null,\n            \"example\": null\n        },\n        {\n            \"scriptParameter\": \"longValue\",\n            \"multivalued\": false,\n            \"parameterName\": \"longPrimitiveParam\",\n            \"defaultValue\": null,\n            \"valueRequired\": false,\n            \"description\": null,\n            \"example\": null\n        },\n        {\n            \"scriptParameter\": \"mapValue\",\n            \"multivalued\": true,\n            \"parameterName\": \"mapParam\",\n            \"defaultValue\": null,\n            \"valueRequired\": false,\n            \"description\": null,\n            \"example\": null\n        },\n        {\n            \"scriptParameter\": \"stringValue\",\n            \"multivalued\": false,\n            \"parameterName\": \"stringParam\",\n            \"defaultValue\": null,\n            \"valueRequired\": true,\n            \"description\": null,\n            \"example\": null\n        }\n    ]\n}"
+								},
+								"url": {
+									"raw": "{{opencell.url}}/customization/endpoint/createOrUpdate",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"customization",
+										"endpoint",
+										"createOrUpdate"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find Endpoint",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"var jsonData = pm.response.json();\r",
+											"\r",
+											"pm.test(\"\", function () {\r",
+											"    pm.expect(jsonData.path).to.eql(\"/{intValue}/test/{doubleValue}\");\r",
+											"    pm.expect(jsonData.basePath).to.eql(\"value-endpoint\");\r",
+											"});\r",
+											"\r",
+											"pm.environment.unset('access_token');"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{opencell.url}}/customization/endpoint/value-endpoint",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"customization",
+										"endpoint",
+										"value-endpoint"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "List Endpoints",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"var jsonData = pm.response.json();\r",
+											"\r",
+											"pm.test(\"\", function () {\r",
+											"    pm.expect(jsonData.searchResults[0].path).to.eql(\"/{intValue}/test/{doubleValue}\");\r",
+											"    pm.expect(jsonData.searchResults[0].basePath).to.eql(\"value-endpoint\");\r",
+											"});\r",
+											"\r",
+											"pm.environment.unset('access_token');"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{opencell.url}}/customization/endpoint/filtering",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"customization",
+										"endpoint",
+										"filtering"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Check parameter - fail",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});\r",
+											"var jsonData = pm.response.json();\r",
+											"\r",
+											"pm.test(\"\", function () {\r",
+											"    pm.expect(jsonData.error).to.eql(\"Parameter 'booleanObjectParam' is missing\");\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"stringParam\": \"test\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{opencell.url}}/custom/value-endpoint/2/test/6",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"custom",
+										"value-endpoint",
+										"2",
+										"test",
+										"6"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Check parameter - ok",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"\", function () {\r",
+											"    pm.expect(pm.response.json()).to.eql(\"Returning from getter: 8779845 long value, 0 map value, 0 list value\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"stringParam\": \"test\",\n    \"longParam\": 7.8,\n    \"booleanObjectParam\": true,\n    \"longObjectParam\": 8779845\n}"
+								},
+								"url": {
+									"raw": "{{opencell.url}}/custom/value-endpoint/4/test/5",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"custom",
+										"value-endpoint",
+										"4",
+										"test",
+										"5"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Check parameter - map and list",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"\", function () {\r",
+											"    pm.expect(pm.response.json()).to.eql(\"Returning from getter: 8779845 long value, 33 map value, 134 list value\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"stringParam\": \"test\",\n    \"longParam\": 7.8,\n    \"booleanObjectParam\": true,\n    \"longObjectParam\": 8779845,\n    \"mapParam\": {\n        \"one\": 12,\n        \"two\": 21\n    },\n    \"listParam\": [\n        \"78\",\n        \"56\"\n    ]\n}"
+								},
+								"url": {
+									"raw": "{{opencell.url}}/custom/value-endpoint/4/test/5",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"custom",
+										"value-endpoint",
+										"4",
+										"test",
+										"5"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add Jsonata to Endpoint",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"value-endpoint\",\n    \"jsonataTransformer\": \"$.one + $.two\",\n    \"returnedVariableName\": \"mapValue\"\n}"
+								},
+								"url": {
+									"raw": "{{opencell.url}}/customization/endpoint/createOrUpdate",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"customization",
+										"endpoint",
+										"createOrUpdate"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Check Jasonata transformation",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"\", function () {\r",
+											"    pm.expect(pm.response.json()).to.eql(33);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"stringParam\": \"test\",\n    \"longParam\": 7.8,\n    \"booleanObjectParam\": true,\n    \"longObjectParam\": 8779845,\n    \"mapParam\": {\n        \"one\": 12,\n        \"two\": 21\n    },\n    \"listParam\": [\n        \"78\",\n        \"56\"\n    ]\n}"
+								},
+								"url": {
+									"raw": "{{opencell.url}}/custom/value-endpoint/4/test/5",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"custom",
+										"value-endpoint",
+										"4",
+										"test",
+										"5"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Change Endpoint to Asynchronous",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"value-endpoint\",\n    \"synchronous\": false,\n    \"jsonataTransformer\": \"\",\n    \"returnedVariableName\": \"stringValue\"\n}"
+								},
+								"url": {
+									"raw": "{{opencell.url}}/customization/endpoint/createOrUpdate",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"customization",
+										"endpoint",
+										"createOrUpdate"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Call in async mode",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 202\", function () {\r",
+											"    pm.response.to.have.status(202);\r",
+											"});\r",
+											"pm.globals.set('CUSTOM_API_ASYNC_ID',responseBody.trim());"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"stringParam\": \"test\",\n    \"longParam\": 7.8,\n    \"booleanObjectParam\": false,\n    \"longObjectParam\":66542\n}"
+								},
+								"url": {
+									"raw": "{{opencell.url}}/custom/value-endpoint/4/test/5",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"custom",
+										"value-endpoint",
+										"4",
+										"test",
+										"5"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get async call results - keep value",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"\", function () {\r",
+											"    pm.expect(pm.response.json()).to.eql(\"Returning from getter: 66542 long value, 0 map value, 0 list value\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Keep-Data",
+										"value": "true",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{opencell.url}}/custom/{{CUSTOM_API_ASYNC_ID}}",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"custom",
+										"{{CUSTOM_API_ASYNC_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get async call results - witout keep value",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"\", function () {\r",
+											"    pm.expect(pm.response.json()).to.eql(\"Returning from getter: 66542 long value, 0 map value, 0 list value\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Keep-Data",
+										"value": "true",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"url": {
+									"raw": "{{opencell.url}}/custom/{{CUSTOM_API_ASYNC_ID}}",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"custom",
+										"{{CUSTOM_API_ASYNC_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get async call results - witout keep value AGAIN",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 404\", function () {\r",
+											"    pm.response.to.have.status(404);\r",
+											"});\r",
+											"\r",
+											"var jsonData = pm.response.json();\r",
+											"\r",
+											"pm.test(\"\", function () {\r",
+											"    pm.expect(jsonData.error).to.eql(\"Endpoint or asynchronous result was not found\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Keep-Data",
+										"value": "true",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"url": {
+									"raw": "{{opencell.url}}/custom/{{CUSTOM_API_ASYNC_ID}}",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"custom",
+										"{{CUSTOM_API_ASYNC_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Call in async mode AGAIN",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 202\", function () {\r",
+											"    pm.response.to.have.status(202);\r",
+											"});\r",
+											"\r",
+											"pm.globals.set('CUSTOM_API_ASYNC_ID',responseBody.trim());"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"stringParam\": \"test\",\n    \"longParam\": 7.8,\n    \"booleanObjectParam\": false,\n    \"longObjectParam\":66542\n}"
+								},
+								"url": {
+									"raw": "{{opencell.url}}/custom/value-endpoint/4/test/5",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"custom",
+										"value-endpoint",
+										"4",
+										"test",
+										"5"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete async call results",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"\", function () {\r",
+											"    pm.expect(pm.response.json()).to.eql(\"Returning from getter: 66542 long value, 0 map value, 0 list value\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{opencell.url}}/custom/{{CUSTOM_API_ASYNC_ID}}",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"custom",
+										"{{CUSTOM_API_ASYNC_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get async call results after deletion",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 404\", function () {\r",
+											"    pm.response.to.have.status(404);\r",
+											"});\r",
+											"\r",
+											"var jsonData = pm.response.json();\r",
+											"\r",
+											"pm.test(\"\", function () {\r",
+											"    pm.expect(jsonData.error).to.eql(\"Endpoint or asynchronous result was not found\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{opencell.url}}/custom/{{CUSTOM_API_ASYNC_ID}}",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"custom",
+										"{{CUSTOM_API_ASYNC_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Open AI Json",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"var jsonData = pm.response.json();\r",
+											"\r",
+											"pm.test(\"\", function () {\r",
+											"    pm.expect(jsonData.info.title).to.eql(\"value-endpoint\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{opencell.url}}/customization/endpoint/openApi/value-endpoint/",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"customization",
+										"endpoint",
+										"openApi",
+										"value-endpoint",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Script - add delay",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"org.meveo.script.ScriptEndpoint\",\n    \"script\": \"package org.meveo.script;\\r\\n\\r\\nimport java.util.Map;\\r\\nimport java.util.List;\\r\\nimport org.meveo.service.script.Script;\\r\\nimport org.meveo.admin.exception.BusinessException;\\r\\n\\r\\npublic class ScriptEndpoint extends Script { \\n\\tprivate int intValue;\\n\\tprivate boolean booleanValue;\\n\\tprivate double doubleValue;\\n\\tprivate long longValue;\\n\\tprivate String stringValue;\\n\\tprivate Integer integerValue;\\n\\tprivate Boolean booleanObjectValue;\\n\\tprivate Double doubleObjectValue;\\n\\tprivate Long longObjectValue;\\n\\tprivate List<String> listValue;\\n\\tprivate Map<String, Integer> mapValue;\\n\\tpublic int getIntValue() {\\n\\t\\treturn intValue;\\n\\t}\\n\\tpublic void setIntValue(int intValue) {\\n\\t\\tthis.intValue = intValue;\\n\\t}\\n\\tpublic boolean isBooleanValue() {\\n\\t\\treturn booleanValue;\\n\\t}\\n\\tpublic void setBooleanValue(boolean booleanValue) {\\n\\t\\tthis.booleanValue = booleanValue;\\n\\t}\\n\\tpublic double getDoubleValue() {\\n\\t\\treturn doubleValue;\\n\\t}\\n\\tpublic void setDoubleValue(double doubleValue) {\\n\\t\\tthis.doubleValue = doubleValue;\\n\\t}\\n\\tpublic long getLongValue() {\\n\\t\\treturn longValue;\\n\\t}\\n\\tpublic void setLongValue(long longValue) {\\n\\t\\tthis.longValue = longValue;\\n\\t}\\n\\tpublic String getStringValue() {\\n\\t\\treturn stringValue;\\n\\t}\\n\\tpublic void setStringValue(String stringValue) {\\n\\t\\tthis.stringValue = stringValue;\\n\\t}\\n\\tpublic Integer getIntegerValue() {\\n\\t\\treturn integerValue;\\n\\t}\\n\\tpublic void setIntegerValue(Integer integerValue) {\\n\\t\\tthis.integerValue = integerValue;\\n\\t}\\n\\tpublic Boolean getBooleanObjectValue() {\\n\\t\\treturn booleanObjectValue;\\n\\t}\\n\\tpublic void setBooleanObjectValue(Boolean booleanObjectValue) {\\n\\t\\tthis.booleanObjectValue = booleanObjectValue;\\n\\t}\\n\\tpublic Double getDoubleObjectValue() {\\n\\t\\treturn doubleObjectValue;\\n\\t}\\n\\tpublic void setDoubleObjectValue(Double doubleObjectValue) {\\n\\t\\tthis.doubleObjectValue = doubleObjectValue;\\n\\t}\\n\\tpublic Long getLongObjectValue() {\\n\\t\\treturn longObjectValue;\\n\\t}\\n\\tpublic void setLongObjectValue(Long longObjectValue) {\\n\\t\\tthis.longObjectValue = longObjectValue;\\n\\t}\\n\\tpublic List<String> getListValue() {\\n\\t\\treturn listValue;\\n\\t}\\n\\tpublic void setListValue(List<String> listValue) {\\n\\t\\tthis.listValue = listValue;\\n\\t}\\n\\tpublic Map<String, Integer> getMapValue() {\\n\\t\\treturn mapValue;\\n\\t}\\n\\tpublic void setMapValue(Map<String, Integer> mapValue) {\\n\\t\\tthis.mapValue = mapValue;\\n\\t}\\r\\n\\r\\n    @Override\\r\\n    public void execute(Map<String, Object> parameters) throws BusinessException { System.out.println(\\\"Executing endpoint script\\\"); int totalMapValues = 0; if (mapValue!=null && !mapValue.isEmpty()) { for(Object value : mapValue.values()){ totalMapValues = totalMapValues + (int)value; } } int totalListValues = 0; if (listValue!=null && !listValue.isEmpty()) { for(Object value : listValue){ totalListValues = totalListValues + Integer.valueOf((String)value).intValue(); } } parameters.put(\\\"stringValue\\\", \\\"Returning from param: \\\"+ longObjectValue + \\\" long value, \\\"+totalMapValues+\\\" map value, \\\"+totalListValues+ \\\" list value\\\"); stringValue= \\\"Returning from getter: \\\"+ longObjectValue + \\\" long value, \\\"+totalMapValues+\\\" map value, \\\"+totalListValues+ \\\" list value\\\";  try {\\r\\nThread.sleep(35000);\\r\\n}catch (InterruptedException e) {\\r\\n}\\r\\n }\\r\\n }\\r\\n\",\n    \"pool\": {\n        \"usePool\": true,\n        \"min\": \"2\",\n        \"max\": \"5\",\n        \"maxIdleTime\": \"10\"\n    }\n}"
+								},
+								"url": {
+									"raw": "{{opencell.url}}/scriptInstance/createOrUpdate",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"scriptInstance",
+										"createOrUpdate"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Call in async mode to retrieve later with timeout",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 202\", function () {\r",
+											"    pm.response.to.have.status(202);\r",
+											"});\r",
+											"\r",
+											"pm.globals.set('CUSTOM_API_ASYNC_ID',responseBody.trim());"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"stringParam\": \"test\",\n    \"longParam\": 7.8,\n    \"booleanObjectParam\": false,\n    \"longObjectParam\":66542\n}"
+								},
+								"url": {
+									"raw": "{{opencell.url}}/custom/value-endpoint/4/test/5",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"custom",
+										"value-endpoint",
+										"4",
+										"test",
+										"5"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get async call results - with timeout for retrieval - will timeout",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 500\", function () {\r",
+											"    pm.response.to.have.status(500);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"\", function () {\r",
+											"    pm.expect(pm.response.json().error).to.eql(\"Timeout while waiting for asynchronous result\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Keep-Data",
+										"value": "true",
+										"type": "text"
+									},
+									{
+										"key": "Delay-Max-Value",
+										"value": "20",
+										"type": "text"
+									},
+									{
+										"key": "Delay-Unit",
+										"value": "SECONDS",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{opencell.url}}/custom/{{CUSTOM_API_ASYNC_ID}}",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"custom",
+										"{{CUSTOM_API_ASYNC_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get async call results - with timeout for retrieval Again - this time it will pass",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"\", function () {\r",
+											"    pm.expect(pm.response.json()).to.eql(\"Returning from getter: 66542 long value, 0 map value, 0 list value\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Keep-Data",
+										"value": "true",
+										"type": "text"
+									},
+									{
+										"key": "Delay-Max-Value",
+										"value": "20",
+										"type": "text"
+									},
+									{
+										"key": "Delay-Unit",
+										"value": "SECONDS",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{opencell.url}}/custom/{{CUSTOM_API_ASYNC_ID}}",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"custom",
+										"{{CUSTOM_API_ASYNC_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Call in async mode to retrieve later with Wait",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 202\", function () {\r",
+											"    pm.response.to.have.status(202);\r",
+											"});\r",
+											"\r",
+											"pm.globals.set('CUSTOM_API_ASYNC_ID',responseBody.trim());"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"stringParam\": \"test\",\n    \"longParam\": 7.8,\n    \"booleanObjectParam\": false,\n    \"longObjectParam\":66542\n}"
+								},
+								"url": {
+									"raw": "{{opencell.url}}/custom/value-endpoint/4/test/5",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"custom",
+										"value-endpoint",
+										"4",
+										"test",
+										"5"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get async call results - with Wait",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"\", function () {\r",
+											"    pm.expect(pm.response.json()).to.eql(\"Returning from getter: 66542 long value, 0 map value, 0 list value\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Keep-Data",
+										"value": "true",
+										"type": "text"
+									},
+									{
+										"key": "Wait-For-Finish",
+										"value": "true",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{opencell.url}}/custom/{{CUSTOM_API_ASYNC_ID}}",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"custom",
+										"{{CUSTOM_API_ASYNC_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Call in async mode with Wait  - will execute as synchronous",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"\", function () {\r",
+											"    pm.expect(pm.response.json()).to.eql(\"Returning from getter: 66542 long value, 0 map value, 0 list value\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Wait-For-Finish",
+										"value": "true",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"stringParam\": \"test\",\n    \"longParam\": 7.8,\n    \"booleanObjectParam\": false,\n    \"longObjectParam\":66542\n}"
+								},
+								"url": {
+									"raw": "{{opencell.url}}/custom/value-endpoint/4/test/5",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"custom",
+										"value-endpoint",
+										"4",
+										"test",
+										"5"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Call in async mode with Wait and timeout parameter - will execute as synchronous, but will timeout",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 500\", function () {\r",
+											"    pm.response.to.have.status(500);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"\", function () {\r",
+											"    pm.expect(pm.response.json().message).to.eql(\"Timedout while waiting for an endpoint execution result\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Delay-Max-Value",
+										"value": "20",
+										"type": "text"
+									},
+									{
+										"key": "Delay-Unit",
+										"value": "SECONDS",
+										"type": "text"
+									},
+									{
+										"key": "Wait-For-Finish",
+										"value": "true",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"stringParam\": \"test\",\n    \"longParam\": 7.8,\n    \"booleanObjectParam\": false,\n    \"longObjectParam\":66542\n}"
+								},
+								"url": {
+									"raw": "{{opencell.url}}/custom/value-endpoint/4/test/5",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"custom",
+										"value-endpoint",
+										"4",
+										"test",
+										"5"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Endpoint",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 204\", function () {\r",
+											"    pm.response.to.have.status(204);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{opencell.url}}/customization/endpoint/value-endpoint",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"customization",
+										"endpoint",
+										"value-endpoint"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Script",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{opencell.url}}/scriptInstance/org.meveo.script.ScriptEndpoint",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"scriptInstance",
+										"org.meveo.script.ScriptEndpoint"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
 		}
 	],
 	"auth": {
@@ -35110,7 +37355,10 @@
 					"    console.log(\"Jumping to \" + pm.info.requestName);",
 					"    postman.setNextRequest(pm.info.requestName);",
 					"} else {",
-					"    tests[\"is.success\"] = (pm.response.code == 200 || pm.response.code == 204 || pm.response.code == 201);",
+					"    pm.test(\"is.success\", function () {",
+					"        (pm.response.code == 200 || pm.response.code == 204 || pm.response.code == 201);",
+					"    });    ",
+					" ",
 					"}",
 					""
 				]

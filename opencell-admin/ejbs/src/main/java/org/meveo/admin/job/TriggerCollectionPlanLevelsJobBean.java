@@ -155,7 +155,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
             CustomerBalance customerBalance = pDunningSettings.getCustomerBalance();
             CustomerAccount customerAccount = processedCollectionPlan.getCustomerAccount();
             List<String> linkedOccTemplates = getOccTemplateCodesToUse(customerBalance);
-            BigDecimal balance = customerAccountService.getCustomerAccountBalance(customerAccount, linkedOccTemplates, customerBalance);
+            BigDecimal balance = customerAccountService.getCustomerAccountBalanceForUnpaidInvoices(customerAccount, linkedOccTemplates, customerBalance);
 
             if (processedCollectionPlan.getRelatedPolicy().getMinBalanceTrigger() != null &&
                     balance.compareTo(BigDecimal.valueOf(processedCollectionPlan.getRelatedPolicy().getMinBalanceTrigger())) < 0) {
@@ -339,7 +339,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
 
         CustomerBalance customerBalance = dunningSettings.getCustomerBalance();
         List<String> linkedOccTemplates = getOccTemplateCodesToUse(customerBalance);
-        BigDecimal balance = customerAccountService.getCustomerAccountBalance(collectionPlan.getCustomerAccount(), linkedOccTemplates, customerBalance);
+        BigDecimal balance = customerAccountService.getCustomerAccountBalanceForUnpaidInvoices(collectionPlan.getCustomerAccount(), linkedOccTemplates, customerBalance);
 
         // Check if collection plan is active and invoice is paid
         if(collectionPlan.getStatus().getStatus() == ACTIVE && balance.compareTo(BigDecimal.valueOf(collectionPlan.getRelatedPolicy().getMinBalanceTrigger())) < 0) {

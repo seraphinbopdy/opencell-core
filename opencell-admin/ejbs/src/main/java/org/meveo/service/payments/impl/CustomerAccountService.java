@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -855,20 +856,31 @@ public class CustomerAccountService extends AccountService<CustomerAccount> {
      * @param linkedOccTemplates The linked OCC templates.
      * @return The balance of the customer account.
      */
-    public BigDecimal getCustomerAccountBalance(CustomerAccount customerAccount, List<String> linkedOccTemplates, CustomerBalance customerBalance) {
+    public BigDecimal getCustomerAccountBalanceForUnpaidNonTriggeredCPInvoices(CustomerAccount customerAccount, List<String> linkedOccTemplates, CustomerBalance customerBalance) {
+        return getCustomerAccountBalanceForFilteredAO(customerAccount, linkedOccTemplates, customerBalance, accountOperations ->
+            accountOperations.stream()
+                    .filter(ao -> ao.getInvoices().stream().noneMatch(Invoice::isDunningCollectionPlanTriggered))
+                    .filter(ao -> ao.getInvoices().stream().anyMatch(invoice -> invoice.getPaymentStatus() == InvoicePaymentStatusEnum.UNPAID))
+                    .collect(Collectors.toList())
+        );
+    }
+
+    public BigDecimal getCustomerAccountBalanceForUnpaidInvoices(CustomerAccount customerAccount, List<String> linkedOccTemplates, CustomerBalance customerBalance) {
+        return getCustomerAccountBalanceForFilteredAO(customerAccount, linkedOccTemplates, customerBalance, accountOperations ->
+                accountOperations.stream()
+                        .filter(ao -> ao.getInvoices().stream().anyMatch(invoice -> invoice.getPaymentStatus() == InvoicePaymentStatusEnum.UNPAID))
+                        .collect(Collectors.toList())
+        );
+    }
+
+
+    public BigDecimal getCustomerAccountBalanceForFilteredAO(CustomerAccount customerAccount, List<String> linkedOccTemplates, CustomerBalance customerBalance, Function<List<AccountOperation>, List<AccountOperation>> accountOperationFilter){
         List<AccountOperation> accountOperations = accountOperationService.getAccountOperations(customerAccount.getId(),
                 null,
                 linkedOccTemplates,
                 null);
-
-        accountOperations = accountOperations.stream()
-                .filter(ao -> ao.getInvoices().stream().noneMatch(Invoice::isDunningCollectionPlanTriggered))
-                .filter(ao -> ao.getInvoices().stream().anyMatch(invoice -> invoice.getPaymentStatus() == InvoicePaymentStatusEnum.UNPAID))
-                .collect(Collectors.toList());
-
         // Filter account operations based on customer balance
-        List<AccountOperationDto> result = customerBalanceService.filterAccountOperations(accountOperations, customerBalance);
-
+        List<AccountOperationDto> result = customerBalanceService.filterAccountOperations(accountOperationFilter.apply(accountOperations), customerBalance);
         // Calculate totals for credit, debit, and balance
         BigDecimal credit = result.stream()
                 .filter(aod -> aod.getTransactionCategory().equals(OperationCategoryEnum.CREDIT))

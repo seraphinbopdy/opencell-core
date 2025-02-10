@@ -772,9 +772,20 @@ public class Invoice extends AuditableCFEntity implements ISearchable {
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "billing_invoices_purchase_orders", joinColumns = @JoinColumn(name = "invoice_id"), inverseJoinColumns = @JoinColumn(name = "purchase_order_id"))
     private Set<PurchaseOrder> purchaseOrders = new HashSet<>();
+    
+    @Transient
+    private String invoiceKey;
 
-    public Invoice() {
-    }
+    public String getInvoiceKey() {
+		return invoiceKey;
+	}
+
+	public void setInvoiceKey(String invoiceKey) {
+		this.invoiceKey = invoiceKey;
+	}
+
+	public Invoice() {
+	}
 
     public Invoice(Invoice copy) {
         this.billingAccount = copy.billingAccount;

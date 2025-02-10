@@ -141,8 +141,6 @@ public class MediationJobBeanV2 extends IteratorBasedScopedJobBean<Long> {
                 if (!StringUtils.isBlank(cdr.getRejectReason())) {
                     failedCDR(jobExecutionResult, cdr, cdr.getStatus());
                 }
-
-                jobExecutionResult.registerSucces();
             }
 
         } catch (Exception e) {
@@ -165,6 +163,7 @@ public class MediationJobBeanV2 extends IteratorBasedScopedJobBean<Long> {
 
 
             jobExecutionResult.registerError("id=" + cdr.getId() + ": " + errorReason);
+            jobExecutionResult.unRegisterSucces();
             cdr.setStatus(CDRStatusEnum.ERROR);
             cdr.setRejectReason(e.getMessage());
 

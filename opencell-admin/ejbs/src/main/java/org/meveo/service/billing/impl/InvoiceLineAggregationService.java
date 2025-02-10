@@ -209,7 +209,7 @@ public class InvoiceLineAggregationService implements Serializable {
 
         String usageDateAggregationFunction = getUsageDateAggregationFunction(aggregationConfiguration.getDateAggregationOption(), "usageDate", "a");
         String unitAmount = appProvider.isEntreprise() ? "unitAmountWithoutTax" : "unitAmountWithTax";
-        String unitAmountAggregationFunction = aggregationConfiguration.isAggregationPerUnitAmount() ? "SUM(a.unitAmountWithoutTax)" : unitAmount;
+        String unitAmountAggregationFunction = aggregationConfiguration.isAggregationPerUnitAmount() ? "SUM(a."+unitAmount+")/count(1)" : unitAmount;
 
         List<String> fieldToFetch;
         if (aggregationConfiguration.isDisableAggregation()) {

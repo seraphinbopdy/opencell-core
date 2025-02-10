@@ -141,12 +141,18 @@ import jakarta.validation.constraints.Size;
 	    @NamedNativeQuery(name = "Invoice.linkWithSubscriptionsByID", query = "INSERT INTO billing_invoices_subscriptions (invoice_id, subscription_id) "
 	            + "	SELECT DISTINCT il.invoice_id, sub.subscription_id FROM billing_invoice_line il  " 
 	            + " INNER JOIN billing_invoice_lines_subscriptions sub ON sub.invoice_line_id = il.id "
-	            + "	WHERE il.invoice_id=:invoiceId"),
+                + "	WHERE il.invoice_id=:invoiceId AND NOT EXISTS (" +
+                "    SELECT 1 FROM billing_invoices_subscriptions bis" +
+                "    WHERE bis.invoice_id = il.invoice_id" +
+                "    AND bis.subscription_id = sub.subscription_id)"),
 	    @NamedNativeQuery(name = "Invoice.linkWithPurchaseOrdersByID", query = "INSERT INTO billing_invoices_purchase_orders (invoice_id, purchase_order_id) "
 	            + "	SELECT DISTINCT il.invoice_id, po_sub.purchase_order_id FROM billing_invoice_line il "
 	            + " INNER JOIN billing_invoice_lines_subscriptions sub ON sub.invoice_line_id = il.id "
 	            + " INNER JOIN billing_subscriptions_purchase_orders po_sub ON po_sub.subscription_id = sub.subscription_id "
-	            + "	WHERE il.invoice_id=:invoiceId"),
+                + "	WHERE il.invoice_id=:invoiceId AND NOT EXISTS ("
+                + "    SELECT 1 FROM billing_invoices_purchase_orders po"
+                + "    WHERE po.invoice_id = il.invoice_id"
+                + "    AND po.purchase_order_id = po_sub.purchase_order_id)"),
 	    @NamedNativeQuery(name = "Invoice.linkWithSubscriptionsByBR", query = "INSERT INTO billing_invoices_subscriptions (invoice_id, subscription_id) "
 	            + "	SELECT DISTINCT il.invoice_id, rt.subscription_id FROM billing_rated_transaction rt " + "	INNER JOIN billing_invoice_line il ON rt.invoice_line_id = il.id "
 	            + "	WHERE il.status = 'BILLED' and il.billing_run_id=:billingRunId")

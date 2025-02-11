@@ -271,8 +271,8 @@ public class PaymentService extends PersistenceService<Payment> {
      * @return id Refund
 .
      */
-    public Long refundByMandatSD(CustomerAccount customerAccount, long ctsAmount, List<Long> aoIdsToPay, PaymentGateway paymentGateway) {
-        return doPaymentSD(customerAccount, ctsAmount, aoIdsToPay, paymentGateway, null, null, null, null, null, PaymentMethodEnum.DIRECTDEBIT);
+    public Long refundByMandatSD(CustomerAccount customerAccount, long ctsAmount, List<Long> aoIdsToPay, PaymentGateway paymentGateway, Date dueDate) {
+        return doPaymentSD(customerAccount, ctsAmount, aoIdsToPay, paymentGateway, null, null, null, null, null, PaymentMethodEnum.DIRECTDEBIT, dueDate);
     }
 
     /**
@@ -332,9 +332,9 @@ public class PaymentService extends PersistenceService<Payment> {
 .
      */
     public Long refundByCardSD(CustomerAccount customerAccount, Long ctsAmount, String cardNumber, String ownerName, String cvv, String expiryDate,
-            CreditCardTypeEnum cardType, List<Long> aoToRefund, PaymentGateway paymentGateway)
+            CreditCardTypeEnum cardType, List<Long> aoToRefund, PaymentGateway paymentGateway, Date dueDate)
             throws BusinessException, NoAllOperationUnmatchedException, UnbalanceAmountException {
-        return doPaymentSD(customerAccount, ctsAmount, aoToRefund, paymentGateway, cardNumber, ownerName, cvv, expiryDate, cardType, PaymentMethodEnum.CARD);
+        return doPaymentSD(customerAccount, ctsAmount, aoToRefund, paymentGateway, cardNumber, ownerName, cvv, expiryDate, cardType, PaymentMethodEnum.CARD, dueDate);
     }
 
     /**
@@ -666,7 +666,7 @@ public class PaymentService extends PersistenceService<Payment> {
      * @return id Refund
      */
     public Long doPaymentSD(CustomerAccount customerAccount, Long ctsAmount, List<Long> aoIdsToPay, PaymentGateway paymentGateway,
-            String cardNumber, String ownerName, String cvv, String expiryDate, CreditCardTypeEnum cardType, PaymentMethodEnum paymentMethodType)
+            String cardNumber, String ownerName, String cvv, String expiryDate, CreditCardTypeEnum cardType, PaymentMethodEnum paymentMethodType, Date dueDate)
             {        
         
         PaymentResponseDto doPaymentResponseDto = new PaymentResponseDto();
@@ -715,6 +715,7 @@ public class PaymentService extends PersistenceService<Payment> {
         }
         Refund refund = new Refund();
         try {
+            refund.setDueDate(dueDate);
             aoPaymentId = refundService.createSDRefundAO(customerAccount, ctsAmount, doPaymentResponseDto, paymentMethodType, aoIdsToPay, refund, paymentGateway);
             doPaymentResponseDto.setAoCreated(true);
         } catch (Exception e) {

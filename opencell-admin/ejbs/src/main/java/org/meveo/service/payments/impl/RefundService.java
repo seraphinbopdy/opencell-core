@@ -123,6 +123,8 @@ public class RefundService extends PersistenceService<Refund> {
         refund.setAmountWithoutTax(sumWithoutTax);
         refund.setOrderNumber(orderNums);
         refund.setPaymentGateway(paymentGateway);
+        refund.setAccountingDate(new Date());
+        refund.setCollectionDate(new Date());
         create(refund);
     }
 

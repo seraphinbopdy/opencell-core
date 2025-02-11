@@ -228,7 +228,7 @@ public class SecurityDepositService extends BusinessService<SecurityDeposit> {
     private Refund createRefund(SecurityDeposit securityDepositToUpdate, Invoice adjInvoice) {
         securityDepositToUpdate = retrieveIfNotManaged(securityDepositToUpdate);
         long amountToPay = securityDepositToUpdate.getCurrentBalance().multiply(new BigDecimal(100)).longValue();
-        List<Long> accountOperationsToPayIds = new ArrayList<Long>();
+        List<Long> accountOperationsToPayIds = new ArrayList<>();
         CustomerAccount customerAccount = securityDepositToUpdate.getCustomerAccount();
 
         if (customerAccount == null) {
@@ -258,7 +258,7 @@ public class SecurityDepositService extends BusinessService<SecurityDeposit> {
                 throw new PaymentException(PaymentErrorEnum.NO_PAY_GATEWAY_FOR_CA, "No payment gateway for customerAccount:" + customerAccount.getCode());
             }
 
-            refundId = doPayment(amountToPay, List.of(ao.getId()), customerAccount, preferredPaymentMethod, refundId, paymentGateway);
+            refundId = doPayment(amountToPay, List.of(ao.getId()), customerAccount, preferredPaymentMethod, refundId, paymentGateway, adjInvoice.getDueDate());
             if (refundId == null) {
                 return null;
             } else {
@@ -275,7 +275,7 @@ public class SecurityDepositService extends BusinessService<SecurityDeposit> {
     }
 
     private Long doPayment(long amountToPay, List<Long> accountOperationsToPayIds, CustomerAccount customerAccount, PaymentMethod preferredPaymentMethod, Long refundId,
-                           PaymentGateway paymentGateway) {
+                           PaymentGateway paymentGateway, Date dueDate) {
         if (paymentGateway != null && (preferredPaymentMethod.getPaymentType().equals(DIRECTDEBIT) || preferredPaymentMethod.getPaymentType().equals(CARD))) {
             try {
                 if (!accountOperationsToPayIds.isEmpty()) {
@@ -288,9 +288,9 @@ public class SecurityDepositService extends BusinessService<SecurityDeposit> {
                         refundId = paymentService.refundByCardSD(customerAccount, amountToPay, paymentMethod.getCardNumber(),
                                 paymentMethod.getCardNumber(), paymentMethod.getHiddenCardNumber(),
                                 paymentMethod.getExpirationMonthAndYear(), paymentMethod.getCardType(),
-                                accountOperationsToPayIds, paymentGateway);
+                                accountOperationsToPayIds, paymentGateway, dueDate);
                     } else {
-                        refundId = paymentService.refundByMandatSD(customerAccount, amountToPay, accountOperationsToPayIds, paymentGateway);
+                        refundId = paymentService.refundByMandatSD(customerAccount, amountToPay, accountOperationsToPayIds, paymentGateway, dueDate);
                     }
                 }
             } catch (Exception exception) {

@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.meveo.admin.exception.BusinessException;
+import org.meveo.admin.job.utils.CustomFieldTemplateUtils;
 import org.meveo.model.crm.CustomFieldTemplate;
 import org.meveo.model.crm.custom.CustomFieldMapKeyEnum;
 import org.meveo.model.crm.custom.CustomFieldStorageTypeEnum;
@@ -107,6 +108,13 @@ public class ScriptingJob extends Job {
         transactionTypeCF.setValueRequired(true);
         transactionTypeCF.setGuiPosition("tab:Configuration:0;field:2");
         result.put("ScriptingJob_TransactionType", transactionTypeCF);
+
+        result.put("pathFile",
+                CustomFieldTemplateUtils.buildCF("pathFile", "File path", CustomFieldTypeEnum.STRING,
+                        "tab:Configuration:0;field:3", null, false, CustomFieldStorageTypeEnum.SINGLE, null, "JobInstance_ScriptingJob", 256L));
+
+        result.put("mapping", CustomFieldTemplateUtils.buildCF("mapping", "Mapping", CustomFieldTypeEnum.STRING,
+                "tab:Configuration:0;field:4", null, false, CustomFieldStorageTypeEnum.MAP, null, "JobInstance_ScriptingJob", null));
 
         return result;
     }

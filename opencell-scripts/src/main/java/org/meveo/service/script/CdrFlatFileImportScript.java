@@ -16,16 +16,23 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
+import jakarta.inject.Inject;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.commons.utils.ParamBeanFactory;
+import org.meveo.model.crm.EntityReferenceWrapper;
 import org.meveo.model.jobs.JobExecutionResultImpl;
+import org.meveo.model.jobs.JobInstance;
 import org.meveo.model.rating.CDR;
+import org.meveo.service.crm.impl.CustomFieldInstanceService;
 import org.meveo.service.medina.impl.CDRService;
 import org.primefaces.shaded.commons.io.FilenameUtils;
 
 public class CdrFlatFileImportScript extends Script {
+
+    @Inject
+    protected CustomFieldInstanceService customFieldInstanceService;
 
     private static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd'T'HH:mm:ssXXX";
     private final transient ParamBeanFactory paramBeanFactory = (ParamBeanFactory) getServiceInterface(ParamBeanFactory.class.getSimpleName());
@@ -39,8 +46,10 @@ public class CdrFlatFileImportScript extends Script {
     public void execute(Map<String, Object> contextMethod) throws BusinessException {
         DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_PATTERN);
         JobExecutionResultImpl jobExecutionResult = (JobExecutionResultImpl) contextMethod.get("JobExecutionResult");
-        Map<String, String> context = (Map<String, String>) jobExecutionResult.getJobInstance().getCfValues().getValues().get("mapping");
-        String pathFile = (String) jobExecutionResult.getJobInstance().getCfValues().getValues().get("pathFile");
+        JobInstance jobInstance = jobExecutionResult.getJobInstance();
+
+        Map<String, String> mapping = ((Map<String, String>) getParamOrCFValue(jobInstance, "mapping"));
+        String pathFile = ((String) getParamOrCFValue(jobInstance, "pathFile"));
 
         String rootPathFile = getProviderRootDir() + File.separator + pathFile;
         File dir = new File(rootPathFile);
@@ -78,12 +87,12 @@ public class CdrFlatFileImportScript extends Script {
                     try {
                         CDR cdr = new CDR();
                         String[] body = line.split(splitBy);
-                        boolean reject = processLine(context, header, body, dateFormat, cdr, bw, line);
+                        boolean reject = processLine(mapping, header, body, dateFormat, cdr, bw, line);
                         if (!reject) {
                             if (cdr.getEventDate() != null && cdr.getQuantity() != null && cdr.getAccessCode() != null && cdr.getParameter1() != null) {
                                 cdrService.create(cdr);
                             } else {
-                                validateCdr(line, cdr, context, bw);
+                                validateCdr(line, cdr, mapping, bw);
                             }
                         }
                     } catch (Exception e) {
@@ -189,4 +198,18 @@ public class CdrFlatFileImportScript extends Script {
         return paramBeanFactory.getDefaultChrootDir();
     }
 
+    /**
+     * Gets the parameter CF value if found, otherwise return CF value from job definition
+     *
+     * @param jobInstance the job instance
+     * @param cfCode Custom field code
+     * @return Parameter or custom field value
+     */
+    private Object getParamOrCFValue(JobInstance jobInstance, String cfCode) {
+        Object value = jobInstance.getParamValue(cfCode);
+        if (value == null) {
+            return customFieldInstanceService.getCFValue(jobInstance, cfCode);
+        }
+        return value;
+    }
 }

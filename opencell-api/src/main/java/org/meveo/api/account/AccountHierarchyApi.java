@@ -1133,7 +1133,7 @@ public class AccountHierarchyApi extends BaseApi {
 
 	                                                processSubscriptionOnTransitionStatus(subscriptionDto);
                                                     if(subscriptionDto.getAccesses() != null) {
-                                                        createAccess(subscriptionDto);
+                                                        createAccess(subscriptionDto, postData.getOverwriteAccessPoints());
                                                     }
                                                 }
                                             }
@@ -1148,8 +1148,18 @@ public class AccountHierarchyApi extends BaseApi {
         }
     }
 
-    private void createAccess(SubscriptionDto subscriptionDto) {
+    private void createAccess(SubscriptionDto subscriptionDto, Boolean overwriteAccessPoints) {
         if (subscriptionDto.getAccesses() != null) {
+            if (overwriteAccessPoints == Boolean.TRUE) {
+                Subscription subscription = subscriptionService.findByCode(subscriptionDto.getCode());
+                if (subscription == null) {
+                    throw new EntityDoesNotExistsException(Subscription.class, subscriptionDto.getCode());
+                }
+                subscription.getAccessPoints().clear();
+                subscriptionService.update(subscription);
+                //Flush allows to insert the same deleted access point in case it is provided again in the new list of access points
+                subscriptionService.getEntityManager().flush();
+            }
             for (AccessDto accessDto : subscriptionDto.getAccesses().getAccess()) {
                 if (StringUtils.isBlank(accessDto.getCode())) {
                     log.warn("access code is null={}", accessDto);

@@ -145,7 +145,7 @@ public class DunningCollectionPlanJobBean extends BaseJobBean {
         List<String> linkedOccTemplates = getOccTemplateCodesToUse(customerBalance);
         Map<CustomerAccount, BigDecimal> customerAccountsBalance = new HashMap<>();
         customerAccounts.forEach(customerAccount -> {
-            BigDecimal balance = customerAccountService.getCustomerAccountBalance(customerAccount, linkedOccTemplates, customerBalance);
+            BigDecimal balance = customerAccountService.getCustomerAccountBalanceForUnpaidNonTriggeredCPInvoices(customerAccount, linkedOccTemplates, customerBalance);
             customerAccountsBalance.put(customerAccount, balance);
         });
         Map<DunningPolicy, Map<CustomerAccount, BigDecimal>> eligibleCustomerAccountsByPolicy = getEligibleCustomerAccount(sortedPolicies, customerAccountsBalance);

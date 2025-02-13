@@ -1132,9 +1132,7 @@ public class AccountHierarchyApi extends BaseApi {
                                                     }
 
 	                                                processSubscriptionOnTransitionStatus(subscriptionDto);
-                                                    if(subscriptionDto.getAccesses() != null) {
-                                                        createAccess(subscriptionDto, postData.getOverwriteAccessPoints());
-                                                    }
+                                                    createAccess(subscriptionDto, postData.getOverwriteAccessPoints());
                                                 }
                                             }
                                         }
@@ -1149,7 +1147,7 @@ public class AccountHierarchyApi extends BaseApi {
     }
 
     private void createAccess(SubscriptionDto subscriptionDto, Boolean overwriteAccessPoints) {
-        if (subscriptionDto.getAccesses() != null) {
+        if (subscriptionDto.getAccesses() != null && subscriptionDto.getAccesses().getAccess() != null && !subscriptionDto.getAccesses().getAccess().isEmpty()) {
             if (overwriteAccessPoints == Boolean.TRUE) {
                 Subscription subscription = subscriptionService.findByCode(subscriptionDto.getCode());
                 if (subscription == null) {

@@ -221,7 +221,7 @@ public class Subscription extends BusinessCFEntity implements IInvoicingMinimumA
     /**
      * Child access points
      */
-    @OneToMany(mappedBy = "subscription", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "subscription", fetch = FetchType.LAZY)
     @OrderBy("id")
     private List<Access> accessPoints = new ArrayList<>();
 

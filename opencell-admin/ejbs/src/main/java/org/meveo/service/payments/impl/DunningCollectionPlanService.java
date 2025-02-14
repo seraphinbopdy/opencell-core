@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.hibernate.proxy.HibernateProxy;
@@ -794,9 +795,11 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
                 null,
                 linkedOccTemplates,
                 null);
+        Predicate<Invoice> unpaidInvoicePredicate = invoice -> List.of(InvoicePaymentStatusEnum.UNPAID, InvoicePaymentStatusEnum.PPAID).contains(invoice.getPaymentStatus());
+
         accountOperations = accountOperations.stream()
                 .filter(ao -> ao.getInvoices().stream().noneMatch(Invoice::isDunningCollectionPlanTriggered))
-                .filter(ao -> ao.getInvoices().stream().anyMatch(invoice -> invoice.getPaymentStatus() == InvoicePaymentStatusEnum.UNPAID))
+                .filter(ao -> ao.getInvoices().stream().anyMatch(unpaidInvoicePredicate))
                 .collect(Collectors.toList());
 
         // Filter account operations based on customer balance

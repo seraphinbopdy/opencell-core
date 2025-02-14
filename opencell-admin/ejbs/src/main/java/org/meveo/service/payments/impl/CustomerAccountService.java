@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -86,6 +87,7 @@ import jakarta.persistence.TypedQuery;
 @Stateless
 public class CustomerAccountService extends AccountService<CustomerAccount> {
 
+    private final Predicate<Invoice> unpaidInvoicePredicate = invoice -> List.of(InvoicePaymentStatusEnum.UNPAID, InvoicePaymentStatusEnum.PPAID).contains(invoice.getPaymentStatus());
     /** The credit category service. */
     @Inject
     private CreditCategoryService creditCategoryService;
@@ -860,7 +862,7 @@ public class CustomerAccountService extends AccountService<CustomerAccount> {
         return getCustomerAccountBalanceForFilteredAO(customerAccount, linkedOccTemplates, customerBalance, accountOperations ->
             accountOperations.stream()
                     .filter(ao -> ao.getInvoices().stream().noneMatch(Invoice::isDunningCollectionPlanTriggered))
-                    .filter(ao -> ao.getInvoices().stream().anyMatch(invoice -> invoice.getPaymentStatus() == InvoicePaymentStatusEnum.UNPAID))
+                    .filter(ao -> ao.getInvoices().stream().anyMatch(unpaidInvoicePredicate))
                     .collect(Collectors.toList())
         );
     }
@@ -868,7 +870,8 @@ public class CustomerAccountService extends AccountService<CustomerAccount> {
     public BigDecimal getCustomerAccountBalanceForUnpaidInvoices(CustomerAccount customerAccount, List<String> linkedOccTemplates, CustomerBalance customerBalance) {
         return getCustomerAccountBalanceForFilteredAO(customerAccount, linkedOccTemplates, customerBalance, accountOperations ->
                 accountOperations.stream()
-                        .filter(ao -> ao.getInvoices().stream().anyMatch(invoice -> invoice.getPaymentStatus() == InvoicePaymentStatusEnum.UNPAID))
+                        .filter(ao -> ao.getInvoices().stream().anyMatch(Invoice::isDunningCollectionPlanTriggered))
+                        .filter(ao -> ao.getInvoices().stream().anyMatch(unpaidInvoicePredicate))
                         .collect(Collectors.toList())
         );
     }

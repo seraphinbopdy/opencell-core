@@ -25,6 +25,7 @@ import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.util.ResourceBundle;
+import org.meveo.api.dto.ActionStatusEnum;
 import org.meveo.api.exception.ActionForbiddenException;
 import org.meveo.api.exception.BusinessApiException;
 import org.meveo.api.exception.EntityAlreadyExistsException;
@@ -1002,30 +1003,25 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
                 fields.add("actionMode");
                 dunningActionInstanceToUpdate.setActionMode(dunningActionInstanceInput.getMode());
             }
-            if (dunningActionInstanceInput.getActionStatus() != null) {
-                if (!Objects.equals(dunningActionInstanceInput.getActionStatus(), dunningActionInstanceToUpdate.getActionStatus())) {
+            DunningActionInstanceStatusEnum inputActionStatus = dunningActionInstanceInput.getActionStatus();
+            if (inputActionStatus != null) {
+                if (!Objects.equals(inputActionStatus, dunningActionInstanceToUpdate.getActionStatus())) {
                     fields.add("actionStatus");
                 }
-                dunningActionInstanceToUpdate.setActionStatus(dunningActionInstanceInput.getActionStatus());
+                dunningActionInstanceToUpdate.setActionStatus(inputActionStatus);
                 updateDunningActionInstanceExecutionDate(dunningActionInstanceInput, dunningActionInstanceToUpdate);
-
-                // 2- If the DunningActionInstance status is changed to DONE:
-                if (dunningActionInstanceInput.getActionStatus() == DunningActionInstanceStatusEnum.DONE) {
-
+                // 2- If the DunningActionInstance status is changed to DONE or Ignored:
+                List<DunningActionInstanceStatusEnum> DONE_IGNORED_ACTION = List.of(DunningActionInstanceStatusEnum.DONE, DunningActionInstanceStatusEnum.IGNORED);
+                if (DONE_IGNORED_ACTION.contains(inputActionStatus)) {
                     List<DunningActionInstance> actions = dunningLevelInstance.getActions();
-                    actions.removeIf(a -> a.getId().equals(dunningActionInstanceToUpdate.getId()));
-
-                    // check if all actions of the dunningLevelInstance are DONE:
-                    boolean remainingActionsAreDone = true;
-                    for (DunningActionInstance action : actions) {
-                        if (action.getActionStatus() != DunningActionInstanceStatusEnum.DONE) {
-                            remainingActionsAreDone = false;
-                            break;
-                        }
-                    }
-                    if (remainingActionsAreDone) {
+                    // check if all actions of the dunningLevelInstance are DONE Or IGNORED:
+                    boolean remainingActionsAreDoneOrIgnored = actions.stream().filter(a -> a.getId().equals(dunningActionInstanceToUpdate.getId()))
+                            .noneMatch(action -> DunningActionInstanceStatusEnum.TO_BE_DONE.equals(action.getActionStatus()));
+                    if (remainingActionsAreDoneOrIgnored) {
                         // Update the dunningLevelInstance status also to
-                        dunningLevelInstance.setLevelStatus(DunningLevelInstanceStatusEnum.DONE);
+                        DunningLevelInstanceStatusEnum newLevelStatus = actions.stream().filter(a -> a.getId().equals(dunningActionInstanceToUpdate.getId()))
+                                .anyMatch(action -> DunningActionInstanceStatusEnum.DONE.equals(action.getActionStatus())) ? DunningLevelInstanceStatusEnum.DONE : DunningLevelInstanceStatusEnum.IGNORED;
+                        dunningLevelInstance.setLevelStatus(newLevelStatus);
                         // Update DunningCollectionPlan : currentDunningLevelSequence / lastAction / lastActionDate / nextAction /nextActionDate
                         updateCollectionPlanActions(dunningLevelInstance);
                     } else {

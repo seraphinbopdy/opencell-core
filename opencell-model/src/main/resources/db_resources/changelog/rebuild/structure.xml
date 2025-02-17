@@ -9904,7 +9904,7 @@
             <column name="price_version_type" type="varchar(255)" defaultValue="FIXED">
                 <constraints nullable="false"/>
             </column>
-
+            <column name="trading_prices_el" type="${type.json}" />
         </createTable>
         <addUniqueConstraint columnNames="ppm_id,current_version" constraintName="cpq_price_plan_version_UNIC" tableName="cpq_price_plan_version" />
     </changeSet>
@@ -20910,6 +20910,7 @@
     <changeSet id="#INTRD-26593_20241129" author="TarikFA." />
     <changeSet id="#INTRD-29012_20250131" author="TarikFA." />
     <changeSet id="#INTRD-28233_activate_sub" author="a.rouaguebe" />
+    <changeSet id="INTRD-29405_20240217" author="zbariki" />
     
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

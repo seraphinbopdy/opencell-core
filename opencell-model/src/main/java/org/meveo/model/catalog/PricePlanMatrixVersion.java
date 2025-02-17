@@ -1,14 +1,18 @@
 package org.meveo.model.catalog;
 
+import static org.hibernate.type.SqlTypes.JSON;
+
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.model.AuditableEntity;
@@ -140,6 +144,10 @@ public class PricePlanMatrixVersion extends AuditableEntity {
     @Column(name = "price_version_type")
     @NotNull
     private PriceVersionTypeEnum priceVersionType = PriceVersionTypeEnum.FIXED;
+
+    @JdbcTypeCode(JSON)
+    @Column(name = "trading_prices_el", columnDefinition = "jsonb")
+    private Map<String, String> tradingPricesEL;
 
     public PricePlanMatrixVersion() {
     }
@@ -349,4 +357,11 @@ public class PricePlanMatrixVersion extends AuditableEntity {
                 && Objects.equals(statusChangeLog, other.statusChangeLog) && Objects.equals(statusDate, other.statusDate) && Objects.equals(validity, other.validity);
     }
 
+    public Map<String, String> getTradingPricesEL() {
+        return tradingPricesEL;
+    }
+
+    public void setTradingPricesEL(Map<String, String> tradingPricesEL) {
+        this.tradingPricesEL = tradingPricesEL;
+    }
 }

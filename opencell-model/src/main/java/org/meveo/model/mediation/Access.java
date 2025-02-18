@@ -61,6 +61,7 @@ import jakarta.validation.constraints.Size;
         @NamedQuery(name = "Access.getAccessesByUserId", query = "SELECT a from Access a where a.disabled=false and a.accessUserId=:accessUserId", hints = {
                 @QueryHint(name = "org.hibernate.cacheable", value = "true") }),
         @NamedQuery(name = "Access.getCountByParent", query = "select count(*) from Access a where a.subscription=:parent"),
+        @NamedQuery(name = "Access.deleteBySubscriptionId", query = "delete from Access where subscription.id=:subscriptionId") ,
         @NamedQuery(name = "Access.getAccessesByCodeSubscriptionAndCode", query = "SELECT a from Access a where a.disabled=false and a.accessUserId=:code and a.subscription.code=:subscriptionCode") })
 public class Access extends EnableCFEntity {
 

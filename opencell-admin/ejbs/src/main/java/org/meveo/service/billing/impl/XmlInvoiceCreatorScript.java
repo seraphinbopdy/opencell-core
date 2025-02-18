@@ -1954,7 +1954,7 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
         }
         customerTag.setAttribute("brand", customerBrand != null ? customerBrand.getCode() : "");
         customerTag.setAttribute("category", customerCategory != null ? customerCategory.getCode() : "");
-//        customerTag.setAttribute("vatNo", getDefaultIfNull(customer.getVatNo(), ""));
+        customerTag.setAttribute("vatNo", getDefaultIfNull(customer.getVatNo(), ""));
         customerTag.setAttribute("registrationNo", getDefaultIfNull(getRegisterNumberJoining(customer.getRegistrationNumbers()), ""));
         customerTag.setAttribute("jobTitle", getDefaultIfNull(customer.getJobTitle(), ""));
         customerTag.setAttribute("contracts", getDefaultIfNull(buildContactsCodes(customer.getContracts()), ""));

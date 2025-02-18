@@ -178,4 +178,14 @@ public class AccessService extends PersistenceService<Access> {
         return getEntityManager().createNamedQuery("Access.getAccessesByCodeSubscriptionAndCode", Access.class).setParameter("subscriptionCode", subscriptionCode).setParameter("code", code).getResultList();
     }
 
+    /**
+     * Delete the access points by subscription Id.
+     * @param subscriptionId the subscription Id.
+     */
+    public void deleteAccessBySubscriptionId(Long subscriptionId) {
+        getEntityManager().createNamedQuery("Access.deleteBySubscriptionId")
+                .setParameter("subscriptionId", subscriptionId)
+                .executeUpdate();
+    }
+
 }

@@ -43,6 +43,7 @@ import org.meveo.api.dto.BusinessEntityDto;
 import org.meveo.api.dto.CRMAccountTypeSearchDto;
 import org.meveo.api.dto.CustomFieldDto;
 import org.meveo.api.dto.CustomFieldsDto;
+import org.meveo.api.dto.OptionsDto;
 import org.meveo.api.dto.SellerDto;
 import org.meveo.api.dto.account.AccessDto;
 import org.meveo.api.dto.account.AccountDto;
@@ -127,6 +128,7 @@ import org.meveo.service.crm.impl.CustomerBrandService;
 import org.meveo.service.crm.impl.CustomerCategoryService;
 import org.meveo.service.crm.impl.CustomerService;
 import org.meveo.service.crm.impl.SubscriptionTerminationReasonService;
+import org.meveo.service.medina.impl.AccessService;
 import org.meveo.service.payments.impl.CustomerAccountService;
 import org.meveo.util.ApplicationProvider;
 import org.meveo.util.MeveoParamBean;
@@ -248,6 +250,8 @@ public class AccountHierarchyApi extends BaseApi {
 	private SubscriptionService subscriptionService;
 	@Inject
 	private SubscriptionTerminationReasonService subscriptionTerminationReasonService;
+    @Inject
+    private AccessService accessService;
 
     /**
      * Creates the customer heirarchy including : - Trading Country - Trading Currency - Trading Language - Customer Brand - Customer Category - Seller - Customer - Customer
@@ -1132,7 +1136,7 @@ public class AccountHierarchyApi extends BaseApi {
                                                     }
 
 	                                                processSubscriptionOnTransitionStatus(subscriptionDto);
-                                                    createAccess(subscriptionDto, postData.getOverwriteAccessPoints());
+                                                    createAccess(subscriptionDto, postData.getOptions());
                                                 }
                                             }
                                         }
@@ -1146,17 +1150,14 @@ public class AccountHierarchyApi extends BaseApi {
         }
     }
 
-    private void createAccess(SubscriptionDto subscriptionDto, Boolean overwriteAccessPoints) {
+    private void createAccess(SubscriptionDto subscriptionDto, OptionsDto overwriteAccessPoints) {
         if (subscriptionDto.getAccesses() != null && subscriptionDto.getAccesses().getAccess() != null && !subscriptionDto.getAccesses().getAccess().isEmpty()) {
-            if (overwriteAccessPoints == Boolean.TRUE) {
+            if (overwriteAccessPoints != null && overwriteAccessPoints.getOverwriteAllAccessPoints() == Boolean.TRUE) {
                 Subscription subscription = subscriptionService.findByCode(subscriptionDto.getCode());
                 if (subscription == null) {
                     throw new EntityDoesNotExistsException(Subscription.class, subscriptionDto.getCode());
                 }
-                subscription.getAccessPoints().clear();
-                subscriptionService.update(subscription);
-                //Flush allows to insert the same deleted access point in case it is provided again in the new list of access points
-                subscriptionService.getEntityManager().flush();
+                accessService.deleteAccessBySubscriptionId(subscription.getId());
             }
             for (AccessDto accessDto : subscriptionDto.getAccesses().getAccess()) {
                 if (StringUtils.isBlank(accessDto.getCode())) {

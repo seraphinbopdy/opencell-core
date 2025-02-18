@@ -19,6 +19,7 @@
 package org.meveo.api.dto.account;
 
 import org.meveo.api.dto.BaseEntityDto;
+import org.meveo.api.dto.OptionsDto;
 import org.meveo.api.dto.SellersDto;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
@@ -42,8 +43,8 @@ public class CustomerHierarchyDto extends BaseEntityDto {
     @XmlElement(required = true)
     private SellersDto sellers;
 
-    /** Option to replace existing access points. */
-    private Boolean overwriteAccessPoints;
+    /** options section which contains technical keys. */
+    private OptionsDto options;
 
     /**
      * Gets the sellers.
@@ -64,20 +65,20 @@ public class CustomerHierarchyDto extends BaseEntityDto {
     }
 
     /**
-     * Gets the overwrite access points.
+     * Gets the options.
      *
-     * @return the overwrite access points
+     * @return the options
      */
-    public Boolean getOverwriteAccessPoints() {
-        return overwriteAccessPoints;
+    public OptionsDto getOptions() {
+        return options;
     }
 
     /**
-     * Sets the overwrite access points.
+     * Sets the options.
      *
-     * @param overwriteAccessPoints the new overwrite access points.
+     * @param options the new options
      */
-    public void setOverwriteAccessPoints(Boolean overwriteAccessPoints) {
-        this.overwriteAccessPoints = overwriteAccessPoints;
+    public void setOptions(OptionsDto options) {
+        this.options = options;
     }
 }

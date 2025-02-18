@@ -1,8 +1,13 @@
 package org.meveo.api.dto.catalog;
 
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -87,6 +92,9 @@ public class PricePlanMatrixVersionDto extends BaseEntityDto {
 
     private Set<PricePlanMatrixLineDto> lines;
 
+    @Schema(description = "Trading prices EL")
+    private List<TradingPriceEL> tradingPricesEL;
+
     public PricePlanMatrixVersionDto() {
     }
 
@@ -117,6 +125,7 @@ public class PricePlanMatrixVersionDto extends BaseEntityDto {
                     .collect(Collectors.toSet());
         }
         setPriceVersionType(pricePlanMatrixVersion.getPriceVersionType());
+        this.tradingPricesEL = fromTradingPricesElMap(pricePlanMatrixVersion.getTradingPricesEL());
     }
 
     public String getPricePlanMatrixCode() {
@@ -273,5 +282,35 @@ public class PricePlanMatrixVersionDto extends BaseEntityDto {
 
     public void setPriceVersionType(PriceVersionTypeEnum priceVersionType) {
         this.priceVersionType = priceVersionType;
+    }
+
+    public List<TradingPriceEL> getTradingPricesEL() {
+        return tradingPricesEL;
+    }
+
+    public void setTradingPricesEL(List<TradingPriceEL> tradingPricesEL) {
+        this.tradingPricesEL = tradingPricesEL;
+    }
+
+    public Map<String, String> toTradingPricesElMap() {
+        if (tradingPricesEL == null || tradingPricesEL.isEmpty()) {
+            return null;
+        } else {
+            return this.tradingPricesEL
+                    .stream()
+                    .collect(toMap(TradingPriceEL::getCurrencyCode, TradingPriceEL::getPriceEL));
+        }
+    }
+
+    public List<TradingPriceEL> fromTradingPricesElMap(Map<String, String> tradingPricesElMap) {
+        if (tradingPricesElMap == null || tradingPricesElMap.isEmpty()) {
+            return null;
+        } else {
+            return tradingPricesElMap
+                    .entrySet()
+                    .stream()
+                    .map(entry -> new TradingPriceEL(entry.getKey(), entry.getValue()))
+                    .collect(toList());
+        }
     }
 }

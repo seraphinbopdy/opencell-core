@@ -141,7 +141,7 @@ public class PricePlanMatrixVersionApi extends BaseCrudApi<PricePlanMatrixVersio
             Date from = validity.getFrom();
             Date to = validity.getTo();
             if(from!=null && to!=null && !to.after(from)) {
-                throw new InvalidParameterException("Invalid validity period, the end date must be greather than the start date");
+                throw new InvalidParameterException("Invalid validity period, the end date must be greater than the start date");
             }
 
 
@@ -300,6 +300,7 @@ public class PricePlanMatrixVersionApi extends BaseCrudApi<PricePlanMatrixVersio
         if(!StringUtils.isBlank(pricePlanMatrixVersionDto.getPriceVersionType())) {
             pricePlanMatrixVersion.setPriceVersionType(pricePlanMatrixVersionDto.getPriceVersionType());
         }
+        pricePlanMatrixVersion.setTradingPricesEL(pricePlanMatrixVersionDto.toTradingPricesElMap());
         return pricePlanMatrixVersion;
     }
 

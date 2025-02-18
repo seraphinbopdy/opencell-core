@@ -15640,10 +15640,10 @@
                                  onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="cat_calendar" />
     </changeSet>
     <changeSet author="AndriusKarpavicius" id="rebuild-str-fk-1016">
-        <addForeignKeyConstraint baseColumnNames="following_job_id" baseTableName="meveo_job_instance" constraintName="fk_following_job_id" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
-                                 onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="meveo_job_instance" />
-        <addForeignKeyConstraint baseColumnNames="timerentity_id" baseTableName="meveo_job_instance" constraintName="fk_4hgoocwc77rh6ne8fct0f2y2h" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
-                                 onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="meveo_timer" />
+        <addForeignKeyConstraint baseColumnNames="following_job_id" baseTableName="meveo_job_instance" constraintName="fk_following_job_id" deferrable="false" initiallyDeferred="false" onDelete="CASCADE"
+                                 onUpdate="CASCADE" referencedColumnNames="id" referencedTableName="meveo_job_instance" />
+        <addForeignKeyConstraint baseColumnNames="timerentity_id" baseTableName="meveo_job_instance" constraintName="fk_timerentity_job" deferrable="false" initiallyDeferred="false" onDelete="CASCADE"
+                                 onUpdate="CASCADE" referencedColumnNames="id" referencedTableName="meveo_timer" />
     </changeSet>
     <changeSet author="AndriusKarpavicius" id="rebuild-str-fk-1018">
         <addForeignKeyConstraint baseColumnNames="script_instance_id" baseTableName="adm_notification" constraintName="fk_notif_script_instance" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
@@ -18131,7 +18131,7 @@
         <addForeignKeyConstraint
                 baseColumnNames="report_query_id" baseTableName="query_scheduler"
                 constraintName="fk_report_query_scheduler" deferrable="false"
-                initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
                 referencedColumnNames="id" referencedTableName="report_query" />
 
         <addForeignKeyConstraint
@@ -18144,7 +18144,7 @@
                 baseColumnNames="query_scheduler_id"
                 baseTableName="meveo_job_instance"
                 constraintName="fk_job_query_scheduler_id" deferrable="false"
-                initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
                 referencedColumnNames="id" referencedTableName="query_scheduler" />
 
         <addForeignKeyConstraint
@@ -18170,14 +18170,14 @@
                 baseColumnNames="query_scheduler_id"
                 baseTableName="query_execution_result"
                 constraintName="fk_scheduler_result" deferrable="false"
-                initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
                 referencedColumnNames="id" referencedTableName="query_scheduler" />
 
         <addForeignKeyConstraint
                 baseColumnNames="report_query_id"
                 baseTableName="query_execution_result"
                 constraintName="fk_report_query_execution" deferrable="false"
-                initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
                 referencedColumnNames="id" referencedTableName="report_query" />
 
         <addForeignKeyConstraint
@@ -20911,7 +20911,8 @@
     <changeSet id="#INTRD-29012_20250131" author="TarikFA." />
     <changeSet id="#INTRD-28233_activate_sub" author="a.rouaguebe" />
     <changeSet id="INTRD-29405_20240217" author="zbariki" />
-    
+    <changeSet id="#INTRD-29287_update_fk_report_query_execution" author="AbdelkaderBouazza" />
+
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 
 </databaseChangeLog>

@@ -576,12 +576,12 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 				if(financeSettingsService.isEntityWithHugeVolume(WalletOperation.class.getSimpleName())) {
 					HugeEntity batchEntity = ImmutableHugeEntity.builder()
 							.filters(filters)
-							.targetJob("MarkWOToRerateJob")
+							.targetJob("MarkWOToRerateFromInvoiceJob")
 							.build();
 	
 					batchEntityService.create(batchEntity, batchEntity.getFilters(), WalletOperation.class.getSimpleName());
 				} else {
-					JobInstance jobInstance = jobInstanceService.findByCode("MarkWOToRerateJob");
+					JobInstance jobInstance = jobInstanceService.findByCode("MarkWOToRerateFromInvoiceJob");
 
 					String selectQuery = batchEntityService.getSelectQuery(WalletOperation.class, filters, null, false);
 					List<Long> ids = batchEntityService.getEntityManager().createQuery(selectQuery).getResultList();

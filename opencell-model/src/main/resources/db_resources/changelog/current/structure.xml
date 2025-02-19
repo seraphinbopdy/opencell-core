@@ -17714,4 +17714,89 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
         </addColumn>
     </changeSet>
 
+    <changeSet id="#INTRD-29287_update_fk_report_query_execution" author="AbdelkaderBouazza">
+        <dropForeignKeyConstraint
+                baseTableName="query_execution_result"
+                constraintName="fk_report_query_execution"/>
+        <dropForeignKeyConstraint
+                baseTableName="query_execution_result"
+                constraintName="fk_scheduler_result"/>
+        <dropForeignKeyConstraint
+                baseTableName="query_scheduler"
+                constraintName="fk_scheduler_result"/>
+        <dropForeignKeyConstraint
+                baseTableName="query_scheduler"
+                constraintName="fk_report_query_scheduler"/>
+        <dropForeignKeyConstraint
+                baseTableName="meveo_job_instance"
+                constraintName="fk_job_query_scheduler_id"/>
+        <dropForeignKeyConstraint
+                baseTableName="meveo_job_instance"
+                constraintName="fk_following_job_id"/>
+        <dropForeignKeyConstraint
+                baseTableName="meveo_job_instance"
+                constraintName="fk_4hgoocwc77rh6ne8fct0f2y2h"/>
+
+        <addForeignKeyConstraint
+                baseTableName="query_execution_result"
+                baseColumnNames="report_query_id"
+                referencedTableName="report_query"
+                referencedColumnNames="id"
+                constraintName="fk_report_query_execution"
+                deferrable="false"
+                initiallyDeferred="false"
+                onDelete="CASCADE"
+                onUpdate="CASCADE"/>
+        <addForeignKeyConstraint
+                baseTableName="query_execution_result"
+                baseColumnNames="query_scheduler_id"
+                referencedTableName="query_scheduler"
+                referencedColumnNames="id"
+                constraintName="fk_scheduler_result"
+                deferrable="false"
+                initiallyDeferred="false"
+                onDelete="CASCADE"
+                onUpdate="CASCADE"/>
+        <addForeignKeyConstraint
+                baseColumnNames="report_query_id"
+                baseTableName="query_scheduler"
+                constraintName="fk_report_query_scheduler"
+                deferrable="false"
+                initiallyDeferred="false"
+                onDelete="CASCADE"
+                onUpdate="CASCADE"
+                referencedColumnNames="id"
+                referencedTableName="report_query" />
+        <addForeignKeyConstraint
+                baseColumnNames="query_scheduler_id"
+                baseTableName="meveo_job_instance"
+                constraintName="fk_job_query_scheduler_id"
+                deferrable="false"
+                initiallyDeferred="false"
+                onDelete="CASCADE"
+                onUpdate="CASCADE"
+                referencedColumnNames="id"
+                referencedTableName="query_scheduler" />
+        <addForeignKeyConstraint
+                baseColumnNames="following_job_id"
+                baseTableName="meveo_job_instance"
+                constraintName="fk_following_job_id"
+                deferrable="false"
+                initiallyDeferred="false"
+                onDelete="CASCADE"
+                onUpdate="CASCADE"
+                referencedColumnNames="id"
+                referencedTableName="meveo_job_instance" />
+        <addForeignKeyConstraint
+                baseColumnNames="timerentity_id"
+                baseTableName="meveo_job_instance"
+                constraintName="fk_timerentity_job"
+                deferrable="false" initiallyDeferred="false"
+                onDelete="CASCADE"
+                onUpdate="CASCADE"
+                referencedColumnNames="id"
+                referencedTableName="meveo_timer" />
+
+    </changeSet>
+
 </databaseChangeLog>

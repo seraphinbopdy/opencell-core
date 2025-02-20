@@ -1083,9 +1083,13 @@ final CommercialOrder order = commercialOrderService.findById(orderDto.getId());
 		
 		
 		checkDeliveryDate(orderOfferDto.getDeliveryDate());
-    	orderOffer.setDeliveryDate(orderOfferDto.getDeliveryDate());
-        orderOffer.setOrderLineType(orderOfferDto.getOrderLineType());
-        
+		if(orderOfferDto.getDeliveryDate() != null) {
+    		orderOffer.setDeliveryDate(orderOfferDto.getDeliveryDate());
+		}
+		if(orderOfferDto.getOrderLineType() != null) {
+			orderOffer.setOrderLineType(orderOfferDto.getOrderLineType());
+		}
+
         if(orderOfferDto.getOrderLineType() == OfferLineTypeEnum.AMEND) {
         	if (orderOfferDto.getSubscriptionCode() == null) {
 				throw new BusinessApiException("Subscription is missing");

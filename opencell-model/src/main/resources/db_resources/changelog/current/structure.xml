@@ -17799,5 +17799,53 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
                 referencedColumnNames="id"
                 referencedTableName="meveo_timer" />
     </changeSet>
+    
+    <changeSet id="#INTRD-27819_20250217" author="AbdellatifBARI">
+        <addColumn tableName="billing_wallet_operation">
+            <column name="rerate_from_invoice" type="${type.boolean}" />
+        </addColumn>
+        <update tableName="meveo_job_instance">
+            <column name="cf_values"><![CDATA[{
+                "nbRuns":[{"long":-1}],
+                "waitingMillis":[{"long":0}],
+                "targetJob":[{"string":"MarkWOToRerateJob"}],
+                "entityClassName":[{"string": "org.meveo.model.billing.WalletOperation"}],
+                "fieldsToUpdate":[{"string": "status='TO_RERATE', rerateFromInvoice=false"}],
+                "defaultFilter":[{"string": "{\"filters\": {\"$filter1\": {\"$operator\": \"OR\",\"ne ratedTransaction.status\": \"BILLED\",\"ne ratedTransaction.invoiceLine.status\": \"BILLED\",\"inList status\": [\"OPEN\",\"F_TO_RERATE\",\"REJECTED\"]},\"not-inList status\": [\"TO_RERATE\",\"RERATED\",\"CANCELED\"]}}"}],
+                "selectFetchSize":[{"long":1000000}],
+                "updateChunkSize":[{"long":32767}],
+                "isPessimisticUpdateLock":[{"boolean":false}],
+                "isUsingView":[{"boolean":true}],
+                "isOpenCursor":[{"boolean":true}],
+                "emailTemplate": [{"entity": {"code": "MASS_RERATE_EMAIL", "classname": "org.meveo.model.communication.email.EmailTemplate"}}]
+                }]]></column>
+            <where>code='MarkWOToRerateJob'</where>
+        </update>
+        <insert tableName="meveo_job_instance">
+            <column name="id" valueSequenceNext="meveo_job_instance_seq"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="disabled" valueNumeric="1"/>
+            <column name="created" valueDate="${db.current.time}"/>
+            <column name="job_category" value="UTILS"/>
+            <column name="job_template" value="UpdateHugeEntityJob"/>
+            <column name="code" value="MarkWOToRerateFromInvoiceJob"/>
+            <column name="creator" value="applicationInitializer"/>
+            <column name="uuid" value="MarkWOToRerateFromInvoiceJob"/>
+            <column name="cf_values"><![CDATA[{
+                "nbRuns":[{"long":-1}],
+                "waitingMillis":[{"long":0}],
+                "targetJob":[{"string":"MarkWOToRerateFromInvoiceJob"}],
+                "entityClassName":[{"string": "org.meveo.model.billing.WalletOperation"}],
+                "fieldsToUpdate":[{"string": "status='TO_RERATE', rerateFromInvoice=true"}],
+                "defaultFilter":[{"string": "{\"filters\": {\"$filter1\": {\"$operator\": \"OR\",\"ne ratedTransaction.status\": \"BILLED\",\"ne ratedTransaction.invoiceLine.status\": \"BILLED\",\"inList status\": [\"OPEN\",\"F_TO_RERATE\",\"REJECTED\"]},\"not-inList status\": [\"TO_RERATE\",\"RERATED\",\"CANCELED\"]}}"}],
+                "selectFetchSize":[{"long":1000000}],
+                "updateChunkSize":[{"long":32767}],
+                "isPessimisticUpdateLock":[{"boolean":false}],
+                "isUsingView":[{"boolean":true}],
+                "isOpenCursor":[{"boolean":true}],
+                "emailTemplate": [{"entity": {"code": "MASS_RERATE_EMAIL", "classname": "org.meveo.model.communication.email.EmailTemplate"}}]
+                }]]></column>
+        </insert>
+    </changeSet>
 
 </databaseChangeLog>

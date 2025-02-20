@@ -694,6 +694,11 @@ public class WalletOperation extends CFEntity {
     @JoinColumn(name = "batch_entity_id")
     private BatchEntity reratingBatch;
 
+
+    @Convert(converter = NumericBooleanConverter.class)
+    @Column(name = "rerate_from_invoice")
+    protected Boolean rerateFromInvoice;
+
     /**
      * Constructor
      */
@@ -1890,5 +1895,19 @@ public class WalletOperation extends CFEntity {
 
     public void setUpdater(String updater) {
         this.updater = updater;
+    }
+
+    /**
+     * @return the rerateFromInvoice
+     */
+    public Boolean getRerateFromInvoice() {
+        return rerateFromInvoice;
+    }
+
+    /**
+     * @param rerateFromInvoice the rerateFromInvoice to set
+     */
+    public void setRerateFromInvoice(Boolean rerateFromInvoice) {
+        this.rerateFromInvoice = rerateFromInvoice;
     }
 }

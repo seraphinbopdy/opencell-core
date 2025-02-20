@@ -34,9 +34,9 @@ public class OrderOfferDto extends BaseEntityDto {
 	@Schema(description = "The discountPlan code") 
     private String discountPlanCode;
     
-    private List<OrderProductDto> orderProducts = new ArrayList<OrderProductDto>();
+    private List<OrderProductDto> orderProducts;
      
-    private List<OrderAttributeDto> orderAttributes =new ArrayList<OrderAttributeDto>();
+    private List<OrderAttributeDto> orderAttributes;
     
     /** The delivery date. */
 	@Schema(description = "The delivery date") 

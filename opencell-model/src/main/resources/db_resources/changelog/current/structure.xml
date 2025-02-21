@@ -17714,7 +17714,7 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
         </addColumn>
     </changeSet>
 
-    <changeSet id="#INTRD-29287_update_fk_report_query_execution" author="AbdelkaderBouazza">
+    <changeSet id="#INTRD-29287_update_fk_report_query_execution" author="AbdelkaderBouazza" failOnError="false">
         <dropForeignKeyConstraint
                 baseTableName="query_execution_result"
                 constraintName="fk_report_query_execution"/>

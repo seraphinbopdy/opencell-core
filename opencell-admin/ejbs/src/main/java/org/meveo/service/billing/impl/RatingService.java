@@ -722,13 +722,6 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
                             if (pricePlanMatrixLine != null) {
                                 try {
 	                                unitPriceWithoutTax = pricePlanMatrixLine != null ? pricePlanMatrixLine.getValue() : pricePlanMatrixLine.getPricePlanMatrixVersion().getPrice();
-                                    if (pricePlan.getScriptInstance() != null) {
-                                        log.debug("start to execute script instance for ratePrice {}", pricePlan);
-                                        executeRatingScript(bareWalletOperation, pricePlan.getScriptInstance(), false, ratingResult);
-                                        unitPriceWithoutTax=bareWalletOperation.getUnitAmountWithoutTax()!=null?bareWalletOperation.getUnitAmountWithoutTax():BigDecimal.ZERO;
-                                        unitPriceWithTax=bareWalletOperation.getUnitAmountWithTax()!=null?bareWalletOperation.getUnitAmountWithTax():BigDecimal.ZERO;
-                                    }
-
                                     bareWalletOperation.setPricePlanMatrixVersion(pricePlanMatrixLine.getPricePlanMatrixVersion());
                                     bareWalletOperation.setPricePlanMatrixLine(pricePlanMatrixLine);
                                 }catch(NoPricePlanException e) {

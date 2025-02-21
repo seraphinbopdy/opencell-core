@@ -16,6 +16,7 @@ import org.meveo.apiv2.article.resource.AccountingArticleResource;
 import org.meveo.apiv2.article.service.AccountingArticleApiService;
 import org.meveo.apiv2.article.service.AccountingArticleBaseApi;
 import org.meveo.apiv2.ordering.common.LinkGenerator;
+import org.meveo.commons.utils.ExceptionUtils;
 import org.meveo.model.article.AccountingArticle;
 import org.meveo.service.billing.impl.UntdidAllowanceCodeService;
 
@@ -113,8 +114,13 @@ public class AccountingArticleResourceImpl implements AccountingArticleResource 
 			return Response.ok(result).build();
 		} catch(BadRequestException e) {
 			result.setStatus(ActionStatusEnum.FAIL);
-			result.setMessage(e.getMessage());
-			return Response.status(Response.Status.NOT_FOUND).entity(result).build();
+			if (ExceptionUtils.getRootCause(e).getMessage().contains("violates foreign key constraint")) {
+				result.setMessage(String.format("You can only delete an accounting article if it has not been used. Accounting article %s is still referenced in other entities.", accountingArticleCode));
+				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(result).build();
+			} else {
+				result.setMessage(e.getMessage());
+				return Response.status(Response.Status.NOT_FOUND).entity(result).build();
+			}
 		}
 	}
 

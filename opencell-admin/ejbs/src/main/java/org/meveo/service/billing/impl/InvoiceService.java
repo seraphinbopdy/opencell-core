@@ -3555,6 +3555,8 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
     }
 
+    @JpaAmpNewTx
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void recalculateDatesForValidated(Long invoiceId) {
         Invoice invoice = findById(invoiceId, true);
         BillingAccount billingAccount = invoice.getBillingAccount();
@@ -3566,8 +3568,8 @@ public class InvoiceService extends PersistenceService<Invoice> {
         billingCycle = PersistenceUtils.initializeAndUnproxy(billingCycle);
         if (billingRun == null) {
             return;
-        }        
-        if ((billingRun.getComputeDatesAtValidation() != null && billingRun.getComputeDatesAtValidation()) 
+        }
+        if ((billingRun.getComputeDatesAtValidation() != null && billingRun.getComputeDatesAtValidation())
                 || billingRun.getComputeDatesAtValidation() == null) {
             recalculateDateByBR(invoice, billingRun, billingAccount, billingCycle, true);
         }
@@ -3600,6 +3602,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         invoice.setInvoiceDate(invoiceDate);
         setInvoiceDueDate(invoice, billingCycle);
         setInitialCollectionDate(invoice, billingCycle, billingRun);
+        update(invoice);
     }
 
     /**

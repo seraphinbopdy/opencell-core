@@ -44,6 +44,7 @@ import org.meveo.model.billing.TradingCountry;
 import org.meveo.model.billing.UserAccount;
 import org.meveo.model.billing.WalletOperation;
 import org.meveo.model.catalog.ChargeTemplate;
+import org.meveo.model.crm.CustomerCategory;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.model.tax.TaxCategory;
 import org.meveo.model.tax.TaxClass;
@@ -466,13 +467,16 @@ public class TaxMappingService extends PersistenceService<TaxMapping> {
         TaxCategory taxCategory = billingAccount.getTaxCategoryResolved();
         if (taxCategory == null) {
             taxCategory = billingAccount.getTaxCategory();
-            if (taxCategory == null) {
-                String taxCategoryEl = billingAccount.getCustomerAccount().getCustomer().getCustomerCategory().getTaxCategoryEl();
+            CustomerCategory customerCategory = billingAccount.getCustomerAccount()
+                                                              .getCustomer()
+                                                              .getCustomerCategory();
+            if (taxCategory == null && customerCategory != null) {
+                String taxCategoryEl = customerCategory.getTaxCategoryEl();
                 if (taxCategoryEl != null) {
                     taxCategory = evaluateTaxCategoryExpression(taxCategoryEl, billingAccount);
                 }
                 if (taxCategory == null) {
-                    taxCategory = billingAccount.getCustomerAccount().getCustomer().getCustomerCategory().getTaxCategory();
+                    taxCategory = customerCategory.getTaxCategory();
                 }
             }
             billingAccount.setTaxCategoryResolved(taxCategory);

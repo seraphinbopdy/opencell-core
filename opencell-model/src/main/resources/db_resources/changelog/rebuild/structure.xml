@@ -20916,8 +20916,8 @@
     <changeSet id="INTRD-29405_20240217" author="zbariki" />
     <changeSet id="#INTRD-27819_20250217" author="AbdellatifBARI" />
     <changeSet id="#INTRD-29287_update_fk_report_query_execution" author="AbdelkaderBouazza" />
+    <changeSet id="#INTRD-29381_fix_wording" author="a.rouaguebe" />
     <changeSet id="#INTRD-29007_20250212" author="anasseh" />
-    
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 
 </databaseChangeLog>

@@ -17847,6 +17847,19 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
                 }]]></column>
         </insert>
     </changeSet>
+
+    <changeSet id="#INTRD-29381_fix_wording" author="a.rouaguebe">
+        <update tableName="advanced_settings">
+            <column name="description_i18n">
+                <![CDATA[{
+                    "ENG":"Use actual activation date when activating service instance from the waiting status",
+                    "FRA":"Utiliser la date d’activation effective lors de l’activation d’un service depuis le statut d’attente"
+                }]]>
+            </column>
+            <where>code = 'subscriptionActivation.useActualServiceActivationDate'</where>
+        </update>
+    </changeSet>
+
     
     <changeSet id="#INTRD-29007_20250212" author="anasseh">
         <addColumn tableName="ar_ddrequest_lot_op">

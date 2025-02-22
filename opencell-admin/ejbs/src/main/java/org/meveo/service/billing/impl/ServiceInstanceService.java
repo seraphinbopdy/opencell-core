@@ -639,6 +639,10 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
         
 
         boolean waitForMandatory = Boolean.TRUE.equals(advancedSettingsService.getParameter("subscriptionActivation.waitForMandatoryServices"));
+        waitForMandatory = waitForMandatory && subscription.getOffer()
+                .getOfferComponents()
+                .stream()
+                .anyMatch(OfferComponent::isMandatory);
         if(!waitForMandatory) {
             serviceInstance.setStatus(InstanceStatusEnum.ACTIVE);
         } else {

@@ -45,6 +45,9 @@ public class DunningCollectionPlanMapper
                 .lastActionDate(entity.getLastActionDate())
                 .totalDunningLevels(entity.getTotalDunningLevels())
                 .collectionPlanNumber(entity.getCollectionPlanNumber())
+                .relatedInvoices(entity.getRelatedInvoices() != null
+                        ? entity.getRelatedInvoices().stream().map(i -> createResource(i)).collect(toList())
+                        : null)
                 .build();
     }
 

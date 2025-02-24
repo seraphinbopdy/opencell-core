@@ -29,6 +29,9 @@ public interface DunningCollectionPlan extends Resource {
 	Resource getRelatedInvoice();
 
 	@Nullable
+	List<Resource> getRelatedInvoices();
+
+	@Nullable
 	Resource getPauseReason();
 
 	@Nullable

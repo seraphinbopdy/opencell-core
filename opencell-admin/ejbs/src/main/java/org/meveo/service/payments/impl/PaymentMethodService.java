@@ -20,6 +20,7 @@ package org.meveo.service.payments.impl;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.ValidationException;
@@ -283,7 +284,7 @@ public class PaymentMethodService extends PersistenceService<PaymentMethod> {
         if (paymentMethodCount <= 1) {
             throw new ValidationException("At least one payment method on a customer account is required");
         }
-        Long count =  getEntityManager().createNamedQuery("PaymentMethod.isReferenced", Long.class).setParameter("pmId", paymentMethod.getId())
+        long count =  getEntityManager().createNamedQuery("PaymentMethod.isReferenced", Long.class).setParameter("pmId", paymentMethod.getId())
                 .getSingleResult();
         if (count > 0) {
             throw new ValidationException("The payment method is still referenced on Subscription, Billing account or Invoice");

@@ -392,10 +392,7 @@ public class OfferTemplateService extends GenericProductOfferingService<OfferTem
             }
 
             if (allowedDiscountPlans != null) {
-                for (DiscountPlan discountPlan : allowedDiscountPlans) {
-                    discountPlan.setId(null);
-                    offer.getAllowedDiscountPlans().add(discountPlan);
-                }
+                offer.getAllowedDiscountPlans().addAll(allowedDiscountPlans);
             }
 
             if (allowedOffersChange != null) {

@@ -729,9 +729,6 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
                                         unitPriceWithTax=bareWalletOperation.getUnitAmountWithTax()!=null?bareWalletOperation.getUnitAmountWithTax():BigDecimal.ZERO;
                                     }
 
-                                    bareWalletOperation.setContract(contract);
-                                    bareWalletOperation.setContractLine(contractItem);
-                                    bareWalletOperation.setPriceplan(pricePlan);
                                     bareWalletOperation.setPricePlanMatrixVersion(pricePlanMatrixLine.getPricePlanMatrixVersion());
                                     bareWalletOperation.setPricePlanMatrixLine(pricePlanMatrixLine);
                                 }catch(NoPricePlanException e) {
@@ -739,6 +736,16 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
                                 } catch (Exception e) {
                                     log.warn("Error on contract code " + contract.getCode(), e);
                                 }
+                            }else {
+	                            Amounts unitPrices = new Amounts(unitPriceWithoutTax, unitPriceWithTax);
+	                            unitPrices = determineUnitPrice(pricePlan, bareWalletOperation);
+								if(unitPrices != null) {
+									unitPriceWithoutTax = unitPrices.getAmountWithoutTax();
+								}
+	                            bareWalletOperation.setPriceplan(pricePlan);
+	                            bareWalletOperation.setContract(contract);
+	                            bareWalletOperation.setContractLine(contractItem);
+								
                             }
 
                         } else {

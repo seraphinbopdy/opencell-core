@@ -471,7 +471,7 @@ public class PricePlanSelectionService implements Serializable {
      */
     public PricePlanMatrixLine determinePricePlanLine(Long pricePlanId, WalletOperation bareWalletOperation) throws NoPricePlanException {
         PricePlanMatrixVersion ppmVersion = getPublishedVersionValidForDate(pricePlanId, bareWalletOperation.getServiceInstance(), bareWalletOperation.getOperationDate());
-        if (ppmVersion != null) {
+        if (ppmVersion != null && ppmVersion.isMatrix()) {
             PricePlanMatrixLine ppLine = determinePricePlanLine(ppmVersion, bareWalletOperation);
             if (ppLine != null) {
                 return ppLine;

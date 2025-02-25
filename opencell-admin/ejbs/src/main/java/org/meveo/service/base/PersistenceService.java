@@ -31,6 +31,9 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.math.BigInteger;
 import java.sql.Clob;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,10 +58,11 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.CacheMode;
-import org.hibernate.LockMode;
+
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
+import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jpa.QueryHints;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.query.sqm.internal.QuerySqmImpl;
@@ -126,6 +130,7 @@ import jakarta.persistence.CacheRetrieveMode;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Id;
+import jakarta.persistence.LockModeType;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.NonUniqueResultException;
@@ -341,6 +346,14 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
 
     }
 
+    @Override
+    public E findByIdLock(Long id, LockModeType lockModeType) {
+
+        log.trace("Find {}/{} by id", entityClass.getSimpleName(), id);
+        return getEntityManager().find(entityClass, id,lockModeType);
+
+    }
+    
     /**
      * @see org.meveo.service.base.local.IPersistenceService#findByIds(java.util.List)
      */
@@ -967,6 +980,23 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
         }
     }
 
+    @Override
+    public E refreshOrRetrieveLock(E entity,LockModeType lockModeType) {
+
+        if (entity == null) {
+            return null;
+        }
+
+        if (getEntityManager().contains(entity)) {
+            log.trace("Entity {}/{} will be refreshed) ..", getEntityClass().getSimpleName(), entity.getId());
+            getEntityManager().refresh(entity,lockModeType);
+            return entity;
+        } else if (entity.getId() != null) {
+            return findByIdLock((Long) entity.getId(),lockModeType);
+        } else {
+            return entity;
+        }
+    }
     /**
      * @see org.meveo.service.base.local.IPersistenceService#refreshOrRetrieve(java.util.List)
      */
@@ -1893,4 +1923,34 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
 
         return nativeSql;
     }
+    
+    public long[] getAllIdsAsPrimitifArray(String sqlQueryAfterFrom,String idName) {
+	    Session session = getEntityManager().unwrap(Session.class);
+
+	    return session.doReturningWork(new ReturningWork<long[]>() {
+	        @Override
+	        public long[] execute(Connection connection) throws SQLException {	            
+	            int size = 0;
+	            try (PreparedStatement countStmt = connection.prepareStatement("SELECT COUNT("+idName+") FROM "+sqlQueryAfterFrom);
+	                 ResultSet countRs = countStmt.executeQuery()) {
+	                if (countRs.next()) {
+	                    size = countRs.getInt(1);
+	                }
+	            }
+	            if (size == 0) {
+	                return new long[0];
+	            }
+	            long[] ids = new long[size];
+	            try (PreparedStatement stmt = connection.prepareStatement("SELECT "+idName+" FROM "+sqlQueryAfterFrom);
+	                 ResultSet rs = stmt.executeQuery()) {
+
+	                int index = 0;
+	                while (rs.next()) {
+	                    ids[index++] = rs.getLong(1);
+	                }
+	            }
+	            return ids;
+	        }
+	    });
+	}
 }

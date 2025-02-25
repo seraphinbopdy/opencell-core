@@ -2385,6 +2385,7 @@
             <column name="error_msg" type="varchar(1000)" />
             <column name="refund_id" type="bigint" />
             <column name="rejected_file_name" type="varchar(1000)" />
+            <column name="thread_name" type="varchar(255)" />
         </createTable>
     </changeSet>
     <changeSet author="AndriusKarpavicius" id="rebuild-str-tbl-151">
@@ -2441,6 +2442,7 @@
             <column name="seller_id" type="bigint" />
             <column name="generate_payment_lines" type="${type.boolean}" defaultValueNumeric="1" />
             <column name="payment_status" type="varchar(25)" />
+            <column name="create_matching" type="${type.boolean}" defaultValueNumeric="1"/>
         </createTable>
     </changeSet>
     <changeSet author="AndriusKarpavicius" id="rebuild-str-tbl-153">
@@ -20914,6 +20916,7 @@
     <changeSet id="INTRD-29405_20240217" author="zbariki" />
     <changeSet id="#INTRD-27819_20250217" author="AbdellatifBARI" />
     <changeSet id="#INTRD-29287_update_fk_report_query_execution" author="AbdelkaderBouazza" />
+    <changeSet id="#INTRD-29007_20250212" author="anasseh" />
     
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

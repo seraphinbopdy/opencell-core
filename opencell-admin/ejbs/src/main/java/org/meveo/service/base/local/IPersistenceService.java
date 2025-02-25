@@ -26,6 +26,7 @@ import org.meveo.model.BaseEntity;
 import org.meveo.model.IEntity;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 
 /**
  * Generic interface that defines the methods to implement for every persistence service.
@@ -41,6 +42,8 @@ public interface IPersistenceService<E extends IEntity> {
      * @return Entity found.
      */
     E findById(Long id);
+    
+    E findByIdLock(Long id,LockModeType lockModeType);
 
     /**
      * Find entities by its id.
@@ -236,6 +239,7 @@ public interface IPersistenceService<E extends IEntity> {
      * @return Refreshed/retrieved entity.
      */
     E refreshOrRetrieve(E entity);
+    E refreshOrRetrieveLock(E entity,LockModeType lockModeType);
 
     /**
      * Refresh entity with state from database, or if it is not managed - retrieve it freshly from DB.

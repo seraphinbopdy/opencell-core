@@ -315,7 +315,7 @@ public class AccountOperationService extends PersistenceService<AccountOperation
      * @return the a os to pay
      */
     @SuppressWarnings("unchecked")
-    public List<AccountOperation> getAOsToPayOrRefund(PaymentMethodEnum paymentMethodEnum, Date fromDueDate, Date toDueDate, OperationCategoryEnum opCatToProcess, Seller seller) {
+    public List<Long> getAOsToPayOrRefund(PaymentMethodEnum paymentMethodEnum, Date fromDueDate, Date toDueDate, OperationCategoryEnum opCatToProcess, Seller seller) {
         try {
             StringBuilder queryName = new StringBuilder("SELECT ao FROM AccountOperation AS ao, PaymentMethod AS pm")
                     .append(" WHERE ao.transactionCategory=:opCatToProcessIN ")
@@ -338,6 +338,7 @@ public class AccountOperationService extends PersistenceService<AccountOperation
             
             if (OperationCategoryEnum.CREDIT == opCatToProcess) {
                 queryName.append(" AND ao.code IN (:REFUNDABLE_ADJUSTEMENT_CODES) ");
+                queryName.append(" AND ao.operationAction='TO_REFUND'");
             }
 
             Query query = getEntityManager().createQuery(queryName.toString())
@@ -355,7 +356,7 @@ public class AccountOperationService extends PersistenceService<AccountOperation
                 query.setParameter("REFUNDABLE_ADJUSTEMENT_CODES", Arrays.asList(refundableCodes.split("\\s*,\\s*")));
             }
 
-            return (List<AccountOperation>) query.getResultList();
+            return (List<Long>) query.getResultList();
 
         } catch (NoResultException e) {
             log.error("error = {}", e);

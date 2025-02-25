@@ -27,17 +27,18 @@ import java.util.concurrent.Future;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.job.UnitSepaDirectDebitJobBean;
 import org.meveo.commons.utils.ParamBeanFactory;
+import org.meveo.jpa.JpaAmpNewTx;
 import org.meveo.model.crm.Provider;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.payments.AccountOperation;
 import org.meveo.model.payments.CustomerAccount;
-import org.meveo.model.payments.DDRequestItem;
 import org.meveo.model.payments.DDRequestLOT;
 import org.meveo.model.payments.PaymentStatusEnum;
-import org.meveo.service.job.JobExecutionService;
 import org.meveo.service.payments.impl.AccountOperationService;
 import org.meveo.service.payments.impl.DDRequestItemService;
 import org.meveo.service.payments.impl.DDRequestLOTService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.ejb.AsyncResult;
 import jakarta.ejb.Asynchronous;
@@ -45,6 +46,7 @@ import jakarta.ejb.Stateless;
 import jakarta.ejb.TransactionAttribute;
 import jakarta.ejb.TransactionAttributeType;
 import jakarta.inject.Inject;
+import jakarta.persistence.LockModeType;
 
 /**
  * The Class SepaDirectDebitAsync.
@@ -71,12 +73,11 @@ public class SepaDirectDebitAsync {
 	@Inject
 	private DDRequestItemService ddRequestItemService;
 
-	/** The job execution service. */
-	@Inject
-	private JobExecutionService jobExecutionService;
 	
 	@Inject
 	private DDRequestLOTService ddRequestLOTService;
+	
+	Logger log = LoggerFactory.getLogger(getClass());
 	
 	/**
 	 * Create payments for all items from the ddRequestLot. One Item at a time in a
@@ -88,33 +89,21 @@ public class SepaDirectDebitAsync {
 	 * @throws BusinessException BusinessException
 	 */
 	@Asynchronous
-	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
-	public Future<Map<String, Object>> launchAndForgetPaymentCreation( List<DDRequestItem> ddRequestItems, boolean isToMatching,
-			PaymentStatusEnum paymentStatus, JobExecutionResultImpl result) throws BusinessException {
-		Map<String, Object> resultFuture = new HashMap<String, Object>();
-		Integer nbItemsKo = 0;
-		BigDecimal totalAmount = BigDecimal.ZERO;
-		for (DDRequestItem ddRequestItem : ddRequestItems) {
-
-			if (result != null && !jobExecutionService.isJobRunningOnThis(result.getJobInstance())) {
-				break;
-			}
+	@TransactionAttribute(TransactionAttributeType.NEVER)
+	public Future<String> launchAndForgetPaymentCreation(DDRequestLOT ddRequestLOT,boolean isToMatching, PaymentStatusEnum paymentStatus, JobExecutionResultImpl result) throws BusinessException {
+		
+		long[] items = ddRequestItemService.getAllIdsAsPrimitifArray("ar_ddrequest_item where ddrequest_lot_id="+ddRequestLOT.getId()+" and thread_name='"+Thread.currentThread().getName()+"'","id");		
+		for (long ddRequestItemId : items) {		
 			try {
-				unitSSDJobBean.execute(result, ddRequestItem, isToMatching, paymentStatus);
-				if (!ddRequestItem.hasError()) {
-					totalAmount = totalAmount.add(ddRequestItem.getAmount());
-				}
+				unitSSDJobBean.execute(result, ddRequestItemId, isToMatching,  paymentStatus);
 			} catch (Exception e) {
-				ddRequestItem.setErrorMsg("AO.id:" + ddRequestItem.getAccountOperations().get(0) + ":" + e.getMessage());
-				nbItemsKo++;				
-				if (result != null) {
-					result.registerError("AO.id:" + ddRequestItem.getAccountOperations().get(0) + ":" + e.getMessage());
+				log.warn("Error on launchAndForgetPaymentCreation", e);
+				if(result != null) {
+					result.registerError(e.getMessage());
 				}
 			}
 		}
-		resultFuture.put("nbItemsKo", nbItemsKo);
-		resultFuture.put("totalAmount", totalAmount);
-		return new AsyncResult<Map<String, Object>>(resultFuture);
+		return new AsyncResult<String>("OK");
 	}
 
 	/**
@@ -126,34 +115,48 @@ public class SepaDirectDebitAsync {
 	 * @throws BusinessException the business exception
 	 */
 	@Asynchronous
-	@TransactionAttribute(TransactionAttributeType.REQUIRED)
-	public Future<Map<String, Object>> launchAndForgetDDRequesltLotCreation(DDRequestLOT ddRequestLOT, List<AccountOperation> listAoToPay, Provider appProvider)
-			throws BusinessException {
+	@JpaAmpNewTx
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public Future<Map<String,Object>> launchAndForgetDDRequesltLotCreation(DDRequestLOT ddRequestLOT, List<Long> listAoToPay,
+			Provider appProvider) throws BusinessException {
+				
+		Map<String,Object> result = new HashMap<String, Object>();
 
-		Map<String, Object> result = new HashMap<String, Object>();
-		Long nbItemsKo = 0L, nbItemsOk = 0L;
+		String allErrors="";
+		Long nbItemsKo = 0L;
+		Long nbItemsOk=0L;	
 		BigDecimal totalAmount = BigDecimal.ZERO;
-		StringBuilder allErrors = new StringBuilder();
-		for (AccountOperation ao : listAoToPay) {
-			ao = accountOperationService.refreshOrRetrieve(ao);
+
+		AccountOperation ao = null;
+		int i =0;
+		int lotCommitSize =  paramBeanFactory.getInstance().getPropertyAsInteger("payment.sepa.lotCommit.size", 1000);
+		for (Long aoId : listAoToPay) {
+			i++;
+			 ao = accountOperationService.findByIdLock(aoId,LockModeType.OPTIMISTIC);
 			CustomerAccount ca = ao.getCustomerAccount();
 			String errorMsg = ddRequestLOTService.getMissingField(ao, ddRequestLOT, appProvider, ca);
-			String caFullName = ca.getName() != null ? ca.getName().getFullName() : "";
-			ddRequestLOT.getDdrequestItems().add(ddRequestItemService.createDDRequestItem(ao.getUnMatchingAmount(), ddRequestLOT, caFullName, errorMsg, Arrays.asList(ao)));
+			String caFullName =  ca.getName() != null ? ca.getName().getFullName() : "";			
+			ddRequestItemService.createDDRequestItem(ao.getUnMatchingAmount(), ddRequestLOT, caFullName, errorMsg, Arrays.asList(ao));
 			if (errorMsg != null) {
 				nbItemsKo++;
-				allErrors.append(errorMsg).append(" ; ");
+				allErrors += errorMsg + " ; ";
 			} else {
 				nbItemsOk++;
 				totalAmount = totalAmount.add(ao.getUnMatchingAmount());
 			}
+			if(i % lotCommitSize == 0) {				
+				ddRequestItemService.commit();
+				ddRequestItemService.getEntityManager().clear();
+			}
 		}
+		ddRequestItemService.commit();
+			
+		result.put("nbItemsOk",nbItemsOk);
+		result.put("nbItemsKo",nbItemsKo);
+		result.put("allErrors",allErrors);
+		result.put("totalAmount",totalAmount);
 
-		result.put("nbItemsOk", nbItemsOk);
-		result.put("nbItemsKo", nbItemsKo);
-		result.put("allErrors", allErrors.toString());
-		result.put("totalAmount", totalAmount);
-
-		return new AsyncResult<Map<String, Object>>(result);
+		return new AsyncResult<Map<String,Object>>(result);
+		
 	}
 }

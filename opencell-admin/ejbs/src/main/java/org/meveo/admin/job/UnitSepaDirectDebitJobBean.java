@@ -27,6 +27,7 @@ import java.util.List;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.NoAllOperationUnmatchedException;
 import org.meveo.admin.exception.UnbalanceAmountException;
+import org.meveo.admin.util.ArConfig;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.event.qualifier.Rejected;
@@ -42,6 +43,7 @@ import org.meveo.model.payments.DDRequestLOT;
 import org.meveo.model.payments.MatchingStatusEnum;
 import org.meveo.model.payments.MatchingTypeEnum;
 import org.meveo.model.payments.OCCTemplate;
+import org.meveo.model.payments.OperationActionEnum;
 import org.meveo.model.payments.OperationCategoryEnum;
 import org.meveo.model.payments.Payment;
 import org.meveo.model.payments.PaymentErrorTypeEnum;
@@ -49,6 +51,7 @@ import org.meveo.model.payments.PaymentMethodEnum;
 import org.meveo.model.payments.PaymentOrRefundEnum;
 import org.meveo.model.payments.PaymentStatusEnum;
 import org.meveo.model.payments.Refund;
+import org.meveo.model.shared.DateUtils;
 import org.meveo.service.payments.impl.AccountOperationService;
 import org.meveo.service.payments.impl.DDRequestItemService;
 import org.meveo.service.payments.impl.MatchingCodeService;
@@ -63,6 +66,7 @@ import jakarta.ejb.TransactionAttribute;
 import jakarta.ejb.TransactionAttributeType;
 import jakarta.enterprise.event.Event;
 import jakarta.inject.Inject;
+import jakarta.persistence.LockModeType;
 
 /**
  * The Class UnitSepaDirectDebitJobBean.
@@ -123,64 +127,64 @@ public class UnitSepaDirectDebitJobBean {
 	 *                                          exception
 	 * @throws UnbalanceAmountException         the unbalanced amount exception
 	 */
-    @JpaAmpNewTx
+	@JpaAmpNewTx
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public void execute(JobExecutionResultImpl result, DDRequestItem ddrequestItem, boolean isToMatching, PaymentStatusEnum paymentStatusEnum) throws BusinessException, NoAllOperationUnmatchedException, UnbalanceAmountException {
-    	ddrequestItem = dDRequestItemService.refreshOrRetrieve(ddrequestItem);
-		DDRequestLOT ddRequestLOT = ddrequestItem.getDdRequestLOT();
-		log.debug("processing DD requestItem id  : {}", ddrequestItem.getId());					
+	public void execute(JobExecutionResultImpl result, long ddrequestItemId,boolean isToMatching,PaymentStatusEnum paymentStatusEnum) throws BusinessException, NoAllOperationUnmatchedException, UnbalanceAmountException {
+	
+		DDRequestItem ddrequestItem = dDRequestItemService.findByIdLock(Long.valueOf(ddrequestItemId), LockModeType.OPTIMISTIC);
 		if(!isPaidItem(ddrequestItem)) {
+
+			DDRequestLOT ddRequestLOT = ddrequestItem.getDdRequestLOT();
+			log.debug("processing DD requestItem id  : " + ddrequestItem.getId());
 			AccountOperation automatedPayment = null;
 			PaymentErrorTypeEnum paymentErrorTypeEnum = null;
+			
 			String errorMsg = null;
 			if (!ddrequestItem.hasError()) {
 				if (BigDecimal.ZERO.compareTo(ddrequestItem.getAmount()) == 0) {
-					log.info("invoice: {}  balanceDue: {}  no DIRECTDEBIT transaction", ddrequestItem.getReference(), BigDecimal.ZERO);
+					log.info("invoice: {}  balanceDue:{}  no DIRECTDEBIT transaction", ddrequestItem.getReference(), BigDecimal.ZERO);
 				} else {
+					if (ddrequestItem.getAccountOperations() == null || ddrequestItem.getAccountOperations().isEmpty()) {
+						throw new BusinessException("ddRequestItem " + ddrequestItem + " has no attached AOs ! Payment or refund can't be created for it.");
+					}
 					automatedPayment = createPaymentOrRefund(ddrequestItem, PaymentMethodEnum.DIRECTDEBIT, ddrequestItem.getAmount(),
-							ddrequestItem.getAccountOperations().get(0).getCustomerAccount(), "ddItem" + ddrequestItem.getId(), ddRequestLOT.getFileName(), ddRequestLOT.getSendDate(),
-							new Date(), ddrequestItem.getDueDate(), new Date(),
+							ddrequestItem.getAccountOperations().get(0).getCustomerAccount(), "ddItem" + ddrequestItem.getId(), ddRequestLOT.getFileName(),
+							ddRequestLOT.getSendDate(), DateUtils.addDaysToDate(new Date(), ArConfig.getDateValueAfter()), ddRequestLOT.getSendDate(), ddRequestLOT.getSendDate(),
 							ddrequestItem.getAccountOperations(), isToMatching, MatchingTypeEnum.A_DERICT_DEBIT);
 					if (ddrequestItem.getDdRequestLOT().getPaymentOrRefundEnum().getOperationCategoryToProcess() == OperationCategoryEnum.CREDIT) {
 						ddrequestItem.setAutomatedRefund((AutomatedRefund) automatedPayment);
 					} else {
 						ddrequestItem.setAutomatedPayment((AutomatedPayment) automatedPayment);
-	
+
 					}
 				}
-				
-			} else {
-				paymentErrorTypeEnum = PaymentErrorTypeEnum.ERROR;
-				paymentStatusEnum = PaymentStatusEnum.ERROR;
-				errorMsg = ddrequestItem.getErrorMsg();			
-			}
-			Payment payment = automatedPayment instanceof AutomatedPayment ? (Payment) automatedPayment : null;
-			Refund refund = automatedPayment instanceof Refund ? (Refund) automatedPayment : null;
-			paymentHistoryService.addHistoryAOs(ddrequestItem.getAccountOperations().get(0).getCustomerAccount(),
-					payment, refund, (ddrequestItem.getAmount().multiply(new BigDecimal(100))).longValue(),
-					paymentStatusEnum, errorMsg, errorMsg, payment != null ? payment.getReference() : (refund != null ? refund.getReference() : null), paymentErrorTypeEnum, ddrequestItem.getDdRequestLOT().getPaymentOrRefundEnum() == PaymentOrRefundEnum.PAYMENT ? OperationCategoryEnum.CREDIT : OperationCategoryEnum.DEBIT,
-					ddRequestLOT.getDdRequestBuilder().getCode(), ddrequestItem.getAccountOperations().get(0).getCustomerAccount().getPreferredPaymentMethod(),ddrequestItem.getAccountOperations());	
-			
-			if (!ddrequestItem.hasError()) {
 				if (result != null) {
 					result.registerSucces();
 				}
-				
-			}else {
+			} else {
+				paymentErrorTypeEnum = PaymentErrorTypeEnum.ERROR;
+				paymentStatusEnum = PaymentStatusEnum.ERROR;
+				errorMsg = ddrequestItem.getErrorMsg();
 				if (result != null) {
 					result.registerError(errorMsg);
 				}
 			}
-		} else {
-			log.debug("Payment already crated for requestItem id  : {}", ddrequestItem.getId());	
+			Payment payment = automatedPayment instanceof AutomatedPayment ? (Payment) automatedPayment : null;
+			Refund refund = automatedPayment instanceof Refund ? (Refund) automatedPayment : null;
+			paymentHistoryService.addHistoryAOs(ddrequestItem.getAccountOperations().get(0).getCustomerAccount(), payment, refund,
+					(ddrequestItem.getAmount().multiply(new BigDecimal(100))).longValue(), paymentStatusEnum, errorMsg, errorMsg,
+					payment != null ? payment.getReference() : (refund != null ? refund.getReference() : null), paymentErrorTypeEnum,
+					ddrequestItem.getDdRequestLOT().getPaymentOrRefundEnum() == PaymentOrRefundEnum.PAYMENT ? OperationCategoryEnum.CREDIT : OperationCategoryEnum.DEBIT,
+					ddRequestLOT.getDdRequestBuilder().getCode(), ddrequestItem.getAccountOperations().get(0).getCustomerAccount().getPreferredPaymentMethod(),
+					ddrequestItem.getAccountOperations());
+
 		}
 	}
 
+
 	private boolean isPaidItem(DDRequestItem ddrequestItem) {
-		String refundableCodes = ParamBean.getInstance().getProperty("refundable.adjustement.codes", "ADJ_REF,INV_CRN");
-		for (AccountOperation ao :ddrequestItem.getAccountOperations()) {
-			if ((ddrequestItem.getDdRequestLOT().getPaymentOrRefundEnum().getOperationCategoryToProcess() == OperationCategoryEnum.CREDIT && !refundableCodes.contains(ao.getCode())) 
-					&& (ao instanceof Payment || ao instanceof AutomatedPayment || ao instanceof Refund	|| ao instanceof AutomatedRefund)) {
+		for(AccountOperation ao :ddrequestItem.getAccountOperations() ) {
+			if( ao instanceof Payment || ao instanceof AutomatedPayment || ao instanceof Refund || ao instanceof AutomatedRefund ) {
 				return true;
 			}			
 		}
@@ -234,7 +238,7 @@ public class UnitSepaDirectDebitJobBean {
 			throw new BusinessException("Cannot find OCC Template with code=" + occTemplateCode);
 		}
 
-		paymentService.calculateAmountsByTransactionCurrency(automatedPayment, customerAccount, amount, null, transactionDate);
+		paymentService.calculateAmountsByTransactionCurrency( automatedPayment, customerAccount, amount, null, transactionDate);
 
 		automatedPayment.setPaymentMethod(paymentMethodEnum);
 		automatedPayment.setAccountingCode(occTemplate.getAccountingCode());
@@ -253,6 +257,7 @@ public class UnitSepaDirectDebitJobBean {
 		automatedPayment.setMatchingStatus(MatchingStatusEnum.O);
 		automatedPayment.setDdRequestItem(ddRequestItem);
 		automatedPayment.setSeller(ddRequestItem.getDdRequestLOT().getSeller());
+		automatedPayment.setOperationAction(OperationActionEnum.NONE);
 		accountOperationService.handleAccountingPeriods(automatedPayment);
 
 		accountOperationService.create(automatedPayment);

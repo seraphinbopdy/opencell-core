@@ -111,7 +111,12 @@ public class DDRequestItem extends AuditableEntity {
     @Column(name = "rejected_file_name", length = 1000)
     @Size(max = 1000)
     private String rejectedFileName;
-
+   
+    @Column(name = "thread_name", length = 255)
+    @Size(max = 255)
+    private String threadName;
+    
+  
     public DDRequestItem() {
 
     }
@@ -274,5 +279,12 @@ public class DDRequestItem extends AuditableEntity {
     public boolean hasError() {
         return !(errorMsg == null || errorMsg.trim().length() == 0);
     }
+    
+    public String getThreadName() {
+		return threadName;
+	}
 
+	public void setThreadName(String threadName) {
+		this.threadName = threadName;
+	}
 }

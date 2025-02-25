@@ -23,7 +23,6 @@ import java.util.Map;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.sepa.DDRejectFileInfos;
-import org.meveo.model.payments.AccountOperation;
 import org.meveo.service.script.ScriptInterface;
 
 /**
@@ -80,6 +79,6 @@ public interface DDRequestBuilderScriptInterface extends ScriptInterface {
     * @return the list of account operation
     * @throws BusinessException
     */
-    public List<AccountOperation> findListAoToPay(Map<String, Object> methodContext) throws BusinessException;
+    public List<Long> findListAoToPay(Map<String, Object> methodContext) throws BusinessException;
     
 }

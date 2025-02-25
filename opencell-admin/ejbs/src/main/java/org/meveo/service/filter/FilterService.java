@@ -253,6 +253,20 @@ public class FilterService extends BusinessService<Filter> {
         return objects;
 
     }
+    
+    public List<Long> filteredListAsIds(Filter filter, Map<String, Object> params) throws BusinessException {
+
+        if (!StringUtils.isBlank(filter.getPollingQuery())) {
+            return (List<Long>) executeSelectQuery(filter.getPollingQuery(), params);
+        }
+        FilteredQueryBuilder fqb = getFilteredQueryBuilder(filter);
+
+        Query query = fqb.getQuery(getEntityManager());
+        log.debug("query={}", fqb.getSqlString());
+        List<Long> objects = (List<Long>) query.getResultList();
+        return objects;
+
+    }
 
     public String filteredList(String filterName, Integer firstRow, Integer numberOfRows) throws BusinessException {
         Filter filter = (Filter) findByCode(filterName);

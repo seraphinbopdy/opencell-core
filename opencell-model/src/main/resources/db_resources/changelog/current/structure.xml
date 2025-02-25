@@ -17847,5 +17847,13 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
                 }]]></column>
         </insert>
     </changeSet>
-
+    
+    <changeSet id="#INTRD-29007_20250212" author="anasseh">
+        <addColumn tableName="ar_ddrequest_lot_op">
+            <column name="create_matching" type="${type.boolean}" defaultValueNumeric="1"/>
+        </addColumn>
+        <addColumn tableName="ar_ddrequest_item">
+        	<column name="thread_name" type="varchar(255)" ></column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

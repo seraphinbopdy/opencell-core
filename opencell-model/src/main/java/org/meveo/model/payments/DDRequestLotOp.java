@@ -123,7 +123,12 @@ public class DDRequestLotOp extends AuditableEntity {
     /** Default payment status. */
     @Column(name = "payment_status")
     @Enumerated(EnumType.STRING)
-    private PaymentStatusEnum paymentStatus;
+    private PaymentStatusEnum paymentStatus = PaymentStatusEnum.ACCEPTED;
+    
+    /** Flag to create matching (by default true). */
+    @Convert(converter = NumericBooleanConverter.class)
+    @Column(name = "create_matching")
+    private Boolean createMatching = Boolean.TRUE;
 
     /**
      * Gets the from due date.
@@ -361,4 +366,13 @@ public class DDRequestLotOp extends AuditableEntity {
         this.paymentStatus = paymentStatus;
     }
 
+
+	public Boolean getCreateMatching() {
+		return createMatching;
+	}
+
+	public void setCreateMatching(Boolean createMatching) {
+		this.createMatching = createMatching;
+	}
+	    
 }

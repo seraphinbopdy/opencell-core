@@ -25,7 +25,6 @@ import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.sepa.DDRejectFileInfos;
 import org.meveo.model.crm.Provider;
 import org.meveo.model.jobs.JobExecutionResultImpl;
-import org.meveo.model.payments.AccountOperation;
 import org.meveo.model.payments.DDRequestLOT;
 import org.meveo.model.payments.DDRequestLotOp;
 
@@ -44,7 +43,7 @@ public interface DDRequestBuilderInterface {
      * @return the list of account operation
      * @throws BusinessException the business exception
      */
-    List<AccountOperation> findListAoToPay(DDRequestLotOp ddrequestLotOp) throws BusinessException;
+    List<Long> findListAoToPay(DDRequestLotOp ddrequestLotOp) throws BusinessException;
          
    /**
     * Generate the  sdd or sct request file for a given DDRequestLot.

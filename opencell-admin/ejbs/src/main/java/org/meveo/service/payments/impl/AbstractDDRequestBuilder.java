@@ -25,7 +25,6 @@ import org.meveo.admin.exception.BusinessEntityException;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.commons.utils.EjbUtils;
 import org.meveo.model.filter.Filter;
-import org.meveo.model.payments.AccountOperation;
 import org.meveo.model.payments.DDRequestLotOp;
 import org.meveo.model.payments.PaymentMethodEnum;
 import org.meveo.service.filter.FilterService;
@@ -44,7 +43,7 @@ public abstract class AbstractDDRequestBuilder implements DDRequestBuilderInterf
     }
 
     @Override
-    public List<AccountOperation> findListAoToPay(DDRequestLotOp ddrequestLotOp) throws BusinessException {
+    public List<Long> findListAoToPay(DDRequestLotOp ddrequestLotOp) throws BusinessException {
 
         FilterService filterService = (FilterService) getServiceInterface(FilterService.class.getSimpleName());
         AccountOperationService accountOperationService = (AccountOperationService) getServiceInterface(AccountOperationService.class.getSimpleName());
@@ -53,7 +52,7 @@ public abstract class AbstractDDRequestBuilder implements DDRequestBuilderInterf
         Date toDueDate = ddrequestLotOp.getToDueDate();
         Filter filter = ddrequestLotOp.getFilter();
 
-        List<AccountOperation> listAoToPay = null;
+        List<Long> listAoToPay = null;
         if (filter == null) {
             if (fromDueDate == null) {
                 throw new BusinessEntityException("fromDuDate is empty");
@@ -68,7 +67,7 @@ public abstract class AbstractDDRequestBuilder implements DDRequestBuilderInterf
             listAoToPay = accountOperationService.getAOsToPayOrRefund(PaymentMethodEnum.DIRECTDEBIT, fromDueDate, toDueDate,
                 ddrequestLotOp.getPaymentOrRefundEnum().getOperationCategoryToProcess(), ddrequestLotOp.getSeller());
         } else {
-            listAoToPay = (List<AccountOperation>) filterService.filteredListAsObjects(filterService.refreshOrRetrieve(filter), null);
+            listAoToPay = (List<Long>) filterService.filteredListAsIds(filterService.refreshOrRetrieve(filter), null);
         }
         return listAoToPay;
     }

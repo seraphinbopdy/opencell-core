@@ -208,7 +208,7 @@ public class PaymentJobBean extends IteratorBasedJobBean<PaymentItem> {
             toDueDate = DateUtils.addYearsToDate(fromDueDate, 1000);
         }
 
-        List<AccountOperation> aos = new ArrayList<AccountOperation>();
+        List<Long> aos = new ArrayList<Long>();
 
         AccountOperationFilterScript aoFilterScript = getAOScriptInstance(jobInstance);
 
@@ -225,8 +225,8 @@ public class PaymentJobBean extends IteratorBasedJobBean<PaymentItem> {
         }
 
         List<PaymentItem> paymentItems = new ArrayList<PaymentJobBean.PaymentItem>();
-        for (AccountOperation ao : aos) {
-            paymentItems.add(new PaymentItem(ao.getCustomerAccount().getId(), ao.getId(), ao.getUnMatchingAmount().multiply(oneHundred).longValue()));
+        for (Long aoId : aos) {
+            paymentItems.add(new PaymentItem( aoId));
         }
 
         return Optional.of(new SynchronizedIterator<PaymentItem>(paymentItems));
@@ -243,7 +243,9 @@ public class PaymentJobBean extends IteratorBasedJobBean<PaymentItem> {
         List<Long> listAOids = new ArrayList<Long>();
         listAOids.add(paymentItem.accountOperationId);
 
-        CustomerAccount customerAccount = customerAccountService.findById(paymentItem.customerAccountId);
+        AccountOperation ao = accountOperationService.findById(paymentItem.accountOperationId);
+        paymentItem.amountToPay = ao.getUnMatchingAmount().multiply(oneHundred).longValue();
+        CustomerAccount customerAccount = customerAccountService.findById(ao.getCustomerAccount().getId());
         PaymentResponseDto doPaymentResponseDto = new PaymentResponseDto();
         try {
             if (operationCategory == OperationCategoryEnum.CREDIT) {
@@ -340,11 +342,9 @@ public class PaymentJobBean extends IteratorBasedJobBean<PaymentItem> {
 
         }
 
-        public PaymentItem(Long customerAccountId, Long accountOperationId, Long amountToPay) {
-            super();
-            this.customerAccountId = customerAccountId;
-            this.accountOperationId = accountOperationId;
-            this.amountToPay = amountToPay;
+        public PaymentItem( Long accountOperationId) {
+            super();            
+            this.accountOperationId = accountOperationId;           
         }
 
         // Fake methods to simulate IEntity for error handing in job processing

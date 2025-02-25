@@ -53,24 +53,26 @@ public class DDRequestItemService extends PersistenceService<DDRequestItem> {
      * @return the DD request item
      * @throws BusinessException the business exception
      */
-    public DDRequestItem createDDRequestItem(BigDecimal amountToPay, DDRequestLOT ddRequestLOT, String caFullName, String errorMsg, List<AccountOperation> listAO)
+	public DDRequestItem createDDRequestItem(BigDecimal amountToPay, DDRequestLOT ddRequestLOT, String caFullName, String errorMsg, List<AccountOperation> listAO)
             throws BusinessException {
+    	AccountOperation firstAo = listAO.get(0);
         DDRequestItem ddDequestItem = new DDRequestItem();
         ddDequestItem.setErrorMsg(errorMsg);
         ddDequestItem.setAmount(amountToPay);
         ddDequestItem.setDdRequestLOT(ddRequestLOT);
         ddDequestItem.setBillingAccountName(caFullName);
         ddDequestItem.setDueDate(ddRequestLOT.getSendDate());
-        ddDequestItem.setPaymentInfo(listAO.get(0).getPaymentInfo());
-        ddDequestItem.setPaymentInfo1(listAO.get(0).getPaymentInfo1());
-        ddDequestItem.setPaymentInfo2(listAO.get(0).getPaymentInfo2());
-        ddDequestItem.setPaymentInfo3(listAO.get(0).getPaymentInfo3());
-        ddDequestItem.setPaymentInfo4(listAO.get(0).getPaymentInfo4());
-        ddDequestItem.setPaymentInfo5(listAO.get(0).getPaymentInfo5());
-        ddDequestItem.setDueDate(listAO.get(0).getDueDate());
+        ddDequestItem.setPaymentInfo(firstAo.getPaymentInfo());
+        ddDequestItem.setPaymentInfo1(firstAo.getPaymentInfo1());
+        ddDequestItem.setPaymentInfo2(firstAo.getPaymentInfo2());
+        ddDequestItem.setPaymentInfo3(firstAo.getPaymentInfo3());
+        ddDequestItem.setPaymentInfo4(firstAo.getPaymentInfo4());
+        ddDequestItem.setPaymentInfo5(firstAo.getPaymentInfo5());
+        ddDequestItem.setDueDate(firstAo.getDueDate());
         ddDequestItem.setAccountOperations(listAO);
-        if(listAO.size() == 1 && !StringUtils.isBlank(listAO.get(0).getReference())) {
-            ddDequestItem.setReference(listAO.get(0).getReference());
+        ddDequestItem.setThreadName(Thread.currentThread().getName());
+        if(listAO.size() == 1 && !StringUtils.isBlank(firstAo.getReference())) {
+            ddDequestItem.setReference(firstAo.getReference());
         }
         create(ddDequestItem);
         for (AccountOperation ao : listAO) {

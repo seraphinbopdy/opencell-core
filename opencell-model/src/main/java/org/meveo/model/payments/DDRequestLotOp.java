@@ -341,7 +341,7 @@ public class DDRequestLotOp extends AuditableEntity {
     /**
      * @return the generatePaymentLines
      */
-    public Boolean isGeneratePaymentLines() {
+    public Boolean getGeneratePaymentLines() {
         return generatePaymentLines;
     }
 

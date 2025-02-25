@@ -113,7 +113,7 @@ public class DDRequestLOTService extends PersistenceService<DDRequestLOT> {
 		ddRequestLOT.setSendDate(new Date());
 		ddRequestLOT.setPaymentOrRefundEnum(ddrequestLotOp.getPaymentOrRefundEnum());
 		ddRequestLOT.setSeller(ddrequestLotOp.getSeller());
-		ddRequestLOT.setPaymentCreated(ddrequestLotOp.isGeneratePaymentLines());
+		ddRequestLOT.setPaymentCreated(ddrequestLotOp.getGeneratePaymentLines());
 		ddRequestLOT.setSendDate(calendarBankingService.addBusinessDaysToDate(new Date(), ArConfig.getDateValueAfter()));
 		create(ddRequestLOT);
 		ddRequestLOT.setFileName(ddRequestBuilderFactory.getInstance(ddRequestBuilder).getDDFileName(ddRequestLOT, appProvider));

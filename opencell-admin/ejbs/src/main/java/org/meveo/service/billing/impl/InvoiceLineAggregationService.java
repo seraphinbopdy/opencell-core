@@ -1,6 +1,7 @@
 package org.meveo.service.billing.impl;
 
 import static java.util.Arrays.asList;
+import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
 import static org.meveo.model.billing.BillingEntityTypeEnum.BILLINGACCOUNT;
 import static org.meveo.model.billing.BillingEntityTypeEnum.ORDER;
 
@@ -8,6 +9,8 @@ import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -64,6 +67,8 @@ public class InvoiceLineAggregationService implements Serializable {
     /** Logger. */
     private static Logger log = LoggerFactory.getLogger(InvoiceLineAggregationService.class);
 
+    private static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss.SSS";
+
     @Inject
     @Named
     private NativePersistenceService nativePersistenceService;
@@ -75,6 +80,9 @@ public class InvoiceLineAggregationService implements Serializable {
     @Inject
     @MeveoJpa
     private EntityManagerWrapper emWrapper;
+
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_PATTERN);
+
 
     /**
      * Create a query object for IL aggregation lookup
@@ -111,6 +119,7 @@ public class InvoiceLineAggregationService implements Serializable {
             throw new BusinessException("No filter found for billingRun " + billingRun.getId());
         }
 
+        convertFilterValues(bcFilter);
         String aggregationQuery = getAggregationJPAQuery(aggregationConfiguration, billingRun, bcFilter);
         List<String> aggregationFields = parseQueryFieldNames(aggregationQuery);
 
@@ -166,6 +175,18 @@ public class InvoiceLineAggregationService implements Serializable {
 
         return new RTtoILAggregationQuery(query, aggregationFields, ilCount, baCount);
 
+    }
+
+    private void convertFilterValues(Map<String, Object> bcFilter) {
+        bcFilter.entrySet().forEach(entry -> {
+            if (entry.getValue() instanceof String && containsIgnoreCase(entry.getKey(), "Date")) {
+                try {
+                    entry.setValue(dateFormat.parse((String) entry.getValue()));
+                } catch (ParseException exception) {
+                    log.error(exception.getMessage());
+                }
+            }
+        });
     }
 
     /**

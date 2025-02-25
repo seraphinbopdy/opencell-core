@@ -1,6 +1,5 @@
 package org.meveo.api.generics.filter.filtermapper;
 
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -19,6 +18,9 @@ public class DateMapper extends FilterMapper {
             } catch (ParseException e) {
                 throw new IllegalArgumentException(property + " has not a valid filter value, hint : yyyy-MM-dd or dd/MM/yyyy");
             }
+        }
+        if(value instanceof Date) {
+            return (Date) value;
         }
         return new Date((Long) value);
     }

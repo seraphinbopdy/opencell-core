@@ -2349,7 +2349,7 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
             }
             billingRunFilters = Optional.ofNullable(billingRunFilters).orElseGet(HashMap::new);
             billingRunFilters.put("status", RatedTransactionStatusEnum.OPEN.toString());
-            additionalFilter.append("a.usageDate < '").append(billingRun.getLastTransactionDate().toString()).append("'");
+            billingRunFilters.put("usageDate", billingRun.getLastTransactionDate().toString());
         }
         if(billingRun.getStatus() == OPEN) {
             additionalFilter.append("or (a.billingRun.id = ").append(billingRun.getId()).append(")");

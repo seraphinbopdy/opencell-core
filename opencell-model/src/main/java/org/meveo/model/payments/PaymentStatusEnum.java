@@ -25,5 +25,36 @@ package org.meveo.model.payments;
  */
 public enum PaymentStatusEnum {
 
-    ACCEPTED, PENDING, REJECTED, ERROR, NOT_PROCESSED;
+    ACCEPTED(1, "PaymentStatusEnum.ACCEPTED"), 
+    PENDING(2, "PaymentStatusEnum.PENDING"), 
+    REJECTED(3, "PaymentStatusEnum.REJECTED"), 
+    ERROR(4, "PaymentStatusEnum.ERROR"),  
+    NOT_PROCESSED(5, "PaymentStatusEnum.NOT_PROCESSED");
+	
+	 private Integer id;
+	    private String label;
+
+	    PaymentStatusEnum(Integer id, String label) {
+	        this.label = label;
+	        this.id = id;
+	    }
+
+	    public String getLabel() {
+	        return this.label;
+	    }
+
+	    public Integer getId() {
+	        return this.id;
+	    }
+
+	    public static PaymentStatusEnum getValue(Integer id) {
+	        if (id != null) {
+	            for (PaymentStatusEnum status : values()) {
+	                if (id.equals(status.getId())) {
+	                    return status;
+	                }
+	            }
+	        }
+	        return null;
+	    }
 }

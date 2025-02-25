@@ -183,7 +183,7 @@ public class SepaDirectDebitJobBean extends BaseJobBean {
 				if (ddrequestLotOp.getPaymentStatus() == null) {
 					ddrequestLotOp.setPaymentStatus(PaymentStatusEnum.ACCEPTED);
 				}
-				if (ddrequestLotOp.isGeneratePaymentLines() == null) {
+				if (ddrequestLotOp.getGeneratePaymentLines() == null) {
 					ddrequestLotOp.setGeneratePaymentLines(Boolean.TRUE);
 				}
 				if (ddrequestLotOp.getCreateMatching() == null) {
@@ -218,7 +218,7 @@ public class SepaDirectDebitJobBean extends BaseJobBean {
 								dDRequestLOTService.generateDDRquestLotFile(dDRequestLOTService.findById(ddRequestLOT.getId()),
 										ddRequestBuilderInterface, appProvider,result);
 								log.info("file generated.");
-								if (ddrequestLotOp.isGeneratePaymentLines().booleanValue() ) {
+								if (ddrequestLotOp.getGeneratePaymentLines().booleanValue() ) {
 									dDRequestLOTService.createPaymentsOrRefundsForDDRequestLot(ddRequestLOT, ddrequestLotOp.getCreateMatching().booleanValue(), ddrequestLotOp.getPaymentStatus(),nbRuns, waitingMillis, result);
 									log.info("Payment created.");
 								}
@@ -340,7 +340,7 @@ public class SepaDirectDebitJobBean extends BaseJobBean {
             newDDRequestLotOp.setFilter(ddrequestLotOp.getFilter());
             newDDRequestLotOp.setDdrequestOp(ddrequestLotOp.getDdrequestOp());
 
-			newDDRequestLotOp.setGeneratePaymentLines(ddrequestLotOp.isGeneratePaymentLines());
+			newDDRequestLotOp.setGeneratePaymentLines(ddrequestLotOp.getGeneratePaymentLines());
             newDDRequestLotOp.setPaymentStatus(ddrequestLotOp.getPaymentStatus());
             newDDRequestLotOp.setCreateMatching(ddrequestLotOp.getCreateMatching());
             this.dDRequestLotOpService.create(newDDRequestLotOp);

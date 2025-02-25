@@ -63,6 +63,9 @@
 			<hftl:formField label="#{messages['filter.title']}"  field="filter" id="filterSelectId" valueLabelField="code" popup="true" popupId="filterPopup" /> 
 			<hftl:formField label="#{messages['ddrequestLotOp.status']}" field="status"  isMessage="true" rendered="#{not empty ddRequestLotOpBean.entity.id}" edit="false"/>
 			<hftl:formField label="#{messages['ddrequestLotOp.errorCause']}" field="errorCause" rendered="#{not empty ddRequestLotOpBean.entity.id}" edit="false"/>
+			<hftl:formField label="#{messages['ddrequestLotOp.generatePaymentLines']}" field="generatePaymentLines"  />
+			<hftl:formField label="#{messages['ddrequestLotOp.paymentStatus']}" field="paymentStatus"  />
+			<hftl:formField label="#{messages['ddrequestLotOp.createMatching']}" field="createMatching"  />
 
 			<hftl:formField id="scriptSelectId"
 				label="#{messages['ddrequestLotOp.dueDateRangeScript']}"

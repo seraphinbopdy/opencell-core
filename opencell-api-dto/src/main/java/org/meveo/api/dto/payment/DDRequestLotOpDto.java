@@ -84,6 +84,9 @@ public class DDRequestLotOpDto extends AuditableEntityDto {
     
     /** Flag to activate generation of payment lines (by default true). */
     private Boolean generatePaymentLines = Boolean.TRUE;
+    
+    /** Flag to create matching (by default true). */
+    private Boolean createMatching = Boolean.TRUE;
 
     /** Default payment status. */
     private PaymentStatusEnum paymentStatus;
@@ -111,8 +114,9 @@ public class DDRequestLotOpDto extends AuditableEntityDto {
         this.filterCode = ddrequestLotOp.getFilter() != null ? ddrequestLotOp.getFilter().getCode() : null;
         this.paymentOrRefundEnum = ddrequestLotOp.getPaymentOrRefundEnum();
         this.sellerCode = ddrequestLotOp.getSeller() != null ? ddrequestLotOp.getSeller().getCode() : null;
-        this.generatePaymentLines = ddrequestLotOp.isGeneratePaymentLines();
+        this.generatePaymentLines = ddrequestLotOp.getGeneratePaymentLines();
         this.paymentStatus = ddrequestLotOp.getPaymentStatus();
+        this.createMatching = ddrequestLotOp.getCreateMatching();
     }
 
     /**
@@ -338,5 +342,13 @@ public class DDRequestLotOpDto extends AuditableEntityDto {
     public void setPaymentStatus(PaymentStatusEnum paymentStatus) {
         this.paymentStatus = paymentStatus;
     }
+
+	public Boolean getCreateMatching() {
+		return createMatching;
+	}
+
+	public void setCreateMatching(Boolean createMatching) {
+		this.createMatching = createMatching;
+	}
 
 }

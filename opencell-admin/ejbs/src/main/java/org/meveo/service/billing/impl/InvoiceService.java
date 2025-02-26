@@ -2695,6 +2695,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
             try {
                 if (invoice.getStatus().equals(DRAFT)) {
                     invoice.assignTemporaryInvoiceNumber();
+                    update(invoice);
                 } else if (invoice.getStatus() != REJECTED && invoice.getStatus() != InvoiceStatusEnum.SUSPECT) {
                     invoicesWNumber.add(serviceSingleton.assignInvoiceNumber(invoice));
                 }
@@ -2717,7 +2718,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
                 log.error("Failed to generate XML/PDF files or recorded invoice AO for invoice {}/{}", invoice.getId(), invoice.getInvoiceNumberOrTemporaryNumber(), e);
             }
         }
-        return refreshOrRetrieve(invoices);
+        return retrieveIfNotManaged(invoices);
     }
 
     /**

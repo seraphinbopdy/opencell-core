@@ -1990,6 +1990,24 @@
           "attributes": {}
         },
         {
+          "id": "a72dd6dd-be73-42cf-baad-000b70daebb4",
+          "name": "NEWUI_PRODUCT",
+          "description": "",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "3eeadcfd-ace4-44e0-ba78-9a4d0505eef8",
+          "attributes": {}
+        },
+        {
+          "id": "5d0fb0a0-ca25-4961-b295-d412354c8fc4",
+          "name": "NEWUI_CONTACT",
+          "description": "",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "3eeadcfd-ace4-44e0-ba78-9a4d0505eef8",
+          "attributes": {}
+        },
+        {
           "id": "bed02301-69cf-4799-a981-d9f1218173bb",
           "name": "NEWUI",
           "composite": true,
@@ -2002,7 +2020,9 @@
                 "NEWUI_ORDER",
                 "NEWUI_SUBSCRIPTION",
                 "NEWUI_INVOICE",
-                "NEWUI_COLLECTION_PLAN"
+                "NEWUI_COLLECTION_PLAN",
+                "NEWUI_PRODUCT",
+                "NEWUI_CONTACT"
               ]
         }
           }

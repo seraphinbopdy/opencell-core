@@ -1816,6 +1816,20 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
                     } else {
                         priceWithTax = tradingPricePlanMatrixLine.getTradingValue();
                     }
+                    if(tradingCurrency != null && tradingCurrency.getCurrencyCode() != null && pricePlanMatrixVersion.getTradingPricesEL() != null) {
+                        String priceEl = pricePlanMatrixVersion.getTradingPricesEL().get(tradingCurrency.getCurrencyCode());
+                        if(StringUtils.isNotBlank(priceEl)) {
+                            BigDecimal priceTemp = elUtils.evaluateAmountExpression(priceEl, walletOperation, walletOperation.getWallet().getUserAccount(), null, priceWithoutTax);
+                            if (priceTemp == null) {
+                                throw new BusinessException("Can't evaluate price for price plan " + pricePlan.getId() + " EL:" + priceEl + " for currency : " + tradingCurrency.getCurrencyCode());
+                            }
+                            if (appProvider.isEntreprise()) {
+                                priceWithoutTax = priceTemp;
+                            } else {
+                                priceWithTax = priceTemp;
+                            }
+                        }
+                    }
                     walletOperation.setUseSpecificPriceConversion(true);
                 } else if(tradingPricePlanMatrixLine == null) {
                     priceWithoutTax = walletOperation.getUnitAmountWithoutTax() != null ? walletOperation.getUnitAmountWithoutTax().multiply(currentRate) : null;

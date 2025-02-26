@@ -6287,7 +6287,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
                         if (existingInvoice != null) {
                             cleanInvoiceAggregates(existingInvoice.getId());
                             initAmounts(existingInvoice.getId());
-                            invoiceAggregateProcessingInfo.invoice = retrieveIfNotManaged(existingInvoice);
+                            invoiceAggregateProcessingInfo.invoice = refreshOrRetrieve(existingInvoice);
                         } else {
                             // TODO check instantiateInvoice(entityToInvoice
                             invoiceAggregateProcessingInfo.invoice = instantiateInvoice(entityToInvoice, invoiceLinesGroup.getBillingAccount(), invoiceLinesGroup.getSeller().getId(), billingRun, invoiceDate, isDraft,
@@ -6989,10 +6989,13 @@ public class InvoiceService extends PersistenceService<Invoice> {
      * @param invoiceResource invoice resource
      * @return Updated invoice
      */
+    @JpaAmpNewTx
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public Invoice update(Invoice toUpdate, Invoice input, org.meveo.apiv2.billing.Invoice invoiceResource) {
         toUpdate = refreshOrRetrieve(toUpdate);
         final InvoiceStatusEnum status = toUpdate.getStatus();
-        if (!(InvoiceStatusEnum.REJECTED.equals(status) || InvoiceStatusEnum.SUSPECT.equals(status) || DRAFT.equals(status) || InvoiceStatusEnum.NEW.equals(status))) {
+        if (!(InvoiceStatusEnum.REJECTED.equals(status) || InvoiceStatusEnum.SUSPECT.equals(status)
+                || DRAFT.equals(status) || InvoiceStatusEnum.NEW.equals(status))) {
             throw new BusinessException("Can only update invoices in statuses NEW/DRAFT/SUSPECT/REJECTED");
         }
         if (InvoiceStatusEnum.NEW.equals(status)) {            

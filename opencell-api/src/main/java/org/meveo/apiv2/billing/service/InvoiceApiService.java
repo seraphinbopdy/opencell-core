@@ -71,12 +71,10 @@ import org.meveo.service.billing.impl.BatchEntityService;
 import org.meveo.service.billing.impl.InvoiceLineService;
 import org.meveo.service.billing.impl.InvoiceService;
 import org.meveo.service.billing.impl.InvoiceTypeService;
-import org.meveo.service.billing.impl.LinkedInvoiceService;
 import org.meveo.service.billing.impl.RatedTransactionService;
 import org.meveo.service.filter.FilterService;
 import org.meveo.service.job.JobInstanceService;
 import org.meveo.service.securityDeposit.impl.FinanceSettingsService;
-import org.meveo.service.settings.impl.AdvancedSettingsService;
 
 import jakarta.ejb.TransactionAttribute;
 import jakarta.ejb.TransactionAttributeType;
@@ -86,6 +84,7 @@ import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
+import org.meveo.service.settings.impl.AdvancedSettingsService;
 
 public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 
@@ -127,7 +126,6 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 	@Inject
 	private JobInstanceService jobInstanceService;
 
-	@Override
 	public List<Invoice> list(Long offset, Long limit, String sort, String orderBy, String filter) {
         PaginationConfiguration paginationConfiguration = new PaginationConfiguration(offset.intValue(), limit.intValue(), null, filter, null, null, null);
         return invoiceService.listWithlinkedInvoices(paginationConfiguration);
@@ -614,7 +612,7 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 	 * @return refresh result
 	 */
 	public Optional<Invoice> refreshRate(Long invoiceId) {
-		Invoice invoice = ofNullable(invoiceService.findById(invoiceId, asList("tradingCurrency")))
+		Invoice invoice = ofNullable(invoiceService.findById(invoiceId, List.of("tradingCurrency")))
 				.orElseThrow(() -> new NotFoundException("Invoice not found"));
 		if(invoice.getStatus() != InvoiceStatusEnum.NEW && invoice.getStatus() != InvoiceStatusEnum.DRAFT) {
 			throw new ForbiddenException("Refresh rate only allowed for invoices with status : NEW or DRAFT");

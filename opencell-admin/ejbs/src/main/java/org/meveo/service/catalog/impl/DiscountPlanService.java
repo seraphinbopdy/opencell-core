@@ -233,11 +233,10 @@ public class DiscountPlanService extends BusinessService<DiscountPlan> {
     					&& walletOperation.getDiscountedAmount()!=null 
     					&& walletOperation.getDiscountedAmount().compareTo(BigDecimal.ZERO)>0) {
     				unitAmountWithoutTax=walletOperation.getDiscountedAmount();
-    				discountedAmount=unitAmountWithoutTax;
 				} else if (walletOperation != null) {
     				unitAmountWithoutTax=appProvider.isEntreprise() ? walletOperation.getUnitAmountWithoutTax() : walletOperation.getUnitAmountWithTax();
-    				discountedAmount=walletOperation.getDiscountedAmount()!=null && walletOperation.getDiscountedAmount().compareTo(BigDecimal.ZERO)>0 ?walletOperation.getDiscountedAmount():unitAmountWithoutTax;
     			}
+				discountedAmount=unitAmountWithoutTax;
     			 
 			    walletOperationDiscountAmount = discountPlanItemService.getDiscountAmount(unitAmountWithoutTax, discountPlanItem,product,null,null,serviceInstance!=null?new ArrayList<>(serviceInstance.getAttributeInstances()):Collections.emptyList(), walletOperation);
     			discountValue=discountPlanItemService.getDiscountAmountOrPercent(null,null, null, unitAmountWithoutTax, discountPlanItem,product, serviceInstance!=null?new HashSet<>(serviceInstance.getAttributeInstances()):Collections.emptySet(), walletOperation);
@@ -292,12 +291,8 @@ public class DiscountPlanService extends BusinessService<DiscountPlan> {
     				discountWalletOperation.setUserAccount(subscription.getUserAccount());
     				if(walletOperation != null ) {
 						discountWalletOperation.setDiscountedWalletOperation(walletOperation);
-    					walletOperation.setDiscountedAmount(discountedAmount);
     				}
     			}
-			    if(walletOperation != null){
-				    walletOperation.setDiscountedAmount(discountedAmount);
-			    }
     			log.debug("calculateDiscountplanItems walletOperation code={},discountValue={}",walletOperation!=null?walletOperation.getCode():null,discountValue);
     			//TODO: must have wallet operation for : link discountWallet to the current wallet, and
     			discountWalletOperations.add(discountWalletOperation);
@@ -305,6 +300,10 @@ public class DiscountPlanService extends BusinessService<DiscountPlan> {
 					break;
 				}
     		}
+			if(walletOperation != null){
+				var sumDiscountedAmount = discountWalletOperations.stream().map(WalletOperation::getAmountWithoutTax).reduce(BigDecimal.ZERO, BigDecimal::add);
+				walletOperation.setDiscountedAmount(walletOperation.getAmountWithoutTax().subtract(sumDiscountedAmount.abs()));
+			}
     	}
 
     	return discountWalletOperations;

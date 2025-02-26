@@ -358,6 +358,11 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                 dateToCompare = levelInstance.getExecutionDate();
                 DunningLevelInstance previousLevelInstance = null;
 
+                // Update the level status to IGNORE when the execution date is null
+                if(levelInstance.getLevelStatus().equals(DunningLevelInstanceStatusEnum.TO_BE_DONE) && levelInstance.getExecutionDate() == null) {
+                    levelInstance.setLevelStatus(DunningLevelInstanceStatusEnum.IGNORED);
+                 }
+
                 if (levelsIndex > 0) {
                     previousLevelInstance = levelInstances.get(levelsIndex - 1);
                 }

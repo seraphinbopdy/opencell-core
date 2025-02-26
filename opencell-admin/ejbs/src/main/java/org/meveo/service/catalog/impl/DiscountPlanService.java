@@ -224,7 +224,7 @@ public class DiscountPlanService extends BusinessService<DiscountPlan> {
 				discountWalletOperation.setSequence(discountPlanItem.getFinalSequence());
 				discountWalletOperation.setOrderNumber(walletOperation != null ? walletOperation.getOrderNumber() : null);
 				discountWalletOperation.setTradingCurrency(billingAccount.getTradingCurrency());
-			    discountWalletOperation.setEdr(walletOperation.getEdr());
+			    discountWalletOperation.setEdr(walletOperation != null ? walletOperation.getEdr() : null);
 
 				TaxInfo taxInfo = taxMappingService.determineTax(discountAccountingArticle.getTaxClass(), seller, billingAccount, null, operationDate, discountWalletOperation, false, false, null);
     			taxPercent = taxInfo.tax.getPercent();
@@ -272,7 +272,7 @@ public class DiscountPlanService extends BusinessService<DiscountPlan> {
 					discountWalletOperation.setContract(walletOperation.getContract());
 					discountWalletOperation.setContractLine(walletOperation.getContractLine());
 				}
-			    BigDecimal rate = Optional.ofNullable(walletOperation.getTradingCurrency()).map(TradingCurrency::getCurrentRate).orElse(BigDecimal.ONE);
+			    BigDecimal rate = Optional.ofNullable(walletOperation).map(WalletOperation::getTradingCurrency).map(TradingCurrency::getCurrentRate).orElse(BigDecimal.ONE);
 			    discountWalletOperation.setTransactionalAmountTax(discountWalletOperation.getAmountTax().multiply(rate));
 			    discountWalletOperation.setTransactionalAmountWithTax(discountWalletOperation.getAmountWithTax().multiply(rate));
 			    discountWalletOperation.setTransactionalAmountWithoutTax(discountWalletOperation.getAmountWithoutTax().multiply(rate));
@@ -280,11 +280,13 @@ public class DiscountPlanService extends BusinessService<DiscountPlan> {
 			    discountWalletOperation.setTransactionalUnitAmountWithoutTax(discountWalletOperation.getUnitAmountWithoutTax().multiply(rate));
 			    discountWalletOperation.setTransactionalUnitAmountTax(discountWalletOperation.getUnitAmountTax().multiply(rate));
 				
-		        OrderInfo orderInfo = new OrderInfo();
-				orderInfo.setOrder(chargeInstance.getSubscription() != null ? chargeInstance.getSubscription().getOrder() : null);
-		        orderInfo.setProductVersion(chargeInstance.getServiceInstance().getProductVersion());
-		        orderInfo.setOrderProduct(chargeInstance.getServiceInstance().getOrderProduct());
-		        discountWalletOperation.setOrderInfo(orderInfo);
+				if(chargeInstance!=null) {
+					OrderInfo orderInfo = new OrderInfo();
+					orderInfo.setOrder(chargeInstance.getSubscription() != null ? chargeInstance.getSubscription().getOrder() : null);
+					orderInfo.setProductVersion(chargeInstance.getServiceInstance().getProductVersion());
+					orderInfo.setOrderProduct(chargeInstance.getServiceInstance().getOrderProduct());
+					discountWalletOperation.setOrderInfo(orderInfo);
+				}
     			
     			if(!isVirtual) {
     				discountWalletOperation.setSubscription(subscription);

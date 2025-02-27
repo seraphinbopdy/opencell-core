@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.meveo.admin.exception.BusinessException;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.model.communication.MediaEnum;
 import org.meveo.model.communication.MessageSenderConfig;
 import org.meveo.model.crm.Email;
@@ -125,7 +126,7 @@ public class EmailService extends PersistenceService<Email> {
 			if (files != null) {
 				for (File file : files) {
 					MimeBodyPart attached = null;
-					if (file.exists()) {
+					if (FileUtils.existsFile(file)) {
 						attached = new MimeBodyPart();
 						FileDataSource fds = new FileDataSource(file);
 						attached.setDataHandler(new DataHandler(fds));

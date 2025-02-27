@@ -18,7 +18,6 @@
 package org.meveo.admin.parse.xls;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -30,6 +29,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.meveo.commons.utils.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +58,7 @@ public class XLSFile implements Serializable {
 	 * @throws IOException input/output exception
 	 */
 	public void parse() throws IOException {
-		try (Workbook w = WorkbookFactory.create(new FileInputStream(file))) {
+		try (Workbook w = WorkbookFactory.create(FileUtils.getInputStream(file))) {
 			// Get the first sheet
 			Sheet sheet = w.getSheetAt(0);
 			// Loop over first 10 column and lines

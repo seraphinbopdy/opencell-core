@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import org.meveo.commons.utils.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,10 +79,10 @@ public class ParserSwagger {
     }
     //Will search all sub directory files and will add it to our list
     private void listAllFiles(File folder, List<String> returnListFilesPath) {
-        File[] fileNames = folder.listFiles();
+        File[] fileNames = FileUtils.listFiles(folder);
         for (File file : fileNames) {
             // if directory call the same method again
-            if (file.isDirectory()) {
+            if (FileUtils.isDirectory(file)) {
                 listAllFiles(file, returnListFilesPath);
             } else {
                 try {
@@ -429,7 +430,7 @@ public class ParserSwagger {
         }
         File realName = new File(filePath);
         Files.delete(Paths.get(filePath));
-        new File(filePathTemp).renameTo(realName);
+        FileUtils.renameFile(new File(filePathTemp), realName);
     }
     //Will create a unique operation ID for the annotation
     private String autoCompleteUrl(String urlEndString, String typeProcess, String className) {

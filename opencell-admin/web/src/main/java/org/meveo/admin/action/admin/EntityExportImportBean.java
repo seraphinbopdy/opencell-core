@@ -29,11 +29,11 @@ import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.jboss.seam.international.status.Messages;
 import org.jboss.seam.international.status.builder.BundleKey;
 import org.meveo.api.dto.response.utilities.ImportExportResponseDto;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.export.EntityExportImportService;
 import org.meveo.export.ExportImportStatistics;
@@ -334,8 +334,8 @@ public class EntityExportImportBean implements Serializable {
         if (event.getFile() != null) {
             try {
 
-                File tempFile = File.createTempFile(FilenameUtils.getBaseName(event.getFile().getFileName()).replaceAll(" ", "_"),
-                    "." + FilenameUtils.getExtension(event.getFile().getFileName()));
+                File tempFile = FileUtils.createTempFile(FilenameUtils.getBaseName(event.getFile().getFileName()).replaceAll(" ", "_"),
+                        "." + FilenameUtils.getExtension(event.getFile().getFileName()));
                 FileUtils.copyInputStreamToFile(event.getFile().getInputStream(), tempFile);
 
                 exportImportFuture = entityExportImportService.importEntities(tempFile, event.getFile().getFileName().replaceAll(" ", "_"), false, false, !requireFK, null, false);

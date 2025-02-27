@@ -18,10 +18,103 @@
 
 package org.meveo.export;
 
+import com.thoughtworks.xstream.MarshallingStrategy;
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.converters.ConverterLookup;
+import com.thoughtworks.xstream.converters.DataHolder;
+import com.thoughtworks.xstream.core.ReferenceByIdMarshaller;
+import com.thoughtworks.xstream.core.ReferenceByIdUnmarshaller;
+import com.thoughtworks.xstream.core.util.QuickWriter;
+import com.thoughtworks.xstream.hibernate.converter.HibernatePersistentCollectionConverter;
+import com.thoughtworks.xstream.hibernate.converter.HibernatePersistentMapConverter;
+import com.thoughtworks.xstream.hibernate.converter.HibernatePersistentSortedMapConverter;
+import com.thoughtworks.xstream.hibernate.converter.HibernatePersistentSortedSetConverter;
+import com.thoughtworks.xstream.hibernate.mapper.HibernateMapper;
+import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import com.thoughtworks.xstream.io.naming.NameCoder;
+import com.thoughtworks.xstream.io.xml.PrettyPrintWriter;
+import com.thoughtworks.xstream.io.xml.XppReader;
+import com.thoughtworks.xstream.mapper.Mapper;
+import com.thoughtworks.xstream.mapper.MapperWrapper;
+import jakarta.annotation.PostConstruct;
+import jakarta.ejb.AsyncResult;
+import jakarta.ejb.Asynchronous;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Lock;
+import jakarta.ejb.LockType;
+import jakarta.ejb.Singleton;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.enterprise.inject.Instance;
+import jakarta.faces.model.DataModel;
+import jakarta.inject.Inject;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.NonUniqueResultException;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Query;
+import jakarta.persistence.Transient;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.Version;
+import jakarta.transaction.Transactional;
+import jakarta.ws.rs.core.GenericEntity;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import org.apache.commons.beanutils.BeanUtilsBean;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.reflect.FieldUtils;
+import org.hibernate.proxy.HibernateProxy;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
+import org.jboss.resteasy.client.jaxrs.internal.BasicAuthentication;
+import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataOutput;
+import org.meveo.admin.exception.BusinessException;
+import org.meveo.api.MeveoApiErrorCodeEnum;
+import org.meveo.api.dto.response.utilities.ImportExportResponseDto;
+import org.meveo.cache.CacheContainerProvider;
+import org.meveo.commons.utils.FileUtils;
+import org.meveo.commons.utils.ParamBeanFactory;
+import org.meveo.commons.utils.PersistenceUtils;
+import org.meveo.commons.utils.ResteasyClientProxyBuilder;
+import org.meveo.commons.utils.XStreamCDATAConverter;
+import org.meveo.jpa.EntityManagerWrapper;
+import org.meveo.jpa.JpaAmpNewTx;
+import org.meveo.jpa.MeveoJpa;
+import org.meveo.model.ExportIdentifier;
+import org.meveo.model.IEntity;
+import org.meveo.model.IJPAVersionedEntity;
+import org.meveo.model.catalog.OfferTemplate;
+import org.meveo.model.catalog.ProductOffering;
+import org.meveo.model.communication.MeveoInstance;
+import org.meveo.model.cpq.Attribute;
+import org.meveo.model.cpq.Product;
+import org.meveo.model.crm.Provider;
+import org.meveo.model.scripts.ScriptInstance;
+import org.meveo.model.shared.DateUtils;
+import org.meveo.security.CurrentUser;
+import org.meveo.security.MeveoUser;
+import org.meveo.service.base.ValueExpressionWrapper;
+import org.meveo.util.ApplicationProvider;
+import org.primefaces.model.LazyDataModel;
+import org.reflections.Reflections;
+import org.slf4j.Logger;
+
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -56,104 +149,6 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
-
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
-
-import org.apache.commons.beanutils.BeanUtilsBean;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.reflect.FieldUtils;
-import org.hibernate.proxy.HibernateProxy;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
-import org.jboss.resteasy.client.jaxrs.internal.BasicAuthentication;
-import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataOutput;
-import org.meveo.admin.exception.BusinessException;
-import org.meveo.api.MeveoApiErrorCodeEnum;
-import org.meveo.api.dto.response.utilities.ImportExportResponseDto;
-import org.meveo.cache.CacheContainerProvider;
-import org.meveo.commons.utils.ParamBeanFactory;
-import org.meveo.commons.utils.PersistenceUtils;
-import org.meveo.commons.utils.ResteasyClientProxyBuilder;
-import org.meveo.commons.utils.XStreamCDATAConverter;
-import org.meveo.jpa.EntityManagerWrapper;
-import org.meveo.jpa.JpaAmpNewTx;
-import org.meveo.jpa.MeveoJpa;
-import org.meveo.model.ExportIdentifier;
-import org.meveo.model.IEntity;
-import org.meveo.model.IJPAVersionedEntity;
-import org.meveo.model.catalog.OfferTemplate;
-import org.meveo.model.catalog.ProductOffering;
-import org.meveo.model.communication.MeveoInstance;
-import org.meveo.model.cpq.Attribute;
-import org.meveo.model.cpq.Product;
-import org.meveo.model.crm.Provider;
-import org.meveo.model.scripts.ScriptInstance;
-import org.meveo.model.shared.DateUtils;
-import org.meveo.security.CurrentUser;
-import org.meveo.security.MeveoUser;
-import org.meveo.service.base.ValueExpressionWrapper;
-import org.meveo.util.ApplicationProvider;
-import org.primefaces.model.LazyDataModel;
-import org.reflections.Reflections;
-import org.slf4j.Logger;
-
-import com.thoughtworks.xstream.MarshallingStrategy;
-import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.converters.ConverterLookup;
-import com.thoughtworks.xstream.converters.DataHolder;
-import com.thoughtworks.xstream.core.ReferenceByIdMarshaller;
-import com.thoughtworks.xstream.core.ReferenceByIdUnmarshaller;
-import com.thoughtworks.xstream.core.util.QuickWriter;
-import com.thoughtworks.xstream.hibernate.converter.HibernatePersistentCollectionConverter;
-import com.thoughtworks.xstream.hibernate.converter.HibernatePersistentMapConverter;
-import com.thoughtworks.xstream.hibernate.converter.HibernatePersistentSortedMapConverter;
-import com.thoughtworks.xstream.hibernate.converter.HibernatePersistentSortedSetConverter;
-import com.thoughtworks.xstream.hibernate.mapper.HibernateMapper;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
-import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
-import com.thoughtworks.xstream.io.naming.NameCoder;
-import com.thoughtworks.xstream.io.xml.PrettyPrintWriter;
-import com.thoughtworks.xstream.io.xml.XppReader;
-import com.thoughtworks.xstream.mapper.Mapper;
-import com.thoughtworks.xstream.mapper.MapperWrapper;
-
-import jakarta.annotation.PostConstruct;
-import jakarta.ejb.AsyncResult;
-import jakarta.ejb.Asynchronous;
-import jakarta.ejb.EJB;
-import jakarta.ejb.Lock;
-import jakarta.ejb.LockType;
-import jakarta.ejb.Singleton;
-import jakarta.ejb.TransactionAttribute;
-import jakarta.ejb.TransactionAttributeType;
-import jakarta.enterprise.inject.Instance;
-import jakarta.faces.model.DataModel;
-import jakarta.inject.Inject;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
-import jakarta.persistence.NoResultException;
-import jakarta.persistence.NonUniqueResultException;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Query;
-import jakarta.persistence.Transient;
-import jakarta.persistence.TypedQuery;
-import jakarta.persistence.Version;
-import jakarta.transaction.Transactional;
-import jakarta.ws.rs.core.GenericEntity;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 
 /**
  * @author Andrius Karpavicius
@@ -450,10 +445,10 @@ public class EntityExportImportService implements Serializable {
         ZipOutputStream zos = null;
         try {
             log.info("Exporting data to a file {}", filename);
-            FileUtils.forceMkdir(new File(path));
+            FileUtils.mkdirs(path);
 
             if (asZip) {
-                zos = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(filename)));
+                zos = new ZipOutputStream(new BufferedOutputStream(FileUtils.getOutputStream(filename)));
                 zos.putNextEntry(new ZipEntry(shortFilename + ".xml"));
                 fileWriter = new OutputStreamWriter(zos);
 
@@ -729,7 +724,7 @@ public class EntityExportImportService implements Serializable {
 
         try {
             @SuppressWarnings("resource")
-            InputStream inputStream = new FileInputStream(fileToImport);
+            InputStream inputStream = FileUtils.getInputStream(fileToImport);
 
             // Handle zip file
             ZipInputStream zis = null;
@@ -832,7 +827,7 @@ public class EntityExportImportService implements Serializable {
 
         try {
             @SuppressWarnings("resource")
-            InputStream inputStream = new FileInputStream(fileToImport);
+            InputStream inputStream = FileUtils.getInputStream(fileToImport);
 
             // Handle zip file
             ZipInputStream zis = null;
@@ -1037,7 +1032,7 @@ public class EntityExportImportService implements Serializable {
         RetrievedEntities entities = getEntitiesToExport(template, null, null, null, 0, PAGE_SIZE);
 
         try (PrintWriter writer = new PrintWriter(filename)) {
-            FileUtils.forceMkdir(new File(path));
+            FileUtils.mkdirs(path);
 
             List<IEntity> entityList = entities.principalEntities;
             List<String> output = entityList.stream().map(entity -> entity.getId() + "," + entity.getClass().getName()).collect(Collectors.toList());
@@ -2338,7 +2333,7 @@ public class EntityExportImportService implements Serializable {
     private File actualizeVersionOfExportFile(File sourceFile, String sourceFilename, String sourceVersion) throws IOException, TransformerException {
         log.debug("Actualizing the version of export file {}. Current version is {}", sourceFilename, sourceVersion);
 
-        Source source;
+
         File finalFile = null;
         String finalVersion = null;
         List<File> tempFiles = new ArrayList<>();
@@ -2348,39 +2343,43 @@ public class EntityExportImportService implements Serializable {
         factory.setAttribute("http://javax.xml.XMLConstants/property/accessExternalStylesheet", "");
 
         // Handle zip file with try-with-resources
-        try (ZipInputStream zis = sourceFilename.endsWith(".zip") ? new ZipInputStream(new FileInputStream(sourceFile)) : null) {
-            if (zis != null) {
-                zis.getNextEntry();
-                source = new StreamSource(zis);
-            } else {
-                source = new StreamSource(sourceFile);
-            }
 
-            for (Entry<String, String> changesetInfo : getApplicableExportModelVersionChangesets(sourceVersion).entrySet()) {
-                String changesetVersion = changesetInfo.getKey();
-                String changesetFile = changesetInfo.getValue();
-                File tempFile = File.createTempFile(FilenameUtils.getBaseName(sourceFilename) + "_" + changesetVersion, ".xml");
-                tempFiles.add(tempFile);
-                log.trace("Transforming {} to version {}, targetFileName {}", sourceFilename, changesetVersion, tempFile.getAbsolutePath());
-                try {
-                    Transformer transformer = factory.newTransformer(new StreamSource(this.getClass().getResourceAsStream("/" + changesetFile)));
-                    transformer.setParameter("version", changesetVersion);
-                    transformer.transform(source, new StreamResult(tempFile));
-                } catch (TransformerException e) {
-                    log.error("Failed to transform {} to version {}, targetFileName {}", sourceFilename, changesetVersion, tempFile.getAbsolutePath(), e);
-                    throw e;
-                }
-                source = new StreamSource(tempFile);
-                finalFile = tempFile;
-                finalVersion = changesetVersion;
-            }
+        Source source = null;
+        ZipInputStream zis = null;
+        // Handle zip file
+        if (sourceFilename.endsWith(".zip")) {
+            zis = new ZipInputStream(FileUtils.getInputStream(sourceFile));
+            zis.getNextEntry();
+            source = new StreamSource(zis);
+        } else {
+            source = new StreamSource(sourceFile);
         }
+
+        for (Entry<String, String> changesetInfo : getApplicableExportModelVersionChangesets(sourceVersion).entrySet()) {
+            String changesetVersion = changesetInfo.getKey();
+            String changesetFile = changesetInfo.getValue();
+            File tempFile = FileUtils.createTempFile(FilenameUtils.getBaseName(sourceFilename) + "_" + changesetVersion, ".xml");
+            tempFiles.add(tempFile);
+            log.trace("Transforming {} to version {}, targetFileName {}", sourceFilename, changesetVersion, tempFile.getAbsolutePath());
+            try {
+                Transformer transformer = factory.newTransformer(new StreamSource(this.getClass().getResourceAsStream("/" + changesetFile)));
+                transformer.setParameter("version", changesetVersion);
+                transformer.transform(source, new StreamResult(tempFile));
+            } catch (TransformerException e) {
+                log.error("Failed to transform {} to version {}, targetFileName {}", sourceFilename, changesetVersion, tempFile.getAbsolutePath(), e);
+                throw e;
+            }
+            source = new StreamSource(tempFile);
+            finalFile = tempFile;
+            finalVersion = changesetVersion;
+        }
+
 
         // Remove intermediary temp files except the final one
         tempFiles.remove(finalFile);
         for (File file : tempFiles) {
             try {
-                file.delete();
+                FileUtils.delete(file);
             } catch (Exception e) {
                 log.error("Failed to delete a temp file {}", file.getAbsolutePath(), e);
             }
@@ -2392,7 +2391,7 @@ public class EntityExportImportService implements Serializable {
 
     /**
      * Get applicable export model version upgrade changesets. Changeset is applicable when it's version is higher than the sourceVersion value
-     * 
+     *
      * @param sourceVersion Version to upgrade
      * @return A map of changesets with version changeset number as a key and changeset file as a value
      */
@@ -2414,7 +2413,7 @@ public class EntityExportImportService implements Serializable {
     private void loadExportModelVersionChangesets() {
         List<String> returnListFilesPath = new ArrayList<>();
         File folder = new File(Thread.currentThread().getContextClassLoader().getResource("./exportVersions").getPath());
-        org.meveo.commons.utils.FileUtils.listAllFiles(folder, returnListFilesPath, XSLT_EXTENTION);
+        FileUtils.listAllFiles(folder, returnListFilesPath, XSLT_EXTENTION);
         Collections.sort(returnListFilesPath);
 
         exportModelVersionChangesets = new LinkedHashMap<String, String>();
@@ -2427,13 +2426,14 @@ public class EntityExportImportService implements Serializable {
 
     /**
      * Upload file to a remote meveo instance
-     * 
+     *
      * @param filename Path to a file to upload
      * @param remoteInstance Remote meveo instance
      * @throws Exception
      */
     private String uploadFileToRemoteMeveoInstance(String filename, MeveoInstance remoteInstance) throws Exception {
-        try (FileInputStream fileInputStream = new FileInputStream(new File(filename))) {
+
+        try(InputStream inputStream = FileUtils.getInputStream(new File(filename))) {
 
             log.debug("Uplading {} file to a remote meveo instance {}", filename, remoteInstance.getCode());
 
@@ -2445,7 +2445,7 @@ public class EntityExportImportService implements Serializable {
 
             MultipartFormDataOutput mdo = new MultipartFormDataOutput();
 
-            mdo.addFormData("file", fileInputStream, MediaType.APPLICATION_OCTET_STREAM_TYPE, filename);
+            mdo.addFormData("file", inputStream, MediaType.APPLICATION_OCTET_STREAM_TYPE, filename);
             GenericEntity<MultipartFormDataOutput> entity = new GenericEntity<MultipartFormDataOutput>(mdo) {
             };
 
@@ -2478,7 +2478,7 @@ public class EntityExportImportService implements Serializable {
 
     /**
      * Check status and get results of file upload to a remote meveo instance.
-     * 
+     *
      * @param executionId Import in remote meveo instance execution id
      * @param remoteInstance Remote meveo instance
      * @return import export response
@@ -2520,7 +2520,7 @@ public class EntityExportImportService implements Serializable {
 
     /**
      * Get export template for a particular class.
-     * 
+     *
      * @param clazz Class
      * @return Export/import template definition
      */
@@ -2553,7 +2553,7 @@ public class EntityExportImportService implements Serializable {
 
     /**
      * Get export template by name?
-     * 
+     *
      * @param templateName Template name
      * @return Export/import template definition
      */
@@ -2569,7 +2569,7 @@ public class EntityExportImportService implements Serializable {
 
     /**
      * Get export template by name.
-     * 
+     *
      * @param relatedEntityInfo Related entity to be exported.
      * @return Export/import template definition
      */

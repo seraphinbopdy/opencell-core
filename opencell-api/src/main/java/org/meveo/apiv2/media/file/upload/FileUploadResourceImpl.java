@@ -1,9 +1,9 @@
 package org.meveo.apiv2.media.file.upload;
 
-import org.meveo.admin.storage.StorageFactory;
 import org.meveo.api.admin.FilesApi;
 import org.meveo.api.logging.WsRestApiInterceptor;
 import org.meveo.apiv2.media.MediaFile;
+import org.meveo.commons.utils.FileUtils;
 
 import jakarta.inject.Inject;
 import jakarta.interceptor.Interceptors;
@@ -29,12 +29,11 @@ public class FileUploadResourceImpl implements FileUploadResource {
     public Response uploadFile(MediaFile file) {
         Path saveTo = resolePath(file.getLevel());
         try {
-            if(Files.notExists(saveTo)){
-                (new File(saveTo.toUri())).mkdirs();
-            }
+            File fileToSave = saveTo.toFile();
+            FileUtils.createDirectory(fileToSave);
             Path savedFilePath = Path.of(saveTo.toString(), URLDecoder.decode(file.getFileName(), StandardCharsets.UTF_8));
             byte[] data = file.getData() != null ? file.getData() : downloadFile(file.getFileUrl());
-            StorageFactory.write(savedFilePath, data);
+            FileUtils.write(savedFilePath, data);
             return Response.ok().entity("{\"actionStatus\":{\"status\":\"SUCCESS\",\"message\":\"media file successfully uploaded\"}," +
                     "\"URL\": \"/opencell/files/"+savedFilePath.subpath(3,savedFilePath.getNameCount())+"\"} ").build();
         } catch (IOException e) {

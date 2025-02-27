@@ -40,6 +40,7 @@ import org.meveo.api.dto.cpq.xml.QuoteXMLHeader;
 import org.meveo.api.dto.cpq.xml.QuoteXmlDto;
 import org.meveo.api.dto.cpq.xml.Seller;
 import org.meveo.api.dto.cpq.xml.SubCategory;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.model.article.AccountingArticle;
 import org.meveo.model.billing.InvoiceCategory;
@@ -98,10 +99,7 @@ public class QuoteToXmlScript extends ModuleScript {
         }
         String meveoDir = paramBeanFactory.getChrootDir() + File.separator;
 
-        File quoteXmlDir = new File(meveoDir + "quotes" + File.separator + "xml");
-        if (!quoteXmlDir.exists()) {
-            quoteXmlDir.mkdirs();
-        }
+        File quoteXmlDir = FileUtils.createDirectory(meveoDir + "quotes" + File.separator + "xml");
         xmlContent = quoteXml.getBytes();
         String fileName = cpqQuoteService.generateFileName(quoteVersion);
         quoteVersion.setXmlFilename(fileName);

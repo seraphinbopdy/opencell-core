@@ -29,6 +29,7 @@ import java.util.List;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.cache.CacheKeyStr;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.model.bi.OutputFormatEnum;
@@ -78,7 +79,7 @@ public class AccountingDetail extends FileProducer implements Reporting {
         try {
             File file = null;
             if (outputFormat == OutputFormatEnum.PDF) {
-                file = File.createTempFile("tempAccountingDetail", ".csv");
+                file = FileUtils.createTempFile("tempAccountingDetail", ".csv");
             } else if (outputFormat == OutputFormatEnum.CSV) {
                 StringBuilder sb = new StringBuilder(getFilename());
                 sb.append(".csv");

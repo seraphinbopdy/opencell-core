@@ -2,7 +2,6 @@ package org.meveo.service.cpq;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -29,7 +28,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.jboss.vfs.VFS;
 import org.jboss.vfs.VFSUtils;
@@ -38,9 +36,9 @@ import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.ConfigurationException;
 import org.meveo.admin.exception.InvoiceJasperNotFoundException;
 import org.meveo.admin.job.PdfGeneratorConstants;
-import org.meveo.admin.storage.StorageFactory;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.api.exception.MeveoApiException;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.commons.utils.StringUtils;
@@ -153,7 +151,7 @@ public class CpqQuoteService extends BusinessService<CpqQuote> {
 	        if (createDirs) {
 	            int pos = Integer.max(xmlFilename.lastIndexOf("/"), xmlFilename.lastIndexOf("\\"));
 	            String dir = xmlFilename.substring(0, pos);
-	            (new File(dir)).mkdirs();
+	            FileUtils.mkdirs(dir);
 	        }
 
 	        return xmlFilename;
@@ -245,7 +243,7 @@ public class CpqQuoteService extends BusinessService<CpqQuote> {
 	        if (createDirs) {
 	            int pos = Integer.max(pdfFilename.lastIndexOf("/"), pdfFilename.lastIndexOf("\\"));
 	            String dir = pdfFilename.substring(0, pos);
-	            (new File(dir)).mkdirs();
+	            FileUtils.mkdirs(dir);
 	        }
 
 	        return pdfFilename;
@@ -273,7 +271,7 @@ public class CpqQuoteService extends BusinessService<CpqQuote> {
 	        String quoteXmlFileName = getFullXmlFilePath(quoteVersion, false); 
 	        String QUOTE_TAG_NAME = "quote";
 	        File quoteXmlFile = new File(quoteXmlFileName);
-	        if (!StorageFactory.exists(quoteXmlFile)) {
+	        if (!FileUtils.existsFile(quoteXmlFile)) {
 	            //createXmlQuote(quote);
 	        }    
 	        String resDir = quoteDir + "quotes"  + File.separator + "jasper";
@@ -284,21 +282,21 @@ public class CpqQuoteService extends BusinessService<CpqQuote> {
 	        try {
 	            File destDir = new File(resDir);
 
-	            if (!destDir.exists()) {
+				if (!FileUtils.existsDirectory(destDir)) {
 
 	                String sourcePath = Thread.currentThread().getContextClassLoader().getResource("./jasper").getPath()  + File.separator + paramBean.getProperty("provider.rootDir", "default") + File.separator+ "quote";
 
 	                File sourceFile = new File(sourcePath);
-	                if (!sourceFile.exists()) {
+					if (!FileUtils.existsDirectory(sourceFile)) {
 	                    VirtualFile vfDir = VFS.getChild("content/" + ParamBeanFactory.getAppScopeInstance().getProperty("opencell.moduleName", "opencell") + ".war/WEB-INF/classes/jasper/default/quote");
 	                    log.info("default jaspers path :" + vfDir.getPathName());
 	                    URL vfPath = VFSUtils.getPhysicalURL(vfDir);
 	                    sourceFile = new File(vfPath.getPath());
-	                    if (!sourceFile.exists()) {
+						if (!FileUtils.existsDirectory(sourceFile)) {
 	                        throw new BusinessException("embedded jasper report for quote is missing..");
 	                    }
 	                }
-	                destDir.mkdirs();
+					FileUtils.mkdirs(destDir);
 	                FileUtils.copyDirectory(sourceFile, destDir);
 	            }   
 	            InvoiceType quoteType=invoiceTypeService.getDefaultQuote();
@@ -307,18 +305,18 @@ public class CpqQuoteService extends BusinessService<CpqQuote> {
 	            	jasperFilename=evaluateQuoteTemplateName(quoteType.getBillingTemplateNameEL(), quote);
 	            }
 	            File jasperFile = new File(resDir, jasperFilename+".jasper");
-	            if (!jasperFile.exists()) {
+				if (!FileUtils.existsFile(jasperFile)) {
 	            	 jasperFile = new File(resDir, "main.jasper");
 	            }
-	            if (!jasperFile.exists()) {
+				if (!FileUtils.existsFile(jasperFile)) {
 	                throw new InvoiceJasperNotFoundException("The jasper file doesn't exist.");
 	            }
 	            log.debug("Jasper template used: {}", jasperFile.getCanonicalPath());
 
-	            reportTemplate = new FileInputStream(jasperFile);
+	            reportTemplate = FileUtils.getInputStream(jasperFile);
 	            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 	            DocumentBuilder db = dbf.newDocumentBuilder();
-				Document xmlDocument = StorageFactory.parse(db, quoteXmlFile);
+				Document xmlDocument = FileUtils.parse(db, quoteXmlFile);
 	            xmlDocument.getDocumentElement().normalize();
 	            Node quoteNode = xmlDocument.getElementsByTagName(QUOTE_TAG_NAME).item(0);
 	            Transformer trans = TransformerFactory.newInstance().newTransformer();
@@ -345,7 +343,7 @@ public class CpqQuoteService extends BusinessService<CpqQuote> {
 
 	            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
 
-				OutputStream outStream = StorageFactory.getOutputStream(pdfFullFilename);
+				OutputStream outStream = FileUtils.getOutputStream(pdfFullFilename);
 				JasperExportManager.exportReportToPdfStream(jasperPrint, outStream);
 				assert outStream != null; // new code for S3
 				outStream.close(); // new code for S3
@@ -368,37 +366,36 @@ public class CpqQuoteService extends BusinessService<CpqQuote> {
 	    
 	    public boolean isCpqQuotePdfExist(QuoteVersion quoteVersion) {
 	        String pdfFileName = getFullPdfFilePath(quoteVersion, false);
-	        File pdfFile = new File(pdfFileName);
-	        return pdfFile.exists();
+	        return FileUtils.existsFile(pdfFileName);
 	    }
 	    
 	    public byte[] getQuotePdf(QuoteVersion quoteVersion) throws BusinessException {
 
 	        String pdfFileName = getFullPdfFilePath(quoteVersion, false);
 	        File pdfFile = new File(pdfFileName);
-			if (!StorageFactory.exists(pdfFileName)) {
+			if (!FileUtils.existsFile(pdfFileName)) {
 	            throw new BusinessException("quote PDF was not produced yet for quote {} and quoteVersion {} " +quoteVersion.getQuote().getQuoteNumber());
 	        }
 
-	        InputStream fileInputStream = null;
+	        InputStream inputStream = null;
 	        try {
 	            long fileSize = pdfFile.length();
 	            if (fileSize > Integer.MAX_VALUE) {
 	                throw new IllegalArgumentException("File is too big to put it to buffer in memory.");
 	            }
 	            byte[] fileBytes = new byte[(int) fileSize];
-				fileInputStream = StorageFactory.getInputStream(pdfFile);
-	            fileInputStream.read(fileBytes);
-				fileInputStream.close();
+				inputStream = FileUtils.getInputStream(pdfFile);
+	            inputStream.read(fileBytes);
+				inputStream.close();
 	            return fileBytes;
 
 	        } catch (Exception e) {
 	            log.error("Error reading quote PDF file {} contents", pdfFileName, e);
 
 	        } finally {
-	            if (fileInputStream != null) {
+	            if (inputStream != null) {
 	                try {
-	                    fileInputStream.close();
+	                    inputStream.close();
 	                } catch (IOException e) {
 	                    log.error("Error closing file input stream", e);
 	                }
@@ -483,7 +480,7 @@ public class CpqQuoteService extends BusinessService<CpqQuote> {
 			String fullPdfFilePath = getFullPdfFilePath(quoteVersion, false);
 			File file = new File(fullPdfFilePath);
 
-			if (!file.exists()) {
+			if (!FileUtils.existsFile(file)) {
 				log.warn("No Pdf file exists for the quote {}", quote.getQuoteNumber());
 				return false;
 			}

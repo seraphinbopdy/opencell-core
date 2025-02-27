@@ -193,10 +193,7 @@ public class FilesBean implements Serializable {
             subDirOUT, subDirERR, subDirWARN, catDirIN, catDirOUT, catDirKO, subDirKO, meterDirIN, meterDirOUT, meterDirKO, invoicePdfDir, invoiceXmlDir, jasperDir, priceplanVersionsDir, cdrFlatFileDirIn, cdrFlatFileDirOut
             , writeOffDirIN, writeOffDirOUT, writeOffDirKO, writeOffDirArchiv, discountDirIN, discountDirOUT, discountDirKO, discountDirArchiv);
         for (String custDirs : filePaths) {
-            File subDir = new File(custDirs);
-            if (!subDir.exists()) {
-                subDir.mkdirs();
-            }
+            FileUtils.createDirectory(custDirs);
         }
     }
 
@@ -212,9 +209,11 @@ public class FilesBean implements Serializable {
     public void deleteSelectedFile() {
         String folder = getFilePath() + File.separator + (this.selectedFolder == null ? "" : this.selectedFolder);
         log.info("delete file" + folder + File.separator + selectedFileName);
-        File file = new File(folder + File.separator + selectedFileName);
-        if (file.exists()) {
-            file.delete();
+        try {
+            FileUtils.delete(folder + File.separator + selectedFileName);
+        } catch (IOException e) {
+            log.error("Failed to delete a file {}", selectedFileName, e);
+            messages.error("Error while deleting " + selectedFileName);
         }
         this.selectedFileName = null;
         buildFileList();
@@ -224,7 +223,7 @@ public class FilesBean implements Serializable {
         StreamedContent result = null;
 
         String folder = getFilePath() + File.separator + (this.selectedFolder == null ? "" : this.selectedFolder);
-        try (FileInputStream is = new FileInputStream(new File(folder + File.separator + selectedFileName))) {
+        try (InputStream is = FileUtils.getInputStream(new File(folder + File.separator + selectedFileName))) {
             result = DefaultStreamedContent.builder().name(selectedFileName).stream(() -> is).build();
 
         } catch (IOException e) {
@@ -268,9 +267,9 @@ public class FilesBean implements Serializable {
     private void buildFileList() {
         String folder = getFilePath() + File.separator + (this.selectedFolder == null ? "" : this.selectedFolder);
         File file = new File(folder);
-        log.debug("getFileList " + folder);
+        log.info("buildFileList.folder " + folder);
 
-        File[] files = file.listFiles();
+        File[] files = FileUtils.listFiles(file);
 
         fileList = files == null ? new ArrayList<File>() : new ArrayList<File>(Arrays.asList(files));
         currentDirEmpty = !StringUtils.isBlank(this.selectedFolder) && fileList.size() == 0;
@@ -284,7 +283,7 @@ public class FilesBean implements Serializable {
     }
 
     public String getLastModified(File file) {
-        return sdf.format(new Date(file.lastModified()));
+        return sdf.format(new Date(FileUtils.getLastModified(file)));
     }
 
     public String getSelectedFileName() {
@@ -333,31 +332,29 @@ public class FilesBean implements Serializable {
 
             if (fileFormat != null) {
                 folderPath = getFilePath() + File.separator + "temp" + DateUtils.formatDateWithPattern(new Date(), "dd_MM_yyyy-HHmmss");
-                tempDirectory = new File(folderPath);
-                if (!tempDirectory.exists()) {
-                    tempDirectory.mkdirs();
-                }
+                tempDirectory = FileUtils.createDirectory(folderPath);
                 filePath = folderPath + File.separator + fileName;
             } else {
                 folderPath = getFilePath("");
                 filePath = getFilePath(fileName);
             }
 
-            InputStream fileInputStream = file.getInputStream();
+
+            InputStream inputStream = file.getInputStream();
             if (this.isAutoUnzipped()) {
                 if (!fileName.endsWith(ZIP_FILE_EXTENSION)) {
                     messages.info(fileName + " isn't a valid zip file!");
-                    copyFile(filePath, fileInputStream);
+                    copyFile(filePath, inputStream);
                 } else {
-                    copyUnZippedFile(folderPath, fileInputStream);
+                    copyUnZippedFile(folderPath, inputStream);
                 }
             } else {
-                copyFile(filePath, fileInputStream);
+                copyFile(filePath, inputStream);
             }
             if (fileFormat != null) {
-                File[] files = tempDirectory.listFiles();
+                File[] files = FileUtils.listFiles(tempDirectory);
                 Map<String, String> messagesValidation = flatFileValidator.validateAndLogFiles(files, fileFormat.getCode(), getFilePath(""));
-                tempDirectory.delete();
+                FileUtils.deleteDirectory(tempDirectory);
                 buildFileList();
 
                 if (messagesValidation != null && !messagesValidation.isEmpty()) {
@@ -379,8 +376,13 @@ public class FilesBean implements Serializable {
             log.error("Failed to upload a file {}", fileName, e);
             messages.error("Error while uploading " + fileName);
         } finally {
-            if (tempDirectory != null && tempDirectory.isDirectory()) {
-                tempDirectory.delete();
+            if (tempDirectory != null && FileUtils.isDirectory(tempDirectory)) {
+                try {
+                    FileUtils.deleteDirectory(tempDirectory);
+                } catch (IOException e) {
+                    log.error("Failed to delete a directory {}", tempDirectory, e);
+                    messages.error("Error while deleting " + tempDirectory);
+                }
             }
         }
     }
@@ -407,8 +409,9 @@ public class FilesBean implements Serializable {
         if (!StringUtils.isBlank(directoryName)) {
             String filePath = getFilePath(directoryName);
             File newDir = new File(filePath);
-            if (!newDir.exists()) {
-                if (newDir.mkdir()) {
+            if (!FileUtils.isDirectory(newDir)) {
+                FileUtils.mkdirs(newDir);
+                if (FileUtils.isDirectory(newDir)) {
                     buildFileList();
                     directoryName = "";
                 }
@@ -416,17 +419,22 @@ public class FilesBean implements Serializable {
         }
     }
 
+
     public void deleteDirectory() {
         log.debug("deleteDirectory:" + selectedFolder);
         if (currentDirEmpty) {
             String filePath = getFilePath("");
             File currentDir = new File(filePath);
-            if (currentDir.exists() && currentDir.isDirectory()) {
-                if (currentDir.delete()) {
-                    setSelectedFolder("..");
-                    createMissingDirectories();
-                    buildFileList();
-                }
+            try {
+                FileUtils.deleteDirectory(currentDir);
+            } catch (IOException e) {
+                log.error("Failed to delete a directory {}", currentDir, e);
+                messages.error("Error while deleting " + currentDir);
+            }
+            if (!FileUtils.isDirectory(currentDir)) {
+                setSelectedFolder("..");
+                createMissingDirectories();
+                buildFileList();
             }
         }
     }
@@ -437,8 +445,8 @@ public class FilesBean implements Serializable {
             String newFilePath = getFilePath(newFilename);
             File currentFile = new File(filePath);
             File newFile = new File(newFilePath);
-            if (currentFile.exists() && currentFile.isFile() && !newFile.exists()) {
-                if (currentFile.renameTo(newFile)) {
+            if (FileUtils.existsFile(currentFile) && FileUtils.isFile(currentFile) && !FileUtils.existsFile(newFile)) {
+                if (FileUtils.renameFile(currentFile, newFile)) {
                     buildFileList();
                     selectedFileName = newFilename;
                     newFilename = "";
@@ -476,7 +484,7 @@ public class FilesBean implements Serializable {
      * @param in input stream
      */
     public void copyFile(String filePath, InputStream in) {
-        try (OutputStream out = new FileOutputStream(new File(filePath))) {
+        try (OutputStream out = FileUtils.getOutputStream(new File(filePath))) {
             int read = 0;
             byte[] bytes = new byte[1024];
 
@@ -548,5 +556,15 @@ public class FilesBean implements Serializable {
      */
     public boolean canUserDeleteEntity() {
         return pageAccessHandler.isCurrentURLAccesible(AccessScopeEnum.DELETE.getHttpMethod());
+    }
+
+    /**
+     * Determine if the file is the directory
+     *
+     * @param file the file
+     * @return true if the file is the directory
+     */
+    public boolean isDirectory(File file) {
+        return FileUtils.isDirectory(file);
     }
 }

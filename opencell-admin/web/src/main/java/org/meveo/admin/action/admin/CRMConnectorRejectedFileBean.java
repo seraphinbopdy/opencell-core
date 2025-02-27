@@ -19,8 +19,6 @@ package org.meveo.admin.action.admin;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -43,6 +41,7 @@ import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.meveo.admin.action.BaseBean;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.model.Document;
@@ -126,11 +125,8 @@ public class CRMConnectorRejectedFileBean implements Serializable {
     }
 
     public void loadFiles(String documentsPath) {
-        File path = new File(documentsPath);
-        if (!path.exists()) {
-            path.mkdirs();
-        }
-        File[] files = path.listFiles(new FileNameDateFilter(this.filename, this.fromDate, this.toDate));
+        File path = FileUtils.createDirectory(documentsPath);
+        File[] files = FileUtils.listFiles(path, new FileNameDateFilter(this.filename, this.fromDate, this.toDate));
         if (files != null) {
             Document d = null;
             for (File file : files) {
@@ -149,28 +145,22 @@ public class CRMConnectorRejectedFileBean implements Serializable {
 
         log.info("start to compress: #0", document.getAbsolutePath());
         String tmpPath = paramBeanFactory.getInstance().getProperty("document.tmp.path", "");
-        File tmp = new File(tmpPath);
-        if (!tmp.exists()) {
-            tmp.mkdirs();
-        }
+        FileUtils.createDirectory(tmpPath);
 
         File tmpFile = new File(tmpPath + File.separator + UUID.randomUUID().toString());
 
-        try (FileOutputStream fout = new FileOutputStream(tmpFile);
+        try (OutputStream fout = FileUtils.getOutputStream(tmpFile);
                 CheckedOutputStream csum = new CheckedOutputStream(fout, new CRC32());
                 GZIPOutputStream out = new GZIPOutputStream(new BufferedOutputStream(csum));
-                InputStream in = new FileInputStream(new File(document.getAbsolutePath()));) {
+                InputStream in = FileUtils.getInputStream(new File(document.getAbsolutePath()));) {
 
             int sig = 0;
             byte[] buf = new byte[1024];
             while ((sig = in.read(buf, 0, 1024)) != -1)
                 out.write(buf, 0, sig);
             // /TODO FIX TO USE BOTH
-            File createdFile = new File(document.getAbsolutePath() + ".gzip");
-            if (createdFile.exists()) {
-                createdFile.delete();
-            }
-            tmpFile.renameTo(createdFile);
+            File createdFile = FileUtils.createDirectory(document.getAbsolutePath() + ".gzip");
+            FileUtils.renameFile(tmpFile, createdFile);
         } catch (Exception e) {
             log.error("Error:#0, when compress file:#1", e, document.getAbsolutePath());
         }
@@ -196,7 +186,7 @@ public class CRMConnectorRejectedFileBean implements Serializable {
         res.setContentLength(document.getSize().intValue());
         res.addHeader("Content-disposition", "attachment;filename=\"" + document.getFilename() + "\"");
         try (OutputStream out = res.getOutputStream();
-            InputStream fin = new FileInputStream(f);) {
+            InputStream fin = FileUtils.getInputStream(f);) {
             byte[] buf = new byte[1024];
             int sig = 0;
             while ((sig = fin.read(buf, 0, 1024)) != -1) {
@@ -214,10 +204,7 @@ public class CRMConnectorRejectedFileBean implements Serializable {
 
     public String delete(Document document) {
         log.info("start delete...");
-        File file = new File(document.getAbsolutePath());
-        if (file.exists()) {
-            file.delete();
-        }
+        FileUtils.createDirectory(document.getAbsolutePath());
         list();
         log.info("end delete...");
         return null;

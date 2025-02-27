@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.meveo.admin.job.BaseJobBean;
 import org.meveo.admin.job.logging.JobLoggingInterceptor;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.JAXBUtils;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.interceptor.PerformanceInterceptor;
@@ -74,10 +75,7 @@ public class ExportCustomersJobBean extends BaseJobBean {
     public void execute(JobExecutionResultImpl result, String parameter) {
         String exportDir = paramBeanFactory.getChrootDir() + File.separator + "exports" + File.separator + "customers" + File.separator;
         log.info("exportDir=" + exportDir);
-        File dir = new File(exportDir);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
+        File dir = FileUtils.createDirectory(exportDir);
 
         String timestamp = sdf.format(new Date());
         List<Seller> sellersInDB = customerService.listSellersWithCustomers();

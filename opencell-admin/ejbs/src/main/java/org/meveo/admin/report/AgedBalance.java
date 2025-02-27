@@ -25,6 +25,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 import org.apache.commons.io.IOUtils;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.model.bi.OutputFormatEnum;
@@ -56,7 +57,7 @@ public class AgedBalance extends FileProducer implements Reporting {
             date = new Date();
             File file = null;
             if (outputFormat == OutputFormatEnum.PDF) {
-                file = File.createTempFile("tempAgedBalance", ".csv");
+                file = FileUtils.createTempFile("tempAgedBalance", ".csv");
             } else if (outputFormat == OutputFormatEnum.CSV) {
                 StringBuilder sb = new StringBuilder(getFilename(date));
                 sb.append(".csv");

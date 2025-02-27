@@ -18,8 +18,8 @@
 
 package org.meveo.test;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import org.meveo.commons.utils.FileUtils;
+
 import java.io.PrintWriter;
 
 public class KCUserAndRoleGenerator {
@@ -29,44 +29,34 @@ public class KCUserAndRoleGenerator {
 
     public static void main(String[] args) {
 
-        try (PrintWriter usersOut = new PrintWriter(new FileOutputStream("C:\\Users\\explo\\Downloads\\users.txt"));) {
-            for (int i = 0; i < 10000; i++) {
-                usersOut.println(",{\"id\": \"6067f356-7d11-47bb-a2ec-cde41cb9ee1e" + (100000 + i) + "\",\"createdTimestamp\": 1508163776686,\"username\": \"user_" + i
-                        + "\",\"enabled\": true,\"totp\": false,\"emailVerified\": true,\"attributes\": {\"locale\": [\"en\"]},\"credentials\": [{\"id\": \"04a04c9d-506f-49d7-8ded-848bdfc08820" + (100000 + i)
-                        + "\",\"type\": \"password\",\"createdDate\": 1513859053958,\"secretData\": \"{\\\"value\\\":\\\"Pcd6q8qBTCAlCMlMOpyymthpjXNJPz/dv8RZ/e4xow1n9TryXFTIB9ARkfDE07JuGPid8wCqAjQ4s6GLRmJkEw==\\\",\\\"salt\\\":\\\"bANpIaO59vVGwdhRSUSA1Q==\\\"}\",\"credentialData\": \"{\\\"hashIterations\\\":20000,\\\"algorithm\\\":\\\"pbkdf2\\\"}\"}],\"realmRoles\": [\"test_1\"],\"clientRoles\": {\"opencell-web\": [\"administrateur\"]}}");
-            }
-        } catch (FileNotFoundException e) {
-            System.err.println(e);
+        PrintWriter usersOut = new PrintWriter(FileUtils.getOutputStream("C:\\Users\\explo\\Downloads\\users.txt"));
+        for (int i = 0; i < 10000; i++) {
+            usersOut.println(",{\"id\": \"6067f356-7d11-47bb-a2ec-cde41cb9ee1e" + (100000 + i) + "\",\"createdTimestamp\": 1508163776686,\"username\": \"user_" + i
+                    + "\",\"enabled\": true,\"totp\": false,\"emailVerified\": true,\"attributes\": {\"locale\": [\"en\"]},\"credentials\": [{\"id\": \"04a04c9d-506f-49d7-8ded-848bdfc08820" + (100000 + i)
+                    + "\",\"type\": \"password\",\"createdDate\": 1513859053958,\"secretData\": \"{\\\"value\\\":\\\"Pcd6q8qBTCAlCMlMOpyymthpjXNJPz/dv8RZ/e4xow1n9TryXFTIB9ARkfDE07JuGPid8wCqAjQ4s6GLRmJkEw==\\\",\\\"salt\\\":\\\"bANpIaO59vVGwdhRSUSA1Q==\\\"}\",\"credentialData\": \"{\\\"hashIterations\\\":20000,\\\"algorithm\\\":\\\"pbkdf2\\\"}\"}],\"realmRoles\": [\"test_1\"],\"clientRoles\": {\"opencell-web\": [\"administrateur\"]}}");
         }
 
-        try (PrintWriter rolesOut = new PrintWriter(new FileOutputStream("C:\\Users\\explo\\Downloads\\roles.txt"));
-                PrintWriter policiesOut = new PrintWriter(new FileOutputStream("C:\\Users\\explo\\Downloads\\policies.txt"));) {
-            for (int i = 0; i < 30000; i++) {
-                rolesOut.println(",{\"id\": \"0e715a52-4254-4de8-a38b-3f5ad2" + (100000 + i) + "\",\"name\": \"test_" + i + "\",\"containerId\": \"opencell\"}");
-                policiesOut.println("{\"id\": \"028c6d6f-48fa-43b6-a250-789c2f" + (100000 + i) + "\",\"name\": \"Role test_" + i
-                        + "\",\"type\": \"role\",\"logic\": \"POSITIVE\",\"decisionStrategy\": \"UNANIMOUS\",\"config\": {\"roles\": \"[{\\\"id\\\":\\\"test_" + i + "\\\",\\\"required\\\":false}]\"}}");
+        PrintWriter rolesOut = new PrintWriter(FileUtils.getOutputStream("C:\\Users\\explo\\Downloads\\roles.txt"));
+        PrintWriter policiesOut = new PrintWriter(FileUtils.getOutputStream("C:\\Users\\explo\\Downloads\\policies.txt"));
+        for (int i = 0; i < 30000; i++) {
+            rolesOut.println(",{\"id\": \"0e715a52-4254-4de8-a38b-3f5ad2" + (100000 + i) + "\",\"name\": \"test_" + i + "\",\"containerId\": \"opencell\"}");
+            policiesOut.println("{\"id\": \"028c6d6f-48fa-43b6-a250-789c2f" + (100000 + i) + "\",\"name\": \"Role test_" + i
+                    + "\",\"type\": \"role\",\"logic\": \"POSITIVE\",\"decisionStrategy\": \"UNANIMOUS\",\"config\": {\"roles\": \"[{\\\"id\\\":\\\"test_" + i + "\\\",\\\"required\\\":false}]\"}}");
 
-            }
-        } catch (FileNotFoundException e) {
-            System.err.println(e);
         }
 
-        try (PrintWriter resourcesOut = new PrintWriter(new FileOutputStream("C:\\Users\\explo\\Downloads\\resources.txt"));
-                PrintWriter permissionsOut = new PrintWriter(new FileOutputStream("C:\\Users\\explo\\Downloads\\permissions.txt"))
+        PrintWriter resourcesOut = new PrintWriter(FileUtils.getOutputStream("C:\\Users\\explo\\Downloads\\resources.txt"));
+        PrintWriter permissionsOut = new PrintWriter(FileUtils.getOutputStream("C:\\Users\\explo\\Downloads\\permissions.txt"));
+        for (int i = 0; i < 600000; i++) {
 
-        ) {
-            for (int i = 0; i < 600000; i++) {
+            int roleId = i > 300000 ? i - 300000 : 0;
 
-                int roleId = i > 300000 ? i - 300000 : 0;
-
-                resourcesOut.println(",{\"name\": \"SE:Seller:-3:SELLER_" + i + ":READ\",\"owner\": {\"name\": \"opencell.admin\"},\"_id\": \"43f6b49e-570f-42ce-adac-cf982a" + (100000 + i) + "\"}");
-                permissionsOut.println(",{ \"id\": \"bbdea3d4-ae8b-40bf-ba04-f1294b" + (100000 + i) + "\",\"name\": \"SE:Seller:-3:SELLER_" + i
-                        + ":READ\", \"type\": \"resource\",\"logic\": \"POSITIVE\", \"decisionStrategy\": \"AFFIRMATIVE\", \"config\": {\"resources\": \"[\\\"SE:Seller:-3:SELLER_" + i
-                        + ":READ\\\"]\",\"applyPolicies\": \"[\\\"Role test_" + roleId + "\\\"]\"}}");
-            }
-        } catch (FileNotFoundException e) {
-            System.err.println(e);
+            resourcesOut.println(",{\"name\": \"SE:Seller:-3:SELLER_" + i + ":READ\",\"owner\": {\"name\": \"opencell.admin\"},\"_id\": \"43f6b49e-570f-42ce-adac-cf982a" + (100000 + i) + "\"}");
+            permissionsOut.println(",{ \"id\": \"bbdea3d4-ae8b-40bf-ba04-f1294b" + (100000 + i) + "\",\"name\": \"SE:Seller:-3:SELLER_" + i
+                    + ":READ\", \"type\": \"resource\",\"logic\": \"POSITIVE\", \"decisionStrategy\": \"AFFIRMATIVE\", \"config\": {\"resources\": \"[\\\"SE:Seller:-3:SELLER_" + i
+                    + ":READ\\\"]\",\"applyPolicies\": \"[\\\"Role test_" + roleId + "\\\"]\"}}");
         }
+
 
     }
 }

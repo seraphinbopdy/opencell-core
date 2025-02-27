@@ -17,8 +17,6 @@
  */
 package org.meveo.commons.utils;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -119,7 +117,7 @@ public class CsvReader {
             throw new IllegalArgumentException("Parameter charset can not be null.");
         }
 
-        if (!new File(fileName).exists()) {
+        if (!FileUtils.existsFile(fileName)) {
             throw new FileNotFoundException("File " + fileName + " does not exist.");
         }
 
@@ -1130,7 +1128,7 @@ public class CsvReader {
     private void checkDataLength() throws IOException {
         if (!initialized) {
             if (fileName != null) {
-                inputStream = new BufferedReader(new InputStreamReader(new FileInputStream(fileName), charset),
+                inputStream = new BufferedReader(new InputStreamReader(FileUtils.getInputStream(fileName), charset),
                         StaticSettings.MAX_FILE_BUFFER_SIZE);
             }
 

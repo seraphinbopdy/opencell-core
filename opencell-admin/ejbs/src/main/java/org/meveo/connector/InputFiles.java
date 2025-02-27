@@ -39,11 +39,9 @@ public abstract class InputFiles {
 	protected Logger log;
 
 	public void handleFiles(String dirIN, String prefix, String ext, String dirOK, String dirKO) throws InterruptedException {
-		File dir = new File(dirIN);
-		if (!dir.exists()) {
-			dir.mkdirs();
-		}
-		List<File> files = getFilesToProcess(dir, prefix, ext);
+
+		File dir = FileUtils.createDirectory(dirIN);
+		List<File> files = FileUtils.listFiles(dir, ext, prefix);
 		int numberOfFiles = files.size();
 		log.info("InputFiles job " + numberOfFiles + " to import");
 
@@ -81,20 +79,5 @@ public abstract class InputFiles {
 			log.error("error on get provider ",e);
 		}
 		return null;
-	}
-
-	private List<File> getFilesToProcess(File dir,String prefix, String ext){
-		List<File> files = new ArrayList<File>();
-		ImportFileFiltre filtre = new ImportFileFiltre(prefix, ext);
-		File[] listFile = dir.listFiles(filtre);
-		if(listFile == null){
-			return files;			
-		}
-		for(File file : listFile){
-			if(file.isFile()){
-				files.add(file);
-			}
-		}
-		return files;
 	}
 }

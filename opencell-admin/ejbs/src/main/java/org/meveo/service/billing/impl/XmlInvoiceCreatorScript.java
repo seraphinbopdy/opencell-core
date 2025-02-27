@@ -55,7 +55,7 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.meveo.admin.exception.BusinessException;
-import org.meveo.admin.storage.StorageFactory;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.InvoiceCategoryComparatorUtils;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.ParamBeanFactory;
@@ -266,7 +266,7 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
             // create string from xml tree
             DOMSource source = new DOMSource(doc);
             File xmlFile = new File(fullXmlFilePath);
-            OutputStream outStream = StorageFactory.getOutputStream(fullXmlFilePath);
+            OutputStream outStream = FileUtils.getOutputStream(fullXmlFilePath);
             StreamResult result = new StreamResult(outStream);
             trans.transform(source, result);
             log.info("XML file '{}' produced for invoice {}", fullXmlFilePath, invoice.getInvoiceNumberOrTemporaryNumber());

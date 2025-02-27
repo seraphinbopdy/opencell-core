@@ -1017,7 +1017,7 @@ public class CustomerApi extends AccountEntityApi {
 
         String accountHierarchy = xstream.toXML(result);
 
-        File accountHierarchyFile = File.createTempFile(customerCode, ".json");
+        File accountHierarchyFile = FileUtils.createTempFile(customerCode, ".json");
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(accountHierarchyFile))) {
             writer.write(accountHierarchy);
         }
@@ -1031,7 +1031,7 @@ public class CustomerApi extends AccountEntityApi {
                 }
 
                 for (String pdfFile : invoicePdfs) {
-                    try (FileInputStream fis = new FileInputStream(pdfFile)) {
+                    try (InputStream fis = FileUtils.getInputStream(pdfFile)) {
                         ZipEntry zipEntry = new ZipEntry(customerCode + File.separator + Paths.get(pdfFile).getFileName().toString());
                         FileUtils.addZipEntry(zipOut, fis, zipEntry);
                     } catch (FileNotFoundException e) {

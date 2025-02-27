@@ -17,6 +17,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.meveo.admin.exception.BusinessException;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.rating.CDR;
@@ -39,20 +40,16 @@ public class CdrJsonImportScript extends Script {
         String rootPathFile = getProviderRootDir() + File.separator + pathFile;
         File dir = new File(rootPathFile);
 
-        File[] fileList = dir.listFiles();
+        File[] fileList = FileUtils.listFiles(dir);
 	    
 	        for (File fileInput : fileList) {
 		        File file = new File(fileInput.getAbsolutePath().replace("input", "reject") + ".rejected");
-		        if (!file.getParentFile().exists()) {
-			        file.getParentFile().mkdirs();
-		        }
+		        FileUtils.createDirectory(file.getParentFile());
 		        try (FileWriter rejectFile = new FileWriter(fileInput.getAbsolutePath().replace("input", "reject") + ".rejected");
 		             FileReader fread = new FileReader(fileInput.getAbsolutePath()))
 		        {
-			        
-			        if (!file.exists()) {
-				        file.createNewFile();
-			        }
+
+                    FileUtils.create(file);
 	               
 	                Object obj = parser.parse(fread);
 	                JSONArray subjects = (JSONArray) obj;
@@ -159,7 +156,7 @@ public class CdrJsonImportScript extends Script {
 	                        validateCdr(jsonObject, cdr, context, rejectFile);
 	                    }
 	                }
-	                fileInput.delete();
+	                FileUtils.delete(fileInput);
 		        } catch (Exception e) {
 			        log.error("Error while injecting CDR : ", e );
 		        }

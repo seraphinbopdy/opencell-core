@@ -18,16 +18,14 @@
 package org.meveo.commons.utils;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.ConditionalFormatting;
 import org.apache.poi.ss.usermodel.Row;
@@ -59,7 +57,7 @@ public final class ExcelExporter {
 	 */
 	public static void exportToExcel(List<SheetData> sheetDataList, File input, File output) {
 
-		try (FileInputStream inputStream = new FileInputStream(input);
+		try (InputStream inputStream = FileUtils.getInputStream(input);
 				Workbook workbook = WorkbookFactory.create(inputStream)) {
 
 			if (sheetDataList != null && !sheetDataList.isEmpty()) {
@@ -161,7 +159,7 @@ public final class ExcelExporter {
 					}
 				}
 				// Save to file
-				try (FileOutputStream outputStream = new FileOutputStream(output)){
+				try (OutputStream outputStream = FileUtils.getOutputStream(output)){
 					workbook.write(outputStream);
 				} catch (Exception e) {
 					throw new RuntimeException("Unable to export to Excel", e);
@@ -258,7 +256,7 @@ public final class ExcelExporter {
 	private static File getFile(String resource) throws IOException {
 		ClassLoader cl = ExcelExporter.class.getClassLoader();
 		InputStream cpResource = cl.getResourceAsStream(resource);
-		File tmpFile = File.createTempFile("file", "temp");
+		File tmpFile = FileUtils.createTempFile("file", "temp");
 		FileUtils.copyInputStreamToFile(cpResource, tmpFile);
 		tmpFile.deleteOnExit();
 		return tmpFile;

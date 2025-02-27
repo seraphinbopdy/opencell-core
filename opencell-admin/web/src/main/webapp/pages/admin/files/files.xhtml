@@ -4,7 +4,8 @@
 				xmlns:h="http://xmlns.jcp.org/jsf/html"
 				xmlns:hftl="http://hftl.org"
 				xmlns:p="http://primefaces.org/ui"
-				template="/layout/template.xhtml">
+                xmlns:c="http://java.sun.com/jsp/jstl/core"
+                template="/layout/template.xhtml">
  	
  
 		<f:metadata>
@@ -35,20 +36,21 @@
                         <h:outputText value="#{messages['fileExplorer.currentDirectory']}: #{filesBean.selectedFolder}" rendered="#{filesBean.hasSelectedFolder()}" />
                     </f:facet>
                     <p:column headerText="#{messages['fileExplorer.fileName']}" sortBy="#{file.name}">
-                        <p:commandLink action="#{filesBean.setSelectedFolder(file.name)}" rendered="#{file.isDirectory()}" update=":fileExplorer" process="@this">
+                        <p:commandLink action="#{filesBean.setSelectedFolder(file.name)}" rendered="#{filesBean.isDirectory(file)}" update=":fileExplorer" process="@this">
                             <i class="pi pi-folder-o pi-2x"></i>
                             <p:spacer width="8" />
                             <h:outputText value='#{file.name}' />
                         </p:commandLink>
-                        <p:commandLink action="#{filesBean.setSelectedFileName(file.name)}" rendered="#{!file.isDirectory()}" update=":fileExplorer" process="@this">
+                        <p:commandLink action="#{filesBean.setSelectedFileName(file.name)}" rendered="#{!filesBean.isDirectory()}" update=":fileExplorer" process="@this">
                             <i class="pi pi-file-#{filesBean.getFileType(file.name)}-o pi-2x"/>
                             <p:spacer width="8" />
                             <h:outputText value='#{file.name}' />
                         </p:commandLink>
                     </p:column>
 
-                    <p:column headerText="#{messages['fileExplorer.fileDate']}" sortBy="#{file.lastModified()}">
-                        <h:outputText value="#{file.lastModified()}">
+                    <c:set var="lastModified" value="${filesBean.getLastModified(file)}" />
+                    <p:column headerText="#{messages['fileExplorer.fileDate']}" sortBy="#{lastModified}">
+                        <h:outputText value="#{lastModified}">
                             <f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" />
                         </h:outputText>
                     </p:column>

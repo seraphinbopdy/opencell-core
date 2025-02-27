@@ -68,9 +68,9 @@ import org.meveo.admin.sepa.jaxb.pain008.PersonIdentification5;
 import org.meveo.admin.sepa.jaxb.pain008.PersonIdentificationSchemeName1Choice;
 import org.meveo.admin.sepa.jaxb.pain008.SequenceType1Code;
 import org.meveo.admin.sepa.jaxb.pain008.ServiceLevel8Choice;
-import org.meveo.admin.storage.StorageFactory;
 import org.meveo.admin.util.ArConfig;
 import org.meveo.commons.utils.EjbUtils;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.JAXBUtils;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.model.admin.Seller;
@@ -270,10 +270,7 @@ public class SepaFile extends AbstractDDRequestBuilder {
 			outputDir = outputDir + File.separator + additionalOutputDir;
 			outputDir = outputDir.replaceAll(DOUBLE_POINT, EMPTY_STRING);
 
-			File dir = new File(outputDir);
-			if (!StorageFactory.existsDirectory(dir)) {
-				StorageFactory.mkdirs(dir);
-			}
+			FileUtils.createDirectory(outputDir);
 			return outputDir + File.separator + fileName;
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);

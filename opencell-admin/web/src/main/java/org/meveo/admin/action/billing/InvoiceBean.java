@@ -18,7 +18,6 @@
 package org.meveo.admin.action.billing;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -46,6 +45,7 @@ import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.InvoiceJasperNotFoundException;
 import org.meveo.admin.exception.InvoiceXmlNotFoundException;
 import org.meveo.admin.web.interceptor.ActionMethod;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.InvoiceCategoryComparatorUtils;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.model.billing.BillingAccount;
@@ -420,7 +420,7 @@ public class InvoiceBean extends CustomFieldBean<Invoice> {
             res.addHeader("Content-disposition", "attachment;filename=\"" + file.getName() + "\"");
 
             out = res.getOutputStream();
-            fin = new FileInputStream(file);
+            fin = FileUtils.getInputStream(file);
 
             byte[] buf = new byte[1024];
             int sig = 0;

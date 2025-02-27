@@ -41,6 +41,7 @@ import org.meveo.admin.exception.RejectedImportException;
 import org.meveo.admin.web.interceptor.ActionMethod;
 import org.meveo.commons.utils.CsvBuilder;
 import org.meveo.commons.utils.CsvReader;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.model.catalog.CounterTemplate;
 import org.meveo.model.notification.NotificationEventTypeEnum;
 import org.meveo.model.notification.StrategyImportTypeEnum;
@@ -209,8 +210,7 @@ public class WebHookBean extends BaseNotificationBean<WebHook> {
         csvReader.readHeaders();
 
         String existingEntitiesCSV = paramBeanFactory.getInstance().getProperty("existingEntities.csv.dir", "existingEntitiesCSV");
-        File dir = new File(paramBeanFactory.getChrootDir() + File.separator + existingEntitiesCSV);
-        dir.mkdirs();
+        File dir = FileUtils.createDirectory(paramBeanFactory.getChrootDir() + File.separator + existingEntitiesCSV);
         existingEntitiesCsvFile = dir.getAbsolutePath() + File.separator + "WebHooks_" + new SimpleDateFormat("ddMMyyyyHHmmSS").format(new Date()) + ".csv";
         csv = new CsvBuilder();
         boolean isEntityAlreadyExist = false;

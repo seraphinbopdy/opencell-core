@@ -29,6 +29,7 @@ import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.util.ArConfig;
 import org.meveo.commons.utils.CsvBuilder;
 import org.meveo.commons.utils.CsvReader;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.model.crm.Provider;
 import org.meveo.model.jobs.JobExecutionResultImpl;
@@ -78,10 +79,7 @@ public class PaynumFile extends AbstractDDRequestBuilder {
         outputDir = outputDir.replaceAll("\\..", "");
 
         log.info("DDRequest output directory=" + outputDir);
-        File dir = new File(outputDir);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
+        FileUtils.createDirectory(outputDir);
         return outputDir + File.separator + fileName;
     }
 

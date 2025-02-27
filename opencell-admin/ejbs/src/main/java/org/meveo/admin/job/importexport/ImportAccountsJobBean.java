@@ -19,6 +19,7 @@
 package org.meveo.admin.job.importexport;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -120,10 +121,7 @@ public class ImportAccountsJobBean extends BaseJobBean{
         String prefix = param.getProperty("connectorCRM.importAccounts.prefix", "ACCOUNT_");
         String ext = param.getProperty("connectorCRM.importAccounts.extension", "xml");
 
-        File dir = new File(dirIN);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
+        File dir = FileUtils.createDirectory(dirIN);
         List<File> files = getFilesToProcess(dir, prefix, ext);
         int numberOfFiles = files.size();
 
@@ -148,7 +146,11 @@ public class ImportAccountsJobBean extends BaseJobBean{
 
             } finally {
                 if (currentFile != null) {
-                    currentFile.delete();
+                    try {
+                        FileUtils.delete(currentFile);
+                    } catch (IOException e) {
+                        log.error("Failed to delete a file {}", currentFile, e);
+                    }
                 }
             }
         }
@@ -160,18 +162,11 @@ public class ImportAccountsJobBean extends BaseJobBean{
     }
 
     private List<File> getFilesToProcess(File dir, String prefix, String ext) {
-        List<File> files = new ArrayList<File>();
-        ImportFileFiltre filtre = new ImportFileFiltre(prefix, ext);
-        File[] listFile = dir.listFiles(filtre);
-        if (listFile == null) {
-            return files;
-        }
-        for (File file : listFile) {
-            if (file.isFile()) {
-                files.add(file);
-                // we just process one file
-                return files;
-            }
+        List<File> files = FileUtils.listFiles(dir, ext, prefix,null);
+
+        if (!files.isEmpty()) {
+            // we just process one file
+            return files.subList(0,0);
         }
         return files;
     }
@@ -457,20 +452,14 @@ public class ImportAccountsJobBean extends BaseJobBean{
 
         if (billingAccountsWarning.getWarnings() != null) {
             String warningDir = importDir + "output" + File.separator + "warnings";
-            File dir = new File(warningDir);
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
+            FileUtils.createDirectory(warningDir);
             JAXBUtils.marshaller(billingAccountsWarning, new File(warningDir + File.separator + "WARN_" + fileName));
         }
 
         if (billingAccountsError.getErrors() != null) {
             String errorDir = importDir + "output" + File.separator + "errors";
 
-            File dir = new File(errorDir);
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
+            FileUtils.createDirectory(errorDir);
             JAXBUtils.marshaller(billingAccountsError, new File(errorDir + File.separator + "ERR_" + fileName));
         }
     }

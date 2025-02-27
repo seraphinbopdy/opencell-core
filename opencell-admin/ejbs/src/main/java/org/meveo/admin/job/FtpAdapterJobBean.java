@@ -42,6 +42,7 @@ import org.apache.commons.vfs2.impl.DefaultFileSystemConfigBuilder;
 import org.apache.commons.vfs2.provider.sftp.SftpFileSystemConfigBuilder;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.job.logging.JobLoggingInterceptor;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.interceptor.PerformanceInterceptor;
@@ -266,10 +267,7 @@ public class FtpAdapterJobBean {
     private void createToDirIfNotExist(String localAddress, String ftpAddress) throws FileSystemException {
         //If import create local Dir if not exists
         if (isOperationImport()) {
-            File localDirFile = new File(localAddress);
-            if (!localDirFile.exists()) {
-                localDirFile.mkdirs();
-            }
+            FileUtils.createDirectory(localAddress);
         } else {
             //Create the remote dir in case of export
             FileObject remoteDirFile = fsManager.resolveFile(ftpAddress);

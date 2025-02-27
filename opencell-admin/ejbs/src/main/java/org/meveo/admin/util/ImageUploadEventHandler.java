@@ -27,6 +27,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
 import org.apache.commons.io.FilenameUtils;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.BusinessEntity;
 import org.meveo.model.ICustomFieldEntity;
@@ -113,13 +114,12 @@ public class ImageUploadEventHandler<T extends IEntity> {
         String extension = FilenameUtils.getExtension(originalFilename);
 
         String folder = getPicturePath(entity);
-        Path file = Paths.get(folder, filename + "." + extension);
-        if (!Files.exists(file)) {
-            file = Files.createFile(file);
-        }
+        Path path = Paths.get(folder, filename + "." + extension);
+        FileUtils.create(path.toUri().toString());
+
 
         try (InputStream input = inputStream) {
-            Files.copy(input, file, StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(input, path, StandardCopyOption.REPLACE_EXISTING);
         }
 
         return filename + "." + extension;
@@ -156,7 +156,7 @@ public class ImageUploadEventHandler<T extends IEntity> {
         if (!StringUtils.isBlank(imagePath)) {
             String folder = getPicturePath(entity);
             Path source = Paths.get(folder, imagePath);
-            Files.deleteIfExists(source);
+            FileUtils.delete(source.toUri().toString());
         }
     }
 
@@ -180,7 +180,7 @@ public class ImageUploadEventHandler<T extends IEntity> {
         String targetFile = targetFilename + "." + extension;
         Path source = Paths.get(folder, sourceFilename);
         Path target = Paths.get(folder, targetFile);
-        Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
+        FileUtils.moveFile(source.toUri().toString(), target.toUri().toString(), StandardCopyOption.REPLACE_EXISTING);
 
         return targetFile;
 

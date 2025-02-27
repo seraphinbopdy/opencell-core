@@ -31,6 +31,7 @@ import java.util.List;
 import org.meveo.api.dto.RatedTransactionDto;
 import org.meveo.api.dto.billing.EDRDto;
 import org.meveo.api.dto.billing.WalletOperationDto;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.JAXBUtils;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.model.billing.RatedTransaction;
@@ -88,10 +89,7 @@ public class ExportMediationEntityJobBean extends BaseJobBean {
         log.debug("Running with parameter={}", jobInstance.getParametres());
         try {
             String exportParentDir = paramBeanFactory.getChrootDir() + File.separator + "exports" + File.separator;
-            File dir = new File(exportParentDir);
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
+            FileUtils.createDirectory(exportParentDir);
 
             String exportFileName = (String) this.getParamOrCFValue(jobInstance, EXPORT_MEDIATION_ENTITY_JOB_FILE_NAME);
             exportFileName = exportFileName == null ? "" : exportFileName;
@@ -162,10 +160,7 @@ public class ExportMediationEntityJobBean extends BaseJobBean {
                 EDRs edrs = edrsToDto(edrList, jobInstance.getId());
 
                 String exportDir = exportParentDir + "edr" + File.separator;
-                File dir = new File(exportDir);
-                if (!dir.exists()) {
-                    dir.mkdirs();
-                }
+                File dir = FileUtils.createDirectory(exportDir);
                 if (exportFileName.isEmpty()) {
                     exportFileName = "EDR_";
                 }
@@ -317,10 +312,7 @@ public class ExportMediationEntityJobBean extends BaseJobBean {
         if (size > 0) {
             WalletOperations walletOperations = walletOperationsToDto(walletOperation, jobInstanceId);
             String exportDir = exportParentDir + "wo" + File.separator;
-            File dir = new File(exportDir);
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
+            File dir = FileUtils.createDirectory(exportDir);
             if (exportFileName.isEmpty()) {
                 exportFileName = "WO_";
             }
@@ -342,10 +334,7 @@ public class ExportMediationEntityJobBean extends BaseJobBean {
         if (!ratedTransactions.isEmpty()) {
             RatedTransactions ratedTransactionDtos = ratedTransactionToDto(ratedTransactions, jobInstanceId);
             String exportDir = exportParentDir + "rt" + File.separator;
-            File dir = new File(exportDir);
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
+            File dir = FileUtils.createDirectory(exportDir);
 
             if (exportFileName.isEmpty()) {
                 exportFileName = "RT_";

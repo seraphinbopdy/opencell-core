@@ -19,14 +19,15 @@
 package org.meveo.service.notification;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
 
 import org.joda.time.DateTimeComparator;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +53,7 @@ public class LogExtractionService {
      */
     public static String getLogs(Date fromDate, Date toDate) {
         String result = "";
-        try (FileInputStream logginConfigurationInStream = new FileInputStream(System.getProperty("logging.configuration").substring(5))) {
+        try (InputStream logginConfigurationInStream = FileUtils.getInputStream(System.getProperty("logging.configuration").substring(5))) {
             Properties props = new Properties();
             props.load(logginConfigurationInStream);
             String logFile = props.getProperty("handler.FILE.fileName");
@@ -64,7 +65,7 @@ public class LogExtractionService {
             Date dateCurrentLine = null;
             String line = null;
             boolean isAfterToDate = false;
-            try (BufferedReader logReader = new BufferedReader(new InputStreamReader(new FileInputStream(logFile)))) {
+            try (BufferedReader logReader = new BufferedReader(new InputStreamReader(FileUtils.getInputStream(logFile)))) {
                 while ((line = logReader.readLine()) != null && length < maxLength && !isAfterToDate) {
                     dateCurrentLine = getDateTime(line, dateFormat);
                     if ((dateCurrentLine == null && mustBeInToo) || // include the line that not start by a date but it is in the period

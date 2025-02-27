@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.meveo.admin.exception.InvalidELException;
-import org.meveo.admin.storage.StorageFactory;
 import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.jobs.JobInstance;
@@ -90,7 +89,7 @@ public class MEVEOCdrReader implements ICdrCsvReader {
             totalNumberOfRecords = FileUtils.countLines(cdrFile);
         } catch (IOException e) {
         }
-        fileReader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(StorageFactory.getInputStream(cdrFile))));
+        fileReader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(FileUtils.getInputStream(cdrFile))));
     }
 
     @Override

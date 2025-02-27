@@ -31,6 +31,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
 import org.meveo.admin.action.BaseBean;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.model.BaseEntity;
 import org.meveo.model.billing.InvoiceCategory;
@@ -239,12 +240,9 @@ public class ConfigIssuesReportingBean extends BaseBean<BaseEntity> {
         String jasperCommercial = paramBean.getProperty("jasper.invoiceTemplate.commercial", "invoice.jasper");
         String jasperAdjustment = paramBean.getProperty("jasper.invoiceTemplate.adjustment", "invoice.jasper");
         // check jaspers files
-        File jasperDir = new File(paramBeanFactory.getChrootDir() + File.separator + "jasper");
-        if (!jasperDir.exists()) {
-            jasperDir.mkdirs();
-        }
+        File jasperDir = FileUtils.createDirectory(paramBeanFactory.getChrootDir() + File.separator + "jasper");
         log.info("Jaspers template used :" + jasperDir.getPath());
-        File[] foldersList = jasperDir.listFiles();
+        File[] foldersList = FileUtils.listFiles(jasperDir);
         String commercialRep = null;
         String adjustRep = null;
         File commercialInvoice = null;
@@ -253,12 +251,12 @@ public class ConfigIssuesReportingBean extends BaseBean<BaseEntity> {
             for (File f : foldersList) {
                 adjustRep = f.getCanonicalPath() + File.separator + "invoiceAdjustmentPdf";
                 adjustInvoice = new File(adjustRep + File.separator + jasperCommercial);
-                if (!adjustInvoice.exists()) {
+                if (!FileUtils.existsFile(adjustInvoice)) {
                     jasperFiles.put(adjustRep, jasperAdjustment);
                 }
                 commercialRep = f.getCanonicalPath() + File.separator + "pdf";
                 commercialInvoice = new File(commercialRep + File.separator + jasperCommercial);
-                if (!commercialInvoice.exists()) {
+                if (!FileUtils.existsFile(commercialInvoice)) {
                     jasperFiles.put(commercialRep, jasperCommercial);
                 }
             }

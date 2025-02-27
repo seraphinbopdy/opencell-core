@@ -19,7 +19,6 @@
 package org.meveo.admin.job.importexport;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -91,20 +90,9 @@ public class ImportCatalogJobBean extends BaseJobBean {
             outputDir = catalogDir + "output";
             rejectDir = catalogDir + "reject";
 
-            File f = new File(inputDir);
-            if (!f.exists()) {
-                f.mkdirs();
-            }
-
-            f = new File(outputDir);
-            if (!f.exists()) {
-                f.mkdirs();
-            }
-
-            f = new File(rejectDir);
-            if (!f.exists()) {
-                f.mkdirs();
-            }
+            FileUtils.createDirectory(inputDir);
+            FileUtils.createDirectory(outputDir);
+            FileUtils.createDirectory(rejectDir);
 
             report = "";
             file = FileUtils.getFirstFile(inputDir, fileExtensions);
@@ -112,7 +100,7 @@ public class ImportCatalogJobBean extends BaseJobBean {
                 fileName = file.getName();
                 report = "parse " + fileName + ";";
                 file = FileUtils.addExtension(file, ".processing");
-                excelInputStream = new FileInputStream(file);
+                excelInputStream = FileUtils.getInputStream(file);
 
                 int processed = 0;
 
@@ -162,7 +150,7 @@ public class ImportCatalogJobBean extends BaseJobBean {
                     } catch (Exception ex) {
                         log.error("excel error ", ex);
                     } finally {
-                        fi.delete();
+                        FileUtils.delete(fi);
                     }
                     throw new BusinessException("Error while parsing the excel file." + e.getMessage());
                 }
@@ -192,7 +180,7 @@ public class ImportCatalogJobBean extends BaseJobBean {
                     } catch (Exception e) {
                         log.error("excel error ", e);
                     } finally {
-                        fi.delete();
+                        FileUtils.delete(fi);
                     }
                 }
 

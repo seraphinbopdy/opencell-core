@@ -58,7 +58,7 @@ public class MassImportApi {
             String importTempDir = TEMP_DIR + massImportForm.getFilename();
             FlatFile flatFile = filesApi.uploadFile(massImportForm.getData(), importTempDir, null);
 
-            File[] files = new File(tempDir).listFiles((file, s) -> filesToImport.contains(s));
+            File[] files = FileUtils.listFiles(new File(tempDir), (file, s) -> filesToImport.contains(s));
 
             fileTypes = detectFileType(files);
             moveFiles(fileTypes);
@@ -106,22 +106,17 @@ public class MassImportApi {
 
     private String moveFiles(List<ImportFileTypeDto> filesType) {
         String tempDir = getProviderRootDir() + File.separator + TEMP_DIR;
-        File[] files = new File(tempDir).listFiles();
+        File[] files = FileUtils.listFiles(new File(tempDir));
         for (File file : files) {
-            try {
-                ImportFileTypeDto fileTypeDto = filesType.stream().filter(fileType -> file.getName().equals(fileType.getFileName()))
-                        .findFirst()
-                        .orElse(null);
+            ImportFileTypeDto fileTypeDto = filesType.stream().filter(fileType -> file.getName().equals(fileType.getFileName()))
+                    .findFirst()
+                    .orElse(null);
 
-                if(fileTypeDto != null && fileTypeDto.getFileType() != ImportTypesEnum.UNKNOWN) {
-                    String toPath = getProviderRootDir() + File.separator
-                            + ImportTypesEnum.valueOf(fileTypeDto.getFileType().toString()).path + File.separator + file.getName();
-                    Files.createDirectories(Paths.get(toPath));
-                    Files.move(Paths.get(file.getPath()), Paths.get(toPath), StandardCopyOption.REPLACE_EXISTING);
-                }
-
-            } catch (IOException e) {
-                e.printStackTrace();
+            if (fileTypeDto != null && fileTypeDto.getFileType() != ImportTypesEnum.UNKNOWN) {
+                String toPath = getProviderRootDir() + File.separator
+                        + ImportTypesEnum.valueOf(fileTypeDto.getFileType().toString()).path + File.separator + file.getName();
+                FileUtils.createDirectory(toPath);
+                FileUtils.moveFile(file.getPath(), toPath, StandardCopyOption.REPLACE_EXISTING);
             }
         }
         return null;

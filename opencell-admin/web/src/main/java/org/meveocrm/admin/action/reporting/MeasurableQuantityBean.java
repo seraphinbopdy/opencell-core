@@ -35,6 +35,7 @@ import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.RejectedImportException;
 import org.meveo.commons.utils.CsvBuilder;
 import org.meveo.commons.utils.CsvReader;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.dwh.MeasurableQuantity;
 import org.meveo.model.dwh.MeasurementPeriodEnum;
@@ -137,7 +138,7 @@ public class MeasurableQuantityBean extends BaseBean<MeasurableQuantity> {
 
         String existingEntitiesCSV = paramBeanFactory.getInstance().getProperty("existingEntities.csv.dir", "existingEntitiesCSV");
         File dir = new File(paramBeanFactory.getChrootDir() + File.separator + existingEntitiesCSV);
-        dir.mkdirs();
+        FileUtils.mkdirs(dir);
         existingEntitiesCsvFile = dir.getAbsolutePath() + File.separator + "MeasurableQuantitys_" + new SimpleDateFormat("ddMMyyyyHHmmSS").format(new Date()) + ".csv";
         csv = new CsvBuilder();
         boolean isEntityAlreadyExist = false;

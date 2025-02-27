@@ -18,11 +18,11 @@ package org.meveo.commons.utils;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -291,7 +291,7 @@ public class ExcelToCsv {
      String destinationFilename = null;
 
      // Check that the source file/folder exists.
-     if(!source.exists()) {
+     if(!FileUtils.isDirectory(source) && !FileUtils.isFile(source)) {
          throw new IllegalArgumentException("The source for the Excel " +
                  "file(s) cannot be found.");
      }
@@ -299,11 +299,11 @@ public class ExcelToCsv {
      // Ensure thaat the folder the user has chosen to save the CSV files
      // away into firstly exists and secondly is a folder rather than, for
      // instance, a data file.
-     if(!destination.exists()) {
+     if(!FileUtils.existsDirectory(destination)) {
          throw new IllegalArgumentException("The folder/directory for the " +
                  "converted CSV file(s) does not exist.");
      }
-     if(!destination.isDirectory()) {
+     if(!FileUtils.isDirectory(destination)) {
          throw new IllegalArgumentException("The destination for the CSV " +
                  "file(s) is not a directory/folder.");
      }
@@ -323,10 +323,10 @@ public class ExcelToCsv {
 
      // Check to see if the sourceFolder variable holds a reference to
      // a file or a folder full of files.
-     if(source.isDirectory()) {
+     if(FileUtils.isDirectory(source)) {
          // Get a list of all of the Excel spreadsheet files (workbooks) in
          // the source folder/directory
-         filesList = source.listFiles(new ExcelFilenameFilter());
+         filesList = FileUtils.listFiles(source, new ExcelFilenameFilter());
      }
      else {
          // Assume that it must be a file handle - although there are other
@@ -380,11 +380,11 @@ public class ExcelToCsv {
   */
  private void openWorkbook(File file) throws FileNotFoundException,
                                         IOException, InvalidFormatException {
-     FileInputStream fis = null;
+     InputStream fis = null;
      try {
          log.debug("Opening workbook [" + file.getName() + "]");
 
-         fis = new FileInputStream(file);
+         fis = FileUtils.getInputStream(file);
 
          // Open the workbook and then create the FormulaEvaluator and
          // DataFormatter instances that will be needed to, respectively,

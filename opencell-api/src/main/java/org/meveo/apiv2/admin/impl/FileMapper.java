@@ -18,6 +18,7 @@
 package org.meveo.apiv2.admin.impl;
 
 import org.meveo.apiv2.admin.ImmutableFile;
+import org.meveo.commons.utils.FileUtils;
 
 import java.io.File;
 
@@ -32,7 +33,7 @@ public class FileMapper {
     public org.meveo.apiv2.admin.File toResource(File file) {
         return ImmutableFile.builder()
                 .name(file.getName())
-                .isDirectory(file.isDirectory())
+                .isDirectory(FileUtils.isDirectory(file))
                 .lastModified(file.lastModified())
                 .size(file.length())
                 .build();

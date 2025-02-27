@@ -44,6 +44,7 @@ import org.jboss.seam.international.status.Messages;
 import org.jboss.seam.international.status.builder.BundleKey;
 import org.meveo.admin.exception.BusinessEntityException;
 import org.meveo.admin.report.BordereauRemiseChequeRecord;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.model.crm.Provider;
 import org.meveo.model.payments.AccountOperation;
@@ -160,7 +161,7 @@ public class BordereauRemiseCheque {
         Iterator<AccountOperation> itr = records.iterator();
         FileWriter writer = null;
         try {
-            File temp = File.createTempFile("bordereauRemiseChequeDS", ".csv");
+            File temp = FileUtils.createTempFile("bordereauRemiseChequeDS", ".csv");
             writer = new FileWriter(temp);
             writer.append("customerAccountId;title;name;firstname;amount");
             writer.append('\n');

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.meveo.admin.exception.BusinessException;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.model.payments.AccountOperation;
 import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.payments.RecordedInvoice;
@@ -31,10 +32,7 @@ public class ExportAccountOperationScript extends ReportExtractScript {
             List<AccountOperation> accountOperations = accountOperationService.list();
             initContext.put(ReportExtractScript.LINE_COUNT, accountOperations.size());
             String exportDir = String.valueOf(initContext.get(ReportExtractScript.DIR));
-            File dir = new File(exportDir);
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
+            File dir = FileUtils.createDirectory(exportDir);
             CustomerAccount customerAccount = null;
             StringBuilder sb = new StringBuilder();
             sb.append("Transaction Date;Transaction Type;Amount;Due Date;Reference;Transaction Category;Invoice Date;" + "Customer Account Code;Customer Account Description\n");

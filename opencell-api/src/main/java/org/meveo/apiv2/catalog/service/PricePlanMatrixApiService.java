@@ -2,7 +2,7 @@
 package org.meveo.apiv2.catalog.service;
 
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -116,7 +116,7 @@ public class PricePlanMatrixApiService implements ApiService<PricePlanMatrix> {
 
         try {
             FileUtils.deleteDirectory(new File(importTempDir));
-            zipFile.delete();
+            FileUtils.delete(zipFile);
         } catch (Exception e) {
             log.warn(e.getMessage());
         }
@@ -125,14 +125,14 @@ public class PricePlanMatrixApiService implements ApiService<PricePlanMatrix> {
     }
 
     private void unzipFile(String importTempDir, File zipFile) {
-        if (!zipFile.exists()) {
+        if (!FileUtils.existsFile(zipFile)) {
             throw new BusinessApiException("The zipped file does not exist");
         }
         if (!FileUtils.isValidZip(zipFile)) {
             throw new BusinessApiException("The zipped file is invalid!");
         }
-        try (FileInputStream fileInputStream = new FileInputStream(zipFile)) {
-            FileUtils.unzipFile(importTempDir, fileInputStream);
+        try (InputStream inputStream = FileUtils.getInputStream(zipFile)) {
+            FileUtils.unzipFile(importTempDir, inputStream);
         } catch (Exception e) {
             throw new BusinessApiException("Error when unziping file");
         }

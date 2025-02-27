@@ -20,16 +20,17 @@ package org.meveo.admin.parse.csv;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.meveo.admin.exception.FileContentException;
+import org.meveo.commons.utils.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,9 +56,9 @@ public abstract class CSVFile<T extends CSVLineData> {
 	 * @throws FileContentException file content exception
 	 */
 	public void parse() throws FileContentException {
-		try (FileInputStream fis = new FileInputStream(file);
-			InputStreamReader read = new InputStreamReader(fis);
-			BufferedReader reader = new BufferedReader(read);) {
+		try (InputStream fis = FileUtils.getInputStream(file);
+			 InputStreamReader read = new InputStreamReader(fis);
+			 BufferedReader reader = new BufferedReader(read);) {
 
 			if (parseHeader) {
 				// 1)----header--
@@ -114,9 +115,9 @@ public abstract class CSVFile<T extends CSVLineData> {
      * @throws IOException input/output excception.
      */
     public void createCsvFile() throws IOException {
-        try (FileOutputStream fos = new FileOutputStream(file);
-             OutputStreamWriter out = new OutputStreamWriter(fos, "GBK");
-             BufferedWriter writer = new BufferedWriter(out);) {
+        try (OutputStream fos = FileUtils.getOutputStream(file);
+			 OutputStreamWriter out = new OutputStreamWriter(fos, "GBK");
+			 BufferedWriter writer = new BufferedWriter(out);) {
             writer.write(getHeader());
             for (T t : contexts) {
                 writer.newLine();

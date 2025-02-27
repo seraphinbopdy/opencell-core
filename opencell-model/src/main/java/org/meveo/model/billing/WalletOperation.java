@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Types;
 import java.util.Date;
+import java.util.Objects;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -1910,4 +1911,15 @@ public class WalletOperation extends CFEntity {
     public void setRerateFromInvoice(Boolean rerateFromInvoice) {
         this.rerateFromInvoice = rerateFromInvoice;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (getClass() != obj.getClass())
+            return false;
+        WalletOperation other = (WalletOperation) obj;
+        return Objects.equals(id, other.id);
+    }
+
 }

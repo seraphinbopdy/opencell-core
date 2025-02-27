@@ -15565,7 +15565,7 @@ Meaning that advances won’t be available for further invoices."/>
 			<column name="description" value="Use actual activation date when activating service instance form the waiting status"/>
 			<column name="description_i18n">
 				<![CDATA[{
-                    "ENG":"Use actual activation date when activating service instance form the waiting status",
+                    "ENG":"Use actual activation date when activating service instance from the waiting status",
                     "FRA":"Utiliser la date d’activation effective lors de l’activation d’un service depuis le statut d’attente"
                 }]]>
 			</column>

@@ -42,12 +42,10 @@ import jakarta.interceptor.Interceptors;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.ws.rs.core.MultivaluedMap;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import org.meveo.api.MeveoApiErrorCodeEnum;
-import org.meveo.api.dto.ActionStatusEnum;
 import org.meveo.api.dto.response.utilities.FieldsNotImportedStringCollectionDto;
 import org.meveo.api.dto.response.utilities.ImportExportRequestDto;
 import org.meveo.api.dto.response.utilities.ImportExportResponseDto;
@@ -55,6 +53,7 @@ import org.meveo.api.exception.MeveoApiException;
 import org.meveo.api.logging.WsRestApiInterceptor;
 import org.meveo.api.rest.impl.BaseRs;
 import org.meveo.api.rest.importExport.ImportExportRs;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.export.EntityExportImportService;
 import org.meveo.export.ExportImportStatistics;
 import org.meveo.export.ExportTemplate;
@@ -102,7 +101,7 @@ public class ImportExportRsImpl extends BaseRs implements ImportExportRs {
             File tempFile = null;
             try {
                 InputStream inputStream = inputPart.getBody(InputStream.class, null);
-                tempFile = File.createTempFile(FilenameUtils.getBaseName(fileName).replaceAll(" ", "_"), "." + FilenameUtils.getExtension(fileName));
+                tempFile = FileUtils.createTempFile(FilenameUtils.getBaseName(fileName).replaceAll(" ", "_"), "." + FilenameUtils.getExtension(fileName));
                 FileUtils.copyInputStreamToFile(inputStream, tempFile);
 
             } catch (IOException e) {

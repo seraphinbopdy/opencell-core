@@ -19,7 +19,6 @@
 package org.meveo.admin.action;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
@@ -32,6 +31,7 @@ import jakarta.inject.Named;
 import org.apache.commons.io.FilenameUtils;
 import org.meveo.admin.util.ModuleUtil;
 import org.meveo.admin.web.servlet.PictureServlet;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.model.crm.Provider;
 import org.meveo.security.CurrentUser;
 import org.meveo.security.MeveoUser;
@@ -92,16 +92,17 @@ public class DefaultImageStreamer {
             String groupName = facesContext.getExternalContext().getRequestParameterMap().get("pictureGroupName");
 
             String imagePath = ModuleUtil.getPicturePath(currentUser.getProviderCode(), groupName) + File.separator + fileName;
+
             try {
-                FileInputStream inStream = new FileInputStream(imagePath);
-                streamedFile = DefaultStreamedContent.builder().stream(() -> inStream).build();
+                InputStream inputStream = FileUtils.getInputStream(imagePath);
+                streamedFile = DefaultStreamedContent.builder().stream(() -> inputStream).build();
             } catch (FileNotFoundException | NullPointerException e) {
                 log.debug("failed loading image={}", imagePath);
                 String ext = FilenameUtils.getExtension(fileName);
                 imagePath = ModuleUtil.getPicturePath(currentUser.getProviderCode(), groupName) + File.separator + getDefaultImage(groupName);
                 try {
-                    FileInputStream inStream = new FileInputStream(imagePath);
-                    streamedFile = DefaultStreamedContent.builder().contentType("image/" + ext).stream(() -> inStream).build();
+                    InputStream inputStream = FileUtils.getInputStream(imagePath);
+                    streamedFile = DefaultStreamedContent.builder().contentType("image/" + ext).stream(() -> inputStream).build();
                 } catch (FileNotFoundException e1) {
                     log.error("no group default image, loading no image default...");
                     

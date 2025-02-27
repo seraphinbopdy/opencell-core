@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.model.bi.OutputFormatEnum;
@@ -66,7 +67,7 @@ public class AccountingSummary extends FileProducer implements Reporting {
         try {
             File file = null;
             if (outputFormat == OutputFormatEnum.PDF) {
-                file = File.createTempFile("tempAccountingSummary", ".csv");
+                file = FileUtils.createTempFile("tempAccountingSummary", ".csv");
             } else if (outputFormat == OutputFormatEnum.CSV) {
                 StringBuilder sb = new StringBuilder(getFilename());
                 sb.append(".csv");

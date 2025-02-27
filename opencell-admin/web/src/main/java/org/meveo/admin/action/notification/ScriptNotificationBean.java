@@ -42,6 +42,7 @@ import org.meveo.admin.exception.RejectedImportException;
 import org.meveo.admin.web.interceptor.ActionMethod;
 import org.meveo.commons.utils.CsvBuilder;
 import org.meveo.commons.utils.CsvReader;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.model.notification.NotificationEventTypeEnum;
 import org.meveo.model.notification.ScriptNotification;
@@ -156,7 +157,7 @@ public class ScriptNotificationBean extends BaseNotificationBean<ScriptNotificat
         String existingEntitiesCSV = paramBean.getProperty("existingEntities.csv.dir", "existingEntitiesCSV");
         providerDir = paramBean.getChrootDir(currentUser.getProviderCode());
         File dir = new File(providerDir + File.separator + existingEntitiesCSV);
-        dir.mkdirs();
+        FileUtils.mkdirs(dir);
         existingEntitiesCsvFile = dir.getAbsolutePath() + File.separator + "Notifications_" + new SimpleDateFormat("ddMMyyyyHHmmSS").format(new Date()) + ".csv";
         csv = new CsvBuilder();
         boolean isEntityAlreadyExist = false;

@@ -71,6 +71,7 @@ import org.meveo.api.exception.MissingParameterException;
 import org.meveo.api.rest.admin.impl.FileUploadForm;
 import org.meveo.api.rest.exception.NotFoundException;
 import org.meveo.api.restful.util.GenericPagingAndFilteringUtils;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.jpa.JpaAmpNewTx;
 import org.meveo.model.admin.Currency;
@@ -507,7 +508,7 @@ public class CurrencyApi extends BaseApi {
         String pathName = exchangeRateDir + exchangeRateForm.getFilename();
         File file = new File(pathName);
         
-        if (!file.exists()) {
+        if (!FileUtils.existsFile(file)) {
             throw new BusinessApiException("The file: '" + exchangeRateDir + exchangeRateForm.getFilename() + "' does not exist");
         }else if(!FilenameUtils.getExtension(file.getName()).equals("csv") && !FilenameUtils.getExtension(file.getName()).equals("xlsx")){
           throw new BadRequestException("Only file extensions .csv and .xlsx are allowed.");

@@ -96,11 +96,7 @@ public class CustomTableImportJob extends Job {
 
         // Process files that should overrite data
 
-        File inputDir = new File(customTableDir + "input");
-
-        if (!inputDir.exists()) {
-            inputDir.mkdirs();
-        }
+        File inputDir = FileUtils.createDirectory(customTableDir + "input");
         String sortingOption = (String) this.getParamOrCFValue(jobInstance, CF_SORTING_OPTION);
         List<File> files = FileUtils.listFiles(inputDir, "csv", null, sortingOption);
         if (files != null && !files.isEmpty()) {
@@ -162,14 +158,8 @@ public class CustomTableImportJob extends Job {
         String outputDir = customTableDir + "output";
         String rejectDir = customTableDir + "reject";
 
-        File f = new File(outputDir);
-        if (!f.exists()) {
-            f.mkdirs();
-        }
-        f = new File(rejectDir);
-        if (!f.exists()) {
-            f.mkdirs();
-        }
+        FileUtils.createDirectory(outputDir);
+        FileUtils.createDirectory(rejectDir);
 
         for (File file : files) {
             if (!jobExecutionService.isJobRunningOnThis(result.getJobInstance())) {

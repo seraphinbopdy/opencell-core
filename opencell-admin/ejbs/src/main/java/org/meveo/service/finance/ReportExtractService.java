@@ -40,7 +40,6 @@ import org.apache.commons.io.IOUtils;
 import org.hibernate.ScrollableResults;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.ReportExtractExecutionException;
-import org.meveo.admin.storage.StorageFactory;
 import org.meveo.admin.util.ModuleUtil;
 import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ParamBean;
@@ -283,10 +282,7 @@ public class ReportExtractService extends BusinessService<ReportExtract> {
             template = template.replace("#{REPORT_DESCRIPTION}", entity.getDescriptionOrCode());
 
             // create the output file, must be html
-            File dir = new File(sbDir.toString());
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
+            FileUtils.createDirectory(sbDir.toString());
             File file = new File(sbDir.toString() + File.separator + filename);
             file.createNewFile();
             fileWriter = new FileWriter(file);
@@ -317,17 +313,14 @@ public class ReportExtractService extends BusinessService<ReportExtract> {
         Map<String, Object> row = null;
         int fileSufix = 0;
         try {
-            File dir = new File(sbDir.toString());
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
+            FileUtils.createDirectory(sbDir.toString());
             List<String> fileNames = new ArrayList<>();
             String[] path = filename.split("\\.");
             filename = new StringBuilder(path[0]).append("_").append(format("%04d", fileSufix)).append(".").append(path[1]).toString();
             globalFileName = filename;
             File file = new File(sbDir + File.separator + filename);
-            StorageFactory.createNewFile(file);
-            fileWriter = StorageFactory.getWriter(file);
+            FileUtils.createNewFile(file);
+            fileWriter = FileUtils.getWriter(file);
             fileNames.add(filename);
 
             // get the header
@@ -440,22 +433,20 @@ public class ReportExtractService extends BusinessService<ReportExtract> {
 
     private List<Map<String, Object>> readGeneratedFile(String path, String separator) {
         List<Map<String, Object>> records = new ArrayList<>();
-        if(StorageFactory.getReader(path) == null)
+        if(FileUtils.getReader(path) == null)
             throw new BusinessException("Path for reading generated file must not be null");
-        try (BufferedReader br = new BufferedReader(StorageFactory.getReader(path))) {
+        try (BufferedReader br = new BufferedReader(FileUtils.getReader(path))) {
         	String line=br.readLine();
             if(line==null) {
             	return records;
             }
             String[] header = line.split(separator);
-            while ((line = br.readLine()) != null) {
                 String[] values = line.split(separator);
                 Map<String, Object> data = new HashMap<>();
                 for (int index = 0; index < header.length; index++) {
                     data.put(header[index].replaceAll("\\s+", ""), values[index]);
                 }
                 records.add(data);
-            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -467,13 +458,10 @@ public class ReportExtractService extends BusinessService<ReportExtract> {
             filename = FileUtils.changeExtension(filename, ".html");
             globalFileName = filename;
         }
-        File dir = new File(sbDir.toString());
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
+        FileUtils.createDirectory(sbDir.toString());
         File file = new File(sbDir + File.separator + filename);
 
-        StorageFactory.createNewFile(file);
+        FileUtils.createNewFile(file);
 
         return filename;
     }

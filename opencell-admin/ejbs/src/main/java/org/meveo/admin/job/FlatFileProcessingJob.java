@@ -26,7 +26,6 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.exception.BusinessException;
-import org.meveo.admin.storage.StorageFactory;
 import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.model.admin.FileFormat;
@@ -198,35 +197,15 @@ public class FlatFileProcessingJob extends Job {
         ArrayList<String> fileExtensions = new ArrayList<String>();
         fileExtensions.add(fileNameExtension);
 
-        File f = new File(inputDir);
-        if (!StorageFactory.existsDirectory(f)) {
-            StorageFactory.mkdirs(f);
-        }
-
+        File f = FileUtils.createDirectory(inputDir);
         String inputDirParent = f.getParent();
         outputDir = outputDir != null ? outputDir : inputDirParent + File.separator + "output";
         rejectDir = rejectDir != null ? rejectDir : inputDirParent + File.separator + "reject";
         archiveDir = archiveDir != null ? archiveDir : inputDirParent + File.separator + "archive";
 
-        f = new File(outputDir);
-        if (!StorageFactory.existsDirectory(f)) {
-            log.debug("outputDir {} not exist", outputDir);
-            StorageFactory.mkdirs(f);
-            log.debug("outputDir {} creation ok", outputDir);
-        }
-        f = new File(rejectDir);
-        if (!StorageFactory.existsDirectory(f)) {
-            log.debug("rejectDir {} not exist", rejectDir);
-            StorageFactory.mkdirs(f);
-            log.debug("rejectDir {} creation ok", rejectDir);
-        }
-        f = new File(archiveDir);
-        if (!StorageFactory.existsDirectory(f)) {
-            log.debug("archiveDir {} not exist", archiveDir);
-            StorageFactory.mkdirs(f);
-            log.debug("archiveDir {} creation ok", archiveDir);
-        }
-
+        FileUtils.createDirectory(outputDir);
+        FileUtils.createDirectory(rejectDir);
+        FileUtils.createDirectory(archiveDir);
         String sortingOption = (String) this.getParamOrCFValue(jobInstance, CF_SORTING_OPTION);
         File[] files = FileUtils.listFilesByNameFilter(inputDir, fileExtensions, fileNameFilter, sortingOption);
         if (files == null || files.length == 0) {
@@ -238,7 +217,7 @@ public class FlatFileProcessingJob extends Job {
                 break;
             }
             // File might have been processed by another mediation job, so continue with a next file
-            if (!StorageFactory.exists(file)) {
+            if (!FileUtils.existsFile(file)) {
                 continue;
             }
 

@@ -19,9 +19,9 @@ import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -65,6 +65,7 @@ import org.hibernate.proxy.HibernateProxy;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.api.generics.PersistenceServiceHelper;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.ReflectionUtils;
@@ -259,8 +260,8 @@ public class ReportQueryService extends BusinessService<ReportQuery> {
 	            }
 	        }
 	    } else if (format == QueryExecutionResultFormatEnum.EXCEL) {
-	        try (XSSFWorkbook wb = new XSSFWorkbook(); 
-	             FileOutputStream fileOut = new FileOutputStream(tempFile.toFile())) {
+	        try (XSSFWorkbook wb = new XSSFWorkbook();
+                 OutputStream fileOut = FileUtils.getOutputStream(tempFile.toFile())) {
 
 	            XSSFSheet sheet = wb.createSheet(reportQuery.getTargetEntity());
 	            int i = 0;
@@ -341,8 +342,8 @@ public class ReportQueryService extends BusinessService<ReportQuery> {
                 }
             }
         } else if (format == QueryExecutionResultFormatEnum.EXCEL) {
-            try (XSSFWorkbook wb = new XSSFWorkbook(); 
-                 FileOutputStream fileOut = new FileOutputStream(file)) {
+            try (XSSFWorkbook wb = new XSSFWorkbook();
+                 OutputStream fileOut = FileUtils.getOutputStream(file)) {
 
                 XSSFSheet sheet = wb.createSheet();
                 int i = 0;
@@ -362,9 +363,11 @@ public class ReportQueryService extends BusinessService<ReportQuery> {
                         Cell cell = rowHeader.createCell(j++);
                         cell.setCellValue(field);
                     }
+
                 }
 
                 wb.write(fileOut);
+
             }
         }
     }
@@ -773,10 +776,7 @@ public class ReportQueryService extends BusinessService<ReportQuery> {
 
     private String createResultFile(List<String> data, String header, String fileName, String extension)
             throws IOException {
-        File dir = new File(paramBeanFactory.getChrootDir() + File.separator + ROOT_DIR);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
+        File dir = FileUtils.createDirectory(paramBeanFactory.getChrootDir() + File.separator + ROOT_DIR);
         String filePath = dir + File.separator + fileName + extension;
         try(PrintWriter pw = new PrintWriter(filePath)) {
             pw.println(header);

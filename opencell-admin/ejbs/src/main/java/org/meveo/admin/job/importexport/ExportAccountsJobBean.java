@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.meveo.admin.job.BaseJobBean;
 import org.meveo.admin.job.logging.JobLoggingInterceptor;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.JAXBUtils;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.ParamBeanFactory;
@@ -75,10 +76,7 @@ public class ExportAccountsJobBean extends BaseJobBean {
         ParamBean param = paramBeanFactory.getInstance();
         String exportDir = paramBeanFactory.getChrootDir() + File.separator + "exports" + File.separator + "accounts" + File.separator;
         log.info("exportDir=" + exportDir);
-        File dir = new File(exportDir);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
+        File dir = FileUtils.createDirectory(exportDir);
 
         String timestamp = sdf.format(new Date());
         List<org.meveo.model.billing.BillingAccount> bas = billingAccountService.list();

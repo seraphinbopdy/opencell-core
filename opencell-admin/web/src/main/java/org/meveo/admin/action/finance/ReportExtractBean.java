@@ -19,8 +19,8 @@
 package org.meveo.admin.action.finance;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.apache.commons.io.FilenameUtils;
 import org.jboss.seam.international.status.builder.BundleKey;
@@ -29,6 +29,7 @@ import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.ReportExtractExecutionException;
 import org.meveo.admin.exception.ValidationException;
 import org.meveo.admin.web.interceptor.ActionMethod;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.finance.ReportExtract;
 import org.meveo.model.finance.ReportExtractExecutionResult;
@@ -168,6 +169,7 @@ public class ReportExtractBean extends UpdateMapTypeFieldBean<ReportExtract> {
 
     public StreamedContent getReportFile(ReportExtractExecutionResult reportResult) {
 
+
         String filePath = reportExtractService.getReporFilePath(reportResult);
         File file = new File(filePath);
 
@@ -176,8 +178,8 @@ public class ReportExtractBean extends UpdateMapTypeFieldBean<ReportExtract> {
             mimeType = "text/html";
         }
 
-        try (FileInputStream inStream = new FileInputStream(file)) {
-            return DefaultStreamedContent.builder().contentType(mimeType).name(filePath.substring(filePath.lastIndexOf(File.separator) + 1)).stream(() -> inStream).build();
+        try (InputStream inputStream = FileUtils.getInputStream(file)) {
+            return DefaultStreamedContent.builder().contentType(mimeType).name(filePath.substring(filePath.lastIndexOf(File.separator) + 1)).stream(() -> inputStream).build();
 
         } catch (BusinessException | IOException e) {
             log.error("Failed loading report file", e);

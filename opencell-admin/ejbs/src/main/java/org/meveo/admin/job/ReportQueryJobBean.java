@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.Date;
 
 import org.meveo.admin.exception.BusinessException;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.crm.EntityReferenceWrapper;
@@ -75,10 +76,7 @@ public class ReportQueryJobBean extends BaseJobBean {
 
         String outputDir = paramBeanFactory.getChrootDir() + File.separator + ROOT_FOLDER + File.separator;
 
-        File f = new File(outputDir);
-        if (!f.exists()) {
-            f.mkdirs();
-        }
+        FileUtils.createDirectory(outputDir);
 
         ReportQuery reportQuery = getReportQuery(this.getParamOrCFValue(jobInstance, "reportQuery"));
         if (reportQuery == null) {

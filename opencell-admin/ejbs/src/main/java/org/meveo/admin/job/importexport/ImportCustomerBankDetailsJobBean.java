@@ -1,6 +1,7 @@
 package org.meveo.admin.job.importexport;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -86,10 +87,7 @@ public class ImportCustomerBankDetailsJobBean {
         String dirIN = importDir + "input";
         String prefix = paramBean.getProperty("importCustomerBankDetails.prefix", "acmt");
         String ext = paramBean.getProperty("importCustomerBankDetails.extension", "");
-        File dir = new File(dirIN);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
+        File dir = FileUtils.createDirectory(dirIN);
         List<File> files = getFilesToProcess(dir, prefix, ext);
         int numberOfFiles = files.size();
         log.info("InputFiles job to import={}", numberOfFiles);
@@ -113,9 +111,12 @@ public class ImportCustomerBankDetailsJobBean {
                 log.error("failed to import Customer Bank Details", e);
                 FileUtils.moveFile(dirKO, currentFile, file.getName());
             } finally {
-                if (currentFile != null)
-                {
-                    currentFile.delete();
+                if (currentFile != null) {
+                    try {
+                        FileUtils.delete(currentFile);
+                    } catch (IOException e) {
+                        log.error("Failed to delete a file {}", currentFile, e);
+                    }
                 }
             }
         }
@@ -238,20 +239,11 @@ public class ImportCustomerBankDetailsJobBean {
      * @return list of file to proceed
      */
     private List<File> getFilesToProcess(File dir, String prefix, String ext) {
-        List<File> files = new ArrayList<File>();
-        ImportFileFiltre filtre = new ImportFileFiltre(prefix, ext);
-        File[] listFile = dir.listFiles(filtre);
+        List<File> files = FileUtils.listFiles(dir, ext, prefix,null);
 
-        if (listFile == null) {
-            return files;
-        }
-
-        for (File file : listFile) {
-            if (file.isFile()) {
-                files.add(file);
-                // we just process one file
-                return files;
-            }
+        if (!files.isEmpty()) {
+            // we just process one file
+            return files.subList(0,0);
         }
         return files;
     }

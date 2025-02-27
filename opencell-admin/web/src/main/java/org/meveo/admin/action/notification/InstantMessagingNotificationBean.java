@@ -40,6 +40,7 @@ import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.RejectedImportException;
 import org.meveo.commons.utils.CsvBuilder;
 import org.meveo.commons.utils.CsvReader;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.model.admin.User;
 import org.meveo.model.catalog.CounterTemplate;
@@ -185,8 +186,7 @@ public class InstantMessagingNotificationBean extends BaseBean<InstantMessagingN
         ParamBean paramBean = paramBeanFactory.getInstance();
         String existingEntitiesCSV = paramBean.getProperty("existingEntities.csv.dir", "existingEntitiesCSV");
         providerDir = paramBean.getChrootDir(currentUser.getProviderCode());
-        File dir = new File(providerDir + File.separator + existingEntitiesCSV);
-        dir.mkdirs();
+        File dir = FileUtils.createDirectory(providerDir + File.separator + existingEntitiesCSV);
         existingEntitiesCsvFile = dir.getAbsolutePath() + File.separator + "InstantMessagingNotifications_" + new SimpleDateFormat("ddMMyyyyHHmmSS").format(new Date()) + ".csv";
         csv = new CsvBuilder();
         boolean isEntityAlreadyExist = false;

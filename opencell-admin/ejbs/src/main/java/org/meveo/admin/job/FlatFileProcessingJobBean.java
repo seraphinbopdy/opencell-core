@@ -29,7 +29,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.meveo.admin.async.FlatFileProcessing;
-import org.meveo.admin.storage.StorageFactory;
 import org.meveo.cache.JobRunningStatusEnum;
 import org.meveo.commons.parsers.FileParserBeanio;
 import org.meveo.commons.parsers.IFileParser;
@@ -168,10 +167,10 @@ public class FlatFileProcessingJobBean extends BaseJobBean {
             fileParser.parsing();
 
             rejectFile = new File(rejectDir + File.separator + rejectedfileName);
-            rejectFileWriter = StorageFactory.getPrintWriter(rejectFile);
+            rejectFileWriter = FileUtils.getPrintWriter(rejectFile);
 
             File outputFile = new File(outputDir + File.separator + processedfileName);
-            outputFileWriter = StorageFactory.getPrintWriter(outputFile);
+            outputFileWriter = FileUtils.getPrintWriter(outputFile);
 
             JobInstance jobInstance = jobExecutionResult.getJobInstance();
 
@@ -295,7 +294,7 @@ public class FlatFileProcessingJobBean extends BaseJobBean {
                     if (!isCsvFromExcel) {
                         FileUtils.moveFileDontOverwrite(archiveDir, currentFile, fileName);
                     } else {
-                        currentFile.delete();
+                        FileUtils.delete(currentFile);
                     }
                 }
             } catch (Exception e) {
@@ -314,7 +313,7 @@ public class FlatFileProcessingJobBean extends BaseJobBean {
             // Delete reject file if it is empty
             if (jobExecutionResult.getNbItemsProcessedWithError() == 0 && rejectFile != null) {
                 try {
-                    rejectFile.delete();
+                    FileUtils.delete(rejectFile);
                 } catch (Exception e) {
                     log.error("Failed to delete an empty reject file {}", rejectFile.getAbsolutePath(), e);
                 }

@@ -42,6 +42,7 @@ import org.meveo.admin.exception.RejectedImportException;
 import org.meveo.admin.web.interceptor.ActionMethod;
 import org.meveo.commons.utils.CsvBuilder;
 import org.meveo.commons.utils.CsvReader;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.catalog.CounterTemplate;
 import org.meveo.model.communication.email.EmailTemplate;
@@ -148,7 +149,7 @@ public class EmailNotificationBean extends BaseNotificationBean<EmailNotificatio
         csvReader.readHeaders();
         String existingEntitiesCSV = paramBeanFactory.getInstance().getProperty("existingEntities.csv.dir", "existingEntitiesCSV");
         File dir = new File(paramBeanFactory.getChrootDir() + File.separator + existingEntitiesCSV);
-        dir.mkdirs();
+        FileUtils.mkdirs(dir);
         existingEntitiesCsvFile = dir.getAbsolutePath() + File.separator + "EmailNotifications_" + new SimpleDateFormat("ddMMyyyyHHmmSS").format(new Date()) + ".csv";
         csv = new CsvBuilder();
         boolean isEntityAlreadyExist = false;

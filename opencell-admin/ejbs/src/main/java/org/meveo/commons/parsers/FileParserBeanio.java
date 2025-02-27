@@ -24,7 +24,7 @@ import java.nio.charset.StandardCharsets;
 
 import org.beanio.BeanReader;
 import org.beanio.StreamFactory;
-import org.meveo.admin.storage.StorageFactory;
+import org.meveo.commons.utils.FileUtils;
 
 /**
  *
@@ -61,7 +61,7 @@ public class FileParserBeanio implements IFileParser {
     @Override
     public void parsing() throws Exception {
         factory.load(new ByteArrayInputStream(mappingDescriptor.getBytes(StandardCharsets.UTF_8)));
-        beanReader = factory.createReader(streamName, StorageFactory.getBufferedReader(dataFile));
+        beanReader = factory.createReader(streamName, FileUtils.getBufferedReader(dataFile));
     }
 
     @Override

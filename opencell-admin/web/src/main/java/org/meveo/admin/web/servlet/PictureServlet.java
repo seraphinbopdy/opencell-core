@@ -40,6 +40,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.http.HttpStatus;
 import org.meveo.admin.util.ModuleUtil;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.model.catalog.OfferTemplateCategory;
 import org.meveo.model.catalog.ProductOffering;
 import org.meveo.model.catalog.ProductTemplate;
@@ -309,7 +310,7 @@ public class PictureServlet extends HttpServlet {
 	private byte[] loadImage(String imageFile) {
 		log.debug("Loading image: {}", imageFile);
 		File file = new File(imageFile);
-		if (!file.exists()) {
+		if (!FileUtils.existsFile(file)) {
 			log.debug("Image file does not exist: {}", imageFile);
 		}
 

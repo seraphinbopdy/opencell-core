@@ -8,9 +8,8 @@ import static org.meveo.model.catalog.ColumnTypeEnum.Range_Date;
 import static org.meveo.model.catalog.ColumnTypeEnum.Range_Numeric;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.io.OutputStream;
@@ -53,7 +52,9 @@ import org.meveo.api.dto.response.catalog.PricePlanMatrixLinesDto;
 import org.meveo.api.exception.BusinessApiException;
 import org.meveo.api.exception.MeveoApiException;
 import org.meveo.apiv2.catalog.ImportPricePlanVersionsItem;
+
 import org.meveo.commons.utils.ListUtils;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.jpa.JpaAmpNewTx;
 import org.meveo.model.DatePeriod;
@@ -182,7 +183,7 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
             throw new BusinessApiException("The file name is mandatory");
         }
         String pathName = importTempDir + File.separator + importItem.getFileName();
-        if (!new File(pathName).exists()) {
+        if (!FileUtils.existsFile(pathName)) {
             throw new BusinessApiException("The file: '" + importItem.getFileName() + "' does not exist");
         }
 
@@ -256,9 +257,9 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
                 }
             }
 
-        try (FileInputStream fs = new FileInputStream(pathName);
-                InputStreamReader isr = new InputStreamReader(fs, StandardCharsets.UTF_8);
-                LineNumberReader lnr = new LineNumberReader(isr)) {
+        try (InputStream fs = FileUtils.getInputStream(pathName);
+             InputStreamReader isr = new InputStreamReader(fs, StandardCharsets.UTF_8);
+             LineNumberReader lnr = new LineNumberReader(isr)) {
 
             String header = eliminateBOM(lnr.readLine());
 
@@ -868,19 +869,18 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
          */
         private void writeExcelFile(File file, Set<LinkedHashMap<String, Object>> csvLineRecords, boolean isMatrix) throws IOException {
 
-            try (XSSFWorkbook workbook = new XSSFWorkbook(); 
-                 FileOutputStream fileOut = new FileOutputStream(file)) {
+            try (XSSFWorkbook workbook = new XSSFWorkbook();
+                 OutputStream fileOut = FileUtils.getOutputStream(file)) {
 
-            XSSFSheet sheet = workbook.createSheet();
+                XSSFSheet sheet = workbook.createSheet();
 
-            if (isMatrix) {
-                buildPriceGridExcel(csvLineRecords, sheet);
-            } else {
-                buildPricePlanExcel(csvLineRecords, sheet);
+                if (isMatrix) {
+                    buildPriceGridExcel(csvLineRecords, sheet);
+                } else {
+                    buildPricePlanExcel(csvLineRecords, sheet);
+                }
+                workbook.write(fileOut);
             }
-
-            workbook.write(fileOut);
-        }
         }
 
 
@@ -989,11 +989,11 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
                         Files.createDirectories(Path.of(saveDirectory));
                     }
                     File csvFile = new File(saveDirectory + fileName + extensionFile);
-                    OutputStream fileOutputStream = new FileOutputStream(csvFile);
-                    fileOutputStream.write('\ufeef');
-                    fileOutputStream.write('\ufebb');
-                    fileOutputStream.write('\ufebf');
-                    csvMapper.writer(invoiceCsvSchema).writeValues(fileOutputStream).write(records);
+                    OutputStream outputStream = FileUtils.getOutputStream(csvFile);
+                    outputStream.write('\ufeef');
+                    outputStream.write('\ufebb');
+                    outputStream.write('\ufebf');
+                    csvMapper.writer(invoiceCsvSchema).writeValues(outputStream).write(records);
                     log.info("PricePlanMatrix version is exported in -> " + saveDirectory + fileName + extensionFile);
                     return Path.of(saveDirectory, fileName + extensionFile);
                 }
@@ -1071,7 +1071,7 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
             try (ZipOutputStream zs = new ZipOutputStream(Files.newOutputStream(Path.of(zipFileName)))) {
                 filesPath.stream().map(Path::toFile).filter(File::exists).map(file -> {
                     try {
-                        FileInputStream fis = new FileInputStream(file);
+                        InputStream fis = FileUtils.getInputStream(file);
                         ZipEntry zipEntry = new ZipEntry(file.getName());
                         zs.putNextEntry(zipEntry);
                         byte[] bytes = new byte[1024];

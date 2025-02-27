@@ -19,10 +19,11 @@
 package org.meveo.admin.util;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import org.apache.commons.io.IOUtils;
+import org.meveo.commons.utils.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +47,7 @@ public class PdfWaterMark {
         PdfStamper pdfStamper = null;
         PdfContentByte over = null;
         PdfGState gs = null;
-        try(FileInputStream inputStream = new FileInputStream(new File(pdfFileName)); FileOutputStream outputStream = new FileOutputStream(pdfFileName)) {
+        try(InputStream inputStream = FileUtils.getInputStream(new File(pdfFileName)); OutputStream outputStream = FileUtils.getOutputStream(pdfFileName)) {
 
             byte[] pdfBytes = IOUtils.toByteArray(inputStream);
 

@@ -59,6 +59,7 @@ import org.meveo.api.dto.document.sign.SignProcedureResponseDto;
 import org.meveo.api.dto.document.sign.YousignEventEnum;
 import org.meveo.api.dto.response.RawResponseDto;
 import org.meveo.api.exception.MeveoApiException;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ResteasyClientProxyBuilder;
 import org.meveo.service.base.ValueExpressionWrapper;
 import org.slf4j.Logger;
@@ -223,10 +224,7 @@ public class YouSignApi extends BaseApi {
             signeddocsDir =  File.separator +  signeddocsDir;
         }
         String parentDirPath = paramBeanFactory.getChrootDir() + signeddocsDir;
-        File parentDir = new File( parentDirPath );
-        if (!parentDir.exists()) {
-            parentDir.mkdirs();  
-        }
+        FileUtils.createDirectory(parentDirPath);
         return parentDirPath + File.separator + fileName + "." + extension;
     }
     
@@ -535,7 +533,7 @@ public class YouSignApi extends BaseApi {
     private byte[] getFileAsBytes(String filePath) throws FileNotFoundException { 
          
         File pdfFile = new File(filePath); 
-        if (!pdfFile.exists()) { 
+        if (!FileUtils.existsFile(pdfFile)) {
             throw new FileNotFoundException(" File not found ! -> filePath :  " + filePath); 
         } 
         try (FileInputStream fileInputStream = new FileInputStream(pdfFile)) { 

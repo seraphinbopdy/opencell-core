@@ -25,7 +25,6 @@ import static java.math.BigDecimal.ZERO;
 import static java.util.stream.Collectors.toList;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,6 +59,7 @@ import org.meveo.api.dto.custom.CustomTableRecordDto;
 import org.meveo.api.dto.response.PagingAndFiltering.SortOrder;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.api.exception.InvalidParameterException;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.MethodCallingUtils;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.ParamBeanFactory;
@@ -269,14 +269,8 @@ public class CustomTableService extends NativePersistenceService {
             String providerRoot = parambean.getChrootDir(currentUser.getProviderCode());
             String exportDir = providerRoot + File.separator + "exports" + File.separator;
 
-            File exportsDirFile = new File(exportDir);
-
+            File exportsDirFile = FileUtils.createDirectory(exportDir);
             File exportFile = new File(exportDir + customEntityTemplate.getDbTablename() + DateUtils.formatDateWithPattern(new Date(), "_yyyy-MM-dd_HH-mm-ss") + ".csv");
-
-            if (!exportsDirFile.exists()) {
-                exportsDirFile.mkdirs();
-            }
-
             Map<String, CustomFieldTemplate> cfts = customFieldTemplateService.findByAppliesTo(customEntityTemplate.getAppliesTo());
 
             if (cfts == null || cfts.isEmpty()) {
@@ -336,7 +330,7 @@ public class CustomTableService extends NativePersistenceService {
     @TransactionAttribute(TransactionAttributeType.NEVER)
     public int importData(CustomEntityTemplate customEntityTemplate, File file, boolean append) throws BusinessException {
 
-        try (FileInputStream inputStream = new FileInputStream(file)) {
+        try (InputStream inputStream = FileUtils.getInputStream(file)) {
             return importData(customEntityTemplate, inputStream, append);
 
         } catch (IOException e) {

@@ -37,6 +37,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.service.crm.impl.ProviderService;
 import org.slf4j.Logger;
@@ -111,25 +112,22 @@ public class RessourceServlet extends HttpServlet {
 	        requestedFile = requestedFile.substring(providerCode.length());
 	        String basePath = paramBeanFactory.getInstance().getProperty("providers.rootDir", "./opencelldata/") + File.separator + providerCode;
 	        File dir = new File(basePath);
-	        if (!dir.exists() || !dir.isDirectory() || !dir.canRead()) {
+            if (!FileUtils.isDirectory(dir) || !FileUtils.canRead(dir)) {
 	            throw new IOException("RessourceServlet dir '" + dir + "' is not a writable directory.");
 	        }
 	
 	        basePath += File.separator + "resources" + File.separator;
-	
-	        File path = new File(basePath);
-	        if (!path.exists()) {
-	            path.mkdirs();
-	            File csspath = new File(basePath + "custom.css");
-	            if (!csspath.exists()) {
-	                csspath.createNewFile();
-	            }
-	        }
-	        if (!path.isDirectory()) {
-	            throw new IOException("RessourceServlet path '" + basePath + "' is not a directory.");
-	        } else if (!path.canRead()) {
-	            throw new IOException("RessourceServlet path '" + basePath + "' is readable.");
-	        }
+
+            File directory = new File(basePath);
+            if (!FileUtils.existsDirectory(directory)) {
+                FileUtils.mkdirs(directory);
+                FileUtils.create(basePath + "custom.css");
+            }
+            if (!FileUtils.isDirectory(directory)) {
+                throw new IOException("RessourceServlet path '" + basePath + "' is not a directory.");
+            } else if (!FileUtils.canRead(directory)) {
+                throw new IOException("RessourceServlet path '" + basePath + "' is readable.");
+            }
 	
 	        log.debug("requestedFile=" + requestedFile);
 	
@@ -145,7 +143,7 @@ public class RessourceServlet extends HttpServlet {
 	        File file = new File(basePath, URLDecoder.decode(requestedFile, "UTF-8"));
 	
 	        // Check if file actually exists in filesystem.
-	        if (!file.exists()) {
+            if (!FileUtils.existsFile(file)) {
 	            // Do your thing if the file appears to be non-existing.
 	            // Throw an exception, or send 404, or show default/warning page, or just ignore it.
 	            response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -155,7 +153,7 @@ public class RessourceServlet extends HttpServlet {
 	
 	        // Prepare some variables. The ETag is an unique identifier of the file.
 	        String fileName = file.getName();
-	        long length = file.length();
+	        long length = FileUtils.length(file);
 	        long lastModified = file.lastModified();
 	        String eTag = fileName + "_" + length + "_" + lastModified;
 	        long expires = System.currentTimeMillis() + DEFAULT_EXPIRE_TIME;

@@ -79,6 +79,7 @@ import org.meveo.api.security.config.annotation.FilterProperty;
 import org.meveo.api.security.config.annotation.FilterResults;
 import org.meveo.api.security.config.annotation.SecuredBusinessEntityMethod;
 import org.meveo.api.security.filter.ListFilter;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.event.qualifier.StatusUpdated;
 import org.meveo.model.BaseEntity;
@@ -652,10 +653,7 @@ public class CpqQuoteApi extends BaseApi {
         try {
             InvoiceType invoiceType=invoiceTypeService.getDefaultQuote();
             String meveoDir = paramBeanFactory.getChrootDir() + File.separator;
-            File quoteXmlDir = new File(meveoDir + "quotes" + File.separator + "xml");
-            if (!quoteXmlDir.exists()) {
-                quoteXmlDir.mkdirs();
-            }
+            File quoteXmlDir = FileUtils.createDirectory(meveoDir + "quotes" + File.separator + "xml");
 
             TaxDetailDTO taxDetail = new TaxDetailDTO();
             Map<String, TaxDTO> mapTaxIndexes = buildTaxesIndexes(quoteVersion, taxDetail);
@@ -684,7 +682,7 @@ public class CpqQuoteApi extends BaseApi {
             quoteVersion.setXmlFilename(fileName);
             String xmlFilename = quoteXmlDir.getPath() + File.separator + fileName + ".xml";
             Path xmlPath = Paths.get(xmlFilename);
-            Files.write(xmlPath, xmlContent, xmlPath.toFile().exists() ? StandardOpenOption.TRUNCATE_EXISTING : StandardOpenOption.CREATE);
+            Files.write(xmlPath, xmlContent, FileUtils.existsFile(xmlPath.toFile()) ? StandardOpenOption.TRUNCATE_EXISTING : StandardOpenOption.CREATE);
             if (generatePdf) {
                 result.setPdfContent(generateQuotePDF(quoteCode, currentVersion, true));
                 CpqQuote quote = cpqQuoteService.findByCode(quoteCode);

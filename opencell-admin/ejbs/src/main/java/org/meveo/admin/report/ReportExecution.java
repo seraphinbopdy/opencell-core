@@ -18,7 +18,6 @@
 package org.meveo.admin.report;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -31,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.meveo.admin.exception.BusinessException;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.model.bi.JobNameEnum;
 import org.meveo.model.bi.Report;
@@ -201,11 +201,11 @@ public class ReportExecution implements Serializable {
     public void executeReport(Report report, Map<String, Object> params, String dataSource, String exportFileName) {
         InputStream xmlDS;
         try {
-            xmlDS = new FileInputStream(dataSource);
+            xmlDS = FileUtils.getInputStream(dataSource);
             setParameters(params);
             generatePDF(report.getFileName(), report.getName(), xmlDS, report.getRecordPath(), report.getSchedule(), exportFileName);
         } catch (FileNotFoundException e) {
-            log.error("failed to execute report , file not found Exception", e);
+            log.error("file not found exception ", e);
         }
     }
 

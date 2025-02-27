@@ -26,6 +26,7 @@ import java.io.IOException;
 import org.meveo.audit.logging.configuration.AuditConfiguration;
 import org.meveo.audit.logging.dto.ClassAndMethods;
 import org.meveo.audit.logging.handler.Handler;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.ResourceUtils;
 import org.slf4j.Logger;
@@ -71,13 +72,13 @@ public class AuditContext {
 				
 				// migration process to keep older configuration
 				File newFile = new File(_propertyFile);
-				if(!newFile.exists() && System.getProperty("jboss.server.config.dir") != null) {
+				if(!FileUtils.existsFile(newFile) && System.getProperty("jboss.server.config.dir") != null) {
 					File oldFile = new File(System.getProperty("jboss.server.config.dir") + File.separator + AUDIT_CONFIG);
-					if(oldFile.exists()) {
+					if(FileUtils.existsFile(oldFile)) {
 						log.info("Copy {} to the 'opencelldata' folder", AUDIT_CONFIG);
 						try {
-							Files.copy(oldFile, newFile);
-						} catch (IOException e) {
+							FileUtils.copyFileOrObject(oldFile,newFile);
+						} catch (Exception e) {
 							log.error("Error while trying to copy {} to the new location", AUDIT_CONFIG);
 						}
 					}

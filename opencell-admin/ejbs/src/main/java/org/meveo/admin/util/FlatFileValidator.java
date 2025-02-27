@@ -321,9 +321,7 @@ public class FlatFileValidator {
                 fileCurrentName = moveFile(file, flatFile, rejectDirectory);
             } else {
                 log.info("the file {} is well formed", flatFile.getFileOriginalName());
-                if (!new File(inputDirectory).exists()) {
-                    new File(inputDirectory).mkdirs();
-                }
+                FileUtils.createDirectory(inputDirectory);
                 fileCurrentName = moveFile(file, flatFile, inputDirectory);
             }
         }
@@ -405,7 +403,7 @@ public class FlatFileValidator {
         }
 
         if (!StringUtils.isBlank(inputDirectory)) {
-            File[] files = new File(inputDirectory).listFiles();
+            File[] files = FileUtils.listFiles(new File(inputDirectory));
             if (files != null) {
                 for (File currentFile : files) {
                     if (currentFile != null && currentFile.getName().startsWith(fileFormat.getCode()) && currentFile.getName().endsWith(fileName)) {

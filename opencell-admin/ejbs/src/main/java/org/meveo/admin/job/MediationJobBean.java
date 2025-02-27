@@ -18,23 +18,19 @@
 
 package org.meveo.admin.job;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.stream.Collectors;
 
+import jakarta.ejb.EJB;
+import jakarta.ejb.EJBTransactionRolledbackException;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.enterprise.event.Event;
+import jakarta.inject.Inject;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.async.FlatFileProcessing;
 import org.meveo.admin.parse.csv.MEVEOCdrFlatFileReader;
-import org.meveo.admin.storage.StorageFactory;
 import org.meveo.cache.JobRunningStatusEnum;
 import org.meveo.commons.utils.EjbUtils;
 import org.meveo.commons.utils.FileUtils;
@@ -57,15 +53,18 @@ import org.meveo.service.medina.impl.CDRService;
 import org.meveo.service.medina.impl.ICdrParser;
 import org.meveo.service.medina.impl.ICdrReader;
 
-import jakarta.ejb.EJB;
-import jakarta.ejb.EJBTransactionRolledbackException;
-import jakarta.ejb.Stateless;
-import jakarta.ejb.TransactionAttribute;
-import jakarta.ejb.TransactionAttributeType;
-import jakarta.enterprise.event.Event;
-import jakarta.inject.Inject;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 /**
  * Job implementation to process CDR files converting CDRs to EDR records
@@ -174,10 +173,10 @@ public class MediationJobBean extends BaseJobBean {
         try {
 
             rejectFile = new File(rejectDir + File.separator + rejectedfileName);
-            rejectFileWriter = StorageFactory.getPrintWriter(rejectFile);
+            rejectFileWriter = FileUtils.getPrintWriter(rejectFile);
 
             File outputFile = new File(outputDir + File.separator + processedfileName);
-            outputFileWriter = StorageFactory.getPrintWriter(outputFile);
+            outputFileWriter = FileUtils.getPrintWriter(outputFile);
 
             currentFile = FileUtils.addExtension(file, ".processing_" + EjbUtils.getCurrentClusterNode());
 
@@ -389,7 +388,7 @@ public class MediationJobBean extends BaseJobBean {
             // Delete reject file if it is empty
             if ((jobExecutionResult.getErrors().isEmpty() && jobExecutionResult.getNbItemsProcessedWithError() == 0) && rejectFile != null) {
                 try {
-                    rejectFile.delete();
+                    FileUtils.delete(rejectFile);
                 } catch (Exception e) {
                     log.error("Failed to delete an empty reject file {}", rejectFile.getAbsolutePath(), e);
                 }

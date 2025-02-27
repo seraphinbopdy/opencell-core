@@ -17,19 +17,6 @@
  */
 package org.meveo.admin.report;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.meveo.admin.exception.NoTemplateException;
-import org.meveo.admin.storage.StorageFactory;
-import org.meveo.model.crm.Provider;
-import org.meveo.util.ApplicationProvider;
-import org.slf4j.Logger;
-
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import net.sf.jasperreports.engine.JRException;
@@ -39,7 +26,18 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.data.JRCsvDataSource;
 import net.sf.jasperreports.engine.util.JRLoader;
+import org.meveo.admin.exception.NoTemplateException;
+import org.meveo.commons.utils.FileUtils;
+import org.meveo.model.crm.Provider;
+import org.meveo.util.ApplicationProvider;
+import org.slf4j.Logger;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 /**
  * This file producer class is used to generate PDF file
  */
@@ -65,12 +63,12 @@ public class FileProducer {
      * @param parameters template parameters
      */
     public void generatePDFfile(File dataSourceFile, String fileName, String reportFileName, Map<String, Object> parameters) {
-        try(InputStream reportTemplate = StorageFactory.getInputStream(reportFileName)) {
+        try(InputStream reportTemplate = FileUtils.getInputStream(reportFileName)) {
                 jasperReport = (JasperReport) JRLoader.loadObject(reportTemplate);
             if (dataSourceFile != null) {
                 JRCsvDataSource dataSource = createDataSource(dataSourceFile);
                 jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
-                JasperExportManager.exportReportToPdfStream(jasperPrint, StorageFactory.getOutputStream(fileName));
+                JasperExportManager.exportReportToPdfStream(jasperPrint, FileUtils.getOutputStream(fileName));
             }
         } catch (FileNotFoundException e) {
             throw new NoTemplateException();

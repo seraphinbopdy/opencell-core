@@ -25,7 +25,7 @@ import java.util.Map;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.job.utils.CustomFieldTemplateUtils;
-import org.meveo.admin.storage.StorageFactory;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.model.admin.FileFormat;
@@ -125,30 +125,12 @@ public class MediationJob extends ScopedJob {
             rejectDir = meteringDir + "reject";
             archiveDir = meteringDir + "archive";
         }
-        File f = new File(inputDir);
-        if (!StorageFactory.existsDirectory(f)) {
-            StorageFactory.mkdirs(f);
-        }
-        f = new File(outputDir);
-        if (!StorageFactory.existsDirectory(f)) {
-            log.debug("outputDir {} not exist", outputDir);
-            StorageFactory.mkdirs(f);
-            log.debug("outputDir {} creation ok", outputDir);
-        }
-        f = new File(rejectDir);
-        if (!StorageFactory.existsDirectory(f)) {
-            log.debug("rejectDir {} not exist", rejectDir);
-            StorageFactory.mkdirs(f);
-            log.debug("rejectDir {} creation ok", rejectDir);
-        }
-        f = new File(archiveDir);
-        if (!StorageFactory.existsDirectory(f)) {
-            log.debug("archiveDir {} not exist", archiveDir);
-            StorageFactory.mkdirs(f);
-            log.debug("archiveDir {} creation ok", archiveDir);
-        }
+        FileUtils.createDirectory(inputDir);
+        FileUtils.createDirectory(outputDir);
+        FileUtils.createDirectory(rejectDir);
+        FileUtils.createDirectory(archiveDir);
         String sortingOption = (String) this.getParamOrCFValue(jobInstance, CF_SORTING_OPTION);
-        File[] files = StorageFactory.listFiles(inputDir, cdrExtensions, sortingOption);
+        File[] files = FileUtils.listFiles(inputDir, cdrExtensions, "*", sortingOption);
         if (files == null || files.length == 0) {
             log.debug("There is no file in {} with extension {} to by processed by Mediation {} job", inputDir, cdrExtensions, result.getJobInstance().getCode());
             return result;
@@ -160,7 +142,7 @@ public class MediationJob extends ScopedJob {
             }
 
             // File might have been processed by another mediation job, so continue with a next file
-            if (!StorageFactory.exists(file)) {
+            if (!FileUtils.existsFile(file)) {
                 continue;
             }
 

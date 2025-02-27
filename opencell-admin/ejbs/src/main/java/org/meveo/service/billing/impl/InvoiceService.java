@@ -43,7 +43,6 @@ import static org.meveo.service.base.ValueExpressionWrapper.VAR_INVOICE_SHORT;
 import static org.meveo.service.base.ValueExpressionWrapper.evaluateExpression;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -91,7 +90,6 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.Hibernate;
 import org.hibernate.LockMode;
@@ -110,7 +108,6 @@ import org.meveo.admin.exception.InvoiceJasperNotFoundException;
 import org.meveo.admin.exception.ValidationException;
 import org.meveo.admin.job.AggregationConfiguration;
 import org.meveo.admin.job.PDFParametersConstruction;
-import org.meveo.admin.storage.StorageFactory;
 import org.meveo.admin.util.PdfWaterMark;
 import org.meveo.admin.util.ResourceBundle;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
@@ -131,6 +128,7 @@ import org.meveo.apiv2.billing.InvoiceLineRTs;
 import org.meveo.apiv2.billing.InvoiceLinesToReplicate;
 import org.meveo.apiv2.billing.RejectReasonInput;
 import org.meveo.commons.utils.MethodCallingUtils;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.NumberUtils;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.ParamBeanFactory;
@@ -1802,7 +1800,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         boolean isInvoiceAdjustment = invoiceTypeService.getListAdjustementCode().contains(invoice.getInvoiceType().getCode());
 
         File invoiceXmlFile = new File(invoiceXmlFileName);
-        if (!StorageFactory.exists(invoiceXmlFile)) {
+        if (!FileUtils.existsFile(invoiceXmlFile)) {
             produceInvoiceXmlNoUpdate(invoice, true);
         }
 
@@ -1836,14 +1834,14 @@ public class InvoiceService extends PersistenceService<Invoice> {
             }
 
             File jasperFile = getJasperTemplateFile(resDir, billingTemplateName, paymentMethodEnum, isInvoiceAdjustment);
-            if (!jasperFile.exists()) {
+            if (!FileUtils.existsFile(jasperFile)) {
                 throw new InvoiceJasperNotFoundException("The jasper file doesn't exist.");
             }
             log.debug("Jasper template used: {}", jasperFile.getCanonicalPath());
 
-            reportTemplate = new FileInputStream(jasperFile);
+            reportTemplate = FileUtils.getInputStream(jasperFile);
 
-            JRXmlDataSource dataSource = StorageFactory.getJRXmlDataSource(invoiceXmlFile);
+            JRXmlDataSource dataSource = FileUtils.getJRXmlDataSource(invoiceXmlFile);
 
             String fileKey = jasperFile.getPath() + jasperFile.lastModified();
             JasperReport jasperReport = jasperReportMap.get(fileKey);
@@ -1892,23 +1890,22 @@ public class InvoiceService extends PersistenceService<Invoice> {
     public synchronized void generateInvoiceFile(String billingTemplateName, String resDir) throws IOException {
         File destDir = new File(resDir + File.separator + billingTemplateName);
 
-        if (!destDir.exists()) {
+        if (!FileUtils.existsDirectory(destDir)) {
             log.warn("PDF jasper report {} was not found. A default report will be used.", destDir.getAbsolutePath());
             String sourcePath = Thread.currentThread().getContextClassLoader().getResource("./jasper").getPath() + File.separator + billingTemplateName;
             File sourceFile = new File(sourcePath);
-            
-            if (!sourceFile.exists()) {
+
+            if (!FileUtils.existsDirectory(sourceFile)) {
                 VirtualFile vfDir = VFS
                     .getChild("content/" + ParamBeanFactory.getAppScopeInstance().getProperty("opencell.moduleName", "opencell") + ".war/WEB-INF/classes/jasper/default");
                 log.info("default jaspers path : {}", vfDir.getPathName());
                 URL vfPath = VFSUtils.getPhysicalURL(vfDir);
                 sourceFile = new File(vfPath.getPath());
-                if (!sourceFile.exists()) {
+                if (!FileUtils.existsDirectory(sourceFile)) {
                     throw new BusinessException("A default embedded jasper PDF report [" + sourceFile.getAbsolutePath() + "] for invoice is missing..");
                 }
             }
-
-            destDir.mkdirs();
+            FileUtils.mkdirs(destDir);
             FileUtils.copyDirectory(sourceFile, destDir);
         }
     }
@@ -1921,20 +1918,22 @@ public class InvoiceService extends PersistenceService<Invoice> {
      * @throws IOException {@link IOException}
      */
     public synchronized void generateInvoiceAdjustmentFile(boolean isInvoiceAdjustment, String billingTemplateName, String resDir) throws IOException {
+
         File destDirInvoiceAdjustment = new File(resDir + File.separator + billingTemplateName);
 
-        if (!destDirInvoiceAdjustment.exists() && isInvoiceAdjustment) {
-            destDirInvoiceAdjustment.mkdirs();
+        if (!FileUtils.existsDirectory(destDirInvoiceAdjustment) && isInvoiceAdjustment) {
+            FileUtils.createDirectory(destDirInvoiceAdjustment);
+
             String sourcePathInvoiceAdjustment = Thread.currentThread().getContextClassLoader().getResource("./jasper").getPath() + File.separator + billingTemplateName + "/invoiceAdjustment";
             File sourceFileInvoiceAdjustment = new File(sourcePathInvoiceAdjustment);
             
-            if (!sourceFileInvoiceAdjustment.exists()) {
+            if (!FileUtils.existsDirectory(sourceFileInvoiceAdjustment)) {
                 VirtualFile vfDir = VFS
                     .getChild("content/" + ParamBeanFactory.getAppScopeInstance().getProperty("opencell.moduleName", "opencell") + ".war/WEB-INF/classes/jasper/default/invoiceAdjustment");
                 URL vfPath = VFSUtils.getPhysicalURL(vfDir);
                 sourceFileInvoiceAdjustment = new File(vfPath.getPath());
                 
-                if (!sourceFileInvoiceAdjustment.exists()) {
+                if (!FileUtils.existsDirectory(sourceFileInvoiceAdjustment)) {
                     URL resource = Thread.currentThread().getContextClassLoader().getResource("./jasper/" + billingTemplateName + "/invoiceAdjustment");
 
                     if (resource == null) {
@@ -1947,7 +1946,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
                     sourcePathInvoiceAdjustment = resource.getPath();
 
-                    if (!sourceFileInvoiceAdjustment.exists()) {
+                    if (!FileUtils.existsDirectory(sourceFileInvoiceAdjustment)) {
                         throw new BusinessException("embedded jasper report for invoice is missing.");
                     }
 
@@ -1972,7 +1971,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         invoice.setPdfFilename(null);
         invoice = update(invoice);
 
-        Files.delete(Path.of(pdfFilename));
+        FileUtils.delete(pdfFilename);
         return invoice;
     }
 
@@ -1992,7 +1991,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         String paymentMethodFileName = new StringBuilder("invoice_").append(paymentMethod).append(".jasper").toString();
         File paymentMethodFile = new File(pdfDir, paymentMethodFileName);
 
-        if (paymentMethodFile.exists()) {
+        if (FileUtils.existsFile(paymentMethodFile)) {
             return paymentMethodFile;
         }else {
             File defaultTemplate = new File(pdfDir, INVOICE_TEMPLATE_FILENAME);
@@ -2281,7 +2280,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         if (createDirs) {
             int pos = Integer.max(xmlFilename.lastIndexOf("/"), xmlFilename.lastIndexOf("\\"));
             String dir = xmlFilename.substring(0, pos);
-            StorageFactory.mkdirs(new File(dir));
+            FileUtils.mkdirs(dir);
         }
 
         return xmlFilename;
@@ -2365,7 +2364,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         if (createDirs) {
             int pos = Integer.max(pdfFilename.lastIndexOf("/"), pdfFilename.lastIndexOf("\\"));
             String dir = pdfFilename.substring(0, pos);
-            StorageFactory.mkdirs(new File(dir));
+            FileUtils.mkdirs(new File(dir));
         }
 
         return pdfFilename;
@@ -2496,7 +2495,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         invoice.setXmlFilename(null);
         invoice = update(invoice);
 
-        Files.delete(Path.of(xmlFilename));
+        FileUtils.delete(xmlFilename);
         return invoice;
     }
 
@@ -2509,7 +2508,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
     public boolean isInvoiceXmlExist(Invoice invoice) {
 
         String xmlFileName = getFullXmlFilePath(invoice, false);
-        return StorageFactory.exists(xmlFileName);
+        return FileUtils.existsFile(xmlFileName);
     }
 
     /**
@@ -2531,7 +2530,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 		}
 		String xmlFileName = getFullXmlFilePath(invoice, false);
 		File xmlFile = new File(xmlFileName);
-		if (!xmlFile.exists()) {
+		if (!FileUtils.existsFile(xmlFile)) {
 			produceInvoiceXmlNoUpdate(invoice, true);
 		}
 		try {
@@ -2553,9 +2552,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
     public boolean isInvoicePdfExist(Invoice invoice) {
 
         String pdfFileName = getFullPdfFilePath(invoice, false);
-        File file=new File(pdfFileName);
-       
-        return StorageFactory.exists(file);
+        return FileUtils.existsFile(pdfFileName);
     }
 
     /**
@@ -2569,28 +2566,28 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
         String pdfFileName = getFullPdfFilePath(invoice, false);
         File pdfFile = new File(pdfFileName);
-        if (!StorageFactory.exists(pdfFile)) {
+        if (!FileUtils.existsFile(pdfFile)) {
             throw new BusinessException("Invoice PDF was not produced yet for invoice " + invoice.getInvoiceNumberOrTemporaryNumber());
         }
 
-        InputStream fileInputStream = null;
+        InputStream inputStream = null;
         try {
-            long fileSize = StorageFactory.length(pdfFile);
+            long fileSize = FileUtils.length(pdfFile);
             if (fileSize > Integer.MAX_VALUE) {
                 throw new IllegalArgumentException("File is too big to put it to buffer in memory.");
             }
-            fileInputStream = StorageFactory.getInputStream(pdfFile);
-            assert fileInputStream != null;
+            inputStream = FileUtils.getInputStream(pdfFile);
+            assert inputStream != null;
 
-            return fileInputStream.readAllBytes();
+            return inputStream.readAllBytes();
 
         } catch (Exception e) {
             log.error("Error reading invoice PDF file {} contents", pdfFileName, e);
 
         } finally {
-            if (fileInputStream != null) {
+            if (inputStream != null) {
                 try {
-                    fileInputStream.close();
+                    inputStream.close();
                 } catch (IOException e) {
                     log.error("Error closing file input stream", e);
                 }
@@ -3897,7 +3894,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
             String fileName = getFullPdfFilePath(invoice, false);
             File attachment = new File(fileName);
-            if (!attachment.exists()) {
+            if (!FileUtils.existsFile(attachment)) {
                 log.warn("No Pdf file exists for the invoice {}", invoice.getInvoiceNumber());
                 return false;
             }

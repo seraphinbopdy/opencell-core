@@ -96,14 +96,11 @@ public class SepaRejectedTransactionsJob extends Job {
         String ext = (String) this.getParamOrCFValue(jobInstance, "RejectSepaJob_fileNameExtension");
         String inputDir = paramBeanFactory.getChrootDir() + ((String) this.getParamOrCFValue(jobInstance, "RejectSepaJob_inputDir")).replaceAll("\\..", "");
         log.info("inputDir=" + inputDir);
-        File dir = new File(inputDir);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
+        FileUtils.createDirectory(inputDir);
         ArrayList<String> fileExtensions = new ArrayList<String>();
         fileExtensions.add(ext);
 
-        File[] files = FileUtils.listFiles(inputDir, fileExtensions, prefix);
+        File[] files = FileUtils.listFiles(inputDir, fileExtensions, prefix, null);
         if (files == null || files.length == 0) {
             result.setReport("No files!");
         } else {

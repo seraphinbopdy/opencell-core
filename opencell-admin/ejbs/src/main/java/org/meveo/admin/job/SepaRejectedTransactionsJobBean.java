@@ -19,6 +19,7 @@
 package org.meveo.admin.job;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 
 import org.meveo.admin.exception.BusinessException;
@@ -87,24 +88,9 @@ public class SepaRejectedTransactionsJobBean {
             outputDir = inputDir + File.separator + "output";
             rejectDir = inputDir + File.separator + "reject";
             archiveDir = inputDir + File.separator + "archive";
-            File f = new File(outputDir);
-            if (!f.exists()) {
-                log.debug("outputDir {} not exist", outputDir);
-                f.mkdirs();
-                log.debug("outputDir {} creation ok", outputDir);
-            }
-            f = new File(rejectDir);
-            if (!f.exists()) {
-                log.debug("rejectDir {} not exist", rejectDir);
-                f.mkdirs();
-                log.debug("rejectDir {} creation ok", rejectDir);
-            }
-            f = new File(archiveDir);
-            if (!f.exists()) {
-                log.debug("saveDir {} not exist", archiveDir);
-                f.mkdirs();
-                log.debug("saveDir {} creation ok", archiveDir);
-            }
+            FileUtils.createDirectory(outputDir);
+            FileUtils.createDirectory(rejectDir);
+            FileUtils.createDirectory(archiveDir);
             fileName = file.getName();
             log.info(file.getName() + " in progress");
             currentFile = FileUtils.addExtension(file, ".processing_" + EjbUtils.getCurrentClusterNode());
@@ -132,7 +118,11 @@ public class SepaRejectedTransactionsJobBean {
             FileUtils.moveFile(rejectDir, currentFile, fileName);
         } finally {
             if (currentFile != null) {
-                currentFile.delete();
+                try {
+                    FileUtils.delete(currentFile);
+                } catch (IOException e) {
+                    log.error("Failed to delete a file {}", currentFile, e);
+                }
             }
         }
     }

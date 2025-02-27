@@ -19,6 +19,7 @@
 package org.meveo.admin.job;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.job.logging.JobLoggingInterceptor;
@@ -92,15 +93,15 @@ public class ImportMediationEntityJobBean extends BaseJobBean {
         String dirKO = importDir + "reject";
         String fileName = null;
         try {
-
-            if (dir.listFiles() == null) {
+            File[] files = FileUtils.listFiles(dir);
+            if (files == null) {
                 result.setNbItemsToProcess(nbItems);
                 result.setNbItemsCorrectlyProcessed(nbItems);
                 return;
             }
-            result.setNbItemsToProcess(dir.listFiles().length);
+            result.setNbItemsToProcess(files.length);
 
-            for (File file : dir.listFiles()) {
+            for (File file : files) {
                 if (!jobExecutionService.isShouldJobContinue(result.getJobInstance().getId())) {
                     break;
                 }
@@ -123,7 +124,11 @@ public class ImportMediationEntityJobBean extends BaseJobBean {
             FileUtils.moveFile(dirKO, currentFile, fileName);
         } finally {
             if (currentFile != null) {
-                currentFile.delete();
+                try {
+                    FileUtils.delete(currentFile);
+                } catch (IOException e) {
+                    log.error("Failed to delete a file {}", currentFile, e);
+                }
             }
         }
     }

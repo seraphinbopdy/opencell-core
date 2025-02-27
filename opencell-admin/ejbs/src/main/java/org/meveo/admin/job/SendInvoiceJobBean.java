@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 
 import org.meveo.admin.async.SynchronizedIterator;
 import org.meveo.admin.exception.ValidationException;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.model.billing.Invoice;
 import org.meveo.model.communication.email.MailingTypeEnum;
 import org.meveo.model.crm.EntityReferenceWrapper;
@@ -128,8 +129,6 @@ public class SendInvoiceJobBean extends IteratorBasedJobBean<Invoice> {
         if (pdfPath == null) {
             return false;
         }
-        File pdfFile = new File(pdfPath);
-        return pdfFile.exists();
-
+        return FileUtils.existsFile(pdfPath);
     }
 }

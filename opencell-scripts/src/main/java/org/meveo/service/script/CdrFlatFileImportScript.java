@@ -7,7 +7,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.text.DateFormat;
@@ -20,8 +19,8 @@ import jakarta.inject.Inject;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.exception.BusinessException;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ParamBeanFactory;
-import org.meveo.model.crm.EntityReferenceWrapper;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.model.rating.CDR;
@@ -54,7 +53,7 @@ public class CdrFlatFileImportScript extends Script {
         String rootPathFile = getProviderRootDir() + File.separator + pathFile;
         File dir = new File(rootPathFile);
 
-        File[] fileList = dir.listFiles();
+        File[] fileList = FileUtils.listFiles(dir);
         if (fileList == null) {
             return;
         }
@@ -65,9 +64,7 @@ public class CdrFlatFileImportScript extends Script {
             }
 
             File rejectFile = new File(fileInput.getAbsolutePath().replace("input", "reject") + ".rejected");
-            if (!rejectFile.getParentFile().exists()) {
-                rejectFile.getParentFile().mkdirs();
-            }
+            FileUtils.createDirectory(rejectFile.getParentFile());
 
             try (FileWriter fw = new FileWriter(rejectFile, true);
                  BufferedWriter bw = new BufferedWriter(fw);
@@ -75,6 +72,7 @@ public class CdrFlatFileImportScript extends Script {
                  BufferedReader br = new BufferedReader(fread)) {
 
                 String line;
+
                 String splitBy = ";";
                 String[] header = br.readLine().split(splitBy);
 
@@ -148,10 +146,10 @@ public class CdrFlatFileImportScript extends Script {
 
     private void moveOrDeleteFile(File fileInput, File rejectFile) throws IOException {
         String toPath = getProviderRootDir() + File.separator + "imports/cdr/flatFile/archive" + File.separator + fileInput.getName();
-        Files.createDirectories(Paths.get(toPath));
-        Files.move(Paths.get(fileInput.getPath()), Paths.get(toPath), StandardCopyOption.REPLACE_EXISTING);
+        FileUtils.createDirectory(Paths.get(toPath).toUri().toString());
+        FileUtils.moveFile(Paths.get(fileInput.getPath()).toUri().toString(), Paths.get(toPath).toUri().toString(), StandardCopyOption.REPLACE_EXISTING);
         if (rejectFile.length() == 0) {
-            Files.delete(rejectFile.toPath());
+            FileUtils.delete(rejectFile.toPath().toUri().toString());
         }
     }
 

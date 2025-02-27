@@ -20,9 +20,9 @@ package org.meveo.admin.action.frontend;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLDecoder;
 import java.util.zip.ZipOutputStream;
 
@@ -85,11 +85,11 @@ public class FileServlet extends HttpServlet {
             throw new ServletException("FileServlet property 'providers.rootDir' is required.");
         } else {
             File path = new File(this.basePath);
-            if (!path.exists()) {
+            if (!FileUtils.existsDirectory(path)) {
                 throw new ServletException("FileServlet property 'providers.rootDir' value '" + this.basePath + "' does actually not exist in file system.");
-            } else if (!path.isDirectory()) {
+            } else if (!FileUtils.isDirectory(path)) {
                 throw new ServletException("FileServlet property 'providers.rootDir' value '" + this.basePath + "' is actually not a directory in file system.");
-            } else if (!path.canRead()) {
+            } else if (!FileUtils.canRead(path)) {
                 throw new ServletException("FileServlet property 'providers.rootDir' value '" + this.basePath + "' is actually not readable in file system.");
             }
         }
@@ -128,7 +128,7 @@ public class FileServlet extends HttpServlet {
     	try {
 	        // Get requested file by path info.
 	        String requestedFile = request.getPathInfo();
-	
+
 	        // Check if file is actually supplied to the request URL.
 	        if (requestedFile == null) {
 	            // Do your thing if the file is not supplied to the request URL.
@@ -137,39 +137,39 @@ public class FileServlet extends HttpServlet {
 	            response.sendError(HttpServletResponse.SC_NOT_FOUND);
 	            return;
 	        }
-	        
+
 	        // URL-decode the file name (might contain spaces and on) and prepare file
 	        // object.
 	        File fileOrFolder = new File(basePath, URLDecoder.decode(requestedFile, "UTF-8"));
-	
+
 	        // Check if file actually exists in filesystem.
-	        if (!fileOrFolder.exists()) {
+            if (!FileUtils.isDirectory(fileOrFolder) && !FileUtils.isFile(fileOrFolder)) {
 	            // Do your thing if the file appears to be non-existing.
 	            // Throw an exception, or send 404, or show default/warning page, or just ignore
 	            // it.
 	            response.sendError(HttpServletResponse.SC_NOT_FOUND);
 	            return;
 	        }
-	
+
 	        if(!currentUser.isAuthenticated()) {//Not Authenticated
 	            //Only files in "media" Folder is Valid
 	            boolean isFolderOrFileValide = (requestedFile.length() > 7) && ("/media/".equalsIgnoreCase(requestedFile.substring(0, 7)));
-	            if (!isFolderOrFileValide || fileOrFolder.isDirectory()) {
+                if (!isFolderOrFileValide || FileUtils.isDirectory(fileOrFolder)) {
 	                response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 	                return;
 	            }
 	        }
-	        
+
 	        // Prepare some variables. The ETag is an unique identifier of the file.
 	        String fileName = fileOrFolder.getName();
-	
-	        if (fileOrFolder.isDirectory()) {
+
+            if (FileUtils.isDirectory(fileOrFolder)) {
 	            // zipped it
 	            ByteArrayOutputStream zipout = new ByteArrayOutputStream();
 	            ZipOutputStream zos = new ZipOutputStream(zipout);
 	            FileUtils.addDirToArchive(basePath, fileOrFolder.getPath(), zos);
 	            zos.close();
-	
+
 	            ServletOutputStream outStream = response.getOutputStream();
 	            response.setContentType("application/zip");
 	            response.setHeader("Content-Disposition", "attachment; filename=" + fileName + ".zip");
@@ -179,7 +179,7 @@ public class FileServlet extends HttpServlet {
 	            zipout.close();
 	        } else {
 	            // file
-	            try(FileInputStream fis = new FileInputStream(fileOrFolder);) {
+                try(InputStream fis = FileUtils.getInputStream(fileOrFolder);) {
 	                response.setContentType("application/force-download");
 	                response.setContentLength((int) fileOrFolder.length());
 	                response.addHeader("Content-disposition", "attachment;filename=\"" + fileName + "\"");
@@ -192,14 +192,14 @@ public class FileServlet extends HttpServlet {
     	} catch (IOException e) {
     		// Log the exception for debugging purposes
             log.error("Error processing request", e);
-            
+
             try {
             	// Return an error response to the client
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal server error occurred while processing the request.");
             } catch (IOException ex) {
                 log.error("Error sending error response", ex);
             }
-        }      
+        }
     }
 
 }

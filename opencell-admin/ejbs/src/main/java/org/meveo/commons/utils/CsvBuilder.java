@@ -17,20 +17,18 @@
  */
 package org.meveo.commons.utils;
 
+
+import jakarta.faces.context.FacesContext;
+import jakarta.servlet.http.HttpServletResponse;
+import org.apache.poi.util.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
-
-import org.apache.poi.util.IOUtils;
-import org.meveo.admin.storage.StorageFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import jakarta.faces.context.FacesContext;
-import jakarta.servlet.http.HttpServletResponse;
 
 
 /**
@@ -155,9 +153,8 @@ public class CsvBuilder {
 		try {
 			File tmp = new File(absolutFfilename);
 			File createDir = tmp.getParentFile();
-
-			createDir.mkdirs();
-			fw = StorageFactory.getWriter(absolutFfilename);
+			FileUtils.mkdirs(createDir);
+			fw = FileUtils.getWriter(absolutFfilename);
 			fw.write(sb.toString());
 			fw.close();
 		} catch (Exception e) {
@@ -182,11 +179,8 @@ public class CsvBuilder {
 	 * @throws IOException input/output exception.
 	 */
 	public void writeFile(byte[] content, String filename) throws IOException {
-		File file = new File(filename);
-		if (!file.exists()) {
-			file.createNewFile();
-		}
-		try (FileOutputStream fop = new FileOutputStream(file, true)) {
+		File file = FileUtils.create(filename);
+		try (OutputStream fop = FileUtils.getOutputStream(file, true)) {
 			fop.write(content);
 			fop.flush();
 		} catch (IOException ex) {

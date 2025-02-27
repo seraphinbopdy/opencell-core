@@ -23,6 +23,7 @@ import org.meveo.api.exception.BusinessApiException;
 import org.meveo.api.exception.EntityDoesNotExistsException;
 import org.meveo.apiv2.admin.FilesPagingAndFiltering;
 import org.meveo.apiv2.admin.impl.FileMapper;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.shared.DateUtils;
 import org.meveo.service.base.expressions.ExpressionParser;
@@ -218,7 +219,7 @@ public class FilesApiService extends BaseApi {
             dir = getProviderRootDir();
         }
         File folder = new File(dir);
-        if (folder.isFile()) {
+        if (FileUtils.isFile(folder)) {
             throw new BusinessApiException("Path " + dir + " is a file.");
         }
         Path path = Paths.get(dir);

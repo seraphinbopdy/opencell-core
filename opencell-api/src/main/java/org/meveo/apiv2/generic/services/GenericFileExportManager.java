@@ -10,8 +10,8 @@ import static java.time.temporal.ChronoField.YEAR;
 import static java.util.stream.Collectors.toMap;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -55,6 +55,7 @@ import org.meveo.apiv2.generic.GenericFieldDetails;
 import org.meveo.apiv2.generic.common.ExcelExportConfiguration;
 import org.meveo.apiv2.settings.globalSettings.service.AdvancedSettingsApiService;
 import org.meveo.commons.utils.CsvBuilder;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.settings.AdvancedSettings;
@@ -192,7 +193,7 @@ public class GenericFileExportManager {
             csv.startNewLine();
         }
 
-		try (FileOutputStream fop = new FileOutputStream(csvFile, true)) {
+		try (OutputStream fop = FileUtils.getOutputStream(csvFile, true)) {
 			fop.write(csv.toString().getBytes());
 			fop.flush();
 		} catch (IOException ex) {
@@ -221,7 +222,6 @@ public class GenericFileExportManager {
      * @throws IOException
      */
     private void writeExcelFile(File file, List<Map<String, Object>> records, Map<String, GenericFieldDetails> fieldDetails, List<String> ordredColumn, ExcelExportConfiguration configuration) throws IOException {
-        FileOutputStream fileOut = null;
         var wb = new SXSSFWorkbook();
         wb.setCompressTempFiles(true);
         SXSSFSheet sheet = wb.createSheet();
@@ -307,9 +307,10 @@ public class GenericFileExportManager {
                 // apply function where inputs are sheet and last row index
                 configuration.getFooter().apply(sheet, i.get() + records.size());
             }
-            
+
+            OutputStream fileOut = null;
             try {
-                fileOut = new FileOutputStream(file);
+                fileOut = FileUtils.getOutputStream(file);
                 wb.write(fileOut);
             } catch (IOException e) {
                 throw new RuntimeException("error during file writing : ", e);
@@ -325,7 +326,7 @@ public class GenericFileExportManager {
     private void writePdfFile(File file, List<Map<String, Object>> lineRecords, Map<String, GenericFieldDetails> fieldDetails, List<String> ordredColumn, String locale) throws IOException, DocumentException{
         if(!CollectionUtils.isEmpty(lineRecords)) {
             Document doc = new Document();
-            PdfWriter.getInstance(doc, new FileOutputStream(file));
+            PdfWriter.getInstance(doc, FileUtils.getOutputStream(file));
             doc.open();
             final PdfPTable table = new PdfPTable(lineRecords.get(0).size());
             table.setWidthPercentage(100);

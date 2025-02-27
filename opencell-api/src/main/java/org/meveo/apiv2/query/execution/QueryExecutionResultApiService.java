@@ -13,6 +13,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 
 import org.meveo.apiv2.ordering.services.ApiService;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.model.report.query.QueryExecutionResult;
 import org.meveo.security.CurrentUser;
@@ -82,7 +83,7 @@ public class QueryExecutionResultApiService implements ApiService<QueryExecution
 		if(queryExecutionResult.getQueryStatus() == SUCCESS) {
 			if (queryExecutionResult.getFilePath() != null && !queryExecutionResult.getFilePath().isEmpty()) {
 				var filePath = new File(paramBeanFactory.getDefaultChrootDir() + File.separator + queryExecutionResult.getFilePath());
-				if(!filePath.exists())
+				if(!FileUtils.existsFile(filePath))
 					throw new BadRequestException("File Path not exist");
 				if(!queryExecutionResult.getFilePath().toLowerCase().endsWith("csv"))
 					throw new BadRequestException("Only File CSV format is accepted");

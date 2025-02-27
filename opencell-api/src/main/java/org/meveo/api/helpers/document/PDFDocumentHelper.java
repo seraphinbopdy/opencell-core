@@ -19,8 +19,8 @@
 package org.meveo.api.helpers.document;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,6 +32,7 @@ import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.meveo.api.dto.document.PDFDocumentRequestDto;
 import org.meveo.api.dto.document.PDFTemplateDto;
+import org.meveo.commons.utils.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -146,10 +147,7 @@ public class PDFDocumentHelper {
                 documentDir = rootDir + documentDir;
             }
         }
-        File documentDirFile = new File(documentDir);
-        if (!documentDirFile.exists()) {
-            documentDirFile.mkdirs();
-        }
+        FileUtils.createDirectory(documentDir);
         return documentDir;
     }
 
@@ -163,16 +161,16 @@ public class PDFDocumentHelper {
     public static byte[] getPdfFileAsBytes(String pdfFilePath) throws FileNotFoundException {
 
         File pdfFile = new File(pdfFilePath);
-        if (!pdfFile.exists()) {
+        if (!FileUtils.existsFile(pdfFile)) {
             throw new FileNotFoundException("PDF document not found ! pdfFilePath :  " + pdfFilePath);
         }
-        try (FileInputStream fileInputStream = new FileInputStream(pdfFile)) {
+        try (InputStream inputStream = FileUtils.getInputStream(pdfFile)) {
             long fileSize = pdfFile.length();
             if (fileSize > Integer.MAX_VALUE) {
                 throw new IllegalArgumentException("File is too big to put it to buffer in memory.");
             }
             byte[] fileBytes = new byte[(int) fileSize];
-            fileInputStream.read(fileBytes);
+            inputStream.read(fileBytes);
             return fileBytes;
         } catch (Exception e) {
             LOG.error("Error reading PDF document file {} contents", pdfFilePath, e);

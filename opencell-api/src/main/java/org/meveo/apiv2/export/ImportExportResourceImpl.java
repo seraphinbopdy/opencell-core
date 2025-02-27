@@ -1,15 +1,13 @@
 package org.meveo.apiv2.export;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
-import org.meveo.api.dto.ActionStatus;
-import org.meveo.api.dto.ActionStatusEnum;
 import org.meveo.api.dto.response.utilities.FieldsNotImportedStringCollectionDto;
 import org.meveo.api.dto.response.utilities.ImportExportResponseDto;
 import org.meveo.api.exception.*;
 import org.meveo.api.logging.WsRestApiInterceptor;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.export.*;
 import org.meveo.model.IEntity;
 import org.meveo.model.communication.MeveoInstance;
@@ -151,7 +149,7 @@ public class ImportExportResourceImpl implements ImportExportResource {
         File tempFile = null;
             try {
                 InputStream inputStream = inputPart.getBody(InputStream.class, null);
-                tempFile = File.createTempFile(FilenameUtils.getBaseName(fileName).replaceAll(" ", "_"), "." + FilenameUtils.getExtension(fileName));
+                tempFile = FileUtils.createTempFile(FilenameUtils.getBaseName(fileName).replaceAll(" ", "_"), "." + FilenameUtils.getExtension(fileName));
                 FileUtils.copyInputStreamToFile(inputStream, tempFile);
                 return tempFile;
             } catch (IOException e) {

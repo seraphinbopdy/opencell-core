@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.assertj.core.util.VisibleForTesting;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.model.document.Document;
@@ -44,11 +45,9 @@ public class DocumentFileService {
     }
     public void saveFile(org.meveo.model.document.Document documentEntity, byte[] decodedFile) {
         try {
-            final String getFileLocationPath = getFileLocationPath(DOCUMENT_ROOT_DIR, documentEntity, documentEntity.getCategory());
-            if(Files.notExists(Path.of(getFileLocationPath))){
-                (new File(getFileLocationPath)).mkdirs();
-            }
-            Files.write(Path.of(getFileLocationPath+ File.separator + documentEntity.getFileName()), decodedFile);
+            final String fileLocationPath = getFileLocationPath(DOCUMENT_ROOT_DIR, documentEntity, documentEntity.getCategory());
+            FileUtils.createDirectory(fileLocationPath);
+            Files.write(Path.of(fileLocationPath+ File.separator + documentEntity.getFileName()), decodedFile);
         } catch (IOException e) {
             log.error("error = {}", e);
             throw new BadRequestException("there was an issue during file creation!");
@@ -74,7 +73,7 @@ public class DocumentFileService {
             if(Files.notExists(Path.of(fileFullPath))){
                 throw new BadRequestException("directory '"+fileFullPath+"' does not exist ");
             }
-            Files.delete(Path.of(fileFullPath));
+            FileUtils.delete(fileFullPath);
         } catch (IOException e) {
             log.error("error = {}", e);
             throw new BadRequestException("there was an issue during file delete!");

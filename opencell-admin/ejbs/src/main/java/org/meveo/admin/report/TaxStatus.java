@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.model.bi.OutputFormatEnum;
@@ -56,7 +57,7 @@ public class TaxStatus extends FileProducer implements Reporting {
             // getFilename(startDate, endDate));
             File file = null;
             if (outputFormat == OutputFormatEnum.PDF) {
-                file = File.createTempFile("tempAccountingDetail", ".csv");
+                file = FileUtils.createTempFile("tempAccountingDetail", ".csv");
             } else if (outputFormat == OutputFormatEnum.CSV) {
                 StringBuilder sb = new StringBuilder(getFilename(startDate, endDate));
                 sb.append(".csv");

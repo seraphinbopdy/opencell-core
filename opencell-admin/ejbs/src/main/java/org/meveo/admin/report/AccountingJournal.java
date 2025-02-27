@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.model.bi.OutputFormatEnum;
@@ -58,7 +59,7 @@ public class AccountingJournal extends FileProducer implements Reporting {
         try {
             File file = null;
             if (outputFormat == OutputFormatEnum.PDF) {
-                file = File.createTempFile("tempAccountingJournal", ".csv");
+                file = FileUtils.createTempFile("tempAccountingJournal", ".csv");
             } else if (outputFormat == OutputFormatEnum.CSV) {
                 StringBuilder sb = new StringBuilder(getFilename(startDate, endDate));
                 sb.append(".csv");

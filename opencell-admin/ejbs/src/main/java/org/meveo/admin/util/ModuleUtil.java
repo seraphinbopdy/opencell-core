@@ -27,6 +27,7 @@ import javax.imageio.ImageIO;
 import javax.imageio.stream.FileImageOutputStream;
 
 import org.apache.commons.lang3.StringUtils;
+import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.ParamBean;
 import org.primefaces.model.CroppedImage;
 
@@ -73,16 +74,15 @@ public class ModuleUtil {
     }
 
     private static String getPath(String path, boolean createDir) {
-        File file = new File(path);
-        if (createDir && !file.exists()) {
-            file.mkdirs();
+        if (createDir && !FileUtils.existsDirectory(path)) {
+            FileUtils.createDirectory(path);
         }
         return path;
     }
 
     public static byte[] readPicture(String filename) throws IOException {
         File file = new File(filename);
-        if (!file.exists()) {
+        if (!FileUtils.existsFile(file)) {
             return new byte[] { };
         }
         BufferedImage img = ImageIO.read(file);
@@ -128,14 +128,13 @@ public class ModuleUtil {
     }
 
     /**
+     * Remove picture
+     *
      * @param filename file name of picture
-     * @throws Exception exception when something happens
+     * @throws IOException exception when something happens
      */
-    public static void removePicture(String filename) throws Exception {
-        File file = new File(filename);
-        if (file.exists()) {
-            file.delete();
-        }
+    public static void removePicture(String filename) throws IOException {
+        FileUtils.delete(filename);
     }
 
     public static void removeModulePicture(String providerCode, String filename) throws Exception {

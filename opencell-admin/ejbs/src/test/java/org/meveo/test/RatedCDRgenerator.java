@@ -19,10 +19,10 @@
 package org.meveo.test;
 
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.Date;
 
+import org.meveo.commons.utils.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +46,7 @@ public class RatedCDRgenerator implements Runnable {
 		long time = System.currentTimeMillis() + shift * 100;
 		PrintWriter out = null;
 		try {
-			out = new PrintWriter(new FileOutputStream(fileName));
+			out = new PrintWriter(FileUtils.getOutputStream(fileName));
 			StringBuffer sb = new StringBuffer();
 			for (long i = 0; i < nbRecords; i++) {
 				time += 100;
@@ -59,8 +59,6 @@ public class RatedCDRgenerator implements Runnable {
 				sb.append(Math.random() * 10);
 				out.println(sb.toString());
 			}
-		} catch (FileNotFoundException e) {
-			log.error("error = {}", e);
 		} finally {
 			if (out != null) {
 				out.close();

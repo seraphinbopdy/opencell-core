@@ -1077,7 +1077,9 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
         
         if(recalculateMrr) {
             entity.setMrr(calculateMRR(entity));
-            subscriptionService.calculateMrr(entity.getSubscription());
+            if(entity.getSubscription()!=null) {
+                subscriptionService.calculateMrr(entity.getSubscription());
+            }
         }
 
         entity = super.update(entity);

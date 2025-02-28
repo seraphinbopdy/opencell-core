@@ -22,9 +22,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.joda.time.DateTime;
-import org.joda.time.Days;
-import org.joda.time.Hours;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.model.billing.Invoice;
 import org.meveo.model.billing.InvoicePaymentStatusEnum;
@@ -591,17 +588,6 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
         return updateCollectionPlan;
     }
 
-    public static int daysBetween(Date start, Date end) {
-        if (start == null || end == null) {
-            return 0;
-        }
-
-        LocalDate dateStart = start.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        LocalDate dateEnd = end.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-
-        return Math.abs((int) ChronoUnit.DAYS.between(dateStart, dateEnd));
-    }
-
     /**
      * Set level and action status
      *
@@ -640,5 +626,23 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
 
         collectionPlan.setLastActionDate(new Date());
         collectionPlan.setLastAction(actionInstance.getDunningAction().getCode());
+    }
+
+    /**
+     * Calculate days between two dates
+     *
+     * @param start Start date
+     * @param end End date
+     * @return Days between two dates
+     */
+    public static int daysBetween(Date start, Date end) {
+        if (start == null || end == null) {
+            return 0;
+        }
+
+        LocalDate dateStart = start.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate dateEnd = end.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+        return Math.abs((int) ChronoUnit.DAYS.between(dateStart, dateEnd));
     }
 }

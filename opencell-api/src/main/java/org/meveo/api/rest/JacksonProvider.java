@@ -22,6 +22,7 @@ import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
 import org.meveo.api.MeveoApiErrorCodeEnum;
 import org.meveo.api.dto.ActionStatus;
 import org.meveo.api.dto.ActionStatusEnum;
+import org.meveo.api.jaxb.AttributeTypeDeserializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +79,17 @@ public class JacksonProvider extends ResteasyJackson2Provider {
             Throwable cause = e.getCause();
             if (cause instanceof IllegalStateException) {
                 handleValidationError((IllegalStateException) cause);
-            }
+            }else if (cause instanceof AttributeTypeDeserializationException) {
+				throw new WebApplicationException(Response
+					.status(Response.Status.BAD_REQUEST)
+					.entity(new ActionStatus(
+						ActionStatusEnum.FAIL,
+						MeveoApiErrorCodeEnum.INVALID_PARAMETER,
+						cause.getMessage()
+					))
+					.type(MediaType.APPLICATION_JSON)
+					.build());
+			}
             throw e;
         }
     }

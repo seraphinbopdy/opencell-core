@@ -5,7 +5,6 @@ import java.util.Date;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.BusinessCFEntity;
-import org.meveo.model.CustomFieldEntity;
 import org.meveo.model.payments.ActionModeEnum;
 import org.meveo.model.payments.ActionTypeEnum;
 
@@ -23,7 +22,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 @Entity
-@CustomFieldEntity(cftCodePrefix = "DunningActionInstance")
 @Table(name = "dunning_action_instance")
 @GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "dunning_action_instance_seq"), @Parameter(name = "increment_size", value = "1") })
 @NamedQueries({ @NamedQuery(name = "DunningActionInstance.updateStatus", query = "UPDATE DunningActionInstance ai SET ai.actionStatus=:actionStatus WHERE ai.dunningLevelInstance=:dunningLevelInstance") })

@@ -197,12 +197,17 @@ public class CountryApi extends BaseApi {
         TradingCountry tradingCountry = tradingCountryService.findByCode(countryCode);
    
         if (tradingCountry == null) {
-            throw new EntityDoesNotExistsException(TradingCountry.class, countryCode);
+            Country country = countryService.findByCode(countryCode);
+            if (country == null) {
+                throw new EntityDoesNotExistsException(TradingCountry.class, countryCode);
+            } else{
+                countryService.remove(country);
+            }
+        } else {
+            Long lCountryId = tradingCountry.getCountry().getId();
+            tradingCountryService.remove(tradingCountry);
+            countryService.remove(lCountryId);
         }
-        
-        Long lCountryId = tradingCountry.getCountry().getId();
-        tradingCountryService.remove(tradingCountry);
-        countryService.remove(lCountryId);
     }
 
     public CountryDto update(CountryDto postData) throws MeveoApiException, BusinessException {

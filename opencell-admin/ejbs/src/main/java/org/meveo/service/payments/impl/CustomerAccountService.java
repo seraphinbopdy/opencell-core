@@ -945,9 +945,9 @@ public class CustomerAccountService extends AccountService<CustomerAccount> {
             }
         }
 
-        if(customerAccount.getSeller().getContactInformation() != null && StringUtils.isNotBlank(customerAccount.getSeller().getContactInformation().getEmail()) &&
+        if(customerAccount.getSeller() != null && customerAccount.getSeller().getContactInformation() != null && StringUtils.isNotBlank(customerAccount.getSeller().getContactInformation().getEmail()) &&
                 customerAccount.getContactInformation() != null && StringUtils.isNotBlank(customerAccount.getContactInformation().getEmail())){
-            collectionPlanService.sendNotification(customerAccount.getSeller().getContactInformation().getEmail(),customerAccount.getContactInformation().getEmail(), customerAccount.getTradingLanguage().getLanguage().getLanguageCode(), emailTemplate, params);
+            collectionPlanService.sendNotification(customerAccount.getSeller().getContactInformation().getEmail(), customerAccount.getContactInformation().getEmail(), customerAccount.getTradingLanguage().getLanguage().getLanguageCode(), emailTemplate, params);
         }
     }
 
@@ -1006,7 +1006,7 @@ public class CustomerAccountService extends AccountService<CustomerAccount> {
                 .map(billingAccount -> List.of(
                         billingAccount.getCode(),
                         billingAccount.getDescription(),
-                        billingAccount.getContactInformation().getEmail()
+                        billingAccount.getContactInformation() != null ? billingAccount.getContactInformation().getEmail() : ""
                 ))
                 .collect(Collectors.toList());
         params.put("billingAccountsList", createHtmlTable(header, rows));

@@ -7,8 +7,7 @@ import java.util.List;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.meveo.model.BusinessCFEntity;
-import org.meveo.model.CustomFieldEntity;
+import org.meveo.model.AuditableCFEntity;
 import org.meveo.model.billing.Invoice;
 import org.meveo.model.payments.CustomerAccount;
 
@@ -26,7 +25,6 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
-@CustomFieldEntity(cftCodePrefix = "DunningLevelInstance")
 @Table(name = "dunning_level_instance")
 @GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "dunning_level_instance_seq"), @Parameter(name = "increment_size", value = "1") })
 @NamedQueries({ @NamedQuery(name = "DunningLevelInstance.findByCollectionPlan", query = "SELECT li FROM DunningLevelInstance li where li.collectionPlan = :collectionPlan order by li.daysOverdue"),
@@ -41,7 +39,7 @@ import jakarta.validation.constraints.NotNull;
         @NamedQuery(name = "DunningLevelInstance.findByCustomerAccount", query = "SELECT li FROM DunningLevelInstance li where li.customerAccount = :customerAccount and li.collectionPlan is NULL"),
         @NamedQuery(name = "DunningLevelInstance.incrementSequencesByDaysOverdue", query = "UPDATE DunningLevelInstance li set li.sequence = li.sequence+1 where li.collectionPlan = :collectionPlan and li.daysOverdue > :daysOverdue"),
         @NamedQuery(name = "DunningLevelInstance.decrementSequencesByDaysOverdue", query = "UPDATE DunningLevelInstance li set li.sequence = li.sequence-1 where li.collectionPlan = :collectionPlan and li.daysOverdue > :daysOverdue") })
-public class DunningLevelInstance extends BusinessCFEntity {
+public class DunningLevelInstance extends AuditableCFEntity {
 
     private static final long serialVersionUID = -5809793412586160209L;
 

@@ -57,7 +57,6 @@ import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxExclu
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxExemptionReason;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxExemptionReasonCode;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxInclusiveAmount;
-import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxTypeCode;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.TaxableAmount;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Telephone;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.UBLVersionID;
@@ -755,9 +754,6 @@ public class InvoiceUblHelper {
 		taxCategoryType.setPercent(percent);
 		// InvoiceLine/ Item/ ClassifiedTaxCategory/TaxScheme/TaxTypeCode
 		TaxScheme taxScheme = objectFactoryCommonAggrement.createTaxScheme();
-		TaxTypeCode taxTypeCode = objectFactorycommonBasic.createTaxTypeCode();
-		taxTypeCode.setValue(invoiceLine.getTax().getCode());
-		taxScheme.setTaxTypeCode(taxTypeCode);
 		ID id = objectFactorycommonBasic.createID();
 		id.setSchemeID("UN/ECE 5153");
 		id.setSchemeAgencyID("6");
@@ -901,13 +897,10 @@ public class InvoiceUblHelper {
 
 	private TaxScheme getTaxSheme(){
 		TaxScheme taxScheme = objectFactoryCommonAggrement.createTaxScheme();
-		TaxTypeCode taxTypeCode = objectFactorycommonBasic.createTaxTypeCode();
-		taxTypeCode.setValue("TVA_SUR_ENCAISSEMENT");
 		ID id = objectFactorycommonBasic.createID();
 		id.setSchemeID("UN/ECE 5153");
 		id.setSchemeAgencyID("6");
 		id.setValue("VAT");
-		taxScheme.setTaxTypeCode(taxTypeCode);
 		taxScheme.setID(id);
 		return taxScheme;
 	}
@@ -1349,9 +1342,6 @@ public class InvoiceUblHelper {
 		id.setSchemeAgencyID("6");
 		id.setValue("VAT");
 		taxScheme.setID(id);
-		TaxTypeCode taxTypeCode = objectFactorycommonBasic.createTaxTypeCode();
-		taxTypeCode.setValue(taxInvoiceAgregate.getTax().getCode());
-		taxScheme.setTaxTypeCode(taxTypeCode);
 		taxCategoryType.setTaxScheme(taxScheme);
 		return taxCategoryType;
 	}

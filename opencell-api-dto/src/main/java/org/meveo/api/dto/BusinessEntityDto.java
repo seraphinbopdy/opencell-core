@@ -41,10 +41,6 @@ public class BusinessEntityDto extends AuditableEntityDto implements IEntityDto 
     /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 4451119256601996946L;
 
-    /** The id. */
-    @XmlAttribute()
-    protected Long id;
-
     /**
      * The code
      */
@@ -102,24 +98,6 @@ public class BusinessEntityDto extends AuditableEntityDto implements IEntityDto 
      */
     public void setUpdatedCode(String updatedCode) {
         this.updatedCode = updatedCode;
-    }
-
-    /**
-     * Gets the id.
-     *
-     * @return the id
-     */
-    public Long getId() {
-        return id;
-    }
-
-    /**
-     * Sets the id.
-     *
-     * @param id the new id
-     */
-    public void setId(Long id) {
-        this.id = id;
     }
 
     /**

@@ -40,7 +40,6 @@ public abstract class BaseEntityDto implements Serializable {
     private static final long serialVersionUID = 4456089256601996946L;
 
     /** The id. */
-    @JsonIgnore
     @Schema(description = "Entity id")
     protected Long id;
 

@@ -235,7 +235,8 @@ public class ScriptInstanceBean extends BaseBean<ScriptInstance> {
             messages.error(new BundleKey("messages", "scriptInstance.scriptAlreadyExists"), code);
             return;
         }
-
+        
+        entity.setCode(code);
         scriptInstanceService.compileScript(entity, true);
         if (!entity.isError()) {
             messages.info(new BundleKey("messages", "scriptInstance.compilationSuccessfull"));

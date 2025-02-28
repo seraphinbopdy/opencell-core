@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "e0449c08-d7bd-44c4-928e-cf5670f8a199",
+		"_postman_id": "3bb203a6-8b0e-4450-a261-819f855eaa77",
 		"name": "00_OPENCELL_V17.X - V1",
 		"description": "# Introduction\n\nThis configuration file is designed to be a basis for all configurations provided by Opencell.  \nIt merely contains most common general settings and a catalog of services implementing various rating models.\n\n# Configuring Opencell\n\nThere are 2 main ways for configuring _**Opencell**_:\n\n- GUI (_Administration GUI_ and _Marketing Manager_)\n    \n- API (all Opencell configuration and operations can be performed using our extensive API library)\n    \n\nThe most flexible way is using APIs which currently are available as **Rest** and **Soap**.  \nThe **Soap** API are deprecated, so will won't mention them anymore.\n\n## Tools\n\nAny tools able to send HTTP requests will do.  \nOne could even just script _curl_ calls using shell script.  \nBut of course, a more user friendly tool will make things easier.\n\nHere at _**Opencell**_, we prefer **Postman** ([https://getpostman.com](https://getpostman.com)):\n\n- it has a modern, friendly interface\n    \n- Sets of API request can be organized into collections, themselves structured into a folder tree.\n    \n- Collections can be exported as _JSON_ files or shared with other team members using collaboration features (payed version)\n    \n- it allows to uses variables at different levels (collection, environement, global) and to execute _Javascript_ scripts before and after executing API calls which allows great flexibility and API response testing.\n    \n\n# Configuration documentation guidelines\n\nIn order to document our configuration, we make full used of the internal documentation capabilities of the Markdown fields on Postman Objects\n\n## Default template for _Collection_ documentation\n\n## Default template for _Folder_ documentation\n\n## Default template for _Request_ documentation\n\n# Tips & guidelines\n\nHere follow a few tips for understanding this collection.\n\n## Collection pre-request script\n\n``` javascript\npm.globals.set(\"timestamp.iso\", (new Date()).toISOString());\npm.globals.set(\"request.label\", pm.info.requestName);\nvar parts = pm.info.requestName.split(\"|\");\nfor(let i=0; i    pm.globals.set(\"request.label.\"+i, parts[i]);\n}\n\n ```\n\n## Configuration guidelines\n\n## Entities\n\n__XXX\n\n### Custom Fields\n\nCF___ XXX\n\nwill be discarded for inherited\n\n#### Custom field visibility\n\nSE____XXX\n\nare used in CFT.applicableOnEl to show CFT on entities\n\n## Entity abbreviation\n\n| code | entity |\n| --- | --- |\n| P | Provider |\n| S | Seller |\n| C | Customer |\n| CA | Customer Account |\n| BA | Billing Account |\n| UA | User Account |\n| SU | Subscription |\n| AP | Access Point |\n| OF | Offer Template |\n| SE | Service Template and Instance |\n| CH | Charge Template |\n| PP | Price Plan |\n| CN | Counter |\n| ICAT | Invoice Category |\n| ISCAT | Invoice SubCategory |\n| CAL | Calendar |\n| BC | Billing Cycle |",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
@@ -3441,6 +3441,92 @@
 					"name": "Catalog",
 					"item": [
 						{
+							"name": "Scripts",
+							"item": [
+								{
+									"name": "script|code=LogContext|desc=Logs context",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = JSON.parse(responseBody);",
+													"tests[\"is.success\"] = jsonData.actionStatus.status === \"SUCCESS\";",
+													"tests[\"is.compiled\"] = jsonData.compilationErrors.length === 0;",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/xml",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "<ScriptInstance description=\"{{desc}} {{$timestamp}}\">\r\n        <code>org.meveo.service.script.{{code}}</code>\r\n        <type>JAVA</type>\r\n        <script><![CDATA[\r\npackage org.meveo.service.script;\r\n\r\nimport java.util.Map;\r\nimport org.meveo.admin.exception.BusinessException;\r\nimport org.slf4j.Logger;\r\nimport org.slf4j.LoggerFactory;\r\n\r\npublic class LogContext extends org.meveo.service.script.Script {\r\n\r\n    private static final Logger log = LoggerFactory.getLogger(LogContext.class);\r\n    \r\n    @Override\r\n    public void execute(Map<String, Object> context) {\r\n        log.info(\">>> Method context >>>\");\r\n        context.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach(entry->{ log.info(\"{}={}\",entry.getKey(),entry.getValue()); });\r\n        \r\n        /*log.info(\">>> System environment variables >>>\");\r\n        System.getenv().entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach(entry->{ log.info(\"{}={}\",entry.getKey(),entry.getValue()); });\r\n        */\r\n    }\r\n}\r\n]]></script>\r\n</ScriptInstance>"
+										},
+										"url": {
+											"raw": "{{opencell.url}}/scriptInstance/createOrUpdate",
+											"host": [
+												"{{opencell.url}}"
+											],
+											"path": [
+												"scriptInstance",
+												"createOrUpdate"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "script|code=rating.LogWalletOperation|desc=Logs the WalletOperation",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"if( pm.response.code == 200 ) { tests[\"is.compiled\"] = JSON.parse(responseBody).compilationErrors.length === 0; }"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/xml",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "<ScriptInstance description=\"{{desc}} {{$timestamp}}\">\r\n        <code>org.meveo.service.script.{{code}}</code>\r\n        <scriptInstanceCategoryCode>RATING</scriptInstanceCategoryCode>\r\n        <type>JAVA</type>\r\n        <script><![CDATA[\r\npackage org.meveo.service.script.rating;\r\n\r\nimport org.meveo.service.script.Script;\r\n\r\nimport java.math.BigDecimal;\r\nimport java.util.Map;\r\n\r\nimport org.slf4j.Logger;\r\nimport org.slf4j.LoggerFactory;\r\n\r\nimport org.meveo.admin.exception.BusinessException;\r\nimport org.meveo.api.dto.billing.WalletOperationDto;\r\nimport org.meveo.model.billing.WalletOperation;\r\nimport org.meveo.model.billing.Tax;\r\n\r\nimport org.meveo.service.catalog.impl.TaxService;\r\nimport org.meveo.service.billing.impl.RatingService;\r\n\r\n/**\r\n * Logs the WalletOperation\r\n * @author schambrin\r\n */\r\npublic class LogWalletOperation extends org.meveo.service.script.Script {\r\n\r\n    private static final Logger log = LoggerFactory.getLogger(LogWalletOperation.class);\r\n\r\n    public void execute(Map<String, Object> context) throws BusinessException {\r\n        context.entrySet().stream().forEach(entry->{ log.info(\"{}={}\",entry.getKey(),entry.getValue()); });\r\n        // TaxService taxService = (TaxService)getServiceInterface(\"TaxService\");\r\n        // RatingService ratingService = (RatingService)getServiceInterface(\"RatingService\");\r\n        WalletOperation wo = (WalletOperation) context.get(Script.CONTEXT_ENTITY);\r\n\r\n        try {\r\n        \tlog.info(\"wo={}\",new WalletOperationDto(wo));\r\n        \tlog.info(\"wo.code={}\", wo.getCode());\r\n        \tlog.info(\"wo.article={}\", wo.getAccountingArticle());\r\n        \tlog.info(\"wo.tax={}\", wo.getTax());\r\n        \tlog.info(\"wo.tradingCurrency={}\", wo.getTradingCurrency());\r\n        \tlog.info(\"wo.transactionalAmountWithoutTax={}\", wo.getTransactionalAmountWithoutTax());\r\n        \tlog.info(\"wo.amountWithoutTax={}\", wo.getAmountWithoutTax());\r\n        \tlog.info(\"wo.parameter1={}\", wo.getParameter1());\r\n        \tlog.info(\"wo.parameter2={}\", wo.getParameter2());\r\n        \tlog.info(\"wo.parameter3={}\", wo.getParameter3());\r\n        \tlog.info(\"wo.pricePlan={}\", wo.getPriceplan()!=null ? wo.getPriceplan().getCode() : wo.getPriceplan());\r\n        \tlog.info(\"wo.pricePlanMatrixVersion={}\", wo.getPricePlanMatrixVersion());\r\n        \tlog.info(\"wo.pricePlanMatrixLine={}\", wo.getPricePlanMatrixLine());\r\n        \tlog.info(\"wo.contract={}\", wo.getContract());\r\n        \tlog.info(\"wo.contractLine={}\", wo.getContractLine());\r\n        \tlog.info(\"wo.priceListLine={}\", wo.getPriceListLine());\r\n        } catch(Exception e) {\r\n            log.error(\"Exception:\", e);\r\n            throw new BusinessException(e.getMessage());\r\n        }\r\n    }\r\n}\r\n]]></script>\r\n</ScriptInstance>"
+										},
+										"url": {
+											"raw": "{{opencell.url}}/scriptInstance/createOrUpdate",
+											"host": [
+												"{{opencell.url}}"
+											],
+											"path": [
+												"scriptInstance",
+												"createOrUpdate"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
 							"name": "Rating Script for Energy Charging minium",
 							"item": [
 								{
@@ -3883,7 +3969,8 @@
 																	"pm.variables.set(\"access_token\", null);\r",
 																	""
 																],
-																"type": "text/javascript"
+																"type": "text/javascript",
+																"packages": {}
 															}
 														}
 													],
@@ -3897,7 +3984,7 @@
 														],
 														"body": {
 															"mode": "raw",
-															"raw": "{\n    \"customTableCode\": \"{{request.label.1}}\",\n    \"overwrite\": false,\n    \"record\": [\n                {\n            \"tableName\": \"{{request.label.1}}\",\n            \"values\": {\n                \"index\": 122.4,\n                \"published_date\": \"2023-08-18T14:02:00Z\",\n                \"valid_from\": \"2023-09-01T00:02:00Z\",\n                \"valid_priority\": null,\n                \"valid_to\": \"2023-09-30T23:59:00Z\"\n            }\n        },{\n            \"tableName\": \"{{request.label.1}}\",\n            \"values\": {\n                \"index\": 124.6,\n                \"published_date\": \"2023-09-18T14:02:00Z\",\n                \"valid_from\": \"2023-10-01T00:02:00Z\",\n                \"valid_priority\": null,\n                \"valid_to\": \"2023-10-31T23:59:00Z\"\n            }\n        },\n        {\n            \"tableName\": \"{{request.label.1}}\",\n            \"values\": {\n                \"index\": 125.1,\n                \"published_date\": \"2023-10-12T14:02:00Z\",\n                \"valid_from\": \"2023-11-01T00:02:00Z\",\n                \"valid_priority\": null,\n                \"valid_to\": \"2023-11-30T23:59:00Z\"\n            }\n        },\n        {\n            \"tableName\": \"{{request.label.1}}\",\n            \"values\": {\n                \"index\": 125.9,\n                \"published_date\": \"2023-11-15T14:02:00Z\",\n                \"valid_from\": \"2023-12-01T14:02:00Z\",\n                \"valid_priority\": null,\n                \"valid_to\": \"2033-12-31T23:59:00Z\"\n            }\n        }\n    ]\n}"
+															"raw": "{\n    \"customTableCode\": \"{{request.label.1}}\",\n    \"overwrite\": false,\n    \"record\": [\n                {\n            \"tableName\": \"{{request.label.1}}\",\n            \"values\": {\n                \"index\": 122.4,\n                \"published_date\": \"2023-08-18T14:02:00Z\",\n                \"valid_from\": \"2023-09-01T00:02:00Z\",\n                \"valid_priority\": null,\n                \"valid_to\": \"2023-09-30T23:59:00Z\"\n            }\n        },{\n            \"tableName\": \"{{request.label.1}}\",\n            \"values\": {\n                \"index\": 124.6,\n                \"published_date\": \"2023-09-18T14:02:00Z\",\n                \"valid_from\": \"2023-10-01T00:02:00Z\",\n                \"valid_priority\": null,\n                \"valid_to\": \"2023-10-31T23:59:00Z\"\n            }\n        },\n        {\n            \"tableName\": \"{{request.label.1}}\",\n            \"values\": {\n                \"index\": 125.1,\n                \"published_date\": \"2023-10-12T14:02:00Z\",\n                \"valid_from\": \"2023-11-01T00:02:00Z\",\n                \"valid_priority\": null,\n                \"valid_to\": \"2023-11-30T23:59:00Z\"\n            }\n        },\n        {\n            \"tableName\": \"{{request.label.1}}\",\n            \"values\": {\n                \"index\": 125.9,\n                \"published_date\": \"2023-11-15T14:02:00Z\",\n                \"valid_from\": \"2023-12-01\",\n                \"valid_priority\": null,\n                \"valid_to\": \"2033-12-31T23:59:00Z\"\n            }\n        }\n    ]\n}"
 														},
 														"url": {
 															"raw": "{{opencell.url}}/customTable",
@@ -4107,6 +4194,179 @@
 											"response": []
 										}
 									]
+								}
+							]
+						},
+						{
+							"name": "Accumulator Counters",
+							"item": [
+								{
+									"name": "counter|target=CUST|code=CN_MULTI_ACCUM|type=MULTI_VALUE|calendar=CAL_MONTHLY_1ST|desc=Accumulates quantity for charge",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"code\": \"{{code}}_{{target}}\",\n    \"description\": \"{{desc}} on {{target}}\",\n    \"disabled\": false,\n    \"calendar\": \"{{calendar}}\",\n    \"type\": \"USAGE\",\n    \"ceiling\": 0,\n    \"counterLevel\": \"{{target}}\",\n    \"ceilingExpressionEl\": null,\n    \"accumulator\": true,\n    \"accumulatorType\": \"{{type}}\",\n    \"filterEl\": \"#{ true }\",\n    \"keyEl\": \"#{ op.code }\",\n    \"valueEl\": \"#{ op.quantity }\"\n}"
+										},
+										"url": {
+											"raw": "{{opencell.url}}/catalog/counterTemplate/createOrUpdate",
+											"host": [
+												"{{opencell.url}}"
+											],
+											"path": [
+												"catalog",
+												"counterTemplate",
+												"createOrUpdate"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "counter|target=CA|code=CN_MULTI_ACCUM|type=MULTI_VALUE|calendar=CAL_MONTHLY_1ST|desc=Accumulates quantity for charge",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"code\": \"{{code}}_{{target}}\",\n    \"description\": \"{{desc}} on {{target}}\",\n    \"disabled\": false,\n    \"calendar\": \"{{calendar}}\",\n    \"type\": \"USAGE\",\n    \"ceiling\": 0,\n    \"counterLevel\": \"{{target}}\",\n    \"ceilingExpressionEl\": null,\n    \"accumulator\": true,\n    \"accumulatorType\": \"{{type}}\",\n    \"filterEl\": \"#{ true }\",\n    \"keyEl\": \"#{ op.code }\",\n    \"valueEl\": \"#{ op.quantity }\"\n}"
+										},
+										"url": {
+											"raw": "{{opencell.url}}/catalog/counterTemplate/createOrUpdate",
+											"host": [
+												"{{opencell.url}}"
+											],
+											"path": [
+												"catalog",
+												"counterTemplate",
+												"createOrUpdate"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "counter|target=BA|code=CN_MULTI_ACCUM|type=MULTI_VALUE|calendar=CAL_MONTHLY_1ST|desc=Accumulates quantity for charge",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"code\": \"{{code}}_{{target}}\",\n    \"description\": \"{{desc}} on {{target}}\",\n    \"disabled\": false,\n    \"calendar\": \"{{calendar}}\",\n    \"type\": \"USAGE\",\n    \"ceiling\": 0,\n    \"counterLevel\": \"{{target}}\",\n    \"ceilingExpressionEl\": null,\n    \"accumulator\": true,\n    \"accumulatorType\": \"{{type}}\",\n    \"filterEl\": \"#{ true }\",\n    \"keyEl\": \"#{ op.code }\",\n    \"valueEl\": \"#{ op.quantity }\"\n}"
+										},
+										"url": {
+											"raw": "{{opencell.url}}/catalog/counterTemplate/createOrUpdate",
+											"host": [
+												"{{opencell.url}}"
+											],
+											"path": [
+												"catalog",
+												"counterTemplate",
+												"createOrUpdate"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "counter|target=UA|code=CN_MULTI_ACCUM|type=MULTI_VALUE|calendar=CAL_MONTHLY_1ST|desc=Accumulates quantity for charge",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"code\": \"{{code}}_{{target}}\",\n    \"description\": \"{{desc}} on {{target}}\",\n    \"disabled\": false,\n    \"calendar\": \"{{calendar}}\",\n    \"type\": \"USAGE\",\n    \"ceiling\": 0,\n    \"counterLevel\": \"{{target}}\",\n    \"ceilingExpressionEl\": null,\n    \"accumulator\": true,\n    \"accumulatorType\": \"{{type}}\",\n    \"filterEl\": \"#{ true }\",\n    \"keyEl\": \"#{ op.code }\",\n    \"valueEl\": \"#{ op.quantity }\"\n}"
+										},
+										"url": {
+											"raw": "{{opencell.url}}/catalog/counterTemplate/createOrUpdate",
+											"host": [
+												"{{opencell.url}}"
+											],
+											"path": [
+												"catalog",
+												"counterTemplate",
+												"createOrUpdate"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "counter|target=SU|code=CN_MULTI_ACCUM|type=MULTI_VALUE|calendar=CAL_MONTHLY_1ST|desc=Accumulates quantity for charge",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"code\": \"{{code}}_{{target}}\",\n    \"description\": \"{{desc}} on {{target}}\",\n    \"disabled\": false,\n    \"calendar\": \"{{calendar}}\",\n    \"type\": \"USAGE\",\n    \"ceiling\": 0,\n    \"counterLevel\": \"{{target}}\",\n    \"ceilingExpressionEl\": null,\n    \"accumulator\": true,\n    \"accumulatorType\": \"{{type}}\",\n    \"filterEl\": \"#{ true }\",\n    \"keyEl\": \"#{ op.code }\",\n    \"valueEl\": \"#{ op.quantity }\"\n}"
+										},
+										"url": {
+											"raw": "{{opencell.url}}/catalog/counterTemplate/createOrUpdate",
+											"host": [
+												"{{opencell.url}}"
+											],
+											"path": [
+												"catalog",
+												"counterTemplate",
+												"createOrUpdate"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "counter|target=SI|code=CN_MULTI_ACCUM|type=MULTI_VALUE|calendar=CAL_MONTHLY_1ST|desc=Accumulates quantity for charge",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"code\": \"{{code}}_{{target}}\",\n    \"description\": \"{{desc}} on {{target}}\",\n    \"disabled\": false,\n    \"calendar\": \"{{calendar}}\",\n    \"type\": \"USAGE\",\n    \"ceiling\": 0,\n    \"counterLevel\": \"{{target}}\",\n    \"ceilingExpressionEl\": null,\n    \"accumulator\": true,\n    \"accumulatorType\": \"{{type}}\",\n    \"filterEl\": \"#{ true }\",\n    \"keyEl\": \"#{ op.code }\",\n    \"valueEl\": \"#{ op.quantity }\"\n}"
+										},
+										"url": {
+											"raw": "{{opencell.url}}/catalog/counterTemplate/createOrUpdate",
+											"host": [
+												"{{opencell.url}}"
+											],
+											"path": [
+												"catalog",
+												"counterTemplate",
+												"createOrUpdate"
+											]
+										}
+									},
+									"response": []
 								}
 							]
 						},
@@ -5556,7 +5816,8 @@
 														"exec": [
 															""
 														],
-														"type": "text/javascript"
+														"type": "text/javascript",
+														"packages": {}
 													}
 												}
 											],
@@ -5565,7 +5826,7 @@
 												"header": [],
 												"body": {
 													"mode": "raw",
-													"raw": "{\r\n    \"code\": \"EXAMPLE_TEXT_LIST_ATTRIBUTE\",\r\n    \"description\": \"List Attribute example\",\r\n    \"attributeType\": \"LIST_TEXT\",\r\n    \"allowedValues\": [\r\n        \"TEST_1\",\r\n        \"TEST_2\"\r\n    ],\r\n    \"disabled\": false,\r\n    \"priority\": 0\r\n}",
+													"raw": "{\r\n    \"code\": \"EXAMPLE_TEXT_LIST_ATTRIBUTE\",\r\n    \"description\": \"List Attribute example\",\r\n    \"attributeType\": \"LIST_TEXT\",\r\n    \"allowedValues\": [\r\n        \"TEST_1\",\r\n        \"TEST_2\",\r\n        \"TEST_3\"\r\n    ],\r\n    \"disabled\": false,\r\n    \"priority\": 0\r\n}",
 													"options": {
 														"raw": {
 															"language": "json"
@@ -18486,6 +18747,631 @@
 											]
 										}
 									]
+								},
+								{
+									"name": "Usage with attributes",
+									"item": [
+										{
+											"name": "ch|charge=CH_USG_ATTR|desc=Charge attributes|p1=ATTR",
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"code\": \"{{charge}}\",\n    \"description\": \"{{desc}}\",\n    \"invoiceSubCategory\": null,\n    \"taxClassCode\": null,\n    \"disabled\": false,\n    \"amountEditable\": true,\n    \"inputUnitDescription\": \"unit\",\n    \"ratingUnitDescription\": \"unit\",\n    \"unitMultiplicator\": 1,\n    \"unitNbDecimal\": 6,\n    \"roundingModeDtoEnum\": \"NEAREST\",\n    \"filterParam1\": \"{{p1}}\",\n    \"priority\": 10,\n    \"triggerNextCharge\": false,\n    \"status\": \"ACTIVE\"\n}"
+												},
+												"url": {
+													"raw": "{{opencell.url}}/catalog/usageChargeTemplate/createOrUpdate",
+													"host": [
+														"{{opencell.url}}"
+													],
+													"path": [
+														"catalog",
+														"usageChargeTemplate",
+														"createOrUpdate"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "pp|pp=PP_USG_ATTR",
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"code\": \"{{pp}}\",\n    \"eventCode\": \"{{charge}}\",\n    \"amountWithoutTax\": 1,\n    \"amountWithTax\": 1,\n    \"amountWithoutTaxEL\": null,\n    \"woDescriptionEL\": \"#{ op.description }\",\n    \"scriptInstance\": \"org.meveo.service.script.rating.LogWalletOperation\"\n}\n"
+												},
+												"url": {
+													"raw": "{{opencell.url}}/catalog/pricePlan/createOrUpdate",
+													"host": [
+														"{{opencell.url}}"
+													],
+													"path": [
+														"catalog",
+														"pricePlan",
+														"createOrUpdate"
+													]
+												},
+												"description": "\"parameter2El\": \"Product: #{mv:getInheritedCFValue(serviceInstance.productVersion.product,'Product_STRING')}\",\n    \"parameter3El\": \"ServiceInstance: #{mv:getInheritedCFValue(serviceInstance,'ServiceInstance_STRING')}\","
+											},
+											"response": []
+										},
+										{
+											"name": "pv",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															""
+														],
+														"type": "text/javascript",
+														"packages": {}
+													}
+												},
+												{
+													"listen": "prerequest",
+													"script": {
+														"exec": [
+															""
+														],
+														"type": "text/javascript",
+														"packages": {}
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"pricePlanMatrixCode\": \"{{pp}}\",\n    \"label\": \"Price for attribute usage price\",\n    \"version\": 1,\n    \"isMatrix\": true,\n    \"validity\": {\n        \"from\": \"2020-01-01\"\n    },\n    \"columns\": [\n        {\n            \"attributeCode\": \"EXAMPLE_TEXT_LIST_ATTRIBUTE\",\n            \"code\": \"Select a value\",\n            \"pricePlanMatrixCode\": \"{{pp}}\",\n            \"pricePlanMatrixVersion\": 1,\n            \"position\": 0,\n            \"isRange\": false\n        }\n    ],\n    \"lines\": [\n        {\n            \"value\": 1,\n            \"priceEL\": \"\",\n            \"pricePlanMatrixCode\": \"{{pp}}\",\n            \"pricePlanMatrixVersion\": 1,\n            \"description\": \"Price for option A\",\n            \"priority\": 0,\n            \"pricePlanMatrixValues\": [\n                {\n                    \"ppmColumnCode\": \"Select a value\",\n                    \"stringValue\": \"TEST_1\"\n                }\n            ]\n        },\n        {\n            \"value\": 2,\n            \"priceEL\": \"\",\n            \"pricePlanMatrixCode\": \"{{pp}}\",\n            \"pricePlanMatrixVersion\": 1,\n            \"description\": \"Price for option B\",\n            \"priority\": 0,\n            \"pricePlanMatrixValues\": [\n                {\n                    \"ppmColumnCode\": \"Select a value\",\n                    \"stringValue\": \"TEST_2\"\n                }\n            ]\n        },\n        {\n            \"value\": 3,\n            \"priceEL\": \"\",\n            \"pricePlanMatrixCode\": \"{{pp}}\",\n            \"pricePlanMatrixVersion\": 1,\n            \"description\": \"Price for option C\",\n            \"priority\": 0,\n            \"pricePlanMatrixValues\": [\n                {\n                    \"ppmColumnCode\": \"Select a value\",\n                    \"stringValue\": \"TEST_3\"\n                }\n            ]\n        },\n        {\n            \"value\": 99,\n            \"priceEL\": \"\",\n            \"pricePlanMatrixCode\": \"{{pp}}\",\n            \"pricePlanMatrixVersion\": 1,\n            \"description\": \"Price for no option (should not go there as attribute value is mandatory)\",\n            \"priority\": 4,\n            \"pricePlanMatrixValues\": [\n                {\n                    \"ppmColumnCode\": \"Select a value\",\n                    \"stringValue\": \"\"\n                }\n            ]\n        }\n    ]\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{opencell.url}}/catalog/pricePlan/pricePlanMatrixVersion",
+													"host": [
+														"{{opencell.url}}"
+													],
+													"path": [
+														"catalog",
+														"pricePlan",
+														"pricePlanMatrixVersion"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "pv|publish price version",
+											"request": {
+												"method": "PUT",
+												"header": [],
+												"url": {
+													"raw": "{{opencell.url}}/catalog/pricePlan/{{pp}}/pricePlanMatrixVersions/1/status/PUBLISHED",
+													"host": [
+														"{{opencell.url}}"
+													],
+													"path": [
+														"catalog",
+														"pricePlan",
+														"{{pp}}",
+														"pricePlanMatrixVersions",
+														"1",
+														"status",
+														"PUBLISHED"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "ch|activate charge",
+											"event": [
+												{
+													"listen": "prerequest",
+													"script": {
+														"exec": [
+															""
+														],
+														"type": "text/javascript"
+													}
+												},
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "PUT",
+												"header": [],
+												"url": {
+													"raw": "{{opencell.url}}/catalog/chargeTemplates/{{charge}}/status/ACTIVE",
+													"host": [
+														"{{opencell.url}}"
+													],
+													"path": [
+														"catalog",
+														"chargeTemplates",
+														"{{charge}}",
+														"status",
+														"ACTIVE"
+													]
+												},
+												"description": "Creation of the product"
+											},
+											"response": []
+										},
+										{
+											"name": "pr|product=PR_USG_ATTR|desc=Unit attibute charge product",
+											"event": [
+												{
+													"listen": "prerequest",
+													"script": {
+														"exec": [
+															""
+														],
+														"type": "text/javascript",
+														"packages": {}
+													}
+												},
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"if (pm.response.code == 200 || pm.response.code == 201 || pm.response.code == 204) {\r",
+															"    var jsonData = JSON.parse(responseBody);\r",
+															"    pm.globals.set(\"product.id\", jsonData.id);\r",
+															"    pm.globals.set(\"product.code\", pm.globals.get(\"code\"));\r",
+															"}\r",
+															""
+														],
+														"type": "text/javascript",
+														"packages": {}
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"discountList\": [],\r\n    \"code\": \"{{product}}\",\r\n    \"label\": \"{{desc}}\",\r\n    \"status\": \"ACTIVE\",\r\n    \"priceVersionDateSetting\": \"EVENT\",\r\n    \"modelChildren\": [],\r\n    \"discountFlag\": false,\r\n    \"packageFlag\": false,\r\n    \"discountListCodes\": [],\r\n    \"isModel\": false,\r\n    \"mediaCodes\": [],\r\n    \"productChargeTemplateMappingDto\": [\r\n        {\r\n            \"chargeCode\": \"{{charge}}\",\r\n            \"productCode\": \"{{product}}\",\r\n            \"accumulatorCounterCodes\": [\r\n                \"CN_MULTI_ACCUM_CUST\",\r\n                \"CN_MULTI_ACCUM_CA\",\r\n                \"CN_MULTI_ACCUM_BA\",\r\n                \"CN_MULTI_ACCUM_SU\"\r\n            ]\r\n        }\r\n    ],\r\n    \"customFields\": {\r\n        \"customField\": [\r\n            {\r\n                \"code\": \"CF_PR_STRING\",\r\n                \"stringValue\": \"Product/{{code}}/{{$isoTimestamp}}\"\r\n            }\r\n        ]\r\n    },\r\n    \"currentProductVersion\": {\r\n        \"productCode\": \"{{product}}\",\r\n        \"shortDescription\": \"Unit charge product version\",\r\n        \"currentVersion\": 1,\r\n        \"validity\": {\r\n            \"from\": \"2020-01-01\"\r\n        },\r\n        \"productAttributes\": [\r\n            {\r\n                \"attributeCode\": \"EXAMPLE_TEXT_LIST_ATTRIBUTE\",\r\n                \"sequence\": 0,\r\n                \"mandatory\": true,\r\n                \"readOnly\": false,\r\n                \"display\": true\r\n            },\r\n            {\r\n                \"attributeCode\": \"EXAMPLE_TEXT_ATTRIBUTE\",\r\n                \"sequence\": 0,\r\n                \"mandatory\": false,\r\n                \"readOnly\": false,\r\n                \"display\": true\r\n            }\r\n        ]\r\n    }\r\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{opencell.url}}/catalog/products",
+													"host": [
+														"{{opencell.url}}"
+													],
+													"path": [
+														"catalog",
+														"products"
+													]
+												},
+												"description": "Creation of the product"
+											},
+											"response": []
+										},
+										{
+											"name": "pr|publish version",
+											"event": [
+												{
+													"listen": "prerequest",
+													"script": {
+														"exec": [
+															""
+														],
+														"type": "text/javascript"
+													}
+												},
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "PUT",
+												"header": [],
+												"url": {
+													"raw": "{{opencell.url}}/catalog/products/{{product}}/productVersions/1/status/PUBLISHED",
+													"host": [
+														"{{opencell.url}}"
+													],
+													"path": [
+														"catalog",
+														"products",
+														"{{product}}",
+														"productVersions",
+														"1",
+														"status",
+														"PUBLISHED"
+													]
+												},
+												"description": "Creation of the product"
+											},
+											"response": []
+										},
+										{
+											"name": "pr|publish product",
+											"event": [
+												{
+													"listen": "prerequest",
+													"script": {
+														"exec": [
+															""
+														],
+														"type": "text/javascript"
+													}
+												},
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "PUT",
+												"header": [],
+												"url": {
+													"raw": "{{opencell.url}}/catalog/products/{{product}}/status/ACTIVE",
+													"host": [
+														"{{opencell.url}}"
+													],
+													"path": [
+														"catalog",
+														"products",
+														"{{product}}",
+														"status",
+														"ACTIVE"
+													]
+												},
+												"description": "Creation of the product"
+											},
+											"response": []
+										}
+									]
+								},
+								{
+									"name": "Usage",
+									"item": [
+										{
+											"name": "ch|charge=CH_USG_UNIT|desc=Charge unit|p1=UNIT",
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"code\": \"{{charge}}\",\n    \"description\": \"{{desc}}\",\n    \"invoiceSubCategory\": null,\n    \"taxClassCode\": null,\n    \"disabled\": false,\n    \"amountEditable\": true,\n    \"inputUnitDescription\": \"unit\",\n    \"ratingUnitDescription\": \"unit\",\n    \"unitMultiplicator\": 1,\n    \"unitNbDecimal\": 6,\n    \"roundingModeDtoEnum\": \"NEAREST\",\n    \"filterParam1\": \"{{p1}}\",\n    \"priority\": 10,\n    \"triggerNextCharge\": false,\n    \"status\": \"ACTIVE\"\n}"
+												},
+												"url": {
+													"raw": "{{opencell.url}}/catalog/usageChargeTemplate/createOrUpdate",
+													"host": [
+														"{{opencell.url}}"
+													],
+													"path": [
+														"catalog",
+														"usageChargeTemplate",
+														"createOrUpdate"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "pp|pp=PP_USG_UNIT",
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"code\": \"{{pp}}\",\n    \"eventCode\": \"{{charge}}\",\n    \"amountWithoutTax\": 666,\n    \"amountWithTax\": 777,\n    \"amountWithoutTaxEL\": null,\n    \"woDescriptionEL\": \"#{ op.description }\",\n    \"scriptInstance\": \"org.meveo.service.script.rating.LogWalletOperation\"\n}\n"
+												},
+												"url": {
+													"raw": "{{opencell.url}}/catalog/pricePlan/createOrUpdate",
+													"host": [
+														"{{opencell.url}}"
+													],
+													"path": [
+														"catalog",
+														"pricePlan",
+														"createOrUpdate"
+													]
+												},
+												"description": "\"parameter2El\": \"Product: #{mv:getInheritedCFValue(serviceInstance.productVersion.product,'Product_STRING')}\",\n    \"parameter3El\": \"ServiceInstance: #{mv:getInheritedCFValue(serviceInstance,'ServiceInstance_STRING')}\","
+											},
+											"response": []
+										},
+										{
+											"name": "pv|create",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"pricePlanMatrixCode\": \"{{pp}}\",\n    \"label\": \"Price for unit usage price\",\n    \"price\": 1,\n    \"version\": 1,\n    \"isMatrix\": false\n}\n",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{opencell.url}}/catalog/pricePlan/pricePlanMatrixVersion",
+													"host": [
+														"{{opencell.url}}"
+													],
+													"path": [
+														"catalog",
+														"pricePlan",
+														"pricePlanMatrixVersion"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "pv|publish price version",
+											"request": {
+												"method": "PUT",
+												"header": [],
+												"url": {
+													"raw": "{{opencell.url}}/catalog/pricePlan/{{pp}}/pricePlanMatrixVersions/1/status/PUBLISHED",
+													"host": [
+														"{{opencell.url}}"
+													],
+													"path": [
+														"catalog",
+														"pricePlan",
+														"{{pp}}",
+														"pricePlanMatrixVersions",
+														"1",
+														"status",
+														"PUBLISHED"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "ch|activate charge",
+											"event": [
+												{
+													"listen": "prerequest",
+													"script": {
+														"exec": [
+															""
+														],
+														"type": "text/javascript"
+													}
+												},
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "PUT",
+												"header": [],
+												"url": {
+													"raw": "{{opencell.url}}/catalog/chargeTemplates/{{charge}}/status/ACTIVE",
+													"host": [
+														"{{opencell.url}}"
+													],
+													"path": [
+														"catalog",
+														"chargeTemplates",
+														"{{charge}}",
+														"status",
+														"ACTIVE"
+													]
+												},
+												"description": "Creation of the product"
+											},
+											"response": []
+										},
+										{
+											"name": "pr|product=PR_USG_UNIT|desc=Unit charge product",
+											"event": [
+												{
+													"listen": "prerequest",
+													"script": {
+														"exec": [
+															""
+														],
+														"type": "text/javascript",
+														"packages": {}
+													}
+												},
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"if (pm.response.code == 200 || pm.response.code == 201 || pm.response.code == 204) {\r",
+															"    var jsonData = JSON.parse(responseBody);\r",
+															"    pm.globals.set(\"product.id\", jsonData.id);\r",
+															"    pm.globals.set(\"product.code\", pm.globals.get(\"product\"));\r",
+															"}\r",
+															""
+														],
+														"type": "text/javascript",
+														"packages": {}
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"discountList\": [],\r\n    \"code\": \"{{product}}\",\r\n    \"label\": \"{{desc}}\",\r\n    \"status\": \"ACTIVE\",\r\n    \"priceVersionDateSetting\": \"EVENT\",\r\n    \"modelChildren\": [],\r\n    \"discountFlag\": false,\r\n    \"packageFlag\": false,\r\n    \"discountListCodes\": [],\r\n    \"isModel\": false,\r\n    \"mediaCodes\": [],\r\n    \"productChargeTemplateMappingDto\": [\r\n        {\r\n            \"chargeCode\": \"{{charge}}\",\r\n            \"productCode\": \"{{product}}\",\r\n            \"accumulatorCounterCodes\": [\r\n                \"CN_MULTI_ACCUM_CUST\",\r\n                \"CN_MULTI_ACCUM_CA\",\r\n                \"CN_MULTI_ACCUM_BA\",\r\n                \"CN_MULTI_ACCUM_UA\",\r\n                \"CN_MULTI_ACCUM_SU\",\r\n                \"CN_MULTI_ACCUM_SI\"\r\n            ]\r\n        }\r\n    ],\r\n    \"customFields\": {\r\n        \"customField\": [\r\n            {\r\n                \"code\": \"CF_PR_STRING\",\r\n                \"stringValue\": \"Product/{{$isoTimestamp}}\"\r\n            }\r\n        ]\r\n    },\r\n    \"currentProductVersion\": {\r\n        \"productCode\": \"{{product}}\",\r\n        \"shortDescription\": \"Unit charge product version\",\r\n        \"currentVersion\": 1,\r\n        \"validity\": {\r\n            \"from\": \"2020-01-01\"\r\n        }\r\n    }\r\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{opencell.url}}/catalog/products",
+													"host": [
+														"{{opencell.url}}"
+													],
+													"path": [
+														"catalog",
+														"products"
+													]
+												},
+												"description": "Creation of the product"
+											},
+											"response": []
+										},
+										{
+											"name": "pr|publish version",
+											"event": [
+												{
+													"listen": "prerequest",
+													"script": {
+														"exec": [
+															""
+														],
+														"type": "text/javascript"
+													}
+												},
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "PUT",
+												"header": [],
+												"url": {
+													"raw": "{{opencell.url}}/catalog/products/{{product}}/productVersions/1/status/PUBLISHED",
+													"host": [
+														"{{opencell.url}}"
+													],
+													"path": [
+														"catalog",
+														"products",
+														"{{product}}",
+														"productVersions",
+														"1",
+														"status",
+														"PUBLISHED"
+													]
+												},
+												"description": "Creation of the product"
+											},
+											"response": []
+										},
+										{
+											"name": "pr|publish product",
+											"event": [
+												{
+													"listen": "prerequest",
+													"script": {
+														"exec": [
+															""
+														],
+														"type": "text/javascript"
+													}
+												},
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "PUT",
+												"header": [],
+												"url": {
+													"raw": "{{opencell.url}}/catalog/products/{{product}}/status/ACTIVE",
+													"host": [
+														"{{opencell.url}}"
+													],
+													"path": [
+														"catalog",
+														"products",
+														"{{product}}",
+														"status",
+														"ACTIVE"
+													]
+												},
+												"description": "Creation of the product"
+											},
+											"response": []
+										}
+									]
 								}
 							]
 						},
@@ -21830,7 +22716,8 @@
 												"exec": [
 													""
 												],
-												"type": "text/javascript"
+												"type": "text/javascript",
+												"packages": {}
 											}
 										},
 										{
@@ -21839,7 +22726,8 @@
 												"exec": [
 													"pm.globals.set(\"offer.cpq..code\", pm.globals.get(\"code\"));"
 												],
-												"type": "text/javascript"
+												"type": "text/javascript",
+												"packages": {}
 											}
 										}
 									],
@@ -21848,7 +22736,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "{\r\n    \"code\": \"{{code}}\",\r\n    \"name\": \"{{name}}\",\r\n    \"description\": \"{{name}}\",\r\n    \"disabled\": false,\r\n    \"lifeCycleStatus\": \"ACTIVE\",\r\n    \"validFrom\": \"2022-01-01\",\r\n    \"isModel\": true,\r\n    \"offerProducts\": [\r\n        {\r\n            \"product\": {\r\n                \"code\": \"{{product1.cpq.code}}\",\r\n                \"discountFlag\": false,\r\n                \"packageFlag\": false\r\n            },\r\n            \"commercialRules\": [],\r\n            \"mandatory\": false,\r\n            \"sequence\": 0\r\n        },\r\n        {\r\n            \"product\": {\r\n                \"code\": \"{{product2.cpq.code}}\",\r\n                \"discountFlag\": false,\r\n                \"packageFlag\": false\r\n            },\r\n            \"commercialRules\": [],\r\n            \"mandatory\": false,\r\n            \"sequence\": 1\r\n        },\r\n        {\r\n            \"product\": {\r\n                \"code\": \"{{product3.cpq.code}}\",\r\n                \"discountFlag\": false,\r\n                \"packageFlag\": false\r\n            },\r\n            \"commercialRules\": [],\r\n            \"mandatory\": false,\r\n            \"sequence\": 2\r\n        },\r\n        {\r\n            \"product\": {\r\n                \"code\": \"{{product4.cpq.code}}\",\r\n                \"discountFlag\": false,\r\n                \"packageFlag\": false\r\n            },\r\n            \"commercialRules\": [],\r\n            \"mandatory\": false,\r\n            \"sequence\": 3\r\n        },\r\n        {\r\n            \"product\": {\r\n                \"code\": \"{{product14.cpq.code}}\",\r\n                \"discountFlag\": false,\r\n                \"packageFlag\": false\r\n            },\r\n            \"commercialRules\": [],\r\n            \"mandatory\": false,\r\n            \"sequence\": 4\r\n        },\r\n        {\r\n            \"product\": {\r\n                \"code\": \"{{product15.cpq.code}}\",\r\n                \"discountFlag\": false,\r\n                \"packageFlag\": false\r\n            },\r\n            \"commercialRules\": [],\r\n            \"mandatory\": false,\r\n            \"sequence\": 5\r\n        }\r\n    ]\r\n}",
+											"raw": "{\r\n    \"code\": \"{{code}}\",\r\n    \"name\": \"{{name}}\",\r\n    \"description\": \"{{name}}\",\r\n    \"disabled\": false,\r\n    \"lifeCycleStatus\": \"ACTIVE\",\r\n    \"validFrom\": \"2022-01-01\",\r\n    \"isModel\": true,\r\n    \"offerProducts\": [\r\n        {\r\n            \"product\": {\r\n                \"code\": \"{{product1.cpq.code}}\",\r\n                \"discountFlag\": false,\r\n                \"packageFlag\": false\r\n            },\r\n            \"commercialRules\": [],\r\n            \"mandatory\": false,\r\n            \"sequence\": 0\r\n        },\r\n        {\r\n            \"product\": {\r\n                \"code\": \"{{product2.cpq.code}}\",\r\n                \"discountFlag\": false,\r\n                \"packageFlag\": false\r\n            },\r\n            \"commercialRules\": [],\r\n            \"mandatory\": false,\r\n            \"sequence\": 1\r\n        },\r\n        {\r\n            \"product\": {\r\n                \"code\": \"{{product3.cpq.code}}\",\r\n                \"discountFlag\": false,\r\n                \"packageFlag\": false\r\n            },\r\n            \"commercialRules\": [],\r\n            \"mandatory\": false,\r\n            \"sequence\": 2\r\n        },\r\n        {\r\n            \"product\": {\r\n                \"code\": \"{{product4.cpq.code}}\",\r\n                \"discountFlag\": false,\r\n                \"packageFlag\": false\r\n            },\r\n            \"commercialRules\": [],\r\n            \"mandatory\": false,\r\n            \"sequence\": 3\r\n        },\r\n        {\r\n            \"product\": {\r\n                \"code\": \"{{product14.cpq.code}}\",\r\n                \"discountFlag\": false,\r\n                \"packageFlag\": false\r\n            },\r\n            \"commercialRules\": [],\r\n            \"mandatory\": false,\r\n            \"sequence\": 4\r\n        },\r\n        {\r\n            \"product\": {\r\n                \"code\": \"{{product15.cpq.code}}\",\r\n                \"discountFlag\": false,\r\n                \"packageFlag\": false\r\n            },\r\n            \"commercialRules\": [],\r\n            \"mandatory\": false,\r\n            \"sequence\": 5\r\n        },\r\n        {\r\n            \"product\": {\r\n                \"code\": \"PR_USG_ATTR\",\r\n                \"discountFlag\": false,\r\n                \"packageFlag\": false\r\n            },\r\n            \"commercialRules\": [],\r\n            \"mandatory\": false,\r\n            \"sequence\": 6\r\n        },\r\n        {\r\n            \"product\": {\r\n                \"code\": \"PR_USG_UNIT\",\r\n                \"discountFlag\": false,\r\n                \"packageFlag\": false\r\n            },\r\n            \"commercialRules\": [],\r\n            \"mandatory\": false,\r\n            \"sequence\": 0\r\n        }\r\n    ]\r\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -32731,59 +33619,6 @@
 							"response": []
 						},
 						{
-							"name": "Run|Invoicing_Job_V2",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"if( pm.response.code === 200) {",
-											"    var jsonData = JSON.parse(responseBody);",
-											"    pm.globals.set(\"jobRun.id\", jsonData.actionStatus.message);",
-											"}",
-											""
-										],
-										"type": "text/javascript",
-										"packages": {}
-									}
-								},
-								{
-									"listen": "prerequest",
-									"script": {
-										"exec": [
-											"pm.globals.set(\"task.code\", pm.variables.get(\"request.label.1\"));"
-										],
-										"type": "text/javascript",
-										"packages": {}
-									}
-								}
-							],
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"code\":\"{{request.label.1}}\",\n    \"waitToComplete\": true\n}"
-								},
-								"url": {
-									"raw": "{{opencell.url}}/job/execute",
-									"host": [
-										"{{opencell.url}}"
-									],
-									"path": [
-										"job",
-										"execute"
-									]
-								}
-							},
-							"response": []
-						},
-						{
 							"name": "Run|XMLInvoiceGenerationJobV2",
 							"event": [
 								{
@@ -36445,7 +37280,7 @@
 							"response": []
 						},
 						{
-							"name": "Get async call results - witout keep value AGAIN",
+							"name": "Get async call results - witout keep value AGAIN - fail",
 							"event": [
 								{
 									"listen": "test",
@@ -36584,7 +37419,7 @@
 							"response": []
 						},
 						{
-							"name": "Get async call results after deletion",
+							"name": "Get async call results after deletion - fail",
 							"event": [
 								{
 									"listen": "test",
@@ -36764,7 +37599,7 @@
 							"response": []
 						},
 						{
-							"name": "Get async call results - with timeout for retrieval - will timeout",
+							"name": "Get async call results - with timeout for retrieval - will timeout - fail",
 							"event": [
 								{
 									"listen": "test",
@@ -37031,7 +37866,7 @@
 							"response": []
 						},
 						{
-							"name": "Call in async mode with Wait and timeout parameter - will execute as synchronous, but will timeout",
+							"name": "Call in async mode with Wait and timeout parameter - will execute as synchronous, but will timeout - fail",
 							"event": [
 								{
 									"listen": "test",
@@ -37166,6 +38001,1389 @@
 									"path": [
 										"scriptInstance",
 										"org.meveo.script.ScriptEndpoint"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Invoicing plan",
+					"item": [
+						{
+							"name": "Create Invoicing plan",
+							"item": [
+								{
+									"name": "Invoice Plan",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"description\": \"Invoicing_Plan_01\",\r\n    \"code\": \"Invoicing_Plan_01\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url}}/billing/invoicingPlans",
+											"host": [
+												"{{opencell.url}}"
+											],
+											"path": [
+												"billing",
+												"invoicingPlans"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Invoice Plan Item 01",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"description\": \"Level 01\",\r\n    \"advancement\": 20,\r\n    \"rateToBill\": 20,\r\n    \"billingPlanCode\": \"Invoicing_Plan_01\",\r\n    \"code\": \"Level 01\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url}}/billing/invoicingPlanItems",
+											"host": [
+												"{{opencell.url}}"
+											],
+											"path": [
+												"billing",
+												"invoicingPlanItems"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Invoice Plan Item 02",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"description\": \"Level 02\",\r\n    \"advancement\": 50,\r\n    \"rateToBill\": 30,\r\n    \"billingPlanCode\": \"Invoicing_Plan_01\",\r\n    \"code\": \"Level 02\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url}}/billing/invoicingPlanItems",
+											"host": [
+												"{{opencell.url}}"
+											],
+											"path": [
+												"billing",
+												"invoicingPlanItems"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Invoice Plan Item 03",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"description\": \"Level 03\",\r\n    \"advancement\": 100,\r\n    \"rateToBill\": 50,\r\n    \"billingPlanCode\": \"Invoicing_Plan_01\",\r\n    \"code\": \"Level 03\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url}}/billing/invoicingPlanItems",
+											"host": [
+												"{{opencell.url}}"
+											],
+											"path": [
+												"billing",
+												"invoicingPlanItems"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Create Offer",
+							"item": [
+								{
+									"name": "Create offer",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.environment.set('IP_quote_offer_id',pm.response.json().entityId);\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"name\": \"Offre_IP\",\r\n    \"attributes\": [],\r\n    \"offerAttributes\": [],\r\n    \"commercialRuleCodes\": [],\r\n    \"mediaCodes\": [],\r\n    \"offerProducts\": [],\r\n    \"tagCodes\": [],\r\n    \"newValidFrom\": null,\r\n    \"newValidTo\": null,\r\n    \"seller\": [],\r\n    \"channel\": [],\r\n    \"allowedDiscountPlans\": [],\r\n    \"allowedOfferChange\": [],\r\n    \"isOfferChangeRestricted\": false,\r\n    \"autoEndOfEngagement\": false,\r\n    \"renewalRule\": {\r\n        \"initialTermType\": \"RECURRING\",\r\n        \"initialyActiveForUnit\": \"MONTH\",\r\n        \"autoRenew\": true,\r\n        \"extendAgreementPeriodToSubscribedTillDate\": true,\r\n        \"endOfTermAction\": \"SUSPEND\",\r\n        \"renewalTermType\": \"RECURRING\"\r\n    },\r\n    \"offerTemplateCategory\": [],\r\n    \"code\": \"Offre_IP\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url.RESTful}}/catalog/offerTemplate",
+											"host": [
+												"{{opencell.url.RESTful}}"
+											],
+											"path": [
+												"catalog",
+												"offerTemplate"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create product",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"label\": \"Produit_IP\",\r\n    \"productChargeTemplateMappingDto\": [],\r\n    \"discountListCodes\": [],\r\n    \"mediaCodes\": [],\r\n    \"modelChildren\": [],\r\n    \"currentProductVersion\": null,\r\n    \"commercialRuleCodes\": [],\r\n    \"priceVersionDateSetting\": \"EVENT\",\r\n    \"agreementDateSetting\": \"MANUAL\",\r\n    \"code\": \"Produit_IP\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url.RESTful}}/catalog/products",
+											"host": [
+												"{{opencell.url.RESTful}}"
+											],
+											"path": [
+												"catalog",
+												"products"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Charge OT IP",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"description\": \"Charge One Shot IP\",\r\n    \"linkedAttributes\": [],\r\n    \"oneShotChargeTemplateType\": \"INVOICING_PLAN\",\r\n    \"code\": \"Charge One Shot IP\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url.RESTful}}/catalog/oneShotChargeTemplate/createOrUpdate",
+											"host": [
+												"{{opencell.url.RESTful}}"
+											],
+											"path": [
+												"catalog",
+												"oneShotChargeTemplate",
+												"createOrUpdate"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Instantiate PPM OT IP",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"eventCode\": \"Charge One Shot IP\",\r\n    \"code\": \"PPM_Charge One Shot IP\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url.RESTful}}/catalog/pricePlan/createOrUpdate",
+											"host": [
+												"{{opencell.url.RESTful}}"
+											],
+											"path": [
+												"catalog",
+												"pricePlan",
+												"createOrUpdate"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create PPM OT IP",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"priceVersionType\": \"FIXED\",\r\n    \"pricePlanMatrixCode\": \"PPM_Charge One Shot IP\",\r\n    \"label\": \"Charge One Shot IP\",\r\n    \"validity\": {},\r\n    \"isMatrix\": true\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url.RESTful}}/catalog/pricePlan/pricePlanMatrixVersion",
+											"host": [
+												"{{opencell.url.RESTful}}"
+											],
+											"path": [
+												"catalog",
+												"pricePlan",
+												"pricePlanMatrixVersion"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create PPM Version OT IP",
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"pricePlanMatrixLines\": [\r\n        {\r\n            \"value\": 750,\r\n            \"pricePlanMatrixCode\": \"PPM_Charge One Shot IP\",\r\n            \"pricePlanMatrixVersion\": 1,\r\n            \"priority\": 2,\r\n            \"pricePlanMatrixValues\": []\r\n        }\r\n    ]\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url.RESTful}}/catalog/pricePlan/PPM_Charge%20One%20Shot%20IP/pricePlanMatrixVersions/1/pricePlanMatrixLines/updateWithoutDelete",
+											"host": [
+												"{{opencell.url.RESTful}}"
+											],
+											"path": [
+												"catalog",
+												"pricePlan",
+												"PPM_Charge%20One%20Shot%20IP",
+												"pricePlanMatrixVersions",
+												"1",
+												"pricePlanMatrixLines",
+												"updateWithoutDelete"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Published PPMV OT IP",
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"code\": \"PPM_Charge One Shot IP\",\r\n    \"version\": 1\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url.RESTful}}/catalog/pricePlan/PPM_Charge%20One%20Shot%20IP/pricePlanMatrixVersions/1/status/PUBLISHED",
+											"host": [
+												"{{opencell.url.RESTful}}"
+											],
+											"path": [
+												"catalog",
+												"pricePlan",
+												"PPM_Charge%20One%20Shot%20IP",
+												"pricePlanMatrixVersions",
+												"1",
+												"status",
+												"PUBLISHED"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Activate Charge OT IP",
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"chargeCode\": \"PPM_Charge One Shot IP\",\r\n    \"newStatus\": \"ACTIVE\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url.RESTful}}/catalog/chargeTemplates/Charge%20One%20Shot%20IP/status/ACTIVE",
+											"host": [
+												"{{opencell.url.RESTful}}"
+											],
+											"path": [
+												"catalog",
+												"chargeTemplates",
+												"Charge%20One%20Shot%20IP",
+												"status",
+												"ACTIVE"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Link Charge Product and SAVE",
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"code\": \"Produit_IP\",\r\n    \"label\": \"Produit_IP\",\r\n    \"status\": \"DRAFT\",\r\n    \"statusDate\": 1677625200000,\r\n    \"productChargeTemplateMappingDto\": [\r\n        {\r\n            \"chargeCode\": \"Charge One Shot IP\",\r\n            \"productCode\": \"Produit_IP\"\r\n        }\r\n    ],\r\n    \"discountListCodes\": [],\r\n    \"mediaCodes\": [],\r\n    \"modelChildren\": [],\r\n    \"currentProductVersion\": {\r\n        \"shortDescription\": \"Produit_IP\",\r\n        \"productCode\": \"Produit_IP\",\r\n        \"currentVersion\": 1,\r\n        \"status\": \"DRAFT\",\r\n        \"statusDate\": 1677625200000,\r\n        \"groupedAttributeCodes\": [],\r\n        \"validity\": {\r\n            \"from\": \"2023-03-01\"\r\n        },\r\n        \"productAttributes\": [],\r\n        \"tagCodes\": []\r\n    },\r\n    \"commercialRuleCodes\": [],\r\n    \"isModel\": false,\r\n    \"priceVersionDateSetting\": \"EVENT\",\r\n    \"agreementDateSetting\": \"MANUAL\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url.RESTful}}/catalog/products/Produit_IP",
+											"host": [
+												"{{opencell.url.RESTful}}"
+											],
+											"path": [
+												"catalog",
+												"products",
+												"Produit_IP"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Publish Product",
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"versionStatus\": \"PUBLISHED\",\r\n    \"codeProduct\": \"Produit_IP\",\r\n    \"codeVersion\": 1\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url.RESTful}}/catalog/products/Produit_IP/productVersions/1/status/PUBLISHED",
+											"host": [
+												"{{opencell.url.RESTful}}"
+											],
+											"path": [
+												"catalog",
+												"products",
+												"Produit_IP",
+												"productVersions",
+												"1",
+												"status",
+												"PUBLISHED"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Activate Product",
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"codeProduct\": \"Produit_IP\",\r\n    \"toStatus\": \"ACTIVE\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url.RESTful}}/catalog/products/Produit_IP/status/ACTIVE",
+											"host": [
+												"{{opencell.url.RESTful}}"
+											],
+											"path": [
+												"catalog",
+												"products",
+												"Produit_IP",
+												"status",
+												"ACTIVE"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Link Prodcut Offer",
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"name\": \"Offre_IP\",\r\n    \"code\": \"Offre_IP\",\r\n    \"updatedCode\": \"Offre_IP\",\r\n    \"attributes\": [],\r\n    \"offerAttributes\": [],\r\n    \"commercialRuleCodes\": [],\r\n    \"mediaCodes\": [],\r\n    \"statusDate\": 1677625200000,\r\n    \"disabled\": false,\r\n    \"offerProducts\": [\r\n        {\r\n            \"product\": {\r\n                \"code\": \"Produit_IP\"\r\n            },\r\n            \"quantityDefault\": 1,\r\n            \"quantityMin\": 1,\r\n            \"sequence\": 1,\r\n            \"mandatory\": true,\r\n            \"display\": true\r\n        }\r\n    ],\r\n    \"tagCodes\": [],\r\n    \"seller\": [],\r\n    \"isModel\": false,\r\n    \"channel\": [],\r\n    \"allowedDiscountPlans\": [],\r\n    \"allowedOfferChange\": [],\r\n    \"isOfferChangeRestricted\": false,\r\n    \"autoEndOfEngagement\": false,\r\n    \"renewalRule\": {\r\n        \"autoRenew\": true,\r\n        \"endOfTermAction\": \"SUSPEND\",\r\n        \"initialyActiveForUnit\": \"MONTH\",\r\n        \"extendAgreementPeriodToSubscribedTillDate\": true,\r\n        \"initialTermType\": \"RECURRING\",\r\n        \"renewalTermType\": \"RECURRING\"\r\n    },\r\n    \"offerTemplateCategory\": [],\r\n    \"generateQuoteEdrPerProduct\": false,\r\n    \"sequence\": 0,\r\n    \"display\": false,\r\n    \"id\": \"10\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url.RESTful}}/catalog/offerTemplate",
+											"host": [
+												"{{opencell.url.RESTful}}"
+											],
+											"path": [
+												"catalog",
+												"offerTemplate"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Activate Offer",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"offerCode\": \"Offre_IP\",\r\n    \"toStatus\": \"ACTIVE\",\r\n    \"from\": \"\",\r\n    \"to\": \"\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url.RESTful}}/catalog/offerTemplate/Offre_IP/update/status?status=ACTIVE&validFrom=&validTo=",
+											"host": [
+												"{{opencell.url.RESTful}}"
+											],
+											"path": [
+												"catalog",
+												"offerTemplate",
+												"Offre_IP",
+												"update",
+												"status"
+											],
+											"query": [
+												{
+													"key": "status",
+													"value": "ACTIVE"
+												},
+												{
+													"key": "validFrom",
+													"value": ""
+												},
+												{
+													"key": "validTo",
+													"value": ""
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Create quote",
+							"item": [
+								{
+									"name": "Create customer",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"crmAccountType\": \"C_UA\",\r\n    \"crmParentCode\": \"CUST_000_IP\",\r\n    \"code\": \"CUST_000_IP\",\r\n    \"seller\": \"MAIN_SELLER\",\r\n    \"description\": \"{{$randomFullName}}\",\r\n    \"language\": \"FRA\",\r\n    \"currency\": \"EUR\",\r\n    \"billingCycle\": \"BC_MONTHLY_1ST\",\r\n    \"country\": \"FR\",\r\n    \"customerCategory\": \"CLIENT\",\r\n    \"taxCategoryCode\": \"REGULAR\",\r\n    \"creditCategory\": \"NEWCUSTOMER\",\r\n    \"jobTitle\": \"{{$randomJobTitle}}\",\r\n    \"isCompany\": true,\r\n    \"email\": \"{{$randomEmail}}\",\r\n    \"legalEntityType\": {\r\n        \"code\": \"Company\"\r\n    },\r\n    \"name\": {\r\n        \"title\": \"MR\",\r\n        \"firstName\": \"{{$randomFirstName}}\",\r\n        \"lastName\": \"{{$randomLastName}}\"\r\n    },\r\n    \"address\": {\r\n        \"address1\": \"{{$randomStreetAddress}}\",\r\n        \"address2\": \"\",\r\n        \"address3\": \"\",\r\n        \"zipCode\": {{$randomInt}},\r\n        \"city\": \"{{$randomCity}}\",\r\n        \"country\": \"FR\"\r\n    },\r\n    \"contactInformation\": {\r\n        \"phone\": \"{{$randomPhoneNumber}}\",\r\n        \"mobile\": \"{{$randomPhoneNumber}}\"\r\n    },\r\n    \"registrationNumbers\": [\r\n        {\r\n            \"isoIcdCode\": \"0002\",\r\n            \"registrationNo\": \"362 521 879 00034\"\r\n        }\r\n    ]\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url.RESTful}}/account/accountHierarchy/createCRMAccountHierarchy",
+											"host": [
+												"{{opencell.url.RESTful}}"
+											],
+											"path": [
+												"account",
+												"accountHierarchy",
+												"createCRMAccountHierarchy"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Quote",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"\r",
+													"pm.environment.set('IP_quote_code',\"IP_quote\");"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.environment.set('IP_quote_id',pm.response.json().quoteDto.id);\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"description\": \"{{IP_quote_code}}\",\r\n    \"quoteDate\": \"2025-02-03\",\r\n    \"applicantAccountCode\": \"CUST_000_IP\",\r\n    \"quoteVersion\": {\r\n        \"contractCode\": null,\r\n        \"priceListCode\": \"\",\r\n        \"discountPlanCode\": \"\"\r\n    },\r\n    \"userAccountCode\": \"CUST_000_IP\",\r\n    \"salesPersonName\": \"yassine.chetoui@opencellsoft.com\",\r\n    \"sellerCode\": \"MAIN_SELLER\",\r\n    \"code\": \"{{IP_quote_code}}\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url.RESTful}}/cpq/quotes",
+											"host": [
+												"{{opencell.url.RESTful}}"
+											],
+											"path": [
+												"cpq",
+												"quotes"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Quote Item",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"quoteOfferId\": \"\",\r\n    \"products\": [\r\n        {\r\n            \"productVersion\": 1,\r\n            \"productCode\": \"Produit_IP\",\r\n            \"quantity\": 1,\r\n            \"quoteCode\": \"Offre_IP\",\r\n            \"productAttributes\": [],\r\n            \"quoteProductId\": null\r\n        }\r\n    ],\r\n    \"quoteCode\": \"{{IP_quote_code}}\",\r\n    \"quoteVersion\": 1,\r\n    \"userAccountCode\": \"\",\r\n    \"deliveryDate\": \"\",\r\n    \"offerId\": {{IP_quote_offer_id}},\r\n    \"discountPlanCode\": \"\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url.RESTful}}/cpq/quotes/quoteItems",
+											"host": [
+												"{{opencell.url.RESTful}}"
+											],
+											"path": [
+												"cpq",
+												"quotes",
+												"quoteItems"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Quotes",
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"code\": \"{{IP_quote_code}}\",\r\n    \"status\": \"IN_PROGRESS\",\r\n    \"description\": \"{{IP_quote_code}}\",\r\n    \"quoteDate\": \"2025-02-03T00:00:00+01:00\",\r\n    \"applicantAccountCode\": \"CUST_000_IP\",\r\n    \"quoteVersion\": {\r\n        \"quoteCode\": \"{{IP_quote_code}}\",\r\n        \"currentVersion\": 1,\r\n        \"status\": \"DRAFT\",\r\n        \"statusDate\": \"2025-02-03T15:10:20+01:00\",\r\n        \"startDate\": \"2025-02-03T15:10:20+01:00\",\r\n        \"endDate\": \"2025-02-23T15:10:20+01:00\",\r\n        \"mediaCodes\": [],\r\n        \"billingPlanCode\": \"Invoicing_Plan_01\",\r\n        \"contractCode\": null,\r\n        \"priceListCode\": \"\",\r\n        \"discountPlanCode\": \"\"\r\n    },\r\n    \"userAccountCode\": \"CUST_000_IP\",\r\n    \"salesPersonName\": \"yassine.chetoui@opencellsoft.com\",\r\n    \"sellerCode\": \"MAIN_SELLER\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url.RESTful}}/cpq/quotes",
+											"host": [
+												"{{opencell.url.RESTful}}"
+											],
+											"path": [
+												"cpq",
+												"quotes"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Publish Quote version",
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"url": {
+											"raw": "{{opencell.url.RESTful}}/cpq/quotes/quoteVersions/{{IP_quote_code}}/1/status/PUBLISHED",
+											"host": [
+												"{{opencell.url.RESTful}}"
+											],
+											"path": [
+												"cpq",
+												"quotes",
+												"quoteVersions",
+												"{{IP_quote_code}}",
+												"1",
+												"status",
+												"PUBLISHED"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Order placement",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"url": {
+											"raw": "{{opencell.url.RESTful}}/cpq/quotes/{{IP_quote_code}}/quoteVersions/1/orderPlacement",
+											"host": [
+												"{{opencell.url.RESTful}}"
+											],
+											"path": [
+												"cpq",
+												"quotes",
+												"{{IP_quote_code}}",
+												"quoteVersions",
+												"1",
+												"orderPlacement"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Get order ID",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"pm.environment.set('IP_quote_order_id', jsonData.data[0].id);\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"protocolProfileBehavior": {
+										"disabledSystemHeaders": {
+											"accept": true
+										}
+									},
+									"request": {
+										"auth": {
+											"type": "basic",
+											"basic": [
+												{
+													"key": "password",
+													"value": "{{opencell.password}}",
+													"type": "string"
+												},
+												{
+													"key": "username",
+													"value": "{{opencell.username}}",
+													"type": "string"
+												},
+												{
+													"key": "saveHelperData",
+													"value": true,
+													"type": "boolean"
+												},
+												{
+													"key": "showPassword",
+													"value": false,
+													"type": "boolean"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"filters\": {\r\n        \"quote.id\": \"{{IP_quote_id}}\"\r\n    }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url}}/v2/generic/all/commercialOrder",
+											"host": [
+												"{{opencell.url}}"
+											],
+											"path": [
+												"v2",
+												"generic",
+												"all",
+												"commercialOrder"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Validate Order",
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"orderTypeCode\": \"COMMERCIAL\",\r\n    \"status\": \"DRAFT\",\r\n    \"billingAccountCode\": \"CUST_000_IP\",\r\n    \"orderProgress\": 0,\r\n    \"invoicingPlanCode\": \"Invoicing_Plan_01\",\r\n    \"sellerCode\": \"MAIN_SELLER\",\r\n    \"userAccountCode\": null,\r\n    \"salesPersonName\": \"yassine.chetoui@opencellsoft.com\",\r\n    \"priceListCode\": \"\",\r\n    \"id\": {{IP_quote_order_id}}\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url.RESTful}}/orderManagement/commercialOrders",
+											"host": [
+												"{{opencell.url.RESTful}}"
+											],
+											"path": [
+												"orderManagement",
+												"commercialOrders"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Finalized",
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"newStatus\": \"FINALIZED\",\r\n    \"id\": 15\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url.RESTful}}/orderManagement/commercialOrders/{{IP_quote_order_id}}/status/FINALIZED",
+											"host": [
+												"{{opencell.url.RESTful}}"
+											],
+											"path": [
+												"orderManagement",
+												"commercialOrders",
+												"{{IP_quote_order_id}}",
+												"status",
+												"FINALIZED"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Advance 20",
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url.RESTful}}/orderManagement/commercialOrders/{{IP_quote_order_id}}/orderProgress/20",
+											"host": [
+												"{{opencell.url.RESTful}}"
+											],
+											"path": [
+												"orderManagement",
+												"commercialOrders",
+												"{{IP_quote_order_id}}",
+												"orderProgress",
+												"20"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Check order progress =20",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"pm.test(\"Order advanced to 20%\", function () {\r",
+													"    pm.expect(jsonData.data[0].orderProgress).to.eql(20);\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"protocolProfileBehavior": {
+										"disabledSystemHeaders": {
+											"accept": true
+										}
+									},
+									"request": {
+										"auth": {
+											"type": "basic",
+											"basic": [
+												{
+													"key": "password",
+													"value": "{{opencell.password}}",
+													"type": "string"
+												},
+												{
+													"key": "username",
+													"value": "{{opencell.username}}",
+													"type": "string"
+												},
+												{
+													"key": "saveHelperData",
+													"value": true,
+													"type": "boolean"
+												},
+												{
+													"key": "showPassword",
+													"value": false,
+													"type": "boolean"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"filters\": {\r\n        \"quote.id\": \"{{IP_quote_id}}\"\r\n    }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url}}/v2/generic/all/commercialOrder",
+											"host": [
+												"{{opencell.url}}"
+											],
+											"path": [
+												"v2",
+												"generic",
+												"all",
+												"commercialOrder"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Advance 50",
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url.RESTful}}/orderManagement/commercialOrders/{{IP_quote_order_id}}/orderProgress/50",
+											"host": [
+												"{{opencell.url.RESTful}}"
+											],
+											"path": [
+												"orderManagement",
+												"commercialOrders",
+												"{{IP_quote_order_id}}",
+												"orderProgress",
+												"50"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Check order progress =50",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"\r",
+													"pm.test(\"Order advanced to 50%\", function () {\r",
+													"    pm.expect(jsonData.data[0].orderProgress).to.eql(50);\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"protocolProfileBehavior": {
+										"disabledSystemHeaders": {
+											"accept": true
+										}
+									},
+									"request": {
+										"auth": {
+											"type": "basic",
+											"basic": [
+												{
+													"key": "password",
+													"value": "{{opencell.password}}",
+													"type": "string"
+												},
+												{
+													"key": "username",
+													"value": "{{opencell.username}}",
+													"type": "string"
+												},
+												{
+													"key": "saveHelperData",
+													"value": true,
+													"type": "boolean"
+												},
+												{
+													"key": "showPassword",
+													"value": false,
+													"type": "boolean"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"filters\": {\r\n        \"quote.id\": \"{{IP_quote_id}}\"\r\n    }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url}}/v2/generic/all/commercialOrder",
+											"host": [
+												"{{opencell.url}}"
+											],
+											"path": [
+												"v2",
+												"generic",
+												"all",
+												"commercialOrder"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Advance 100",
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url.RESTful}}/orderManagement/commercialOrders/{{IP_quote_order_id}}/orderProgress/100",
+											"host": [
+												"{{opencell.url.RESTful}}"
+											],
+											"path": [
+												"orderManagement",
+												"commercialOrders",
+												"{{IP_quote_order_id}}",
+												"orderProgress",
+												"100"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Check order progress =100",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"\r",
+													"pm.test(\"Order advanced to 100%\", function () {\r",
+													"    pm.expect(jsonData.data[0].orderProgress).to.eql(100);\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"protocolProfileBehavior": {
+										"disabledSystemHeaders": {
+											"accept": true
+										}
+									},
+									"request": {
+										"auth": {
+											"type": "basic",
+											"basic": [
+												{
+													"key": "password",
+													"value": "{{opencell.password}}",
+													"type": "string"
+												},
+												{
+													"key": "username",
+													"value": "{{opencell.username}}",
+													"type": "string"
+												},
+												{
+													"key": "saveHelperData",
+													"value": true,
+													"type": "boolean"
+												},
+												{
+													"key": "showPassword",
+													"value": false,
+													"type": "boolean"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"filters\": {\r\n        \"quote.id\": \"{{IP_quote_id}}\"\r\n    }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url}}/v2/generic/all/commercialOrder",
+											"host": [
+												"{{opencell.url}}"
+											],
+											"path": [
+												"v2",
+												"generic",
+												"all",
+												"commercialOrder"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Check invoice amounts",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"\r",
+													"pm.test(\"Invoice ammounts are correct\", function () {\r",
+													"    pm.expect(jsonData.data.length).to.eql(3);\r",
+													"    pm.expect(jsonData.data[0].amountWithTax).to.eql(157.5);\r",
+													"    pm.expect(jsonData.data[1].amountWithTax).to.eql(236.25);\r",
+													"    pm.expect(jsonData.data[2].amountWithTax).to.eql(787.5);\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"protocolProfileBehavior": {
+										"disabledSystemHeaders": {
+											"accept": true
+										}
+									},
+									"request": {
+										"auth": {
+											"type": "basic",
+											"basic": [
+												{
+													"key": "password",
+													"value": "{{opencell.password}}",
+													"type": "string"
+												},
+												{
+													"key": "username",
+													"value": "{{opencell.username}}",
+													"type": "string"
+												},
+												{
+													"key": "saveHelperData",
+													"value": true,
+													"type": "boolean"
+												},
+												{
+													"key": "showPassword",
+													"value": false,
+													"type": "boolean"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"filters\": {\r\n        \"commercialOrder.id\": \"{{IP_quote_order_id}}\"\r\n    },\r\n    \"sortBy\": \"id\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{opencell.url}}/v2/generic/all/invoice",
+											"host": [
+												"{{opencell.url}}"
+											],
+											"path": [
+												"v2",
+												"generic",
+												"all",
+												"invoice"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "INTRD-27816 multiple product subscription",
+					"item": [
+						{
+							"name": "Create customer",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"crmAccountType\": \"C_UA\",\r\n    \"crmParentCode\": \"CUST_000_27816\",\r\n    \"code\": \"CUST_000_27816\",\r\n    \"seller\": \"MAIN_SELLER\",\r\n    \"description\": \"{{$randomFullName}}\",\r\n    \"language\": \"FRA\",\r\n    \"currency\": \"EUR\",\r\n    \"billingCycle\": \"BC_MONTHLY_1ST\",\r\n    \"country\": \"FR\",\r\n    \"customerCategory\": \"CLIENT\",\r\n    \"taxCategoryCode\": \"REGULAR\",\r\n    \"creditCategory\": \"NEWCUSTOMER\",\r\n    \"jobTitle\": \"{{$randomJobTitle}}\",\r\n    \"isCompany\": true,\r\n    \"email\": \"{{$randomEmail}}\",\r\n    \"legalEntityType\": {\r\n        \"code\": \"Company\"\r\n    },\r\n    \"name\": {\r\n        \"title\": \"MR\",\r\n        \"firstName\": \"{{$randomFirstName}}\",\r\n        \"lastName\": \"{{$randomLastName}}\"\r\n    },\r\n    \"address\": {\r\n        \"address1\": \"{{$randomStreetAddress}}\",\r\n        \"address2\": \"\",\r\n        \"address3\": \"\",\r\n        \"zipCode\": {{$randomInt}},\r\n        \"city\": \"{{$randomCity}}\",\r\n        \"country\": \"FR\"\r\n    },\r\n    \"contactInformation\": {\r\n        \"phone\": \"{{$randomPhoneNumber}}\",\r\n        \"mobile\": \"{{$randomPhoneNumber}}\"\r\n    },\r\n    \"registrationNumbers\": [\r\n        {\r\n            \"isoIcdCode\": \"0002\",\r\n            \"registrationNo\": \"362 521 879 00034\"\r\n        }\r\n    ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{opencell.url.RESTful}}/account/accountHierarchy/createCRMAccountHierarchy",
+									"host": [
+										"{{opencell.url.RESTful}}"
+									],
+									"path": [
+										"account",
+										"accountHierarchy",
+										"createCRMAccountHierarchy"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create Subscription",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"INTRD-27816-Subscription\",\n    \"description\": \"Subscription OF_BASIC\",\n    \"userAccount\": \"CUST_000_27816\",\n    \"offerTemplate\": \"OF_BASIC\",\n    \"seller\": \"OPENSOFT\",\n    \"subscriptionDate\": \"2023-10-12\",\n    \"productToInstantiateDto\": [\n        {\n            \"productCode\": \"PR_USG_UNIT\",\n            \"quantity\": 1,\n            \"deliveryDate\": null,\n            \"attributeInstances\": []\n        },\n        {\n            \"productCode\": \"PR_USG_ATTR\",\n            \"quantity\": 1,\n            \"deliveryDate\": null,\n            \"attributeInstances\": [\n                {\n                    \"orderAttributeCode\": \"EXAMPLE_TEXT_LIST_ATTRIBUTE\",\n                    \"stringValue\": \"TEST_1\"\n                },\n                {\n                    \"orderAttributeCode\": \"EXAMPLE_TEXT_ATTRIBUTE\",\n                    \"stringValue\": \"But I'm actually rank S\"\n                }\n            ]\n        }\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{opencell.url}}/billing/subscription/subscribeAndInstantiateProducts",
+									"host": [
+										"{{opencell.url}}"
+									],
+									"path": [
+										"billing",
+										"subscription",
+										"subscribeAndInstantiateProducts"
 									]
 								}
 							},
@@ -37354,11 +39572,10 @@
 					"    pm.variables.unset(\"access_token\");",
 					"    console.log(\"Jumping to \" + pm.info.requestName);",
 					"    postman.setNextRequest(pm.info.requestName);",
-					"} else {",
+					"} else if (! pm.info.requestName.endsWith(\"fail\")){",
 					"    pm.test(\"is.success\", function () {",
-					"        (pm.response.code == 200 || pm.response.code == 204 || pm.response.code == 201);",
-					"    });    ",
-					" ",
+					"        pm.expect(pm.response.code).to.be.oneOf([200,204,201,202]);",
+					"    });   ",
 					"}",
 					""
 				]

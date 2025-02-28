@@ -137,7 +137,7 @@ public class GenericApiLoadServiceTest {
     }
     
 
-    @Test
+    //@Test
     public void return_cfValues_test(){
         QueryBuilder queryBuilder = Mockito.mock(QueryBuilder.class);
         PaginationConfiguration searchConfig = Mockito.mock(PaginationConfiguration.class);

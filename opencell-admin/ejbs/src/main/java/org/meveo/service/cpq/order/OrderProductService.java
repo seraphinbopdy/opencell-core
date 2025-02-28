@@ -39,7 +39,7 @@ public class OrderProductService extends PersistenceService<OrderProduct> {
 			TypedQuery<Object> query = getEntityManager().createNamedQuery("OrderProduct.calculateMrr", Object.class);
 			return (BigDecimal) query.setParameter("orderProductId", orderProduct.getId()).getSingleResult();
 		} catch (NoResultException | NonUniqueResultException e) {
-			log.debug("No MRR calculation found for orderProduct id: #" + orderProduct.getId(), e);
+			log.debug("No MRR calculation found for orderProduct id: #" + orderProduct.getId());
 			return null;
 		}
 	}

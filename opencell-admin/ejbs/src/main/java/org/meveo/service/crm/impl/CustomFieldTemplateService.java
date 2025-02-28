@@ -46,6 +46,7 @@ import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.commons.utils.PersistenceUtils;
 import org.meveo.commons.utils.QueryBuilder;
+import org.meveo.commons.utils.ReflectionUtils;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.event.monitoring.ClusterEventDto.ClusterEventActionEnum;
 import org.meveo.event.monitoring.ClusterEventPublisher;
@@ -496,7 +497,7 @@ public class CustomFieldTemplateService extends BusinessService<CustomFieldTempl
             if (cfeAnnotation.cftCodeFields().length > 0) {
                 for (String fieldName : cfeAnnotation.cftCodeFields()) {
                     try {
-                        Object fieldValue = FieldUtils.getField(entity.getClass(), fieldName, true).get(entity);
+                        Object fieldValue = FieldUtils.getField(ReflectionUtils.getCleanClass(entity.getClass()), fieldName, true).get(entity);
                         if (fieldValue == null) {
                             throw new CustomFieldException("Can not calculate AppliesTo value for field " + fieldName + " of class " + entity.getClass().getSimpleName());
                         }

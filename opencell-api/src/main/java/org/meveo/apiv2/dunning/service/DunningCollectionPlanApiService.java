@@ -332,16 +332,20 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
     @Transactional
     public Optional<DunningCollectionPlan> stopCollectionPlan(DunningCollectionPlanStop dunningCollectionPlanStop, Long id) {
         globalSettingsVerifier.checkActivateDunning();
-        var collectionPlanToStop = findById(id).orElseThrow(() -> new EntityDoesNotExistsException(NO_DUNNING_FOUND + id));
+        var collectionPlanToStop = ofNullable(dunningCollectionPlanService.findById(id, Arrays.asList("relatedInvoices"))).
+                orElseThrow(() -> new EntityDoesNotExistsException(NO_DUNNING_FOUND + id));
+
         if(collectionPlanToStop.getStatus().getStatus().equals(DunningCollectionPlanStatusEnum.STOPPED)) {
             throw new BusinessApiException("Collection Plan with id " + collectionPlanToStop.getId() + " cannot be stopped, current status is " + collectionPlanToStop.getStatus().getStatus());
         }
+
         DunningStopReason dunningStopReason = dunningStopReasonService.findById(dunningCollectionPlanStop.getDunningStopReason().getId());
+
         if (dunningStopReason == null) {
             throw new EntityDoesNotExistsException("dunning Pause Reason with id " + dunningCollectionPlanStop.getDunningStopReason().getId() + " does not exits");
         }
-        collectionPlanToStop = dunningCollectionPlanService.stopCollectionPlan(collectionPlanToStop, dunningStopReason);
 
+        collectionPlanToStop = dunningCollectionPlanService.stopCollectionPlan(collectionPlanToStop, dunningStopReason);
         String origine = (collectionPlanToStop != null) ? collectionPlanToStop.getCollectionPlanNumber() : "";
         auditLogService.trackOperation("STOP Reason : " + dunningStopReason.getStopReason(), new Date(), collectionPlanToStop, origine);
         return of(collectionPlanToStop);

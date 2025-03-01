@@ -446,9 +446,11 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
         // Update the dunning collection plan infos after stop action
         updateDunningCollectionPlanInfosAfterStopAction(collectionPlanToStop, dunningStopReason);
 
+        List<Long> invoiceIds = collectionPlanToStop.getRelatedInvoices().stream().map(Invoice::getId).collect(Collectors.toList());
+        log.debug("Stop collection plan with id {} and related invoices {}", collectionPlanToStop.getId(), invoiceIds);
+
         // Update the collection plan
-        update(collectionPlanToStop);
-		return collectionPlanToStop; 
+        return update(collectionPlanToStop);
 	}
 
     /**

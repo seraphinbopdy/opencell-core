@@ -95,6 +95,8 @@ public class FlatFileProcessingJob extends Job {
 
     private static final String FLAT_FILE_PROCESSING_JOB_RECORD_VARIABLE_NAME = "FlatFileProcessingJob_recordVariableName";
 
+    private static final String FLAT_FILE_PROCESSING_JOB_USER = "user";
+
     /** The flat file processing job bean. */
     @Inject
     private FlatFileProcessingJobBean flatFileProcessingJobBean;
@@ -434,6 +436,17 @@ public class FlatFileProcessingJob extends Job {
         errorAction.setListValues(listValuesErrorAction);
         errorAction.setGuiPosition("tab:Configuration:0;fieldGroup:Data processing configuration:3;field:5");
         result.put(FLAT_FILE_PROCESSING_JOB_ERROR_ACTION, errorAction);
+
+        CustomFieldTemplate user = new CustomFieldTemplate();
+        user.setCode(FLAT_FILE_PROCESSING_JOB_USER);
+        user.setAppliesTo(JOB_FLAT_FILE_PROCESSING_JOB);
+        user.setActive(true);
+        user.setDescription("User");
+        user.setFieldType(CustomFieldTypeEnum.STRING);
+        user.setValueRequired(false);
+        user.setMaxValue(256L);
+        user.setGuiPosition("tab:Configuration:0;fieldGroup:Data processing configuration:3;field:6");
+        result.put(FLAT_FILE_PROCESSING_JOB_USER, user);
 
         CustomFieldTemplate nbRuns = new CustomFieldTemplate();
         nbRuns.setCode(CF_NB_RUNS);

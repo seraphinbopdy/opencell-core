@@ -180,7 +180,7 @@ public class ReflectionUtils {
     }
 
     /**
-     * Remove proxy suffix from a class name. Proxy classes contain a name in "..._$$_javassist.. format" If a proxy class object clasname was passed, strip the ending "_$$_javassist.."to obtain real class name
+     * Remove proxy suffix from a class name. Proxy classes contain a name in "..._$$_javassist.. or ..$HibernateProxy$.. format" If a proxy class object clasname was passed, strip the ending "_$$_javassist.." or "$.." to obtain real class name
      *
      * @param classname Class name
      * @return Class name without a proxy suffix
@@ -211,7 +211,7 @@ public class ReflectionUtils {
 
         String className = clazz.getName();
 
-        if (className.contains("$$")) {
+        if (className.contains("$")) {
             className = getCleanClassName(className);
             try {
                 clazz = Class.forName(className);

@@ -8,13 +8,13 @@ import static org.meveo.model.payments.DunningCollectionPlanStatusEnum.ACTIVE;
 import static org.meveo.model.payments.DunningCollectionPlanStatusEnum.FAILED;
 import static org.meveo.model.payments.DunningCollectionPlanStatusEnum.SUCCESS;
 import static org.meveo.model.shared.DateUtils.addDaysToDate;
-import static org.meveo.model.shared.DateUtils.daysBetween;
 
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -583,7 +583,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
             collectionPlan.setNextActionDate(null);
         }
 
-        collectionPlan.setDaysOpen((int) daysBetween(collectionPlan.getStartDate(), new Date()) + 1);
+        collectionPlan.setDaysOpen(daysBetween(collectionPlan.getStartDate(), new Date()) + 1);
         updateCollectionPlan = true;
         return updateCollectionPlan;
     }
@@ -626,5 +626,23 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
 
         collectionPlan.setLastActionDate(new Date());
         collectionPlan.setLastAction(actionInstance.getDunningAction().getCode());
+    }
+
+    /**
+     * Calculate days between two dates
+     *
+     * @param start Start date
+     * @param end End date
+     * @return Days between two dates
+     */
+    public static int daysBetween(Date start, Date end) {
+        if (start == null || end == null) {
+            return 0;
+        }
+
+        LocalDate dateStart = start.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate dateEnd = end.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+        return Math.abs((int) ChronoUnit.DAYS.between(dateStart, dateEnd));
     }
 }

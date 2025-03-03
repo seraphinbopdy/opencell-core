@@ -511,8 +511,8 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
             DunningCollectionPlan collectionPlan = findById(dunningLevelInstanceInput.getCollectionPlan().getId()).orElseThrow(() -> new EntityDoesNotExistsException(NO_DUNNING_FOUND + dunningLevelInstanceInput.getCollectionPlan().getId()));
             newDunningLevelInstance.setCollectionPlan(collectionPlan);
 
-            var dunningLevel = dunningLevelService.findById(dunningLevelInstanceInput.getDunningLevel().getId());
-            validateDunningLevelType(dunningLevel);
+
+            DunningLevel dunningLevel = validateDunningLevel(dunningLevelInstanceInput);
 
             if(collectionPlan.getDunningLevelInstances().size() + 1 > dunningSettings.getMaxDunningLevels()) {
                 throw new BusinessApiException("The maximum number of dunning levels per policy is exceeded - The maximum number is " + dunningSettings.getMaxDunningLevels());
@@ -562,10 +562,35 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
             newDunningLevelInstance.setCollectionPlanStatus(collectionPlanStatus);
 
             dunningLevelInstanceService.create(newDunningLevelInstance);
-            dunningCollectionPlanService.update(collectionPlan);
 
             // Create actions
-            createActions(newDunningLevelInstance, dunningLevelInstanceInput.getActions());
+            if (dunningLevelInstanceInput.getActions() != null && !dunningLevelInstanceInput.getActions().isEmpty()) {
+                createActions(newDunningLevelInstance, dunningLevelInstanceInput.getActions());
+            } else {
+                if (dunningLevel.getDunningActions() != null) {
+                    newDunningLevelInstance.setActions(new ArrayList<>());
+                    dunningLevel.getDunningActions().forEach(dunningAction -> {
+                        DunningActionInstance dunningActionInstance = new DunningActionInstance();
+                        dunningActionInstance.setDunningLevelInstance(newDunningLevelInstance);
+                        dunningActionInstance.setCollectionPlan(collectionPlan);
+                        dunningActionInstance.setDunningAction(dunningAction);
+                        dunningActionInstance.setActionOwner(dunningAction.getAssignedTo());
+                        dunningActionInstance.setCode(dunningAction.getCode());
+                        dunningActionInstance.setDescription(dunningAction.getDescription());
+                        dunningActionInstance.setActionType(dunningAction.getActionType());
+                        dunningActionInstance.setActionMode(dunningAction.getActionMode());
+                        dunningActionInstance.setActionRestult("Action executed manually");
+                        dunningActionInstance.setActionStatus(DunningActionInstanceStatusEnum.TO_BE_DONE);
+                        dunningActionInstance.setExecutionDate(newDunningLevelInstance.getExecutionDate());
+                        newDunningLevelInstance.getActions().add(dunningActionInstance);
+                        dunningActionInstanceService.create(dunningActionInstance);
+                    });
+                }
+            }
+
+            dunningLevelInstanceService.update(newDunningLevelInstance);
+            dunningCollectionPlanService.update(collectionPlan);
+
             auditLogService.trackOperation("ADD DunningLevelInstance", new Date(), collectionPlan, collectionPlan.getCollectionPlanNumber());
             return of(newDunningLevelInstance);
         } catch (MeveoApiException e) {
@@ -663,16 +688,28 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
 
     /**
      * Validate the dunning level type.
-     * @param dunningLevel the dunning level
+     * @param dunningLevelInstanceInput the dunning level
      */
-    private void validateDunningLevelType(DunningLevel dunningLevel) {
-        if (Boolean.TRUE.equals(dunningLevel.isReminder())) {
-            throw new ActionForbiddenException("Can not create a new dunning level instance if dunningLevel.isReminderLevel is TRUE");
+    private DunningLevel validateDunningLevel(DunningLevelInstanceInput dunningLevelInstanceInput) {
+        if (dunningLevelInstanceInput.getDunningLevel().getId() == null) {
+            throw new EntityDoesNotExistsException("Dunning level id is mandatory to add an instance");
         }
 
-        if (Boolean.TRUE.equals(dunningLevel.isEndOfDunningLevel())) {
-            throw new ActionForbiddenException("Can not create a new dunning level instance if dunningLevel.isEndOfDunningLevel is TRUE");
+        var dunningLevel = dunningLevelService.findById(dunningLevelInstanceInput.getDunningLevel().getId());
+
+        if (dunningLevel == null) {
+            throw new EntityDoesNotExistsException("No Dunning Level found with id : " + dunningLevelInstanceInput.getDunningLevel().getId());
+        } else {
+            if (Boolean.TRUE.equals(dunningLevel.isReminder())) {
+                throw new ActionForbiddenException("Can not create a new dunning level instance if dunningLevel.isReminderLevel is TRUE");
+            }
+
+            if (Boolean.TRUE.equals(dunningLevel.isEndOfDunningLevel())) {
+                throw new ActionForbiddenException("Can not create a new dunning level instance if dunningLevel.isEndOfDunningLevel is TRUE");
+            }
         }
+
+        return dunningLevel;
     }
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)

@@ -52,8 +52,12 @@ public class ExportAccountOperationScript extends ReportExtractScript {
                     } else {
                         sb.append(";");
                     }
-                    sb.append(nil(customerAccount.getCode()) + ";");
-                    sb.append(nil(customerAccount.getDescriptionOrCode()) + ";\n");
+                    if (customerAccount != null) {
+                        sb.append(nil(customerAccount.getCode()) + ";");
+                        sb.append(nil(customerAccount.getDescriptionOrCode()) + ";\n");
+                    } else {
+                        sb.append(";;\n");
+                    }
                 }
             }
             String strFilename = String.valueOf(initContext.get(ReportExtractScript.FILENAME));

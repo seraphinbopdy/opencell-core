@@ -66,6 +66,8 @@ import org.meveo.apiv2.document.DocumentResourceImpl;
 import org.meveo.apiv2.documentCategory.impl.DocumentCategoryResourceImpl;
 import org.meveo.apiv2.dunning.impl.CollectionPlanStatusResourceImpl;
 import org.meveo.apiv2.dunning.impl.DunningActionImpl;
+import org.meveo.apiv2.generic.exception.ModeRollBackRatingExceptionMapper;
+import org.meveo.apiv2.payments.resource.CustomerBalanceResourceImpl;
 import org.meveo.apiv2.dunning.impl.DunningAgentResourceImpl;
 import org.meveo.apiv2.dunning.impl.DunningCollectionPlanResourceImpl;
 import org.meveo.apiv2.dunning.impl.DunningLevelResourceImpl;
@@ -196,12 +198,12 @@ public class JaxRsActivatorApiV2 extends Application {
                 OpenOrderQuoteResourceImpl.class, CpqQuoteResourceImpl.class, CommercialOrderResourceImpl.class,
                 InvoiceLinesResourceImpl.class, CpqContractResourceImpl.class, OpenOrderResourceImpl.class,
                 ContactCategoryResourceImpl.class, InvoiceValidationRulesResourceImpl.class, InternationalSettingsResourceImpl.class,
-                CustomTableResourceImpl.class, AdvancedSettingsResourceImpl.class, CustomerBalanceResourceImpl.class, FileTypeResourceImpl.class, DocumentCategoryResourceImpl.class, 
+                CustomTableResourceImpl.class, AdvancedSettingsResourceImpl.class, CustomerBalanceResourceImpl.class, FileTypeResourceImpl.class, DocumentCategoryResourceImpl.class,
                 ElectronicInvoicingResourceImpl.class,PaymentResourceImpl.class, PriceListResourceImpl.class, SellerResourceImpl.class, PriceListLineResourceImpl.class, CatalogPriceListResourceImpl.class,
 				SignatureRequestResourceImpl.class, AuditDataConfigurationResourceImpl.class, AuditDataLogResourceImpl.class, EinvoiceResourceImpl.class, BatchEntityResourceImpl.class, FilesResourceImpl.class,
                 ProductManagementRsImpl.class, HugeEntityResourceImpl.class, PaymentTermResourceImpl.class, CustomActionResourceImpl.class,
                 BillingAccountV2ResourceImpl.class, AccountHierarchyV2ResourceImpl.class, CustomerV2ResourceImpl.class, CustomerAccountV2ResourceImpl.class, UserAccountsV2ResourceImpl.class,
-                LanguageResourceImpl.class
+                LanguageResourceImpl.class, ModeRollBackRatingExceptionMapper.class
         ));
 
         resources.add(GenericJacksonProvider.class);

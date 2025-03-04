@@ -1258,6 +1258,9 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
 		                    priceWithTax = priceTemp;
 	                    }
                     }
+
+                    wo.setUnitAmountWithoutTax(priceWithoutTax);
+
                     String amountELPricePlanMatrixLine = pricePlanMatrixLine.getValueEL();
                     if (!StringUtils.isBlank(amountELPricePlanMatrixLine)) {
                         BigDecimal amountElPPML = elUtils.evaluateAmountExpression(amountELPricePlanMatrixLine, wo, wo.getChargeInstance().getUserAccount(), null, priceWithoutTax);

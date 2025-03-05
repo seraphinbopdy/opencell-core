@@ -2911,8 +2911,9 @@ public class SubscriptionApi extends BaseApi {
                             serviceInstance.getAttributeInstances().add(attributeInstance);
                         });
                     }
-                    if (!serviceInstance.getStatus().equals(InstanceStatusEnum.ACTIVE)) {
+                    if (!serviceInstance.getStatus().equals(InstanceStatusEnum.ACTIVE) && serviceInstance.getDeliveryDate() != null) {
                         serviceInstance.setDeliveryDate(serviceInstanceDto.getDeliveryDate());
+                        serviceInstance.setSubscriptionDate(serviceInstanceDto.getDeliveryDate());
                          
                         serviceInstanceService.update(serviceInstance);
                     }

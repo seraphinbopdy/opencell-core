@@ -236,9 +236,10 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
                 // no need to check AO type, if the invoice is SD, this list will be used in other call, to create SD Transaction
                 securityDepositAOPs.add(accountOperation);
 
-            } else {
+            }
+            else {
                 // Functional Amounts
-                if (functionalDebitAmount.compareTo(accountOperation.getTransactionalUnMatchingAmount()) >= 0) {
+                if (functionalDebitAmount.compareTo(accountOperation.getTransactionalUnMatchingAmount().divide(accountOperation.getAppliedRate() != null ? accountOperation.getAppliedRate() : ONE)) >= 0) {
                 	fullMatch = true;
                 	functionalAmountToMatch = accountOperation.getUnMatchingAmount();
                     functionalDebitAmount = functionalDebitAmount.subtract(functionalAmountToMatch);
@@ -311,9 +312,11 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
                 accountOperation.setTransactionalMatchingAmount(accountOperation.getTransactionalAmount()
                         .subtract(accountOperation.getTransactionalUnMatchingAmount()));
                 BigDecimal computedMatchingAmount =
-                        (accountOperation.getAmount().multiply(accountOperation.getTransactionalMatchingAmount()))
+                        (accountOperation.getAmount()
+                                .multiply(accountOperation.getTransactionalMatchingAmount()))
                                 .divide(accountOperation.getTransactionalAmount(),
-                                        appProvider.getRounding(), appProvider.getRoundingMode().getRoundingMode());
+                                        appProvider.getRounding(), appProvider.getRoundingMode().getRoundingMode())
+                                .multiply(accountOperation.getAppliedRate() != null ? accountOperation.getAppliedRate() : ONE);
                 accountOperation.setMatchingAmount(computedMatchingAmount);
                 accountOperation.setUnMatchingAmount((accountOperation.getAmount().subtract(computedMatchingAmount)).abs());
 				if(accountOperation.getMatchingStatus() != MatchingStatusEnum.I) {
@@ -386,7 +389,8 @@ public class MatchingCodeService extends PersistenceService<MatchingCode> {
                 // no need to check AO type, if the invoice is SD, this list will be used in other call, to create SD Transaction
                 securityDepositAOPs.add(accountOperation);
 
-            } else {
+            }
+            else {
                 // Transactional Amounts
                 if (amountDebit.compareTo(accountOperation.getTransactionalUnMatchingAmount()) >= 0) {
                     fullMatch = true;

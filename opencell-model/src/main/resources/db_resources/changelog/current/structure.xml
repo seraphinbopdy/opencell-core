@@ -17869,4 +17869,12 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
         	<column name="thread_name" type="varchar(255)" ></column>
         </addColumn>
     </changeSet>
+
+    <changeSet id="#INTRD-27967_20250304" author="zelmeliani">
+        <addColumn tableName="dunning_level_instance">
+            <column name="code" type="varchar(255)" />
+            <column name="description" type="varchar(255)" />
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

@@ -118,6 +118,9 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
     @Inject
     private DunningCollectionPlanStatusService collectionPlanStatusService;
 
+    @Inject
+    private DunningLevelApiService dunningLevelApiService;
+
     private static final String NO_DUNNING_FOUND = "No Dunning Plan collection found with id : ";
 
     @Override
@@ -561,6 +564,7 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
             DunningCollectionPlanStatus collectionPlanStatus = collectionPlanStatusService.findByStatus(collectionPlan.getStatus().getStatus());
             newDunningLevelInstance.setCollectionPlanStatus(collectionPlanStatus);
 
+            dunningLevelApiService.populateCustomFieldsForGenericApi(dunningLevelInstanceInput.getCustomFields(), newDunningLevelInstance, true);
             dunningLevelInstanceService.create(newDunningLevelInstance);
 
             // Create actions
@@ -758,6 +762,7 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
                 }
             }
 
+            dunningLevelApiService.populateCustomFieldsForGenericApi(updateLevelInstanceInput.getCustomFields(), levelInstanceToUpdate, true);
             dunningLevelInstanceService.update(levelInstanceToUpdate);
 
             if (updateLevelInstanceInput.getActions() != null) {
@@ -899,6 +904,8 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
         dunningActionInstance.setActionRestult(dunningActionInstanceInput.getActionRestult());
         dunningActionInstance.setActionStatus(DunningActionInstanceStatusEnum.TO_BE_DONE);
         dunningActionInstance.setExecutionDate(dunningActionInstance.getDunningLevelInstance().getExecutionDate());
+
+        dunningLevelApiService.populateCustomFieldsForGenericApi(dunningActionInstanceInput.getCustomFields(), dunningActionInstance, true);
         dunningActionInstanceService.create(dunningActionInstance);
         auditLogService.trackOperation("ADD DunningActionInstance", new Date(), collectionPlan, collectionPlan.getCollectionPlanNumber());
         return of(dunningActionInstance);
@@ -1079,6 +1086,7 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
                 dunningActionInstanceToUpdate.setActionRestult(dunningActionInstanceInput.getActionRestult());
             }
 
+            dunningLevelApiService.populateCustomFieldsForGenericApi(dunningActionInstanceInput.getCustomFields(), dunningActionInstanceToUpdate, true);
             dunningActionInstanceService.update(dunningActionInstanceToUpdate);
 
             String origine = (dunningActionInstanceToUpdate.getCollectionPlan() != null) ? dunningActionInstanceToUpdate.getCollectionPlan().getCollectionPlanNumber() : "";

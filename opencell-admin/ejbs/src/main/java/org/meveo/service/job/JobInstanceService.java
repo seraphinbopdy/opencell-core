@@ -295,19 +295,24 @@ public class JobInstanceService extends BusinessService<JobInstance> {
      */
     private boolean scheduleJob(JobInstance jobInstance, Job job) {
 
-        if (jobInstance.isActive() && jobInstance.getTimerEntity() != null && JobExecutionService.isRunnableOnNode(jobInstance.getRunOnNodesResolved())) {
+        if (jobInstance.isActive() && (jobInstance.getTimerEntity() != null || jobInstance.getQueryScheduler() != null ) && JobExecutionService.isRunnableOnNode(jobInstance.getRunOnNodesResolved())) {
             if (job == null) {
                 job = getJobByName(jobInstance.getJobTemplate());
             }
 
-            ScheduleExpression scheduleExpression;
-            if (jobInstance.getQueryScheduler() != null) {
-                scheduleExpression = getScheduleExpression(jobInstance.getQueryScheduler());
-            } else {
+            ScheduleExpression scheduleExpression = null;
+            if (jobInstance.getTimerEntity() != null) {
                 scheduleExpression = getScheduleExpression(jobInstance.getTimerEntity());
+            } else if(jobInstance.getQueryScheduler() != null){
+                scheduleExpression = getScheduleExpression(jobInstance.getQueryScheduler());
             }
-            log.info("Scheduling job {} of type {} for {}", jobInstance.getCode(), jobInstance.getJobTemplate(), scheduleExpression);
 
+            if(scheduleExpression == null){
+                log.warn("Trying to schedule a job without any schedule expression");
+                return false;
+            }
+
+            log.info("Scheduling job {} of type {} for {}", jobInstance.getCode(), jobInstance.getJobTemplate(), scheduleExpression);
             // detach(jobInstance);
             jobTimers.put(new CacheKeyLong(currentUser.getProviderCode(), jobInstance.getId()), job.createTimer(scheduleExpression, jobInstance));
             return true;

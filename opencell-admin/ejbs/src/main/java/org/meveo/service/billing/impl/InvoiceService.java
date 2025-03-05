@@ -7399,6 +7399,12 @@ public class InvoiceService extends PersistenceService<Invoice> {
         detach(invoice);
 
         var duplicateInvoice = new Invoice(invoice);
+        Date dueDate = calculateDueDate(invoice,
+                duplicateInvoice.getBillingAccount().getBillingCycle(),
+                duplicateInvoice.getBillingAccount(),
+                duplicateInvoice.getBillingAccount().getCustomerAccount(),
+                duplicateInvoice.getOrder());
+        duplicateInvoice.setDueDate(dueDate);
         this.create(duplicateInvoice);
 
         updateInvoiceLinesAmountFromRatedTransactions(invoiceLineRTs, invoiceLines);
@@ -7423,6 +7429,12 @@ public class InvoiceService extends PersistenceService<Invoice> {
         invoice = findById(invoice.getId());
         
         Invoice adjustmentInvoice = duplicateByType(invoice, invoiceLinesIds, true);
+        Date dueDate = calculateDueDate(invoice,
+                adjustmentInvoice.getBillingAccount().getBillingCycle(),
+                adjustmentInvoice.getBillingAccount(),
+                adjustmentInvoice.getBillingAccount().getCustomerAccount(),
+                adjustmentInvoice.getOrder());
+        adjustmentInvoice.setDueDate(dueDate);
         addLinkedInvoice(invoice, adjustmentInvoice);
         populateAdjustmentInvoice(adjustmentInvoice, type, invoice);
         calculateOrUpdateInvoice(invoiceLinesIds, adjustmentInvoice);

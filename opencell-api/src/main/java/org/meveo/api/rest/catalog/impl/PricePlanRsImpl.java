@@ -223,9 +223,9 @@ public class PricePlanRsImpl extends BaseRs implements PricePlanRs {
             if (pricePlanMatrixVersionDto.getColumns() != null) {
                 for (PricePlanMatrixColumnDto columnDto : pricePlanMatrixVersionDto.getColumns()) {
                     try {
-                        pricePlanMatrixColumnApi.create(pricePlanMatrixVersionDto.getPricePlanMatrixCode(),pricePlanMatrixVersionDto.getVersion(), columnDto);
+                        pricePlanMatrixColumnApi.create(pricePlanMatrixVersionDto.getPricePlanMatrixCode(),columnDto.getPricePlanMatrixVersion(), columnDto);
                     }catch(EntityAlreadyExistsException exp){
-                        pricePlanMatrixColumnApi.update(pricePlanMatrixVersionDto.getPricePlanMatrixCode(),pricePlanMatrixVersionDto.getVersion(), columnDto);
+                        pricePlanMatrixColumnApi.update(pricePlanMatrixVersionDto.getPricePlanMatrixCode(),columnDto.getPricePlanMatrixVersion(), columnDto);
                     }
                 }
             }

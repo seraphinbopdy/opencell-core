@@ -17877,4 +17877,11 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
         </addColumn>
     </changeSet>
 
+    <changeSet id="#INTRD-27967_20250306_initialize_code" author="zelmeliani">
+        <update tableName="dunning_level_instance">
+            <column name="code" valueComputed="${uuid_function}"/> 
+            <where>code IS NULL OR code = ''</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

@@ -60,6 +60,7 @@ import org.meveo.model.billing.UserAccount;
 import org.meveo.model.catalog.OfferTemplate;
 import org.meveo.model.catalog.ProductOffering;
 import org.meveo.model.catalog.ProductTemplate;
+import org.meveo.model.cpq.CpqQuote;
 import org.meveo.model.cpq.commercial.InvoicingPlan;
 import org.meveo.model.cpq.enums.VersionStatusEnum;
 import org.meveo.model.crm.CustomFieldTemplate;
@@ -83,6 +84,7 @@ import org.meveo.service.billing.impl.TerminationReasonService;
 import org.meveo.service.billing.impl.UserAccountService;
 import org.meveo.service.catalog.impl.ProductOfferingService;
 import org.meveo.service.catalog.impl.ServiceTemplateService;
+import org.meveo.service.cpq.CpqQuoteService;
 import org.meveo.service.cpq.OfferComponentService;
 import org.meveo.service.cpq.QuoteLotService;
 import org.meveo.service.cpq.QuoteProductService;
@@ -175,6 +177,9 @@ public class QuoteApi extends BaseApi {
     
     @Inject
     private InvoicingPlanService invoicingPlanService;
+
+    @Inject
+    private CpqQuoteService cpqQuoteService;
 
     /**
      * Register a quote from TMForumApi.
@@ -1243,9 +1248,9 @@ public class QuoteApi extends BaseApi {
 		if(quoteVersion == null) {
 			throw new EntityDoesNotExistsException(QuoteVersion.class, quoteVersionDto.getQuoteCode());
 		}
-		final Quote quote = quoteService.findByCode(quoteVersionDto.getQuoteCode());
+		final CpqQuote quote = cpqQuoteService.findByCode(quoteVersionDto.getQuoteCode());
 		if(quote == null) {
-			throw new EntityDoesNotExistsException(Quote.class, quoteVersionDto.getQuoteCode());
+			throw new EntityDoesNotExistsException(CpqQuote.class, quoteVersionDto.getQuoteCode());
 		}
 		//TODO : change with CpqQuote quoteVersion.setQuote(quote);
 		quoteVersion.setStartDate(quoteVersionDto.getStartDate());

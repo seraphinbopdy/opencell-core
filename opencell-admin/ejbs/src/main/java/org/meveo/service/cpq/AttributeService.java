@@ -82,6 +82,9 @@ public class AttributeService extends BusinessService<Attribute>{
         if (expression.indexOf(ValueExpressionWrapper.VAR_WALLET_OPERATION) >= 0 && walletOperation != null) {
             params.put(ValueExpressionWrapper.VAR_WALLET_OPERATION, walletOperation);
         }
+        if (expression.contains(ValueExpressionWrapper.VAR_SUBSCRIPTION) && walletOperation != null && walletOperation.getSubscription() != null) {
+            params.put(ValueExpressionWrapper.VAR_SUBSCRIPTION, walletOperation.getSubscription());
+        }
         if (resultType == null) {
             resultType = (Class<T>) String.class;
         }

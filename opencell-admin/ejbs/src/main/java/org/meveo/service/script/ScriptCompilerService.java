@@ -153,7 +153,7 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> imple
                 // Was deployed as exploded archive
                 if (realFile.exists()) {
                     File deploymentDir = realFile.getParentFile();
-                    for (File file : FileUtils.listFileSystemFiles(deploymentDir,null,null,null)) {
+                    for (File file : deploymentDir.listFiles()) {
                         if (file.getName().endsWith(".jar")) {
                             classpath += file.getCanonicalPath() + File.pathSeparator;
                         }
@@ -171,7 +171,7 @@ public class ScriptCompilerService extends BusinessService<ScriptInstance> imple
 
                     log.info("Constructing class path from VFS. Location dir {}, deployment's lib dir {}", realFile, vfsTmpPath);
 
-                    for (File f : FileUtils.listFileSystemFiles(physicalLibDir, "jar", "*", null)) {
+                    for (File f : FileUtils.listFiles(physicalLibDir, "jar", "*", null)) {
                         classpath += f.getCanonicalPath() + File.pathSeparator;
                     }
                 }

@@ -12101,6 +12101,8 @@
                 <constraints nullable="false" primaryKey="true" primaryKeyName="dunning_level_instance_pkey" />
             </column>
             <column name="version" type="int4" />
+            <column name="code" type="varchar(255)" />
+            <column name="description" type="varchar(255)" />
             <column name="created" type="datetime">
                 <constraints nullable="false" />
             </column>
@@ -20918,6 +20920,8 @@
     <changeSet id="#INTRD-29287_update_fk_report_query_execution" author="AbdelkaderBouazza" />
     <changeSet id="#INTRD-29381_fix_wording" author="a.rouaguebe" />
     <changeSet id="#INTRD-29007_20250212" author="anasseh" />
+    <changeSet id="#INTRD-27967_20250304" author="zelmeliani" />
+    
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 
 </databaseChangeLog>

@@ -21,13 +21,13 @@ import org.meveo.model.dunning.DunningPolicy;
 import org.meveo.model.dunning.DunningPolicyLevel;
 import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.shared.DateUtils;
-import org.meveo.service.base.PersistenceService;
+import org.meveo.service.base.BusinessService;
 
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 
 @Stateless
-public class DunningLevelInstanceService extends PersistenceService<DunningLevelInstance> {
+public class DunningLevelInstanceService extends BusinessService<DunningLevelInstance> {
 
     private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
 

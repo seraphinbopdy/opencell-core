@@ -5,10 +5,15 @@ import org.meveo.apiv2.dunning.ImmutableDunningActionInstanceInput;
 import org.meveo.apiv2.models.ImmutableResource;
 import org.meveo.apiv2.models.Resource;
 import org.meveo.apiv2.ordering.ResourceMapper;
+import org.meveo.commons.utils.EjbUtils;
 import org.meveo.model.BaseEntity;
 import org.meveo.model.dunning.DunningActionInstance;
+import org.meveo.service.api.EntityToDtoConverter;
 
 public class DunningActionInstanceMapper extends ResourceMapper<DunningActionInstanceInput, DunningActionInstance> {
+
+    private EntityToDtoConverter entityToDtoConverter =
+            (EntityToDtoConverter) EjbUtils.getServiceInterface(EntityToDtoConverter.class.getSimpleName());
 
     @Override
     protected DunningActionInstanceInput toResource(DunningActionInstance entity) {
@@ -24,6 +29,7 @@ public class DunningActionInstanceMapper extends ResourceMapper<DunningActionIns
                 .actionStatus(entity.getActionStatus())
                 .collectionPlan(createResource(entity.getCollectionPlan()))
                 .dunningLevelInstance(createResource(entity.getCollectionPlan()))
+                .customFields(entityToDtoConverter.getCustomFieldsDTO(entity))
                 .build();
         }
 

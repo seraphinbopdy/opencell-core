@@ -5,12 +5,17 @@ import java.util.stream.Collectors;
 
 import org.meveo.apiv2.dunning.ImmutableDunningLevel;
 import org.meveo.apiv2.generic.ResourceMapper;
+import org.meveo.commons.utils.EjbUtils;
 import org.meveo.model.admin.Currency;
 import org.meveo.model.dunning.DunningAction;
 import org.meveo.model.dunning.DunningLevel;
 import org.meveo.model.dunning.DunningLevelChargeTypeEnum;
+import org.meveo.service.api.EntityToDtoConverter;
 
 public class DunningLevelMapper extends ResourceMapper<org.meveo.apiv2.dunning.DunningLevel, DunningLevel> {
+
+	private EntityToDtoConverter entityToDtoConverter =
+			(EntityToDtoConverter) EjbUtils.getServiceInterface(EntityToDtoConverter.class.getSimpleName());
 
 	@Override
 	protected org.meveo.apiv2.dunning.DunningLevel toResource(DunningLevel entity) {
@@ -29,6 +34,7 @@ public class DunningLevelMapper extends ResourceMapper<org.meveo.apiv2.dunning.D
 				.dunningLevelChargeCurrency(entity.getChargeCurrency() == null ? null : entity.getChargeCurrency().getCurrencyCode())
 				.isEndOfDunningLevel(entity.isEndOfDunningLevel())
 				.dunningActions(getDunningActionsCodes(entity))
+				.customFields(entityToDtoConverter.getCustomFieldsDTO(entity))
 				.build();
     }
 

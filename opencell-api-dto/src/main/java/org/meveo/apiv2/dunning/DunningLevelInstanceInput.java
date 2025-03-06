@@ -3,9 +3,11 @@ package org.meveo.apiv2.dunning;
 import java.util.Date;
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Nullable;
 
 import org.immutables.value.Value;
+import org.meveo.api.dto.CustomFieldsDto;
 import org.meveo.apiv2.models.Resource;
 import org.meveo.model.dunning.DunningLevelInstanceStatusEnum;
 
@@ -38,4 +40,8 @@ public interface DunningLevelInstanceInput extends Resource {
 
     @Nullable
     Date getExecutionDate();
+
+    @Nullable
+    @Schema(description = "custom field associated to dunning action")
+    CustomFieldsDto getCustomFields();
 }

@@ -1,8 +1,10 @@
 package org.meveo.apiv2.dunning;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Nullable;
 
 import org.immutables.value.Value;
+import org.meveo.api.dto.CustomFieldsDto;
 import org.meveo.apiv2.models.Resource;
 import org.meveo.model.dunning.DunningActionInstanceStatusEnum;
 import org.meveo.model.payments.ActionModeEnum;
@@ -41,4 +43,8 @@ public interface DunningActionInstanceInput extends Resource {
 
     @Nullable
     Resource getDunningLevelInstance();
+
+    @Nullable
+    @Schema(description = "custom field associated to dunning action")
+    CustomFieldsDto getCustomFields();
 }

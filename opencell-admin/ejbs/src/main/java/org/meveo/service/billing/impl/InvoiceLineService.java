@@ -10,6 +10,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.collections4.ListUtils.partition;
 import static org.meveo.commons.utils.ParamBean.getInstance;
+import static org.meveo.commons.utils.StringUtils.isBlank;
 import static org.meveo.model.billing.InvoiceLineStatusEnum.OPEN;
 import static org.meveo.model.billing.InvoiceLineTaxModeEnum.RATE;
 import static org.meveo.model.billing.InvoiceStatusEnum.VALIDATED;
@@ -1428,7 +1429,25 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
         if (invoiceLine.getSeller() != null) {
             invoiceKey.add(formatId(invoiceLine.getSeller().getId()));
         }
-        invoiceKey.add(formatId(invoiceLine.getInvoiceTypeId()));
+        if (invoiceLine.getInvoiceTypeId() != null) {
+            invoiceKey.add(formatId(invoiceLine.getInvoiceTypeId()));
+        } else if (invoiceLine.getAccountingArticle() != null) {
+            // ILs could be also grouped by their articles type invoice
+            InvoiceType invoiceType = null;
+            AccountingArticle accountingArticle = accountingArticleService.refreshOrRetrieve(invoiceLine.getAccountingArticle());
+            if (!isBlank(accountingArticle.getInvoiceTypeEl())) {
+                String invoiceTypeCode =  invoiceTypeService.evaluateInvoiceTypeEl(accountingArticle.getInvoiceTypeEl(), invoiceLine);
+                invoiceType = invoiceTypeService.findByCode(invoiceTypeCode);
+            }
+            if (invoiceType == null) {
+                invoiceType = accountingArticle.getInvoiceType();
+            }
+            invoiceKey.add(formatEntityId(invoiceType));
+            if (invoiceType != null) {
+                invoiceLine.setInvoiceTypeId(invoiceType.getId());
+            }
+        }
+
         invoiceKey.add(formatId(invoiceLine.getPaymentMethodId()));invoiceKey.add(formatId(invoiceLine.getPaymentMethodId()));
         if(billingRun != null && billingRun.getBillingCycle() != null) {
             if(billingRun.getBillingCycle().getType()==BillingEntityTypeEnum.SUBSCRIPTION) {

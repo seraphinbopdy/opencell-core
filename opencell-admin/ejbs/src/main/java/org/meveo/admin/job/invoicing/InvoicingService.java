@@ -127,7 +127,7 @@ public class InvoicingService extends PersistenceService<Invoice> {
     private SubscriptionService subscriptionService;
     @Inject
     private PurchaseOrderService PurchaseOrderService;
-    
+
     @Inject
     @InvoiceNumberAssigned
     private Event<Invoice> invoiceNumberAssignedEventProducer;
@@ -256,7 +256,7 @@ public class InvoicingService extends PersistenceService<Invoice> {
             log.error("Error while trying to generate account operation for billing run: {}, invoice: {}", billingRunId, invoice.getId());
         }
     }
-    
+
 	private void linkInvoiceObjects(List<Long> invoiceIds) {
 		getEntityManager().createNamedQuery("Invoice.linkWithSubscriptionsByID").setParameter("ids", invoiceIds).executeUpdate();
 		getEntityManager().createNamedQuery("Invoice.linkWithPurchaseOrdersByID").setParameter("ids", invoiceIds).executeUpdate();
@@ -280,7 +280,7 @@ public class InvoicingService extends PersistenceService<Invoice> {
 
         BigDecimal amountWithoutTax = itemsBySubCategory.values().stream().flatMap(Collection::stream)
                 .map(InvoicingItem::getAmountWithoutTax).reduce(BigDecimal.ZERO, BigDecimal::add);
-        
+
         List<DiscountPlanItem> applicableDiscountPlanItems = getApplicableDiscounts(billingAccountDetailsItem, invoice);
         final Map<String, List<SubCategoryInvoiceAgregate>> scMap = itemsBySubCategory.keySet().stream().collect(groupingBy(SubCategoryInvoiceAgregate::getCategoryAggKey));
         for (List<SubCategoryInvoiceAgregate> scAggregateList : scMap.values()) {
@@ -363,7 +363,13 @@ public class InvoicingService extends PersistenceService<Invoice> {
         invoice.setNewInvoicingProcess(true);
         populateCustomFieldDefaultValues(invoice);
         invoice.setInvoiceKey(invoicingItem.getInvoiceKey());
-        InvoiceType invoiceType = invoiceTypeService.retrieveIfNotManaged(invoiceService.determineInvoiceType(false, false, false, billingCycle, billingRun, billingAccount, invoice));
+        // ILs could be also grouped by invoice type id. if set then its invoiceKey should have it already in its parts
+        InvoiceType invoiceType;
+        if (invoicingItem.getInvoiceTypeId() != null) {
+            invoiceType = invoiceTypeService.findById(groupedItems.get(0).getInvoiceTypeId());
+        } else {
+            invoiceType = invoiceTypeService.retrieveIfNotManaged(invoiceService.determineInvoiceType(false, false, false, billingCycle, billingRun, billingAccount, invoice));
+        }
         invoice.setInvoiceType(invoiceType);
         return invoice;
     }

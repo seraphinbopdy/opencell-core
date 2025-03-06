@@ -2,7 +2,6 @@ package org.meveo.service.report;
 
 import static java.lang.Double.valueOf;
 import static java.lang.Enum.valueOf;
-import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static java.util.Collections.reverse;
 import static java.util.Optional.ofNullable;
@@ -108,7 +107,8 @@ import jakarta.ws.rs.core.UriInfo;
 public class ReportQueryService extends BusinessService<ReportQuery> {
 
     private static final String SEPARATOR_SELECTED_FIELDS = "\\.";
-    
+    public static final String REPORT_QUERY_SCHEDULED_RESULT = "REPORT_QUERY_SCHEDULED_RESULT";
+
     @Inject
     private QueryExecutionResultService queryExecutionResultService;
     
@@ -329,6 +329,32 @@ public class ReportQueryService extends BusinessService<ReportQuery> {
         queryResult.setExecutionDuration(queryResult.getEndDate().getTime() - queryResult.getStartDate().getTime());
         queryResult.setLineCount(selectResult.size());
         queryResult.setFilePath(outputFile.getParentFile().getName() +  File.separator + outputFile.getName());
+
+        QueryExecutionResult finalQueryResult = queryResult;
+        Optional.ofNullable(queryResult.getQueryScheduler())
+                .map(querySchedulerService::refreshOrRetrieve)
+                .map(QueryScheduler::getEmailsToNotify)
+                .stream()
+                .flatMap(Collection::stream)
+                .forEach(email -> sendReportQueryEmail(email, finalQueryResult, outputFile));
+
+    }
+
+    private void sendReportQueryEmail(String emailAddress, QueryExecutionResult queryResult, File outputFile) {
+        Format format = new SimpleDateFormat("yyyy-M-dd hh:mm:ss");
+        Map<Object, Object> params = new HashMap<>();
+        params.put("userName", emailAddress);
+        params.put("reportQueryName", queryResult.getReportQuery().getCode());
+        params.put("startDate", format.format(queryResult.getStartDate()));
+        params.put("portalResultLink", queryResult.getFilePath());
+
+        try {
+            EmailTemplate emailTemplate = emailTemplateService.findByCode(REPORT_QUERY_SCHEDULED_RESULT);
+            EmailInformations email = buildEmailInformations(true, queryResult.getLineCount(), null, params, emailTemplate, List.of(emailAddress), List.of(outputFile));
+            emailSender.send(email.sender, null, email.recipients, null, null, email.subject(), email.content(), email.htmlContent(), email.attachments.orElse(List.of()), new Date(), true);
+        } catch (Exception exception) {
+            log.error("Failed to send notification email " + exception.getMessage());
+        }
     }
 
     private void writeOutputFile(File file, QueryExecutionResultFormatEnum format, Set<String> columnHeader, List<String> selectResult) throws IOException {
@@ -486,53 +512,60 @@ public class ReportQueryService extends BusinessService<ReportQuery> {
 
     private void notifyUser(Long reportQueryId, String reportQueryName, String userName, String userEmail , boolean success,
                             Date startDate, long duration, Integer lineCount, String error, UriInfo uriInfo) {
-        String contentHtml = null;
-        String content = null;
-        String subject;
-        String portalResultLink = paramBeanFactory.getInstance().getProperty("portal.host.queryUri", uriInfo.getBaseUri().toString().replace(uriInfo.getBaseUri().getPath(), "").concat(DEFAULT_URI_PATH));
-        if (portalResultLink.contains(DEFAULT_URI_PATH)) {
-        	portalResultLink = portalResultLink.concat(reportQueryId+"/show");
-        } else {
-        	portalResultLink = portalResultLink.concat(DEFAULT_URI_PATH).concat(reportQueryId+"/show");
-        }
-       
-        Format format = new SimpleDateFormat("yyyy-M-dd hh:mm:ss");
 
+        Format format = new SimpleDateFormat("yyyy-M-dd hh:mm:ss");
         Map<Object, Object> params = new HashMap<>();
         params.put("userName", userName);
         params.put("reportQueryName", reportQueryName);
         params.put("startDate", format.format(startDate));
-        params.put("portalResultLink", portalResultLink);
+        params.put("portalResultLink", resolveResultLink(reportQueryId, uriInfo));
 
 	    //to arround to the max value : (long) Math.ceil(duration % 1000)
 	    long durationSecond = (duration / 1000) + (((long) Math.ceil(duration % 1000)) > 0?1l:0l);
 	    
         params.put("duration", String.format("%02d",durationSecond / 3600)+"h "+String.format("%02d",durationSecond / 60 % 60)+"m "+String.format("%02d",durationSecond % 60)+"s");
         try {
-
             EmailTemplate emailTemplate = success ? emailTemplateService.findByCode(SUCCESS_TEMPLATE_CODE) :
                     emailTemplateService.findByCode(FAILURE_TEMPLATE_CODE);
 
-            String languageCode = appProvider.getLanguage().getLanguageCode();
-            String emailSubject = internationalSettingsService.resolveSubject(emailTemplate, languageCode);
-            String emailContent = internationalSettingsService.resolveEmailContent(emailTemplate, languageCode);
-            String htmlContent = internationalSettingsService.resolveHtmlContent(emailTemplate, languageCode);
-
-            if(success) {
-                params.put("lineCount", lineCount);
-                contentHtml = evaluateExpression(htmlContent, params, String.class);
-                subject = evaluateExpression(emailSubject, params, String.class);
-            } else {
-                params.put("error", error);
-                content = evaluateExpression(emailContent, params, String.class);
-                subject = evaluateExpression(emailSubject, params, String.class);
-            }
-            emailSender.send(ofNullable(appProvider.getEmail()).orElse(DEFAULT_EMAIL_ADDRESS),
-                    null, asList(userEmail), subject, content, contentHtml);
+            EmailInformations email = buildEmailInformations(success, lineCount, error, params, emailTemplate, List.of(userEmail), null);
+            emailSender.send(email.sender, null, email.recipients, email.subject(), email.content(), email.htmlContent());
         } catch (Exception exception) {
             log.error("Failed to send notification email " + exception.getMessage());
         }
     }
+
+    private String resolveResultLink(Long reportQueryId, UriInfo uriInfo) {
+        String portalResultLink = paramBeanFactory.getInstance().getProperty("portal.host.queryUri", uriInfo.getBaseUri().toString().replace(uriInfo.getBaseUri().getPath(), "").concat(DEFAULT_URI_PATH));
+        if (portalResultLink.contains(DEFAULT_URI_PATH)) {
+        	portalResultLink = portalResultLink.concat(reportQueryId +"/show");
+        } else {
+        	portalResultLink = portalResultLink.concat(DEFAULT_URI_PATH).concat(reportQueryId +"/show");
+        }
+        return portalResultLink;
+    }
+
+    private EmailInformations buildEmailInformations(boolean success, Integer lineCount, String error, Map<Object, Object> params, EmailTemplate emailTemplate, List<String> emails, List<File> attachements) {
+        String contentHtml = null;
+        String content = null;
+        String subject;
+        String languageCode = appProvider.getLanguage().getLanguageCode();
+        String emailSubject = internationalSettingsService.resolveSubject(emailTemplate, languageCode);
+        String emailContent = internationalSettingsService.resolveEmailContent(emailTemplate, languageCode);
+        String htmlContent = internationalSettingsService.resolveHtmlContent(emailTemplate, languageCode);
+
+        subject = evaluateExpression(emailSubject, params, String.class);
+        if(success) {
+            params.put("lineCount", lineCount);
+            contentHtml = evaluateExpression(htmlContent, params, String.class);
+        } else {
+            params.put("error", error);
+            content = evaluateExpression(emailContent, params, String.class);
+        }
+        return new EmailInformations(subject, content, contentHtml, emails, ofNullable(appProvider.getEmail()).orElse(DEFAULT_EMAIL_ADDRESS), Optional.ofNullable(attachements));
+    }
+
+    record EmailInformations(String subject, String content, String htmlContent, List<String> recipients, String sender, Optional<List<File>> attachments) {}
 
     @Asynchronous
     public Future<QueryExecutionResult> executeReportQueryAndSaveResult(ReportQuery reportQuery,

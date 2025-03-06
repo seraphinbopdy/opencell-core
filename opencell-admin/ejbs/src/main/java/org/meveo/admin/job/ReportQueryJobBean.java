@@ -106,6 +106,7 @@ public class ReportQueryJobBean extends BaseJobBean {
         queryResult.setQueryScheduler(queryScheduler);
         queryResult.setQueryExecutionMode(QueryExecutionModeEnum.SCHEDULED);
 
+
         String filePath = outputDir + DateUtils.formatDateWithPattern(new Date(), DATE_PATTERN) + format.getExtension();
         try {
             // Execute the query stored in reportQuery.generatedQuery
@@ -136,7 +137,7 @@ public class ReportQueryJobBean extends BaseJobBean {
         EntityReferenceWrapper ReportQueryERW = (EntityReferenceWrapper) reportQueryCF;
 
         if (ReportQueryERW != null) {
-            return reportQueryService.findById(ReportQueryERW.getId(), asList("fields"));
+            return reportQueryService.findByCode(ReportQueryERW.getCode());
         }
         return null;
     }

@@ -989,7 +989,7 @@ public class CounterInstanceService extends PersistenceService<CounterInstance> 
      * @throws CounterInstantiationException Failure to create a new counter period
      */
     public List<CounterValueChangeInfo> incrementAccumulatorCounterValue(ChargeInstance chargeInstance, List<WalletOperation> walletOperations, boolean isVirtual,boolean verifyManagedByApp) throws CounterInstantiationException {
-        return incrementAccumulatorCounterValue(chargeInstance, walletOperations, verifyManagedByApp, verifyManagedByApp, null);
+        return incrementAccumulatorCounterValue(chargeInstance, walletOperations, isVirtual, verifyManagedByApp, null);
     }
 
     /**

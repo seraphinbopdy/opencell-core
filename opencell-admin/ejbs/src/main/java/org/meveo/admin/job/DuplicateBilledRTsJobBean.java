@@ -1,7 +1,9 @@
 package org.meveo.admin.job;
 
+import java.time.LocalDate;
 import java.util.Iterator;
 import java.util.Optional;
+
 
 import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.ScrollMode;
@@ -23,6 +25,7 @@ import org.meveo.service.job.TablesPartitioningService;
 
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
+import jakarta.persistence.Query;
 
 /**
  * A job implementation to duplicate billed rated transactions
@@ -115,8 +118,7 @@ public class DuplicateBilledRTsJobBean extends IteratorBasedJobBean<Long> {
                         "UNION (select count (distinct to_duplicate) as count_rt FROM triggered_rerate_tree trt join rerate_billed_il i " +
                         "on trt.id=i.id CROSS JOIN unnest(string_to_array(trt_id, ',')) AS to_duplicate GROUP BY to_duplicate) " +
                         "UNION (select count (distinct to_duplicate) as count_rt FROM triggered_rerate_tree trt join rerate_billed_il i " +
-                        "on trt.id=i.id CROSS JOIN unnest(string_to_array(tdrt_id, ',')) AS to_duplicate GROUP BY to_duplicate) " +
-                        ")")
+                        "on trt.id=i.id CROSS JOIN unnest(string_to_array(tdrt_id, ',')) AS to_duplicate GROUP BY to_duplicate)) AS subquery")
                 .getSingleResult();
 
         return count != null ? count.longValue() : 0;
@@ -146,9 +148,17 @@ public class DuplicateBilledRTsJobBean extends IteratorBasedJobBean<Long> {
                 "JOIN billing_rated_transaction new_discounted_RT ON drt.id = new_discounted_RT.origin_ratedtransaction_id " +
                 "WHERE new_RT.origin_ratedtransaction_id = " + alias + ".id " +
                 "AND new_RT.status = 'OPEN' " +
-                "AND new_discounted_RT.status = 'OPEN' " + getRTDateCondition(alias, lastRTPartition);
+                "AND new_discounted_RT.status = 'OPEN' " +
+                (StringUtils.isBlank(lastRTPartition) ? "" : " AND " + alias + ".usage_date > :lastRTPartition");
 
-        emWrapper.getEntityManager().createNativeQuery(updateQuery).executeUpdate();
+        Query query = emWrapper.getEntityManager().createNativeQuery(updateQuery);
+
+        if (!StringUtils.isBlank(lastRTPartition)) {
+            LocalDate localDate = LocalDate.parse(lastRTPartition);
+            query.setParameter("lastRTPartition", java.sql.Date.valueOf(localDate)); 
+        }
+
+        query.executeUpdate();
 
         if (scrollableResults != null) {
             scrollableResults.close();

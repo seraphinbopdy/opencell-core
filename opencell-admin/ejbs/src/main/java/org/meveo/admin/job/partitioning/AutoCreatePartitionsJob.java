@@ -74,7 +74,7 @@ public class AutoCreatePartitionsJob extends Job {
     }
     private void migrateOperationsToPartition(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance, String operationToUpdate, int partitionId) {
         OperationDetails details = OPERATION_DETAILS_MAP.get(operationToUpdate);
-        Date[] referenceDates = tablesPartitioningService.getLastPartitionDate(details.getAlias());
+        Date[] referenceDates = tablesPartitioningService.getLastPartitionsDate(details.getAlias());
         String startDate = tablesPartitioningService.getDateAsString(referenceDates[0]);
         String endDate = tablesPartitioningService.getDateAsString(referenceDates[1]);
         String updateQuery = buildUpdateQuery(details, startDate, endDate, partitionId);

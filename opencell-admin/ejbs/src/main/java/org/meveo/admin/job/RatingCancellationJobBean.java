@@ -82,12 +82,19 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
     }
 	
 	private void addFailedToRerateReport(JobExecutionResultImpl jobExecutionResult) {
-		Object count = (Object) entityManager.createNativeQuery("select sum(rr.count_wo) from "+MAIN_VIEW_NAME+" rr inner join "+BILLED_VIEW_NAME+" bil ON rr.id = bil.id").getSingleResult();
+		Object count = (Object) getEntityManager().createNativeQuery("select sum(rr.count_wo) from "+MAIN_VIEW_NAME+" rr inner join "+BILLED_VIEW_NAME+" bil ON rr.id = bil.id").getSingleResult();
 		Long failedTorerateCount = count != null ? ((Number) count).longValue() : 0;
 		Optional.ofNullable(failedTorerateCount)
         .ifPresent(failedToRerateCount -> jobExecutionResult.addReport(
             String.format("%d WOs were reported as 'F_TO_RERATE' ", failedToRerateCount)
         ));
+	}
+
+	private EntityManager getEntityManager() {
+		if(entityManager==null) {
+			entityManager = emWrapper.getEntityManager();
+		}
+		return entityManager;
 	}
 
 	private Optional<Iterator<List<Object[]>>> initJobAndGetDataToProcess(JobExecutionResultImpl jobExecutionResult) {
@@ -103,7 +110,6 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 
 		final long configuredNrPerTx = (Long) this.getParamOrCFValue(jobInstance, RatingCancellationJob.CF_INVOICE_LINES_NR_RTS_PER_TX, 100000L);
 		
-		entityManager = emWrapper.getEntityManager();
 		boolean useExistingViews = (boolean) getParamOrCFValue(jobInstance, RatingCancellationJob.CF_USE_EXISTING_VIEWS, false);
 
 		lastWOPartition = getOperationDate(jobInstance, "wo");
@@ -118,7 +124,7 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 																										.collect(Collectors.toList()) : Collections.emptyList();
 		
 		createViews(configuredNrPerTx, useExistingViews, reRatingTarget, targetBatches);
-		statelessSession = entityManager.unwrap(Session.class).getSessionFactory().openStatelessSession();
+		statelessSession = getEntityManager().unwrap(Session.class).getSessionFactory().openStatelessSession();
 		getProcessingSummary();
 		if (nrOfInitialWOs.intValue() == 0) {
 			return Optional.empty();
@@ -157,7 +163,7 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 		boolean useLimitDate = !operationDateConfig.equals(RatingCancellationJob.NO_DATE_LIMITE)
 				&& CollectionUtils.isNotEmpty(tablesPartitioningService.listPartitionsStartDate(alias));
 		return useLimitDate ? 
-				( RatingCancellationJob.USE_LAST_PARTITION.equals(operationDateConfig) ? tablesPartitioningService.getLastPartitionStartingDateAsString(alias) : operationDateConfig)
+				((RatingCancellationJob.USE_LAST_PARTITION.equals(operationDateConfig) ? tablesPartitioningService.getLastPartitionStartingDateAsString(alias) : operationDateConfig))
 				: null;
 	}
 
@@ -211,7 +217,7 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 	}
 
 	private void getProcessingSummary() {
-		Object[] count = (Object[]) entityManager.createNativeQuery("select sum(count_wo), count(id) from " + MAIN_VIEW_NAME)
+		Object[] count = (Object[]) getEntityManager().createNativeQuery("select sum(count_wo), count(id) from " + MAIN_VIEW_NAME)
 				.getSingleResult();
 
 		nrOfInitialWOs = count[0] != null ? ((Number) count[0]).longValue() : 0;
@@ -294,8 +300,7 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 	
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public void createMaterializedView(String viewQuery, String viewName, boolean useExistingViews) {
-		entityManager = emWrapper.getEntityManager();
-	    Session hibernateSession = entityManager.unwrap(Session.class);
+	    Session hibernateSession = getEntityManager().unwrap(Session.class);
 	    hibernateSession.doWork(new org.hibernate.jdbc.Work() {
 	        @Override
 	        public void execute(Connection connection) throws SQLException {
@@ -390,15 +395,15 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 	}
 	
 	private String getWODateCondition(String alias) {
-		return lastWOPartition == null ? "" : " AND " + alias + ".operation_date>'" + lastWOPartition + "'";
+		return lastWOPartition == null ? "" : " AND " + alias + ".operation_date>'" + lastWOPartition + "'::DATE";
 	}
 
 	private String getRTDateCondition(String alias) {
-		return lastRTPartition == null ? "" : " AND " + alias + ".usage_date>'" + lastRTPartition + "'";
+		return lastRTPartition == null ? "" : " AND " + alias + ".usage_date>'" + lastRTPartition + "'::DATE";
 	}
 
 	private String getEDRDateCondition(String alias) {
-		return lastEDRPartition == null ? "" : " AND " + alias + ".event_date>'" + lastEDRPartition + "'";
+		return lastEDRPartition == null ? "" : " AND " + alias + ".event_date>'" + lastEDRPartition + "'::DATE";
 	}
 
 }

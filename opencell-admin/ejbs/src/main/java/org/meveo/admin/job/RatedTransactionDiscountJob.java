@@ -84,7 +84,7 @@ public class RatedTransactionDiscountJob extends Job {
 		if(useLimitDate) {
 			Date operationDate = null;
 			if(USE_LAST_PARTITION.equals(usePartitionConfig)) {
-				operationDate = tablesPartitioningService.getLastPartitionDate("rt")[0];
+				operationDate = tablesPartitioningService.getLastPartitionDate("rt");
 			} else {
 				operationDate = tablesPartitioningService.parseDate(usePartitionConfig);
 			}

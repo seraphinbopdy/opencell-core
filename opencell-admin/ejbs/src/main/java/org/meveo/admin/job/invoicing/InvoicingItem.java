@@ -19,6 +19,7 @@ public class InvoicingItem {
 	private Long invoiceSubCategoryId;
 	private Long userAccountId;
 	private Long taxId;
+	private Long sellerId;
 	private BigDecimal amountWithoutTax = BigDecimal.ZERO;
 	private BigDecimal amountTax = BigDecimal.ZERO;
 	private BigDecimal amountWithTax = BigDecimal.ZERO;
@@ -36,6 +37,7 @@ public class InvoicingItem {
 		this.invoiceSubCategoryId = (Long) fields[i++];
 		this.userAccountId = (Long) fields[i++];
 		this.taxId = (Long) fields[i++];
+		this.sellerId = (Long) fields[i++];
 		this.amountWithoutTax = (BigDecimal) fields[i++];
 		this.amountWithTax = (BigDecimal) fields[i++];
 		this.amountTax = (BigDecimal) fields[i++];
@@ -207,5 +209,13 @@ public class InvoicingItem {
 				+ ", userAccountId : " + userAccountId + ", amountWithoutTax : " + amountWithoutTax
 				+ ", amountTax : " + amountTax + ", amountWithTax : " + amountWithTax  + ", invoiceCategoryId : " + invoiceCategoryId
 				+ ", invoiceKey : " + invoiceKey + "]";
+	}
+
+	public Long getSellerId() {
+		return sellerId;
+	}
+
+	public void setSellerId(Long sellerId) {
+		this.sellerId = sellerId;
 	}
 }

@@ -341,7 +341,7 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
                     nbPublishers = (Long) getParamOrCFValue(jobInstance, Job.CF_NB_PUBLISHERS, 0L);
                     if (nbPublishers == null || nbPublishers < 1) {
                         // Number of data publishing tasks is half of the cluster members or the number of nodes that job can run on
-                        int nrOfNodes = jobInstance.getRunOnNodes() != null ? jobInstance.getRunOnNodes().split(",").length : channel.getView().getMembers().size();
+                        int nrOfNodes = !StringUtils.isBlank(jobInstance.getRunOnNodes()) ? jobInstance.getRunOnNodes().split(",").length : channel.getView().getMembers().size();
                         nbPublishers = ((Integer) (nrOfNodes < 1 ? 1 : (3 * nrOfNodes) / 4)).longValue();
                     }
 

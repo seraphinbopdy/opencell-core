@@ -27,6 +27,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.PartitionKey;
+import org.hibernate.jpa.HibernateHints;
 import org.hibernate.type.NumericBooleanConverter;
 import org.meveo.commons.utils.NumberUtils;
 import org.meveo.model.BaseEntity;
@@ -75,6 +76,7 @@ import jakarta.persistence.NamedNativeQuery;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.QueryHint;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -190,9 +192,12 @@ import jakarta.validation.constraints.Size;
         @NamedNativeQuery(name = "WalletOperation.discountWoSummaryForRerating", query = "select wo.id, wo.status, wo.rated_transaction_id from {h-schema}billing_wallet_operation wo where wo.status<>'CANCELED' and wo.discounted_wallet_operation_id in :woIds"),
         @NamedNativeQuery(name = "WalletOperation.woSummaryForRerating", query = "select wo.id as woid, wo.status as wostatus, wo.rated_transaction_id from {h-schema}billing_wallet_operation wo where wo.edr_id in :edrIds and wo.status<>'CANCELED'"),
 
-        @NamedNativeQuery(name = "WalletOperation.massUpdateWithRTInfoFromPendingTable", query = "update {h-schema}billing_wallet_operation wo set status='TREATED', updated=NOW(), rated_transaction_id=pending.rated_transaction_id from {h-schema}billing_wallet_operation_pending pending where status='OPEN' and wo.id=pending.id"),
-        @NamedNativeQuery(name = "WalletOperation.massUpdateWithRTInfoFromPendingTableOracle", query = "UPDATE (SELECT wo.status, wo.updated, wo.id wo_id, wo.rated_transaction_id rt_id, pending.rated_transaction_id pending_rt_id FROM {h-schema}billing_wallet_operation wo, {h-schema}billing_wallet_operation_pending pending WHERE wo.status = 'OPEN' AND wo.id = pending.id) SET status = 'TREATED', updated = now (), rt_id = pending_rt_id"),
-        @NamedNativeQuery(name = "WalletOperation.deletePendingTable", query = "delete from {h-schema}billing_wallet_operation_pending") })
+        @NamedNativeQuery(name = "WalletOperation.massUpdateWithRTInfoFromPendingTable", query = "update {h-schema}billing_wallet_operation wo set status='TREATED', updated=NOW(), rated_transaction_id=pending.rated_transaction_id from {h-schema}billing_wallet_operation_pending pending where status='OPEN' and wo.id=pending.id", hints = {
+                @QueryHint(name = HibernateHints.HINT_NATIVE_SPACES, value = "billing_wallet_operation") }),
+        @NamedNativeQuery(name = "WalletOperation.massUpdateWithRTInfoFromPendingTableOracle", query = "UPDATE (SELECT wo.status, wo.updated, wo.id wo_id, wo.rated_transaction_id rt_id, pending.rated_transaction_id pending_rt_id FROM {h-schema}billing_wallet_operation wo, {h-schema}billing_wallet_operation_pending pending WHERE wo.status = 'OPEN' AND wo.id = pending.id) SET status = 'TREATED', updated = now (), rt_id = pending_rt_id", hints = {
+                @QueryHint(name = HibernateHints.HINT_NATIVE_SPACES, value = "billing_wallet_operation") }),
+        @NamedNativeQuery(name = "WalletOperation.deletePendingTable", query = "delete from {h-schema}billing_wallet_operation_pending", hints = {
+                @QueryHint(name = HibernateHints.HINT_NATIVE_SPACES, value = "billing_wallet_operation") }) })
 public class WalletOperation extends CFEntity {
 
     private static final long serialVersionUID = 1L;

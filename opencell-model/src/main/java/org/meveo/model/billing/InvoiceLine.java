@@ -22,6 +22,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
+import org.hibernate.jpa.HibernateHints;
 import org.hibernate.type.NumericBooleanConverter;
 import org.hibernate.type.SqlTypes;
 import org.meveo.commons.utils.NumberUtils;
@@ -66,6 +67,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
+import jakarta.persistence.QueryHint;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -143,11 +145,11 @@ import jakarta.validation.constraints.Size;
         @NamedQuery(name = "InvoiceLine.sumAmountByOpenOrderNumberAndBA", query = "SELECT SUM(il.amountWithTax) FROM InvoiceLine il WHERE il.status = 'BILLED' AND il.openOrderNumber = :openOrderNumber AND il.billingAccount.id = :billingAccountId"),
 		@NamedQuery(name = "InvoiceLine.linkToInvoice", query = "UPDATE InvoiceLine il set il.status=org.meveo.model.billing.InvoiceLineStatusEnum.BILLED, il.invoice=:invoice, il.invoiceAggregateF=:invoiceAgregateF where il.id in :ids"),
         @NamedQuery(name = "InvoiceLine.getInvoicingItems", query =
-				"select il.billingAccount.id, il.accountingArticle.invoiceSubCategory.id, il.userAccount.id, il.tax.id, sum(il.amountWithoutTax), sum(il.amountWithTax), sum(il.amountTax), count(il.id), (string_agg(cast(il.id as text),',')),"
+				"select il.billingAccount.id, il.accountingArticle.invoiceSubCategory.id, il.userAccount.id, il.tax.id, il.seller.id, sum(il.amountWithoutTax), sum(il.amountWithTax), sum(il.amountTax), count(il.id), (string_agg(cast(il.id as text),',')),"
 						+ " il.invoiceKey, (CASE WHEN COUNT(CASE WHEN il.useSpecificPriceConversion IS DISTINCT FROM TRUE THEN 1 END) > 0 THEN TRUE ELSE FALSE END), sum(il.transactionalAmountWithoutTax), sum(il.transactionalAmountWithTax), sum(il.transactionalAmountTax) "
 						+ " FROM InvoiceLine il "
 						+ " WHERE il.billingRun.id=:billingRunId AND il.billingAccount.id IN (:ids) AND il.status='OPEN' "
-						+ " group by il.billingAccount.id, il.accountingArticle.invoiceSubCategory.id, il.userAccount.id, il.tax.id, il.invoiceKey "
+						+ " group by il.billingAccount.id, il.accountingArticle.invoiceSubCategory.id, il.userAccount.id, il.tax.id, il.seller.id, il.invoiceKey "
 						+ " order by il.billingAccount.id"),
         @NamedQuery(name = "InvoiceLine.findByIdsAndAdjustmentStatus", query = "SELECT il from InvoiceLine il left join fetch il.invoice i left join fetch i.invoiceType WHERE il.adjustmentStatus = :status and il.id in (:invoiceLinesIds)"),
         @NamedQuery(name = "InvoiceLine.findByIdsAndOtherAdjustmentStatus", query = "SELECT il from InvoiceLine il  left join fetch il.invoice i left join fetch i.invoiceType WHERE il.adjustmentStatus <> :status and il.id in (:invoiceLinesIds)"),
@@ -228,8 +230,10 @@ import jakarta.validation.constraints.Size;
 })
 
 @NamedNativeQueries({
-    @NamedNativeQuery(name = "InvoiceLine.massUpdateWithDiscountedIL", query = "update {h-schema}billing_invoice_line il set discounted_invoice_line=discountRT.invoice_line_id, updated=NOW() from {h-schema}billing_rated_transaction discountRT, {h-schema}billing_rated_transaction discountedRT where discountRT.id=discountedRT.discounted_ratedtransaction_id and il.id=discountedRT.invoice_line_id and discountedRT.status='BILLED' and il.status='OPEN' and il.billing_run_id=:brId and discountedRT.discounted_ratedtransaction_id is not null and il.discounted_invoice_line is null and il.discount_plan_type is not null and discountedRT.id>=:minId and discountedRT.id<=:maxId"),
-    @NamedNativeQuery(name = "InvoiceLine.massUpdateWithDiscountedILOracle", query = "UPDATE (SELECT il.discounted_invoice_line, il.discount_plan_type, il.updated FROM {h-schema}billing_invoice_line il, {h-schema}billing_rated_transaction discountRT, {h-schema}billing_rated_transaction discountedRT where discountRT.id=discountedRT.discounted_ratedtransaction_id and il.id=discountedRT.invoice_line_id and discountedRT.status='BILLED' and il.status='OPEN' and il.billing_run_id=:brId and discountedRT.discounted_ratedtransaction_id is not null and discounted_invoice_line is null and discount_plan_type is not null and discountedRT.id>=:minId and discountedRT.id<=:maxId) SET il.discounted_invoice_line=discountRT.invoice_line_id , updated=NOW()"),
+        @NamedNativeQuery(name = "InvoiceLine.massUpdateWithDiscountedIL", query = "update {h-schema}billing_invoice_line il set discounted_invoice_line=discountRT.invoice_line_id, updated=NOW() from {h-schema}billing_rated_transaction discountRT, {h-schema}billing_rated_transaction discountedRT where discountRT.id=discountedRT.discounted_ratedtransaction_id and il.id=discountedRT.invoice_line_id and discountedRT.status='BILLED' and il.status='OPEN' and il.billing_run_id=:brId and discountedRT.discounted_ratedtransaction_id is not null and il.discounted_invoice_line is null and il.discount_plan_type is not null and discountedRT.id>=:minId and discountedRT.id<=:maxId", hints = {
+                @QueryHint(name = HibernateHints.HINT_NATIVE_SPACES, value = "billing_invoice_line") }),
+        @NamedNativeQuery(name = "InvoiceLine.massUpdateWithDiscountedILOracle", query = "UPDATE (SELECT il.discounted_invoice_line, il.discount_plan_type, il.updated FROM {h-schema}billing_invoice_line il, {h-schema}billing_rated_transaction discountRT, {h-schema}billing_rated_transaction discountedRT where discountRT.id=discountedRT.discounted_ratedtransaction_id and il.id=discountedRT.invoice_line_id and discountedRT.status='BILLED' and il.status='OPEN' and il.billing_run_id=:brId and discountedRT.discounted_ratedtransaction_id is not null and discounted_invoice_line is null and discount_plan_type is not null and discountedRT.id>=:minId and discountedRT.id<=:maxId) SET il.discounted_invoice_line=discountRT.invoice_line_id , updated=NOW()", hints = {
+                @QueryHint(name = HibernateHints.HINT_NATIVE_SPACES, value = "billing_invoice_line") }),
 	@NamedNativeQuery(name = "InvoiceLine.checkThresholdB2B",
 			query = "select billingAccountId, invoiceLineIds from ( " +
 						"select b.id as billingAccountId, string_agg(distinct concat(il.id, ''), ',') as invoiceLineIds, " +

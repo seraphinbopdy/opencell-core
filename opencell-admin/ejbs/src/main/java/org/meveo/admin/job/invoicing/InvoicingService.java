@@ -208,12 +208,10 @@ public class InvoicingService extends PersistenceService<Invoice> {
         invoicesbyBA.forEach(invoices->assignNumberAndCreate(billingRun, isFullAutomatic, invoices, billingCycle));
         getEntityManager().flush();//to be able to update ILs
         log.info("======== UPDATING ILs ========");
-        invoicesbyBA.forEach(invoices -> invoices.forEach(invoice
-                -> invoice.getSubCategoryInvoiceAgregate().forEach(sca
-                -> updateInvoiceLinesAndLinkObjects(invoice, billingRun, sca))));
+        invoicesbyBA.forEach(invoices -> invoices.forEach(this::linkInvoiceAndUpdateLines));
         validateInvoices(billingRun, invoicesbyBA);
     }
-    
+
     private void assignNumberAndCreate(BillingRun billingRun, boolean isFullAutomatic, List<Invoice> invoices, BillingCycle billingCycle) {
         if(!isFullAutomatic) {
             invoices.forEach(invoice->invoice.setTemporaryInvoiceNumber(serviceSingleton.getTempInvoiceNumber(billingRun.getId())));
@@ -229,15 +227,20 @@ public class InvoicingService extends PersistenceService<Invoice> {
             invoiceService.postCreate(invoice);
         });
     }
+    
+	private void linkInvoiceAndUpdateLines(Invoice invoice) {
+		invoice.getSubCategoryInvoiceAgregate().forEach(sca -> updateInvoiceLines(invoice, sca));
+		getEntityManager().createNamedQuery("Invoice.linkWithSubscriptionsByID").setParameter("invoiceId", invoice.getId()).executeUpdate();
+		getEntityManager().createNamedQuery("Invoice.linkWithPurchaseOrdersByID").setParameter("invoiceId", invoice.getId()).executeUpdate();
+	}
 
-    private void updateInvoiceLinesAndLinkObjects(Invoice invoice, BillingRun billingRun, SubCategoryInvoiceAgregate sca) {
+    private void updateInvoiceLines(Invoice invoice, SubCategoryInvoiceAgregate sca) {
         final List<Long> largeList = sca.getIlIDs();
         for (List<Long> ilIDs : Lists.partition(largeList, MAX_IL_TO_UPDATE_PER_TRANSACTION)) {
             Query query = getEntityManager().createNamedQuery("InvoiceLine.linkToInvoice").setParameter("invoice", invoice).setParameter("invoiceAgregateF", sca).setParameter("ids", ilIDs);
             query.executeUpdate();
         }
-    	getEntityManager().createNamedQuery("Invoice.linkWithSubscriptionsByID").setParameter("invoiceId", invoice.getId()).executeUpdate();
-    	getEntityManager().createNamedQuery("Invoice.linkWithPurchaseOrdersByID").setParameter("invoiceId", invoice.getId()).executeUpdate();
+
     }
     
     private Set<SubCategoryInvoiceAgregate> createInvoiceAgregates(BillingAccountDetailsItem billingAccountDetailsItem,
@@ -296,13 +299,11 @@ public class InvoicingService extends PersistenceService<Invoice> {
     private Invoice initInvoice(BillingAccountDetailsItem billingAccountDetailsItem, BillingRun billingRun, BillingAccount billingAccount, BillingCycle billingCycle, boolean isFullAutomatic, List<InvoicingItem> groupedItems) {
         Invoice invoice = new Invoice();
         invoice.setBillingAccount(billingAccount);
-        invoice.setSeller(billingAccountDetailsItem.getSellerId() != null ? getEntityManager().getReference(Seller.class, billingAccountDetailsItem.getSellerId()) : null);
+        invoice.setSeller(getEntityManager().getReference(Seller.class, groupedItems.get(0).getSellerId()));
         invoice.setStatus(isFullAutomatic?InvoiceStatusEnum.VALIDATED:InvoiceStatusEnum.DRAFT);
         
         invoice.setInvoiceDate(billingRun.getInvoiceDate());
-        if (billingRun != null) {
-            invoice.setBillingRun(billingRun);
-        }
+        invoice.setBillingRun(billingRun);
         
         if (billingAccountDetailsItem.getPaymentMethodId() != null) {
             invoice.setPaymentMethodType(billingAccountDetailsItem.getPaymentMethodType());

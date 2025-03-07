@@ -10,6 +10,7 @@ import java.util.Map;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Parameter;
+import org.hibernate.jpa.HibernateHints;
 import org.hibernate.type.SqlTypes;
 import org.meveo.model.IEntity;
 
@@ -28,6 +29,7 @@ import jakarta.persistence.NamedNativeQueries;
 import jakarta.persistence.NamedNativeQuery;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
+import jakarta.persistence.QueryHint;
 import jakarta.persistence.SqlResultSetMapping;
 import jakarta.persistence.SqlResultSetMappings;
 import jakarta.persistence.Table;
@@ -44,8 +46,10 @@ import jakarta.persistence.Transient;
 @NamedNativeQueries({
         @NamedNativeQuery(name = "AuditDataLogRecord.listConvertToAggregate", query = "select id, created, user_name, ref_table, ref_id, tx_id, action, origin, origin_name, data_old #>> '{}' as values_old, data_new #>> '{}' as values_new  from {h-schema}audit_data_log_rec where id<=:maxId order by tx_id, id", resultSetMapping = "AuditDataLogRecordResultMapping"),
         @NamedNativeQuery(name = "AuditDataLogRecord.getConvertToAggregateSummary", query = "SELECT count(distinct a.tx_id), max(a.id), min(a.id) FROM {h-schema}audit_data_log_rec a"),
-        @NamedNativeQuery(name = "AuditDataLogRecord.deleteAuditDataLogRecords", query = "delete from {h-schema}audit_data_log_rec where id in :ids"),
-        @NamedNativeQuery(name = "AuditDataLogRecord.purgeAuditDataLogRecords", query = "delete from {h-schema}audit_data_log_rec where created < :purgeDate") })
+        @NamedNativeQuery(name = "AuditDataLogRecord.deleteAuditDataLogRecords", query = "delete from {h-schema}audit_data_log_rec where id in :ids", hints = {
+                @QueryHint(name = HibernateHints.HINT_NATIVE_SPACES, value = "audit_data_log_rec") }),
+        @NamedNativeQuery(name = "AuditDataLogRecord.purgeAuditDataLogRecords", query = "delete from {h-schema}audit_data_log_rec where created < :purgeDate", hints = {
+                @QueryHint(name = HibernateHints.HINT_NATIVE_SPACES, value = "audit_data_log_rec") }) })
 
 @SqlResultSetMappings({ @SqlResultSetMapping(name = "AuditDataLogRecordResultMapping", classes = @ConstructorResult(targetClass = AuditDataLogRecord.class, columns = { @ColumnResult(name = "id", type = Long.class),
         @ColumnResult(name = "created"), @ColumnResult(name = "user_name"), @ColumnResult(name = "ref_table"), @ColumnResult(name = "ref_id", type = Long.class), @ColumnResult(name = "tx_id", type = Long.class),

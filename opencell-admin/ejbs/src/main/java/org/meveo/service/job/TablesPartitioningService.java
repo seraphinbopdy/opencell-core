@@ -49,7 +49,7 @@ public class TablesPartitioningService extends NativePersistenceService {
 			JobExecutionResultImpl result) {
 
 		// Next partition:
-		Date nextPartitionStartDate = getLastPartitionDate(alias)[1];
+		Date nextPartitionStartDate = getLastPartitionsDate(alias)[1];
 
 		String startingRange = getDateAsString(nextPartitionStartDate);
 
@@ -86,7 +86,7 @@ public class TablesPartitioningService extends NativePersistenceService {
 	}
 
 	public String getLastPartitionStartingDateAsString(String alias) {
-		Date resultDate = getLastPartitionDate(alias)[0];
+		Date resultDate = getLastPartitionDate(alias);
 		return getDateAsString(resultDate);
 	}
 
@@ -104,8 +104,13 @@ public class TablesPartitioningService extends NativePersistenceService {
 	            return null;
 	        }
 	}
+	
+	public Date getLastPartitionDate(String alias) {
+		Date[] lastPartitionsDate = getLastPartitionsDate(alias);
+		return lastPartitionsDate == null ? null : lastPartitionsDate[0];
+	}
 
-	public Date[] getLastPartitionDate(String alias) {
+	public Date[] getLastPartitionsDate(String alias) {
 		EntityManager entityManager = emWrapper.getEntityManager();
 		NativeQuery nativeQuery = (NativeQuery) entityManager.createNativeQuery(String.format(GET_LAST_PARTITIONS_QUERY, alias));
 		try {

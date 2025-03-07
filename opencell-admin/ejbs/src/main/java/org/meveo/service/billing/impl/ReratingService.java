@@ -767,10 +767,16 @@ public class ReratingService extends RatingService implements Serializable {
     }
     
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public void applyMassRerate(List<Long> ids, boolean useSamePricePlan, JobExecutionResultImpl jobExecutionResult, String dateCondition) {
+	public void applyMassRerate(List<Long> ids, boolean useSamePricePlan, JobExecutionResultImpl jobExecutionResult, Date limitDate) {
+		String dateCondition = limitDate != null ? " AND wo.operationDate>:limitDate" : "";
 		String readWOsQuery = "FROM WalletOperation wo left join fetch wo.chargeInstance ci left join fetch wo.edr edr WHERE wo.status='TO_RERATE' "+dateCondition+" AND wo.id IN (:ids)";
 		int toProcess=ids.size();
-		List<WalletOperation> walletOperations = getEntityManager().createQuery(readWOsQuery, WalletOperation.class).setParameter("ids", ids).getResultList();
+		Query query=getEntityManager().createQuery(readWOsQuery, WalletOperation.class);
+		query.setParameter("ids", ids);
+		if(limitDate != null) {
+			query.setParameter("limitDate", limitDate);
+		}
+		List<WalletOperation> walletOperations = query.getResultList();
 		Map<String, List<Long>> errorsMap = new HashMap<>();
 		walletOperations.stream().forEach(operationToRerate -> {
 		    try {

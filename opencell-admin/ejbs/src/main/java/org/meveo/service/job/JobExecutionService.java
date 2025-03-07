@@ -28,6 +28,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.Hibernate;
+import org.hibernate.proxy.HibernateProxy;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.JobExecutionException;
 import org.meveo.admin.job.IteratorBasedJobBean;
@@ -189,7 +191,10 @@ public class JobExecutionService extends BaseService {
      */
     public Long executeJob(JobInstance jobInstance, Map<String, Object> params, JobLauncherEnum jobLauncher, boolean triggerExecutionOnOtherNodes) throws BusinessException {
 
-        jobInstance = jobInstanceService.findById(jobInstance.getId());
+    	jobInstance = jobInstanceService.findById(jobInstance.getId());
+    	if (jobInstance instanceof HibernateProxy) {
+    	    jobInstance = (JobInstance) Hibernate.unproxy(jobInstance);
+    	}
 
         log.info("Execute a job {} of type {} with parameters {} from {}", jobInstance, jobInstance.getJobTemplate(), params, jobLauncher);
 

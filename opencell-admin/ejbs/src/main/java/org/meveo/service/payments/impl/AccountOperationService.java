@@ -317,7 +317,7 @@ public class AccountOperationService extends PersistenceService<AccountOperation
     @SuppressWarnings("unchecked")
     public List<Long> getAOsToPayOrRefund(PaymentMethodEnum paymentMethodEnum, Date fromDueDate, Date toDueDate, OperationCategoryEnum opCatToProcess, Seller seller) {
         try {
-            StringBuilder queryName = new StringBuilder("SELECT ao FROM AccountOperation AS ao, PaymentMethod AS pm")
+            StringBuilder queryName = new StringBuilder("SELECT ao.id FROM AccountOperation AS ao, PaymentMethod AS pm")
                     .append(" WHERE ao.transactionCategory=:opCatToProcessIN ")
                     .append(" AND (ao.matchingStatus ='O' OR ao.matchingStatus ='P') ")
                     .append(" AND ao.customerAccount.excludedFromPayment = FALSE ")

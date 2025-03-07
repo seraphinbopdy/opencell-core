@@ -120,6 +120,16 @@ public interface ReportQueryResource {
     		@Parameter(description = "report query id", required = true) @PathParam("reportQueryId") Long id,
             @Parameter(description = "Query scheduler object", required = true) QuerySchedulerInput queryScheduler);
 
+    @GET
+    @Path("/{reportQueryId}/schedule")
+    @Operation(summary = "Retrieve the query scheduler", tags = {"QueryScheduler" }, description = "Retrieve the query scheduler",
+            responses = {
+                    @ApiResponse(responseCode = "200",
+                            description = "Query scheduler found"),
+                    @ApiResponse(responseCode = "404",
+                            description = "Target entity does not exist") })
+    Response getQueryScheduler(@Parameter(description = "report query id", required = true) @PathParam("reportQueryId") Long id);
+
     @POST
     @Path("/{queryId}/execute")
     @Operation(summary = "execute report query", tags = {"ReportQuery"}, description = "Execute report query",

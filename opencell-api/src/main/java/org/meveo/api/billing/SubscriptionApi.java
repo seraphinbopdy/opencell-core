@@ -829,6 +829,7 @@ public class SubscriptionApi extends BaseApi {
                 }
                 if (serviceToActivateDto.getSubscriptionDate() != null) {
                     serviceInstance.setSubscriptionDate(serviceToActivateDto.getSubscriptionDate());
+                    serviceInstance.setDeliveryDate(serviceToActivateDto.getSubscriptionDate());
                 }
                 if (serviceToActivateDto.getQuantity() != null) {
                     serviceInstance.setQuantity(serviceToActivateDto.getQuantity());

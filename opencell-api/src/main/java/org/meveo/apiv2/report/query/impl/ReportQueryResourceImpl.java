@@ -187,6 +187,18 @@ public class ReportQueryResourceImpl implements ReportQueryResource {
                 .build();
 	}
 
+    @Transactional
+    public Response getQueryScheduler(Long reportId) {
+        ReportQuery reportQuery = reportQueryApiService.findById(reportId)
+                .orElseThrow(() -> new NotFoundException("The report query with {" + reportId + "} does not exists"));
+        QueryScheduler queryScheduler = querySchedulerApiService.findByReportQueryId(reportQuery)
+                .orElseThrow(() -> new NotFoundException("The query scheduler related to The query report with the id {" + reportId + "} does not exists"));
+        return Response
+                .ok(LinkGenerator.getUriBuilderFromResource(ReportQueryResource.class, queryScheduler.getId()).build())
+                .entity(queryScheduleMapper.toResource(queryScheduler))
+                .build();
+    }
+
     @Override
     public Response execute(Long id, boolean async, boolean sendNotification, ReportQueryInput resource, UriInfo uriInfo) {
         List<String> emails = new ArrayList<String>();

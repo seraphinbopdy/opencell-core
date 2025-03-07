@@ -49,7 +49,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -2343,11 +2342,10 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
         StringBuilder additionalFilter = new StringBuilder();
         if(billingRun.getStatus() == NEW || billingRun.getStatus() == OPEN) {
             if(billingRun.getBillingCycle() != null) {
-                billingRunFilters = billingRun.getBillingCycle().getFilters();
+                billingRunFilters = new HashMap<>(billingRun.getBillingCycle().getFilters());
             } else {
-                billingRunFilters = billingRun.getFilters();
+                billingRunFilters = new HashMap<>(billingRun.getFilters());
             }
-            billingRunFilters = Optional.ofNullable(billingRunFilters).orElseGet(HashMap::new);
             billingRunFilters.put("status", RatedTransactionStatusEnum.OPEN.toString());
             billingRunFilters.put("usageDate", billingRun.getLastTransactionDate().toString());
         }
@@ -2359,7 +2357,7 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
             billingRunFilters.put("billingRun", billingRun);
         }
         QueryBuilder queryBuilder = getQueryFromFilters(billingRunFilters, null, emptyList(), true);
-        if(additionalFilter.length() != 0) {
+        if(!additionalFilter.isEmpty()) {
             queryBuilder.addSql(additionalFilter.toString());
         }
         return (List<RatedTransaction>) queryBuilder.getQuery(getEntityManager()).getResultList();

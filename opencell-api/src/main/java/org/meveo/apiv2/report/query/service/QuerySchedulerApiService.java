@@ -2,10 +2,7 @@ package org.meveo.apiv2.report.query.service;
 
 import static java.util.Optional.empty;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import jakarta.ejb.ScheduleExpression;
 import jakarta.inject.Inject;
@@ -13,6 +10,7 @@ import jakarta.transaction.Transactional;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 
+import org.meveo.admin.util.pagination.PaginationConfiguration;
 import org.meveo.apiv2.ordering.services.ApiService;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.admin.User;
@@ -209,6 +207,14 @@ public class QuerySchedulerApiService implements ApiService<QueryScheduler> {
 	@Override
 	public Optional<QueryScheduler> findByCode(String code) {
 		return empty();
+	}
+
+	public Optional<QueryScheduler> findByReportQueryId(ReportQuery reportQuery) {
+		PaginationConfiguration paginationConfiguration = new PaginationConfiguration(Map.of("eq reportQuery", reportQuery));
+		paginationConfiguration.setFetchFields(List.of("usersToNotify", "usersToNotify.userRoles"));
+		List<QueryScheduler> list = querySchedulerService.list(paginationConfiguration);
+		list.forEach(qs -> qs.getUsersToNotify().forEach(u -> u.getUserRoles().size()));
+		return Optional.ofNullable(list.isEmpty() ? null : list.getFirst());
 	}
 
 }

@@ -239,6 +239,8 @@ public class AccountEntityApi extends BaseApi {
             }
             if(postData.getIsCompany()){
                 accountEntity.setVatStatus(valid ? VatStatusEnum.VALID : VatStatusEnum.INVALID);
+            } else {
+                accountEntity.setVatStatus(null);
             }
         }
          if (CollectionUtils.isNotEmpty(postData.getRegistrationNumbers())) {

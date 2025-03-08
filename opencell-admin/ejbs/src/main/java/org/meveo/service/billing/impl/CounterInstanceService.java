@@ -227,7 +227,7 @@ public class CounterInstanceService extends PersistenceService<CounterInstance> 
             return counterInstance;
         }
         counterInstance = new CounterInstance();
-		if (!entity.getCounters().containsKey(counterTemplate.getCode()) || chargeInstance.getAccumulatorCounterInstances().stream().noneMatch(c -> c.getCode().equals(counterTemplate.getCode()))) {
+		if (!entity.getCounters().containsKey(counterTemplate.getCode()) || (CollectionUtils.isNotEmpty(chargeInstance.getAccumulatorCounterInstances()) && chargeInstance.getAccumulatorCounterInstances().stream().noneMatch(c -> c.getCode().equals(counterTemplate.getCode())))) {
 			counterInstance.setCounterTemplate(counterTemplate);
 			
 			if (entity instanceof Customer) {
@@ -307,7 +307,7 @@ public class CounterInstanceService extends PersistenceService<CounterInstance> 
      * @param initDate Initial date, used for period start/end date calculation
      * @param chargeInstance Charge instance to associate counter with
      * @param value Value to overwrite the value from counter template
-     * @param level Level to overwrite the level from counter template 
+     * @param level Level to overwrite the level from counter template
      * @return CounterPeriod instance or NULL if counter period can not be created because of calendar limitations
      * @throws CounterInstantiationException Failure to create a counter period
      */
@@ -398,7 +398,7 @@ public class CounterInstanceService extends PersistenceService<CounterInstance> 
      * @param initDate Initial date, used for period start/end date calculation
      * @param chargeInstance charge instance to associate counter with
      * @param value Value to overwrite the value from counter template
-     * @param level Level to overwrite the level from counter template 
+     * @param level Level to overwrite the level from counter template
      * @param periodEndDate USED ONLY FOR API Creation : used to create specific period by using date sent by API
      * @param isApiCreation true only for API Creation
      * @return a counter period or NULL if counter period can not be created because of calendar limitations
@@ -575,7 +575,7 @@ public class CounterInstanceService extends PersistenceService<CounterInstance> 
      * @param initDate initial date.
      * @param chargeInstance Charge instance to associate counter with
      * @param value Value to overwrite the value from counter template
-     * @param level Level to overwrite the level from counter template 
+     * @param level Level to overwrite the level from counter template
      * @param forceFlush default as true, to keep original behavior, and false only from new added API CounterInstance @since v14.0
      * @return Found or created counter period or NULL if counter period can not be created because of calendar limitations
      * @throws CounterInstantiationException Failure to create counter period

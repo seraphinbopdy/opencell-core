@@ -237,7 +237,9 @@ public class AccountEntityApi extends BaseApi {
             if(postData.getVatNo().length() > 2) {
                 valid = validationByNumberCountryService.getValByValNbCountryCode(postData.getVatNo() .substring(2), postData.getVatNo().substring(0, 2));
             }
-            accountEntity.setVatStatus(valid ? VatStatusEnum.VALID : VatStatusEnum.INVALID);
+            if(postData.getIsCompany()){
+                accountEntity.setVatStatus(valid ? VatStatusEnum.VALID : VatStatusEnum.INVALID);
+            }
         }
          if (CollectionUtils.isNotEmpty(postData.getRegistrationNumbers())) {
         }

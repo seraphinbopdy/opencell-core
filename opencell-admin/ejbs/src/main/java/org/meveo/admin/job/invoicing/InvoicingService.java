@@ -231,8 +231,8 @@ public class InvoicingService extends PersistenceService<Invoice> {
     }
     
 	private void linkInvoiceObjects(List<Long> invoiceIds) {
-		getEntityManager().createNamedQuery("Invoice.linkWithSubscriptionsByID").setParameter("invoiceId", invoiceIds).executeUpdate();
-		getEntityManager().createNamedQuery("Invoice.linkWithPurchaseOrdersByID").setParameter("invoiceId", invoiceIds).executeUpdate();
+		getEntityManager().createNamedQuery("Invoice.linkWithSubscriptionsByID").setParameter("ids", invoiceIds).executeUpdate();
+		getEntityManager().createNamedQuery("Invoice.linkWithPurchaseOrdersByID").setParameter("ids", invoiceIds).executeUpdate();
 	}
 
     private void updateInvoiceLines(Invoice invoice, SubCategoryInvoiceAgregate sca) {

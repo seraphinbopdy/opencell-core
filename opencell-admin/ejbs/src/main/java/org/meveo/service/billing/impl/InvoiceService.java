@@ -4443,11 +4443,11 @@ public class InvoiceService extends PersistenceService<Invoice> {
     }
 
     private void linkInvoiceSubscriptions(Invoice invoice) {
-    	getEntityManager().createNamedQuery("Invoice.linkWithSubscriptionsByID").setParameter("invoiceId", invoice.getId()).executeUpdate();
+    	getEntityManager().createNamedQuery("Invoice.linkWithSubscriptionsByID").setParameter("invoiceId", Arrays.asList(invoice.getId())).executeUpdate();
 	}
 
     private void linkInvoicePurchaseOrders(Invoice invoice) {
-        getEntityManager().createNamedQuery("Invoice.linkWithPurchaseOrdersByID").setParameter("invoiceId", invoice.getId()).executeUpdate();
+        getEntityManager().createNamedQuery("Invoice.linkWithPurchaseOrdersByID").setParameter("invoiceId", Arrays.asList(invoice.getId())).executeUpdate();
     }
     
     public void linkInvoicesToSubscriptionsByBR(BillingRun billingRun) {

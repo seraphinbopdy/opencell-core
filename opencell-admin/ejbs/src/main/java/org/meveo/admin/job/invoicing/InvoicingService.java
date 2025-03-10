@@ -167,7 +167,7 @@ public class InvoicingService extends PersistenceService<Invoice> {
         return new AsyncResult<>("OK");
     }
 	private void validateInvoices(BillingRun billingRun, List<List<Invoice>> invoicesByBA) {
-        invoicesByBA.stream().forEach(invoices-> invoiceService.applyAutomaticInvoiceCheck(invoices, true, true, billingRun));
+        invoicesByBA.stream().forEach(invoices-> invoiceService.applyAutomaticInvoiceCheck(invoices, true, false, billingRun));
 	}
 
 	private List<List<Invoice>> generateInvoices(BillingRun billingRun, List<BillingAccountDetailsItem> invoicingItemsList,

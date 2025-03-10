@@ -145,7 +145,7 @@ public class QuerySchedulerApiService implements ApiService<QueryScheduler> {
 		timer.setHour(StringUtils.isBlank(queryTimer.getHour()) ? "*" : (queryTimer.isEveryHour() ? "*/" + queryTimer.getHour() : queryTimer.getHour()));
 		timer.setMinute(StringUtils.isBlank(queryTimer.getMinute()) ? "*" : (queryTimer.isEveryMinute() ? "*/" + queryTimer.getMinute() : queryTimer.getMinute()));
 		timer.setMonth(StringUtils.isBlank(queryTimer.getMonth()) ? "*" : (queryTimer.isEveryMonth() ? "*/" + queryTimer.getMonth() : queryTimer.getMonth()));
-		timer.setSecond(StringUtils.isBlank(queryTimer.getSecond()) ? "*" : (queryTimer.isEverySecond() ? "*/" + queryTimer.getSecond() : queryTimer.getSecond()));
+		timer.setSecond("00");
 		timer.setYear(StringUtils.isBlank(queryTimer.getYear()) ? "*" : queryTimer.getYear());
 		timer.setCode(toCronFormat(getScheduleExpression(timer)));
 		return timer;

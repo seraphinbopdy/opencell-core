@@ -17862,7 +17862,7 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
         </update>
     </changeSet>
 
-    
+
     <changeSet id="#INTRD-29007_20250212" author="anasseh">
         <addColumn tableName="ar_ddrequest_lot_op">
             <column name="create_matching" type="${type.boolean}" defaultValueNumeric="1"/>
@@ -17881,7 +17881,7 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
 
     <changeSet id="#INTRD-27967_20250306_initialize_code" author="zelmeliani">
         <update tableName="dunning_level_instance">
-            <column name="code" valueComputed="${uuid_function}"/> 
+            <column name="code" valueComputed="${uuid_function}"/>
             <where>code IS NULL OR code = ''</where>
         </update>
     </changeSet>
@@ -18002,7 +18002,7 @@ Opencell team.
         <comment>Foreign key fk_wallet_operation_order_product exist and will be dropped</comment>
         <dropForeignKeyConstraint baseTableName="billing_wallet_operation" constraintName="fk_wallet_operation_order_product"/>
     </changeSet>
-    
+
     <changeSet id="#INTRD-30139_20250626" author="AbdelmounaimAkadid">
         <update tableName="meveo_script_instance">
             <column name="script"><![CDATA[package org.meveo.service.script;
@@ -18023,6 +18023,14 @@ public class DummyPaymentGatewayScript extends Script {
 }]]></column>
             <where>code='org.meveo.service.script.DummyPaymentGatewayScript'</where>
         </update>
+    </changeSet>
+
+    <changeSet id="#INTRD-29434_20250310" author="MounirBOUKAYOUA">
+        <addColumn tableName="billing_invoice_line">
+            <column name="invoice_type_id" type="bigint"></column>
+        </addColumn>
+        <addForeignKeyConstraint baseColumnNames="invoice_type_id" baseTableName="billing_invoice_line" constraintName="fk_InvoiceLine_invoiceType" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+                                 onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="billing_invoice_type" />
     </changeSet>
 
 </databaseChangeLog>

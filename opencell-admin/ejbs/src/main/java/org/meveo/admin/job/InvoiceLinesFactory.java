@@ -17,15 +17,7 @@ import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.DatePeriod;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.article.AccountingArticle;
-import org.meveo.model.billing.BillingAccount;
-import org.meveo.model.billing.BillingRun;
-import org.meveo.model.billing.DateAggregationOption;
-import org.meveo.model.billing.InvoiceLine;
-import org.meveo.model.billing.RatedTransaction;
-import org.meveo.model.billing.ServiceInstance;
-import org.meveo.model.billing.Subscription;
-import org.meveo.model.billing.Tax;
-import org.meveo.model.billing.UserAccount;
+import org.meveo.model.billing.*;
 import org.meveo.model.catalog.DiscountPlanItemTypeEnum;
 import org.meveo.model.catalog.OfferTemplate;
 import org.meveo.model.cpq.ProductVersion;
@@ -87,7 +79,7 @@ public class InvoiceLinesFactory {
             .ifPresent(dpt -> invoiceLine.setDiscountPlanType(dpt instanceof DiscountPlanItemTypeEnum ? (DiscountPlanItemTypeEnum) dpt : DiscountPlanItemTypeEnum.valueOf((String) dpt)));
         ofNullable(data.get("discount_value")).ifPresent(id -> invoiceLine.setDiscountValue((BigDecimal) data.get("discount_value")));
         ofNullable(data.get("seller_id")).ifPresent(id -> invoiceLine.setSeller(em.getReference(Seller.class, ((Number)id).longValue())));
-        ofNullable(data.get("invoice_type_id")).ifPresent(id -> invoiceLine.setInvoiceTypeId(((Number)id).longValue()));
+        ofNullable(data.get("invoice_type_id")).ifPresent(id -> invoiceLine.setInvoiceType(em.getReference(InvoiceType.class, ((Number)id).longValue())));
         ofNullable(data.get("method_payment_id")).ifPresent(id -> invoiceLine.setPaymentMethodId(((Number)id).longValue()));
         if(data.get("discounted_ratedtransaction_id")!=null) {
         	Long discountedILId = iLIdsRtIdsCorrespondence.get(((Number)data.get("discounted_ratedtransaction_id")).longValue());

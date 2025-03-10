@@ -11095,6 +11095,7 @@
             <column name="additional_agg_fields" type="${type.json}" />
             <column name="invoice_key" type="varchar(255)" />
             <column name="seller_id"  type="bigint" />
+            <column name="invoice_type_id" type="bigint" />
         </createTable>
     </changeSet>
     <changeSet id="rebuild-str-tbl-488" author="NabilOUACHI">
@@ -19732,6 +19733,11 @@
                                  constraintName="fk_purchase_order_id_billing_invoices_purchase_orders" deferrable="false"
                                  initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
                                  referencedColumnNames="id" referencedTableName="billing_purchase_order"/>
+    </changeSet>
+
+    <changeSet id="INTRD-29434_20250310-fk" author="MounirBOUKAYOUA">
+        <addForeignKeyConstraint baseColumnNames="invoice_type_id" baseTableName="billing_invoice_line" constraintName="fk_InvoiceLine_invoiceType" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+                                 onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="billing_invoice_type" />
     </changeSet>
     <!-- end fk -->
 

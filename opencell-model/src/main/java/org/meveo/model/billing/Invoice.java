@@ -143,13 +143,13 @@ import jakarta.validation.constraints.Size;
 	    @NamedNativeQuery(name = "Invoice.linkWithSubscriptionsByID", query = "INSERT INTO billing_invoices_subscriptions (invoice_id, subscription_id) "
 	            + "	SELECT DISTINCT il.invoice_id, sub.subscription_id FROM billing_invoice_line il  " 
 	            + " INNER JOIN billing_invoice_lines_subscriptions sub ON sub.invoice_line_id = il.id "
-                + "	WHERE il.invoice_id=:invoiceId", hints = {
+                + "	WHERE il.invoice_id in (:ids)", hints = {
                         @QueryHint(name = HibernateHints.HINT_NATIVE_SPACES, value = "billing_invoices_subscriptions") }),
 	    @NamedNativeQuery(name = "Invoice.linkWithPurchaseOrdersByID", query = "INSERT INTO billing_invoices_purchase_orders (invoice_id, purchase_order_id) "
 	            + "	SELECT DISTINCT il.invoice_id, po_sub.purchase_order_id FROM billing_invoice_line il "
 	            + " INNER JOIN billing_invoice_lines_subscriptions sub ON sub.invoice_line_id = il.id "
 	            + " INNER JOIN billing_subscriptions_purchase_orders po_sub ON po_sub.subscription_id = sub.subscription_id "
-                + "	WHERE il.invoice_id=:invoiceId", hints = {
+                + "	WHERE il.invoice_id in (:ids)", hints = {
                         @QueryHint(name = HibernateHints.HINT_NATIVE_SPACES, value = "billing_invoices_purchase_orders") }),
 	    @NamedNativeQuery(name = "Invoice.linkWithSubscriptionsByBR", query = "INSERT INTO billing_invoices_subscriptions (invoice_id, subscription_id) "
 	            + "	SELECT DISTINCT il.invoice_id, rt.subscription_id FROM billing_rated_transaction rt " + "	INNER JOIN billing_invoice_line il ON rt.invoice_line_id = il.id "

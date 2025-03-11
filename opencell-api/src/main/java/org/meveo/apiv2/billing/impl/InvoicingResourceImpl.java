@@ -70,7 +70,7 @@ public class InvoicingResourceImpl implements InvoicingResource {
         BillingRun billingRun = invoicingApiService.advancedStatus(billingRunId, executeInvoicingJob)
                 .orElseThrow(() -> new NotFoundException("Billing run with id " + billingRunId + " does not exists"));
         return ok()
-                .entity("{\"actionStatus\":{\"status\":\"SUCCESS\",\"message\":\"Advance billing run status successfully executed\"},\"id\":" + billingRun.getId() + ",\"billingRunStatus\": " + billingRun.getStatus() + ", \"executeInvoicingJob\": " + executeInvoicingJob + "}")
+                .entity("{\"actionStatus\":{\"status\":\"SUCCESS\",\"message\":\"Advance billing run status successfully executed\"},\"id\":" + billingRun.getId() + ",\"billingRunStatus\": \"" + billingRun.getStatus() + "\", \"executeInvoicingJob\": " + executeInvoicingJob + "}")
                 .build();
     }
     
@@ -89,8 +89,8 @@ public class InvoicingResourceImpl implements InvoicingResource {
                 .orElseThrow(() -> new NotFoundException("Billing run with id " + billingRunId + " does not exists"));
         return ok()
                 .entity("{\"actionStatus\":{\"status\":\"SUCCESS\",\"message\":\"Update billing run status successfully\"},\"id\":"
-                        + billingRun.getId() + ",\"billingRunStatus\": " + billingRun.getStatus()
-                        + ", \"executeInvoicingJob\": " + executeInvoicingJob + "}")
+                        + billingRun.getId() + ",\"billingRunStatus\": \"" + billingRun.getStatus()
+                        + "\", \"executeInvoicingJob\": " + executeInvoicingJob + "}")
                 .build();
     }
 

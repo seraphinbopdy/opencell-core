@@ -1924,20 +1924,20 @@ public class InvoiceService extends PersistenceService<Invoice> {
         if (!FileUtils.existsDirectory(destDirInvoiceAdjustment) && isInvoiceAdjustment) {
             FileUtils.createDirectory(destDirInvoiceAdjustment);
 
-            String sourcePathInvoiceAdjustment = Thread.currentThread().getContextClassLoader().getResource("./jasper").getPath() + File.separator + billingTemplateName + "/invoiceAdjustment";
+            String sourcePathInvoiceAdjustment = Thread.currentThread().getContextClassLoader().getResource("./jasper").getPath() + File.separator + billingTemplateName + "/invoiceAdjustmentPdf";
             File sourceFileInvoiceAdjustment = new File(sourcePathInvoiceAdjustment);
             
             if (!FileUtils.existsDirectory(sourceFileInvoiceAdjustment)) {
                 VirtualFile vfDir = VFS
-                    .getChild("content/" + ParamBeanFactory.getAppScopeInstance().getProperty("opencell.moduleName", "opencell") + ".war/WEB-INF/classes/jasper/default/invoiceAdjustment");
+                    .getChild("content/" + ParamBeanFactory.getAppScopeInstance().getProperty("opencell.moduleName", "opencell") + ".war/WEB-INF/classes/jasper/default/invoiceAdjustmentPdf");
                 URL vfPath = VFSUtils.getPhysicalURL(vfDir);
                 sourceFileInvoiceAdjustment = new File(vfPath.getPath());
                 
                 if (!FileUtils.existsDirectory(sourceFileInvoiceAdjustment)) {
-                    URL resource = Thread.currentThread().getContextClassLoader().getResource("./jasper/" + billingTemplateName + "/invoiceAdjustment");
+                    URL resource = Thread.currentThread().getContextClassLoader().getResource("./jasper/" + billingTemplateName + "/invoiceAdjustmentPdf");
 
                     if (resource == null) {
-                        resource = Thread.currentThread().getContextClassLoader().getResource("./jasper/default/invoiceAdjustment");
+                        resource = Thread.currentThread().getContextClassLoader().getResource("./jasper/default/invoiceAdjustmentPdf");
                     }
 
                     if (resource == null) {

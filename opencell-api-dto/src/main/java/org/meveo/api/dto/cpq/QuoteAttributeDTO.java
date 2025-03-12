@@ -25,6 +25,8 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.api.dto.BaseEntityDto;
 import org.meveo.api.dto.CustomFieldsDto;
+import org.meveo.model.BaseEntity;
+import org.meveo.model.cpq.Attribute;
 import org.meveo.model.cpq.AttributeCategoryEnum;
 import org.meveo.model.cpq.QuoteAttribute;
 
@@ -74,6 +76,8 @@ public class QuoteAttributeDTO extends BaseEntityDto{
 	
 	private List<String> allowedValues;
 	private AttributeCategoryEnum attributeCategoryEnum;
+	private Integer unitNbDecimal = BaseEntity.NB_DECIMALS;
+
 
 	/**
 	 * @return the quoteAttributeCode
@@ -95,6 +99,10 @@ public class QuoteAttributeDTO extends BaseEntityDto{
 		dateValue =quoteAttribute.getDateValue();
 		doubleValue =quoteAttribute.getDoubleValue();
 		booleanValue = quoteAttribute.getBooleanValue();
+		Attribute attribute = quoteAttribute.getAttribute();
+		if (attribute != null) {
+			unitNbDecimal = attribute.getUnitNbDecimal();
+		}
 	}
 	
 	public QuoteAttributeDTO(QuoteAttribute quoteAttribute, Integer sequence, boolean mandatory, boolean display, boolean readOnly, List<String> allowedValues, AttributeCategoryEnum attributeCategoryEnum) {
@@ -213,5 +221,19 @@ public class QuoteAttributeDTO extends BaseEntityDto{
 	public QuoteAttributeDTO setReadOnly(Boolean readOnly) {
 		this.readOnly = readOnly;
 		return this;
+	}
+
+	/**
+	 * @return the unitNbDecimal
+	 */
+	public Integer getUnitNbDecimal() {
+		return unitNbDecimal;
+	}
+
+	/**
+	 * @param unitNbDecimal the unitNbDecimal to set
+	 */
+	public void setUnitNbDecimal(Integer unitNbDecimal) {
+		this.unitNbDecimal = unitNbDecimal;
 	}
 }

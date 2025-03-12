@@ -1528,7 +1528,11 @@ public class StorageFactory {
      */
     public static void copyDirectory(File sourceDirectory, File destinationDirectory) {
         if (NFS.equals(storageType)) {
-            org.meveo.commons.utils.FileUtils.copyDirectory(sourceDirectory, destinationDirectory);
+        	 try {
+        		 FileUtils.copyDirectory(sourceDirectory, destinationDirectory);
+             } catch (Exception e) {
+                 log.error("Exception while copying object in NFS storage type : {}", e.getMessage());
+             }
         } else if (S3.equalsIgnoreCase(storageType)) {
             String sourceDir = formatObjectKey(sourceDirectory.getPath(), true);
             String destDir = formatObjectKey(destinationDirectory.getPath(), true);

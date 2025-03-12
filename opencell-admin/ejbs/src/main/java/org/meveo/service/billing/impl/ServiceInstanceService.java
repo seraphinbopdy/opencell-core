@@ -1166,9 +1166,9 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
             .getResultList();
         
         ids.addAll(getEntityManager().createNamedQuery("ServiceInstance.getPendingToActivate", Long.class) //
-                .setParameter("date", new Date()) //
-                .setParameter("subscriptionStatuses", Arrays.asList(SubscriptionStatusEnum.PENDING)) //
-                .setParameter("statuses", Arrays.asList(InstanceStatusEnum.PENDING)) //
+                .setParameter("date", untillDate) //
+                .setParameter("subscriptionStatuses", Arrays.asList(SubscriptionStatusEnum.PENDING, SubscriptionStatusEnum.WAITING_MANDATORY)) //
+                .setParameter("statuses", Arrays.asList(InstanceStatusEnum.PENDING, InstanceStatusEnum.WAITING_MANDATORY)) //
                 .getResultList());
 
         ids.addAll(getEntityManager().createNamedQuery("ServiceInstance.getToNotifyExpiration", Long.class) //

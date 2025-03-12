@@ -1072,7 +1072,7 @@
 			<expression><![CDATA["Date: " + ($F{caCountryCode}=="US" ? java.time.LocalDate.parse(($F{quoteDate}).substring(0,10), java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd")).format(java.time.format.DateTimeFormatter.ofPattern("MM/dd/yyyy")) : java.time.LocalDate.parse($F{quoteDate}.substring(0, 10), java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd")).format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")))]]></expression>
 		</element>
 		<element kind="image" uuid="3a507fd9-2958-42dc-b452-26696f92232b" x="0" y="-1" width="202" height="61" scaleImage="RealSize" hImageAlign="Left" vImageAlign="Middle">
-			<expression><![CDATA[$P{logoPath}+"Pictos/opensoft.png"]]></expression>
+			<expression><![CDATA[$P{logoPath}+"Pictos/opensoft.jpg"]]></expression>
 		</element>
 		<element kind="textField" uuid="1dd2dce0-cdf5-416b-aa6e-da9fe01d0134" x="380" y="59" width="198" height="20" fontName="SansSerif" fontSize="11.0" bold="false" hTextAlign="Left" vTextAlign="Middle">
 			<expression><![CDATA["Valid until: " + ($F{caCountryCode}=="US" ? java.time.LocalDate.parse(($F{quoteVersionEndDate}).substring(0,10), java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd")).format(java.time.format.DateTimeFormatter.ofPattern("MM/dd/yyyy")) : java.time.LocalDate.parse($F{quoteVersionEndDate}.substring(0, 10), java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd")).format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")))]]></expression>

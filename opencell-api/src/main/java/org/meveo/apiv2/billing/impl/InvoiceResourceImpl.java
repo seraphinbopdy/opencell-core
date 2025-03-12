@@ -1,14 +1,16 @@
 package org.meveo.apiv2.billing.impl;
 
+import static java.math.RoundingMode.HALF_UP;
 import static java.util.Arrays.asList;
+import static java.util.List.of;
 import static java.util.Optional.ofNullable;
+import static org.meveo.apiv2.billing.ImmutableInvoiceMatchedOperation.builder;
 import static org.meveo.model.billing.InvoiceStatusEnum.DRAFT;
 import static org.meveo.model.billing.InvoiceStatusEnum.NEW;
 import static org.meveo.model.billing.InvoiceStatusEnum.REJECTED;
 import static org.meveo.model.billing.InvoiceStatusEnum.SUSPECT;
 import static org.meveo.model.billing.InvoiceStatusEnum.VALIDATED;
 
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -34,6 +36,7 @@ import org.meveo.apiv2.billing.GenerateInvoiceResult;
 import org.meveo.apiv2.billing.ImmutableFile;
 import org.meveo.apiv2.billing.ImmutableInvoice;
 import org.meveo.apiv2.billing.ImmutableInvoiceMatchedOperation;
+import org.meveo.apiv2.billing.ImmutableInvoiceMatchedOperation.Builder;
 import org.meveo.apiv2.billing.ImmutableInvoiceSubTotals;
 import org.meveo.apiv2.billing.ImmutableInvoices;
 import org.meveo.apiv2.billing.InvoiceExchangeRateInput;
@@ -80,6 +83,8 @@ import jakarta.ws.rs.core.Response;
 public class InvoiceResourceImpl implements InvoiceResource {
 
 	private static final String PPL_CREATION = "PPL_CREATION";
+	private static final List<String> CREDIT_NOTE_CODES = of("INV_CRN", "ADJ_INV" , "ADJ_REF");
+	private static final String CREDIT_NOTE_LABEL = "Credit Note";
 
 	@Inject
 	private InvoiceApiService invoiceApiService;
@@ -172,11 +177,11 @@ public class InvoiceResourceImpl implements InvoiceResource {
 
 		ofNullable(accountOperations).orElse(Collections.emptyList())
 				.forEach(accountOperation -> {
-					AccountOperation invoiceAo = accountOperationService.findById(accountOperation.getId(), List.of("matchingAmounts"));
+					AccountOperation invoiceAo = accountOperationService.findById(accountOperation.getId(), of("matchingAmounts"));
 
 					ofNullable(invoiceAo.getMatchingAmounts()).orElse(Collections.emptyList())
 							.forEach(matchingAmount -> {
-								MatchingCode matchingCode = matchingCodeService.findById(matchingAmount.getMatchingCode().getId(), List.of("matchingAmounts"));
+								MatchingCode matchingCode = matchingCodeService.findById(matchingAmount.getMatchingCode().getId(), of("matchingAmounts"));
 								ofNullable(matchingCode.getMatchingAmounts()).orElse(Collections.emptyList())
 										.forEach(matchingAmountAo -> {
 											switch (accountOperation.getTransactionCategory()) {
@@ -213,10 +218,10 @@ public class InvoiceResourceImpl implements InvoiceResource {
 		return response;
 	}
 
-	private InvoiceMatchedOperation toResponse(AccountOperation accountOperation, MatchingAmount matchingAmountPrimary, Invoice invoice){
+	private InvoiceMatchedOperation toResponse(AccountOperation accountOperation,
+											   MatchingAmount matchingAmountPrimary, Invoice invoice){
 		MatchingCode matchingCode = matchingAmountPrimary.getMatchingCode();
-		ImmutableInvoiceMatchedOperation.Builder builder = ImmutableInvoiceMatchedOperation.builder();
-		return builder
+		Builder builder = builder()
 				.paymentId(accountOperation.getId())
 				.matchingAmountId(matchingAmountPrimary.getId())
 				.paymentCode(accountOperation.getCode())
@@ -226,13 +231,18 @@ public class InvoiceResourceImpl implements InvoiceResource {
 				.paymentMethod(accountOperation.getPaymentMethod() != null ? accountOperation.getPaymentMethod().getLabel() : "")
 				.paymentRef(ofNullable(accountOperation.getReference()).orElse(""))
 				.amount(matchingAmountPrimary.getMatchingAmount())
-				.percentageCovered(matchingAmountPrimary.getMatchingAmount().divide(invoice.getAmountWithTax(), 12, RoundingMode.HALF_UP))
+				.percentageCovered(matchingAmountPrimary.getMatchingAmount().divide(invoice.getAmountWithTax(), 12, HALF_UP))
 				.matchingType(matchingCode.getMatchingType() != null ? matchingCode.getMatchingType().getLabel() : "")
 				.matchingDate(matchingCode.getMatchingDate())
-				.rejectedCode(accountOperation.getRejectedPayment() != null ?  accountOperation.getRejectedPayment().getRejectedCode() : "")
-				.rejectedDescription(accountOperation.getRejectedPayment() != null ?  accountOperation.getRejectedPayment().getRejectedDescription() : "")
-				.transactionalAmount(accountOperation.getTransactionalAmount())
-				.build();
+				.rejectedCode(accountOperation.getRejectedPayment() != null ? accountOperation.getRejectedPayment().getRejectedCode() : "")
+				.rejectedDescription(accountOperation.getRejectedPayment() != null ? accountOperation.getRejectedPayment().getRejectedDescription() : "")
+				.transactionalAmount(accountOperation.getTransactionalAmount());
+		if (accountOperation.getPaymentMethod() != null) {
+			builder.paymentMethod(accountOperation.getPaymentMethod().getLabel());
+		} else if (CREDIT_NOTE_CODES.contains(accountOperation.getCode())) {
+			builder.paymentMethod(CREDIT_NOTE_LABEL);
+		}
+		return builder.build();
 	}
 
 	@Override

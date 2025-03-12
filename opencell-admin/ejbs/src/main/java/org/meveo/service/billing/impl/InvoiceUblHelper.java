@@ -1328,7 +1328,8 @@ public class InvoiceUblHelper {
 
 		if(tax != null && tax.getUntdidTaxationCategory() != null) {
 			UntdidTaxationCategory untdidTaxationCategory = tax.getUntdidTaxationCategory();
-			if(!untdidTaxationCategory.getSemanticModel().equalsIgnoreCase("Standard rate")){
+			var noExemptionListValue = List.of("S", "Z", "L", "M");
+			if(!noExemptionListValue.contains(untdidTaxationCategory.getCode())){
 				TaxExemptionReason taxExemptionReason = objectFactorycommonBasic.createTaxExemptionReason();
 				taxExemptionReason.setValue(untdidTaxationCategory.getSemanticModel());
 				taxCategoryType.getTaxExemptionReasons().add(taxExemptionReason);

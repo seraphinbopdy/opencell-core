@@ -12147,6 +12147,7 @@
 			<column name="creator" value="OPENCELL.ADMIN"/>
 			<column name="version" valueNumeric="1"/>
 			<column name="status" value="STOPPED"/>
+			<column name="color_code" value="#00C853"/>
 			<column name="description" value="STOPPED_DUNNING"/>
 			<column name="dunning_settings_id" valueSequenceCurrent="dunning_settings_seq"/>
 		</insert>
@@ -12155,29 +12156,29 @@
 			<column name="created" valueDate="${db.current.time}"/>
 			<column name="creator" value="OPENCELL.ADMIN"/>
 			<column name="version" valueNumeric="1"/>
-			<column name="status" value="SUCCESS"/>
-			<column name="color_code" value="#1976D2"/>
-			<column name="description" value="SUCCESSFUL_DUNNING"/>
-			<column name="dunning_settings_id" valueSequenceCurrent="dunning_settings_seq"/>
-		</insert>
-		<insert tableName="dunning_collection_plan_statuses">
-			<column name="id" valueSequenceNext="dunning_collection_plan_statuses_seq"/>
-			<column name="created" valueDate="${db.current.time}"/>
-			<column name="creator" value="OPENCELL.ADMIN"/>
-			<column name="version" valueNumeric="1"/>
-			<column name="status" value="FAILED"/>
-			<column name="color_code" value="#F44336"/>
-			<column name="description" value="FAILED_DUNNING"/>
-			<column name="dunning_settings_id" valueSequenceCurrent="dunning_settings_seq"/>
-		</insert>
-		<insert tableName="dunning_collection_plan_statuses">
-			<column name="id" valueSequenceNext="dunning_collection_plan_statuses_seq"/>
-			<column name="created" valueDate="${db.current.time}"/>
-			<column name="creator" value="OPENCELL.ADMIN"/>
-			<column name="version" valueNumeric="1"/>
-			<column name="status" value="ACTIVE"/>
+			<column name="status" value="RECOVERED"/>
 			<column name="color_code" value="#00C853"/>
-			<column name="description" value="ACTIVE_DUNNING"/>
+			<column name="description" value="RECOVERED_DUNNING"/>
+			<column name="dunning_settings_id" valueSequenceCurrent="dunning_settings_seq"/>
+		</insert>
+		<insert tableName="dunning_collection_plan_statuses">
+			<column name="id" valueSequenceNext="dunning_collection_plan_statuses_seq"/>
+			<column name="created" valueDate="${db.current.time}"/>
+			<column name="creator" value="OPENCELL.ADMIN"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="status" value="UNRECOVERED"/>
+			<column name="color_code" value="#F44336"/>
+			<column name="description" value="UNRECOVERED_DUNNING"/>
+			<column name="dunning_settings_id" valueSequenceCurrent="dunning_settings_seq"/>
+		</insert>
+		<insert tableName="dunning_collection_plan_statuses">
+			<column name="id" valueSequenceNext="dunning_collection_plan_statuses_seq"/>
+			<column name="created" valueDate="${db.current.time}"/>
+			<column name="creator" value="OPENCELL.ADMIN"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="status" value="ONGOING"/>
+			<column name="color_code" value="#1976D2"/>
+			<column name="description" value="ONGOING_DUNNING"/>
 			<column name="dunning_settings_id" valueSequenceCurrent="dunning_settings_seq"/>
 		</insert>    
     </changeSet>

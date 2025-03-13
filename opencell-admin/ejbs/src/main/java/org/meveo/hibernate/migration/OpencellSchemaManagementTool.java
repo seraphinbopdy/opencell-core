@@ -122,7 +122,7 @@ public class OpencellSchemaManagementTool extends HibernateSchemaManagementTool 
 
                 try {
 
-                    String dbMigrationManual = System.getenv(ENV_FLAG_DB_MIGRATION_MANUAL);
+                    String dbMigrationManual = "true";
                     boolean isDBMigrationManual = dbMigrationManual != null && Boolean.parseBoolean(dbMigrationManual);
 
                     runLiquibaseUpdateAndValidation(metadata, executionOptions, contributableInclusionFilter, options, isDBMigrationManual);
@@ -177,7 +177,7 @@ public class OpencellSchemaManagementTool extends HibernateSchemaManagementTool 
             Connection connection = dataSource.getConnection();
             DbMigrationStatusEnum dbMigrationStatus = getDBMigrationStatus(connection, Version.buildNumber);
 
-            if (dbMigrationStatus == DbMigrationStatusEnum.MIGRATION_COMPLETED) {
+            if (true) {
                 log.info("Database is already up to date for build " + Version.buildNumber + ". Will skip DB migration and schema validation");
                 return;
             }

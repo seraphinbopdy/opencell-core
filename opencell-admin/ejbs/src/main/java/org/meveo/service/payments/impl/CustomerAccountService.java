@@ -859,41 +859,40 @@ public class CustomerAccountService extends AccountService<CustomerAccount> {
      * @return The balance of the customer account.
      */
     public BigDecimal getCustomerAccountBalanceForUnpaidNonTriggeredCPInvoices(CustomerAccount customerAccount, List<String> linkedOccTemplates, CustomerBalance customerBalance) {
-        return getCustomerAccountBalanceForFilteredAO(customerAccount, linkedOccTemplates, customerBalance, accountOperations ->
-            accountOperations.stream()
-                    .filter(ao -> ao.getInvoices().stream().noneMatch(Invoice::isDunningCollectionPlanTriggered))
-                    .filter(ao -> ao.getInvoices().stream().anyMatch(unpaidInvoicePredicate))
-                    .collect(Collectors.toList())
-        );
+        return getCustomerAccountBalanceForFilteredAO(null, linkedOccTemplates, customerBalance, customerAccount);
     }
 
-    public BigDecimal getCustomerAccountBalanceForUnpaidInvoices(CustomerAccount customerAccount, List<String> linkedOccTemplates, CustomerBalance customerBalance) {
-        return getCustomerAccountBalanceForFilteredAO(customerAccount, linkedOccTemplates, customerBalance, accountOperations ->
-                accountOperations.stream()
-                        .filter(ao -> ao.getInvoices().stream().anyMatch(Invoice::isDunningCollectionPlanTriggered))
-                        .filter(ao -> ao.getInvoices().stream().anyMatch(unpaidInvoicePredicate))
-                        .collect(Collectors.toList())
-        );
+    public BigDecimal getCustomerAccountBalanceForUnpaidInvoices(DunningCollectionPlan collectionPlan, List<String> linkedOccTemplates, CustomerBalance customerBalance) {
+        return getCustomerAccountBalanceForFilteredAO(collectionPlan, linkedOccTemplates, customerBalance, null);
     }
 
 
-    public BigDecimal getCustomerAccountBalanceForFilteredAO(CustomerAccount customerAccount, List<String> linkedOccTemplates, CustomerBalance customerBalance, Function<List<AccountOperation>, List<AccountOperation>> accountOperationFilter){
-        List<AccountOperation> accountOperations = accountOperationService.getAccountOperations(customerAccount.getId(),
+    public BigDecimal getCustomerAccountBalanceForFilteredAO(DunningCollectionPlan collectionPlan, List<String> linkedOccTemplates, CustomerBalance customerBalance, CustomerAccount customerAccount) {
+        CustomerAccount customerAccount1 = collectionPlan != null ? collectionPlan.getCustomerAccount() : customerAccount;
+        List<AccountOperation> accountOperations = accountOperationService.getAccountOperations(customerAccount1.getId(),
                 null,
                 linkedOccTemplates,
                 null);
+
+        List<AccountOperation> acs = new ArrayList<>();
+        for (AccountOperation ao : accountOperations) {
+            if (ao instanceof RecordedInvoice ri) {
+                if (ri.getUnMatchingAmount().compareTo(BigDecimal.ZERO) > 0) {
+                    if (!ri.getInvoice().isDunningCollectionPlanTriggered()) {
+                        acs.add(ao);
+
+                        if(collectionPlan != null && !collectionPlan.getRelatedInvoices().contains(ri.getInvoice())){
+                            collectionPlan.getRelatedInvoices().add(ri.getInvoice());
+                        }
+                    } else if(ri.getInvoice().isDunningCollectionPlanTriggered() && collectionPlan != null && collectionPlan.getRelatedInvoices().contains(ri.getInvoice())) {
+                        acs.add(ao);
+                    }
+                }
+            }
+        }
         // Filter account operations based on customer balance
-        List<AccountOperationDto> result = customerBalanceService.filterAccountOperations(accountOperationFilter.apply(accountOperations), customerBalance);
-        // Calculate totals for credit, debit, and balance
-        BigDecimal credit = result.stream()
-                .filter(aod -> aod.getTransactionCategory().equals(OperationCategoryEnum.CREDIT))
-                .map(AccountOperationDto::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal debit = result.stream()
-                .filter(aod -> aod.getTransactionCategory().equals(OperationCategoryEnum.DEBIT))
-                .map(AccountOperationDto::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        return debit.subtract(credit);
+        List<AccountOperationDto> result = customerBalanceService.filterAccountOperations(acs, customerBalance);
+        return result.stream().map(AccountOperationDto::getUnMatchingAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     /**

@@ -8015,13 +8015,14 @@ public class InvoiceService extends PersistenceService<Invoice> {
         	pathCreatedFile = invoiceUblHelper.createInvoiceUBL(invoice);
         }
 
-		invoice.setXmlDate(new Date());
-		invoice.setUblReference(true);
-		invoice = updateNoCheck(invoice);
-		entityUpdatedEventProducer.fire(invoice);
-
-		if (pathCreatedFile != null)
+		if (pathCreatedFile != null) {
+			invoice.setXmlDate(new Date());
+			invoice.setUblReference(true);
+			invoice = updateNoCheck(invoice);
+			entityUpdatedEventProducer.fire(invoice);
+			
 			pathCreatedFile.toFile().setReadOnly();
+		}
 
 		return invoice;
 	}

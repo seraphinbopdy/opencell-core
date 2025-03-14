@@ -26,7 +26,6 @@ import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.util.ResourceBundle;
-import org.meveo.api.dto.ActionStatusEnum;
 import org.meveo.api.exception.ActionForbiddenException;
 import org.meveo.api.exception.BusinessApiException;
 import org.meveo.api.exception.EntityAlreadyExistsException;
@@ -178,8 +177,8 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
         }
 
         if(oldCollectionPlan.getStatus().getStatus().equals(DunningCollectionPlanStatusEnum.STOPPED) ||
-                oldCollectionPlan.getStatus().getStatus().equals(DunningCollectionPlanStatusEnum.FAILED) ||
-                oldCollectionPlan.getStatus().getStatus().equals(DunningCollectionPlanStatusEnum.SUCCESS)) {
+                oldCollectionPlan.getStatus().getStatus().equals(DunningCollectionPlanStatusEnum.UNRECOVERED) ||
+                oldCollectionPlan.getStatus().getStatus().equals(DunningCollectionPlanStatusEnum.RECOVERED)) {
             throw new BusinessApiException("Collection Plan with id " + oldCollectionPlan.getId() + " cannot be switched, the current collection plan status is " + oldCollectionPlan.getStatus().getStatus());
         }
 
@@ -1221,7 +1220,7 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
                 }
             } else {
                 setDunningCollectionPlanLastAction(dunningLevelInstance, collectionPlan);
-                collectionPlan.setStatus(dunningCollectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.FAILED));
+                collectionPlan.setStatus(dunningCollectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.UNRECOVERED));
                 collectionPlan.setNextAction(null);
                 collectionPlan.setNextActionDate(null);
 
@@ -1388,14 +1387,14 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
                 if (dunningSettings.getDunningMode().equals(DunningModeEnum.CUSTOMER_LEVEL) && collectionPlan.getRelatedInvoices() != null) {
                     boolean isUnpaidOrPartiallyPaid = collectionPlan.getRelatedInvoices().stream().anyMatch(invoice -> invoice.getPaymentStatus().equals(UNPAID) || invoice.getPaymentStatus().equals(PPAID));
                     if (!isUnpaidOrPartiallyPaid) {
-                        collectionPlan.setStatus(dunningCollectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.SUCCESS));
+                        collectionPlan.setStatus(dunningCollectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.RECOVERED));
                     } else {
-                        collectionPlan.setStatus(dunningCollectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.FAILED));
+                        collectionPlan.setStatus(dunningCollectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.UNRECOVERED));
                     }
                 } else if (dunningSettings.getDunningMode().equals(DunningModeEnum.INVOICE_LEVEL) && collectionPlan.getRelatedInvoice() != null && collectionPlan.getRelatedInvoice().getPaymentStatus().equals(PAID)) {
-                    collectionPlan.setStatus(dunningCollectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.SUCCESS));
+                    collectionPlan.setStatus(dunningCollectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.RECOVERED));
                 } else {
-                    collectionPlan.setStatus(dunningCollectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.FAILED));
+                    collectionPlan.setStatus(dunningCollectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.UNRECOVERED));
                 }
             }
         }

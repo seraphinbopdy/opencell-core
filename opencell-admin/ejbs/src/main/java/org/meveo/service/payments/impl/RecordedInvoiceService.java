@@ -857,7 +857,7 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
         }
 
         // Stop the dunning collection plan if it is active
-        processToUpdateCollectionPlanStatus(recordedInvoice, DunningCollectionPlanStatusEnum.ACTIVE, DunningCollectionPlanStatusEnum.STOPPED, false);
+        processToUpdateCollectionPlanStatus(recordedInvoice, DunningCollectionPlanStatusEnum.ONGOING, DunningCollectionPlanStatusEnum.STOPPED, false);
 
         recordedInvoice.setMatchingStatus(I);
         recordedInvoice.setLitigationReason(litigationReason);
@@ -908,7 +908,7 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
         recordedInvoice.setLitigationReason(litigationReason);
 
         // Active the dunning collection plan if it is stopped
-        processToUpdateCollectionPlanStatus(recordedInvoice, DunningCollectionPlanStatusEnum.STOPPED, DunningCollectionPlanStatusEnum.ACTIVE, Boolean.TRUE);
+        processToUpdateCollectionPlanStatus(recordedInvoice, DunningCollectionPlanStatusEnum.STOPPED, DunningCollectionPlanStatusEnum.ONGOING, Boolean.TRUE);
 
         computePaymentStatus(recordedInvoice, today);
         update(recordedInvoice);
@@ -979,7 +979,7 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
                 dunningCollectionPlan.setStatus(collectionPlanStatusToSet);
 
                 // If the status to set is ACTIVE and the update pause duration is true
-                if (pStatusToSet.equals(DunningCollectionPlanStatusEnum.ACTIVE) && Boolean.TRUE.equals(pUpdatePauseDuration)) {
+                if (pStatusToSet.equals(DunningCollectionPlanStatusEnum.ONGOING) && Boolean.TRUE.equals(pUpdatePauseDuration)) {
                     // Update the pause duration
                     dunningCollectionPlan.setPauseDuration(dunningCollectionPlan.getPauseDuration() + (int) daysBetween(pRecordedInvoice.getInvoice().getPaymentStatusDate( ), new Date()));
 }

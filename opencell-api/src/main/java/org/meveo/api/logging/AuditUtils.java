@@ -43,6 +43,9 @@ public class AuditUtils {
                 auditOriginName.append(method.getDeclaringClass().getAnnotation(Path.class).value());
             }
             if (method.getAnnotation(Path.class) != null) {
+                if (!auditOriginName.isEmpty()) {
+                    auditOriginName.append("/");
+                }
                 auditOriginName.append(method.getAnnotation(Path.class).value());
             }
             return auditOriginName.toString();

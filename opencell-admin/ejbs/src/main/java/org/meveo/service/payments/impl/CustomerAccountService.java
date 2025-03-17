@@ -704,7 +704,7 @@ public class CustomerAccountService extends AccountService<CustomerAccount> {
             return paymentMethod;
 
         } catch (NoResultException e) {
-            log.warn("Customer account {} has no preferred payment method", customerAccountId, e);
+            log.warn("Customer account {} has no preferred payment method", customerAccountId);
             return null;
         }
     }
@@ -725,7 +725,7 @@ public class CustomerAccountService extends AccountService<CustomerAccount> {
             return resultList;
 
         } catch (NoResultException e) {
-            log.warn("error while getting user account list by billing account", e);
+            log.warn("Customer account for billing account {} has no preferred payment method", billingAccount.getId());
             return null;
         }
     }

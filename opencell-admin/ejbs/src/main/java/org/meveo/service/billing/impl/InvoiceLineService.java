@@ -1432,7 +1432,7 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
         // If IL's invoice type is null then try to get it from its article
         if (invoiceLine.getInvoiceType() == null && invoiceLine.getAccountingArticle() != null) {
             InvoiceType invoiceType = null;
-            AccountingArticle accountingArticle = accountingArticleService.refreshOrRetrieve(invoiceLine.getAccountingArticle());
+            AccountingArticle accountingArticle = accountingArticleService.retrieveIfNotManaged(invoiceLine.getAccountingArticle());
             if (!isBlank(accountingArticle.getInvoiceTypeEl())) {
                 String invoiceTypeCode =  invoiceTypeService.evaluateInvoiceTypeEl(accountingArticle.getInvoiceTypeEl(), invoiceLine);
                 invoiceType = invoiceTypeService.findByCode(invoiceTypeCode);

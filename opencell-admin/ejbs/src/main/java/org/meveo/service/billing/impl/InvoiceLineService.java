@@ -1441,7 +1441,6 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
                 invoiceType = accountingArticle.getInvoiceType();
             }
             invoiceLine.setInvoiceType(invoiceType);
-            invoiceKey.add(formatEntityId(invoiceType));
         }
         invoiceKey.add(formatEntityId(invoiceLine.getInvoiceType()));
 

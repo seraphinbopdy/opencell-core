@@ -195,15 +195,6 @@ public class RecordedInvoice extends AccountOperation {
     @Override
     public void setTransactionalUnMatchingAmount(BigDecimal transactionalUnMatchingAmount) {
         super.setTransactionalUnMatchingAmount(transactionalUnMatchingAmount);
-        // INVOICE_LEVEL
-        if (this.invoice != null && this.invoice.getRelatedDunningCollectionPlan() != null) {
-            this.invoice.getRelatedDunningCollectionPlan().setBalance(transactionalUnMatchingAmount);
-        }
-
-        // CUSTOMER_LEVEL
-        if (this.invoice != null && this.invoice.getCollectionPlan() != null) {
-            this.invoice.getCollectionPlan().setBalance(transactionalUnMatchingAmount);
-        }
     }
 
     public Long getPaymentRequests() {

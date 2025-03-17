@@ -17884,4 +17884,41 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
         </update>
     </changeSet>
 
+   <changeSet id="#INTRD-28562_update_dunning_collection_plan_status" author="zelmeliani">
+       <update tableName="dunning_collection_plan_statuses">
+           <column name="status" value="PAUSED"/>
+           <column name="color_code" value="#FFA000"/>
+           <where>status = 'PAUSED'</where>
+       </update>
+       <update tableName="dunning_collection_plan_statuses">
+           <column name="status" value="STOPPED"/>
+           <column name="color_code" value="#00C853"/>
+           <where>status = 'STOPPED'</where>
+       </update>
+       <update tableName="dunning_collection_plan_statuses">
+           <column name="status" value="RECOVERED"/>
+           <column name="color_code" value="#00C853"/>
+           <column name="description" value="RECOVERED_DUNNING"/>
+           <where>status = 'SUCCESS'</where>
+       </update>
+       <update tableName="dunning_collection_plan_statuses">
+           <column name="status" value="UNRECOVERED"/>
+           <column name="color_code" value="#F44336"/>
+           <column name="description" value="UNRECOVERED_DUNNING"/>
+           <where>status = 'FAILED'</where>
+       </update>
+       <update tableName="dunning_collection_plan_statuses">
+           <column name="status" value="ONGOING"/>
+           <column name="color_code" value="#1976D2"/>
+           <column name="description" value="ONGOING_DUNNING"/>
+           <where>status = 'ACTIVE'</where>
+       </update>
+       <update tableName="dunning_collection_plan_statuses">
+           <column name="status" value="ONGOING"/>
+           <column name="color_code" value="#1976D2"/>
+           <column name="description" value="ONGOING_DUNNING"/>
+           <where>status = 'ACTIVE'</where>
+       </update>
+    </changeSet>
+
 </databaseChangeLog>

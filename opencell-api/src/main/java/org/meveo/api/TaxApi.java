@@ -240,13 +240,16 @@ public class TaxApi extends BaseApi {
             }
             tax.setUntdidTaxationCategory(untdidTaxationCategory);
         }
+
+        UntdidVatex untdidVatex = null;
         if (!StringUtils.isBlank(postData.getVatex())) {
-            UntdidVatex untdidVatex = untdidVatexService.getByCode(postData.getVatex());
+            untdidVatex = untdidVatexService.getByCode(postData.getVatex());
             if (untdidVatex == null) {
                 throw new EntityDoesNotExistsException(UntdidVatex.class, postData.getVatex());
             }
-            tax.setUntdidVatex(untdidVatex);
         }
+        tax.setUntdidVatex(untdidVatex);
+
         // populate customFields
         try {
             populateCustomFields(postData.getCustomFields(), tax, true, true);

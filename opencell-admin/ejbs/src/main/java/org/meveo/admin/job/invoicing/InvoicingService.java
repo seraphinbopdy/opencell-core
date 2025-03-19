@@ -2,12 +2,11 @@ package org.meveo.admin.job.invoicing;
 
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.meveo.model.billing.InvoicePaymentStatusEnum.PENDING;
-import static org.meveo.model.billing.InvoicePaymentStatusEnum.UNPAID;
-import static org.meveo.model.billing.InvoiceStatusEnum.VALIDATED;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -49,6 +48,7 @@ import org.meveo.model.catalog.DiscountPlan;
 import org.meveo.model.catalog.DiscountPlanItem;
 import org.meveo.model.catalog.DiscountPlanItemTypeEnum;
 import org.meveo.model.crm.CustomFieldTemplate;
+import org.meveo.model.crm.custom.CustomFieldTypeEnum;
 import org.meveo.model.jobs.JobExecutionResultImpl;
 import org.meveo.model.order.Order;
 import org.meveo.model.payments.MatchingStatusEnum;
@@ -62,7 +62,6 @@ import org.meveo.service.billing.impl.BillingAccountService;
 import org.meveo.service.billing.impl.InvoiceService;
 import org.meveo.service.billing.impl.PurchaseOrderService;
 import org.meveo.service.billing.impl.InvoiceTypeService;
-import org.meveo.service.billing.impl.PurchaseOrderService;
 import org.meveo.service.billing.impl.RejectedBillingAccountService;
 import org.meveo.service.billing.impl.ServiceSingleton;
 import org.meveo.service.billing.impl.SubscriptionService;
@@ -89,6 +88,8 @@ import jakarta.persistence.Query;
 public class InvoicingService extends PersistenceService<Invoice> {
 
     private final static BigDecimal HUNDRED = new BigDecimal("100");
+    private final static SimpleDateFormat FORMATTER = new SimpleDateFormat("yyyy-MM-dd");
+
     @Inject
     private BillingAccountService billingAccountService;
     @Inject
@@ -329,9 +330,36 @@ public class InvoicingService extends PersistenceService<Invoice> {
                 customFieldTemplateService.findByAppliesTo(Invoice.class.getSimpleName());
         for (Map.Entry<String, CustomFieldTemplate> cfField : associatedCF.entrySet()) {
             if (isNotBlank(cfField.getValue().getDefaultValue())) {
-                customFieldInstanceService.setCFValue(invoice, cfField.getKey(), cfField.getValue().getDefaultValue());
+                Object value = convertToCFType(cfField.getValue().getFieldType(), cfField.getValue().getDefaultValue());
+                customFieldInstanceService.setCFValue(invoice, cfField.getKey(), value);
             }
         }
+    }
+
+    private Object convertToCFType(CustomFieldTypeEnum fieldType, String defaultValue) {
+        Object value;
+        switch (fieldType) {
+            case BOOLEAN:
+                value = Boolean.valueOf(defaultValue);
+                break;
+            case LONG:
+                value = Long.valueOf(defaultValue);
+                break;
+            case DOUBLE:
+                value = Double.valueOf(defaultValue);
+                break;
+            case DATE:
+                try {
+                    value = FORMATTER.parse(defaultValue);
+                } catch (ParseException exception) {
+                    log.error("Error parsing date", exception);
+                    value = null;
+                }
+                break;
+            default:
+                value = null;
+        }
+        return value;
     }
 
     private void addTranslatedDescription(String languageCode, I18nDescripted invoiceSubCategory, InvoiceAgregate aggregate, String prefix) {

@@ -109,7 +109,9 @@ public class EntityManagerProvider {
                 // log.error("AKK will get Factory wrapper");
                 final EntityManager em = emf.createEntityManager();
                 EntityManager emProxy = (EntityManager) Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class<?>[] { EntityManager.class }, (proxy, method, args) -> {
-                    em.joinTransaction();
+                    if (em.getTransaction() != null && em.getTransaction().isActive()) {
+                        em.joinTransaction();
+                    }
                     return method.invoke(em, args);
                 });
                 setAuditContext(emProxy);

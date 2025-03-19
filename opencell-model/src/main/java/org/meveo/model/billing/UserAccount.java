@@ -166,8 +166,7 @@ public class UserAccount extends AccountEntity implements IInvoicingMinimumAppli
     @Column(name = "is_consumer")
     private Boolean isConsumer = Boolean.TRUE;
 
-    @OneToMany
-    @JoinColumn(name = "user_account_id")
+    @OneToMany(mappedBy = "userAccount", cascade = CascadeType.ALL)
     private List<RegistrationNumber> registrationNumbers = new ArrayList<>();
 
     public List<RegistrationNumber> getRegistrationNumbers() {

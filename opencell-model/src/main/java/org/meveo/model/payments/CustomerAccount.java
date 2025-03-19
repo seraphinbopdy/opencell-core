@@ -287,8 +287,7 @@ import jakarta.validation.constraints.Size;
     @OneToMany(mappedBy = "customerAccount", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, orphanRemoval = true)
     private Set<PaymentPlan> paymentPlans = new HashSet<>();
 
-    @OneToMany
-    @JoinColumn(name = "customer_account_id")
+    @OneToMany(mappedBy = "customerAccount", cascade = CascadeType.ALL)
     private List<RegistrationNumber> registrationNumbers = new ArrayList<>();
 
     public List<RegistrationNumber> getRegistrationNumbers() {

@@ -394,8 +394,7 @@ public class BillingAccount extends AccountEntity implements IInvoicingMinimumAp
     @JoinColumn(name = "price_list_id")
     private PriceList priceList;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "billing_account_id")
+    @OneToMany(mappedBy = "billingAccount", cascade = CascadeType.ALL)
     private List<RegistrationNumber> registrationNumbers = new ArrayList<>();
 
     /** MRR. */

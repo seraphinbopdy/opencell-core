@@ -158,8 +158,7 @@ public class Customer extends AccountEntity implements IInvoicingMinimumApplicab
     @OneToMany(mappedBy = "customer", fetch = FetchType.LAZY)
     private List<Contract> contracts = new ArrayList<>();
 
-    @OneToMany
-    @JoinColumn(name = "customer_id")
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
     private List<RegistrationNumber> registrationNumbers = new ArrayList<>();
 
     public List<RegistrationNumber> getRegistrationNumbers() {

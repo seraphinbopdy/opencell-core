@@ -266,7 +266,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
 
                         // Set current dunning level sequence
                     if (nextLevel < collectionPlan.getDunningLevelInstances().size()) {
-                        collectionPlan.setCurrentDunningLevelSequence(collectionPlan.getDunningLevelInstances().get(nextLevel).getSequence());
+                        collectionPlan.setCurrentDunningLevelSequence(levelInstance.getSequence() + 1);
                     }
 
                         // Update collection plan status to FAILED if is end of dunning and invoice is unpaid
@@ -436,7 +436,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
 
                         // Set current dunning level sequence
                         if (nextLevel < collectionPlan.getDunningLevelInstances().size()) {
-                            collectionPlan.setCurrentDunningLevelSequence(collectionPlan.getDunningLevelInstances().get(nextLevel).getSequence());
+                            collectionPlan.setCurrentDunningLevelSequence(levelInstance.getSequence() + 1);
                         }
 
                         // Update collection plan status to FAILED if is end of dunning and invoice is unpaid

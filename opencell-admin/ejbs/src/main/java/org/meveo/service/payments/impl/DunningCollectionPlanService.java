@@ -305,7 +305,10 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
                 collectionPlan.setCurrentDunningLevelSequence(collectionPlan.getCurrentDunningLevelSequence() + 1);
             }
 
-            if (nextDunningLevelInstance.isPresent()) {
+            if(firstDunningLevelInstance.get().getLevelStatus().equals(TO_BE_DONE)) {
+                collectionPlan.setNextAction(firstDunningLevelInstance.get().getActions().get(0).getDunningAction().getCode());
+                collectionPlan.setNextActionDate(addDaysToDate(collectionPlan.getStartDate(), firstDunningLevelInstance.get().getDaysOverdue()));
+            } else if (nextDunningLevelInstance.isPresent()) {
                 collectionPlan.setNextAction(nextDunningLevelInstance.get().getActions().get(0).getDunningAction().getCode());
                 collectionPlan.setNextActionDate(addDaysToDate(collectionPlan.getStartDate(), nextDunningLevelInstance.get().getDaysOverdue()));
             }

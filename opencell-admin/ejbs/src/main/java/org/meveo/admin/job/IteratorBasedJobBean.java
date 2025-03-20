@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputFilter;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -139,6 +140,11 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
      * A number of items in a message that would result in a large MQ message
      */
     private static final int LARGE_MESSAGE_ITEM_COUNT = 2500;
+
+    /**
+     * On WF 34 JVM 21 docker installation for some reason large objects can not be deserialized because of default filter.
+     */
+    private static final ObjectInputFilter OBJECT_INPUT_FILTER = ObjectInputFilter.Config.createFilter("maxdepth=1000;maxarray=10000000;maxbytes=20000000");
 
     @Inject
     private MethodCallingUtils methodCallingUtils;
@@ -1281,6 +1287,7 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
                             msg.setObjectProperty("JMS_AMQ_SaveStream", baos);
 
                             try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray()))) {
+                                ois.setObjectInputFilter(OBJECT_INPUT_FILTER);
                                 itemsToProcess = (List<T>) ois.readObject();
                             } catch (Exception e) {
                                 Logger log = LoggerFactory.getLogger(this.getClass());

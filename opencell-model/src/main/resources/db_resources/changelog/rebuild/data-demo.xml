@@ -6553,7 +6553,7 @@
             <column name="journal_id" valueComputed="(SELECT id FROM journal WHERE code = 'MSC')"/>
         </insert>
     </changeSet>
-
+    <changeSet id="#INTRD-30098_20250321" author="AbdellatifBARI" />
 
     <!-- DONT REMOVE THIS CHANGESET - KEEP AT THE BOTTOM OF THE FILE  -->
     <changeSet id="#liquibase_hack_data" author="AbdelmounaimAkadid">

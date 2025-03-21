@@ -4217,16 +4217,14 @@ public class InvoiceService extends PersistenceService<Invoice> {
         }
 
         // Calculate derived aggregate amounts for subcategory aggregate, create category aggregates, discount aggregates and tax aggregates
-        BigDecimal[] amounts = null;
         Map<String, CategoryInvoiceAgregate> categoryAggregates = new HashMap<>();
         List<SubCategoryInvoiceAgregate> discountAggregates = new ArrayList<>();
         Map<String, TaxInvoiceAgregate> taxAggregates = new HashMap<>();
 
         // Create category aggregates
-        boolean anyUseSpecificConversion = subCategoryAggregates.stream().anyMatch(SubCategoryInvoiceAgregate::isUseSpecificPriceConversion);
         for (SubCategoryInvoiceAgregate scAggregate : subCategoryAggregates) {
             List<InvoiceLine> erronedLines = scAggregate.getInvoiceLinesToAssociate()
-                    .stream()
+                    .parallelStream()
                     .filter(invoiceLine -> invoiceLine.getTax() == null && !invoiceLine.getTaxMode().equals(InvoiceLineTaxModeEnum.RATE))
                     .collect(toList());
             if (!erronedLines.isEmpty()) {
@@ -4330,9 +4328,9 @@ public class InvoiceService extends PersistenceService<Invoice> {
             // Add tax aggregate or update its amounts
 
             if (calculateTaxOnSubCategoryLevel && !isExonerated && !amountCumulativeForTax.isEmpty()) {
-
+                Tax tax;
                 for (Map.Entry<Tax, SubcategoryInvoiceAgregateAmount> amountByTax : amountCumulativeForTax.entrySet()) {
-                    Tax tax = amountByTax.getKey();
+                    tax = amountByTax.getKey();
                     if (BigDecimal.ZERO.compareTo(amountByTax.getValue().getAmount(!isEnterprise)) == 0) {
                         continue;
                     }
@@ -4351,7 +4349,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         // If tax calculation is not done at subcategory level, then call a global script to do calculation for the whole invoice
         if (!isExonerated && !calculateTaxOnSubCategoryLevel && (invoice.getInvoiceType() != null) && (invoice.getInvoiceType().getTaxScript() != null)) {
             taxAggregates = taxScriptService.createTaxAggregates(invoice.getInvoiceType().getTaxScript().getCode(), invoice);
-            if (taxAggregates != null) {
+            if (taxAggregates != null && !taxAggregates.isEmpty()) {
                 for (TaxInvoiceAgregate taxAggregate : taxAggregates.values()) {
                     taxAggregate.setInvoice(invoice);
                     invoice.addInvoiceAggregate(taxAggregate);
@@ -4409,7 +4407,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         final BigDecimal amountWithTax = invoice.getAmountWithTax() != null ? invoice.getAmountWithTax() : BigDecimal.ZERO;
         invoice.setNetToPay(amountWithTax.add(invoice.getDueBalance() != null ? invoice.getDueBalance() : BigDecimal.ZERO));
 		if(CollectionUtils.isEmpty(invoice.getInvoiceLines()) && CollectionUtils.isNotEmpty(subCategoryAggregates)){
-			invoice.setInvoiceLines(subCategoryAggregates.stream().flatMap(sub -> sub.getInvoiceLinesToAssociate().stream()).collect(toList()));
+            invoice.setInvoiceLines(subCategoryAggregates.stream().flatMap(sub -> sub.getInvoiceLinesToAssociate().stream()).collect(toList()));
 		}
         if(invoice.getInvoiceLines() != null && !invoice.getInvoiceLines().isEmpty()) {
             BigDecimal amountDiscount = invoice.getInvoiceLines()
@@ -5912,7 +5910,6 @@ public class InvoiceService extends PersistenceService<Invoice> {
             }
             
             paymentMethod = resolvePMethod(billingAccount, billingCycle, defaultPaymentMethod, invoiceLine);
-            invoiceLine.setSubscription(subscriptionService.refreshOrRetrieve(invoiceLine.getSubscription()));
             Seller seller = getSelectedSeller(invoiceLine);
             String invoiceKey = billingAccount.getId() +  (seller!=null ? "_"+seller.getId():null) + "_" + invoiceType.getId() + (paymentMethod != null ? "_" + paymentMethod.getId() : "") + "_" + invoiceLine.getOpenOrderNumber();
             InvoiceLinesGroup ilGroup = invoiceLinesGroup.get(invoiceKey);
@@ -6544,8 +6541,8 @@ public class InvoiceService extends PersistenceService<Invoice> {
         for (InvoiceLine invoiceLine : invoiceLines) {
 
             addFixedDiscount(invoiceLine);
-            invoiceLine.setSubscription(subscriptionService.refreshOrRetrieve(invoiceLine.getSubscription()));
-            invoiceLine.setAccountingArticle(accountingArticleService.refreshOrRetrieve(invoiceLine.getAccountingArticle()));
+            invoiceLine.setSubscription(invoiceLine.getSubscription());
+            invoiceLine.setAccountingArticle(invoiceLine.getAccountingArticle());
             InvoiceSubCategory invoiceSubCategory = invoiceLine.getAccountingArticle().getInvoiceSubCategory();
 
             scaKey = invoiceSubCategory.getId().toString();
@@ -7015,7 +7012,12 @@ public class InvoiceService extends PersistenceService<Invoice> {
                 toUpdate.setLastAppliedRate(lastAppliedRate);
                 toUpdate.setLastAppliedRateDate(new Date());
 
-                refreshInvoiceLineAndAggregateAmounts(toUpdate);
+                toUpdate.getInvoiceAgregates()
+                        .forEach(invoiceAggregate -> {
+                            if(invoiceAggregate instanceof TaxInvoiceAgregate) {
+                                invoiceAgregateService.update(invoiceAggregate);
+                            }
+                });
             }
         }
 

@@ -1785,6 +1785,8 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
                 taxPercent, serviceInstance, taxClass, null, RatedTransactionTypeEnum.MANUAL, chargeInstance, null);
         rt.setAccountingArticle(accountingArticle);
         rt.setBusinessKey(businessKey);
+        rt.setCreated(new Date());
+        rt.setCreator(currentUser.getUserName());
         
         OrderInfo orderInfo = new OrderInfo();
 		orderInfo.setProductVersion(serviceInstance.getProductVersion());
@@ -1841,7 +1843,8 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
         if(businessKey !=null)
         	ratedTransaction.setBusinessKey(businessKey);
 
-
+        ratedTransaction.setUpdated(new Date());
+        ratedTransaction.setUpdater(currentUser.getUserName());
         update(ratedTransaction);
     }
 

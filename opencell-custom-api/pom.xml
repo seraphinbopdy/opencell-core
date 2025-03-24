@@ -32,7 +32,6 @@
 			<artifactId>opencell-api</artifactId>
 		</dependency>
 
-
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-compress</artifactId>
@@ -141,6 +140,11 @@
 			<artifactId>wildfly-cache-scripts</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>jakarta.enterprise.concurrent</groupId>
+			<artifactId>jakarta.enterprise.concurrent-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
 		<!-- End of libraries provided in Jboss -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -156,13 +160,13 @@
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>com.opencellsoft</groupId>-->
-<!--			<artifactId>opencell-api</artifactId>-->
-<!--			<type>test-jar</type>-->
-<!--			<scope>test</scope>-->
-<!--			<optional>true</optional>-->
-<!--		</dependency>-->
+		<!--		<dependency>-->
+		<!--			<groupId>com.opencellsoft</groupId>-->
+		<!--			<artifactId>opencell-api</artifactId>-->
+		<!--			<type>test-jar</type>-->
+		<!--			<scope>test</scope>-->
+		<!--			<optional>true</optional>-->
+		<!--		</dependency>-->
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-core</artifactId>
@@ -171,61 +175,61 @@
 		<dependency>
 			<groupId>io.swagger.core.v3</groupId>
 			<artifactId>swagger-jaxrs2-jakarta</artifactId>
-<!--			<exclusions>-->
-<!--				<exclusion>-->
-<!--					<groupId>com.fasterxml.jackson.jaxrs</groupId>-->
-<!--					<artifactId>jackson-jaxrs-json-provider</artifactId>-->
-<!--				</exclusion>-->
-<!--			</exclusions>-->
+			<!--			<exclusions>-->
+			<!--				<exclusion>-->
+			<!--					<groupId>com.fasterxml.jackson.jaxrs</groupId>-->
+			<!--					<artifactId>jackson-jaxrs-json-provider</artifactId>-->
+			<!--				</exclusion>-->
+			<!--			</exclusions>-->
 		</dependency>
 		<dependency>
 			<groupId>io.swagger.core.v3</groupId>
 			<artifactId>swagger-core-jakarta</artifactId>
-<!--			<exclusions>-->
-<!--				<exclusion>-->
-<!--					<groupId>org.yaml</groupId>-->
-<!--					<artifactId>snakeyaml</artifactId>-->
-<!--				</exclusion>-->
-<!--				<exclusion>-->
-<!--					<groupId>com.fasterxml.jackson.dataformat</groupId>-->
-<!--					<artifactId>jackson-dataformat-yaml</artifactId>-->
-<!--				</exclusion>-->
-<!--				<exclusion>-->
-<!--					<groupId>jakarta.activation</groupId>-->
-<!--					<artifactId>jakarta.activation-api</artifactId>-->
-<!--				</exclusion>-->
-<!--				<exclusion>-->
-<!--					<groupId>jakarta.xml.bind</groupId>-->
-<!--					<artifactId>jakarta.xml.bind-api</artifactId>-->
-<!--				</exclusion>-->
-<!--			</exclusions>-->
+			<!--			<exclusions>-->
+			<!--				<exclusion>-->
+			<!--					<groupId>org.yaml</groupId>-->
+			<!--					<artifactId>snakeyaml</artifactId>-->
+			<!--				</exclusion>-->
+			<!--				<exclusion>-->
+			<!--					<groupId>com.fasterxml.jackson.dataformat</groupId>-->
+			<!--					<artifactId>jackson-dataformat-yaml</artifactId>-->
+			<!--				</exclusion>-->
+			<!--				<exclusion>-->
+			<!--					<groupId>jakarta.activation</groupId>-->
+			<!--					<artifactId>jakarta.activation-api</artifactId>-->
+			<!--				</exclusion>-->
+			<!--				<exclusion>-->
+			<!--					<groupId>jakarta.xml.bind</groupId>-->
+			<!--					<artifactId>jakarta.xml.bind-api</artifactId>-->
+			<!--				</exclusion>-->
+			<!--			</exclusions>-->
 		</dependency>
 		<dependency>
 			<groupId>io.swagger.core.v3</groupId>
 			<artifactId>swagger-jaxrs2-servlet-initializer-jakarta</artifactId>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>io.springfox</groupId>-->
-<!--			<artifactId>springfox-swagger2</artifactId>-->
-<!--			<exclusions>-->
-<!--				<exclusion>-->
-<!--					<groupId>org.springframework</groupId>-->
-<!--					<artifactId>spring-core</artifactId>-->
-<!--				</exclusion>-->
-<!--				<exclusion>-->
-<!--					<groupId>net.bytebuddy</groupId>-->
-<!--					<artifactId>byte-buddy</artifactId>-->
-<!--				</exclusion>-->
-<!--				<exclusion>-->
-<!--					<groupId>io.springfox</groupId>-->
-<!--					<artifactId>springfox-swagger-common</artifactId>-->
-<!--				</exclusion>-->
-<!--			</exclusions>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>io.springfox</groupId>-->
-<!--			<artifactId>springfox-swagger-ui</artifactId>-->
-<!--		</dependency>-->
+		<!--		<dependency>-->
+		<!--			<groupId>io.springfox</groupId>-->
+		<!--			<artifactId>springfox-swagger2</artifactId>-->
+		<!--			<exclusions>-->
+		<!--				<exclusion>-->
+		<!--					<groupId>org.springframework</groupId>-->
+		<!--					<artifactId>spring-core</artifactId>-->
+		<!--				</exclusion>-->
+		<!--				<exclusion>-->
+		<!--					<groupId>net.bytebuddy</groupId>-->
+		<!--					<artifactId>byte-buddy</artifactId>-->
+		<!--				</exclusion>-->
+		<!--				<exclusion>-->
+		<!--					<groupId>io.springfox</groupId>-->
+		<!--					<artifactId>springfox-swagger-common</artifactId>-->
+		<!--				</exclusion>-->
+		<!--			</exclusions>-->
+		<!--		</dependency>-->
+		<!--		<dependency>-->
+		<!--			<groupId>io.springfox</groupId>-->
+		<!--			<artifactId>springfox-swagger-ui</artifactId>-->
+		<!--		</dependency>-->
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>

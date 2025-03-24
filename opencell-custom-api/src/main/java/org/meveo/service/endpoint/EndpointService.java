@@ -57,7 +57,9 @@ import org.meveo.service.script.ScriptInstanceService;
 
 import com.api.jsonata4java.Expression;
 
+import jakarta.annotation.Resource;
 import jakarta.ejb.Stateless;
+import jakarta.enterprise.concurrent.ManagedExecutorService;
 import jakarta.enterprise.event.Event;
 import jakarta.inject.Inject;
 
@@ -120,6 +122,9 @@ public class EndpointService extends BusinessService<Endpoint> {
     @Inject
     @Processed
     private Event<EndpointExecutionResult> endpointExecuted;
+
+    @Resource(lookup = "java:jboss/ee/concurrency/executor/job_executor")
+    protected ManagedExecutorService executor;
 
     /**
      * Create a new endpoint in database. Also create associated client and roles in keycloak.
@@ -223,7 +228,7 @@ public class EndpointService extends BusinessService<Endpoint> {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-        });
+        }, executor);
 
         // Initialize endpoint execution result
         endpointCacheContainerProvider.initializeExecutionResult(asyncId, future, endpoint.getId());
@@ -288,7 +293,7 @@ public class EndpointService extends BusinessService<Endpoint> {
                     } catch (BusinessException e) {
                         throw new RuntimeException(e);
                     }
-                });
+                }, executor);
                 Map<String, Object> scriptResult = resultFuture.get(executionInformation.getDelayMax(), executionInformation.getDelayUnit());
                 executionResult.setResults(scriptResult);
 

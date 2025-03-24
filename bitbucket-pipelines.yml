@@ -9,11 +9,8 @@ definitions:
   steps:
     - step: &build-test-sonarcloud
         name: Build, test and analyze on SonarCloud
-        caches:
-          - maven
-          - sonar
         script:
-          - mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dmaven.repo.local=$MAVEN_CONFIG
+          - mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
         artifacts:
           - target/**
     - step: &mirror-to-github
@@ -34,3 +31,6 @@ pipelines:                 # More info here: https://confluence.atlassian.com/bi
   pull-requests:
     '**':
       - step: *build-test-sonarcloud
+  caches:
+      - maven
+      - sonar

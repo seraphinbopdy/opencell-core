@@ -13,7 +13,6 @@ definitions:
           - maven
           - sonar
         script:
-          - echo "Maven local repository: $MAVEN_CONFIG"
           - mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dmaven.repo.local=$MAVEN_CONFIG
         artifacts:
           - target/**

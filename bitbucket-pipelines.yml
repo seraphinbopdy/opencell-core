@@ -1,4 +1,4 @@
-image: 3.9-eclipse-temurin-21
+image: maven:3.9-eclipse-temurin-21
 
 clone:
   depth: full              # SonarCloud scanner needs the full history to assign issues properly

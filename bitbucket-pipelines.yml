@@ -13,9 +13,7 @@ definitions:
           - maven
           - sonar
         script:
-          # Add the following line to see the Maven local repository
           - echo "Maven local repository: $MAVEN_CONFIG"
-          # Use -Dmaven.repo.local to explicitly set the local repository
           - mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dmaven.repo.local=$MAVEN_CONFIG
         artifacts:
           - target/**

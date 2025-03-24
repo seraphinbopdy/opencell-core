@@ -102,7 +102,7 @@ import jakarta.validation.constraints.Size;
         @NamedQuery(name = "CustomerAccount.getMinimumAmountUsed", query = "select ca.minimumAmountEl from CustomerAccount ca where ca.minimumAmountEl is not null"),
         @NamedQuery(name = "CustomerAccount.getCustomerAccountsWithMinAmountELNotNullByBA", query = "select ca from CustomerAccount ca where ca.minimumAmountEl is not null AND ca.status = 'ACTIVE' AND ca=:customerAccount"),
         @NamedQuery(name = "CustomerAccount.getCountByParent", query = "select count(*) from CustomerAccount ca where ca.customer=:parent"),
-		@NamedQuery(name = "CustomerAccount.getCustomerAccountNotExistOnDunningCollectionPlan", query = "select ca from CustomerAccount ca where ca.status = 'ACTIVE' and ca.id not in (select distinct dcp.customerAccount.id from DunningCollectionPlan dcp where dcp.customerAccount.id = ca.id and dcp.status.status = ('ACTIVE'))"),
+		@NamedQuery(name = "CustomerAccount.getCustomerAccountNotExistOnDunningCollectionPlan", query = "select ca from CustomerAccount ca where ca.status = 'ACTIVE' and ca.id not in (select distinct dcp.customerAccount.id from DunningCollectionPlan dcp where dcp.customerAccount.id = ca.id and dcp.status.status = ('ONGOING'))"),
 })public class CustomerAccount extends AccountEntity implements IInvoicingMinimumApplicable, IWFEntity, ICounterEntity {
 
     private static final long serialVersionUID = 1L;

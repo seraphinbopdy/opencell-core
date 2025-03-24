@@ -17921,4 +17921,30 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
        </update>
     </changeSet>
 
+    <changeSet id="#INTRD-30098_20250321" author="AbdellatifBARI">
+        <update tableName="billing_tax">
+            <column name="description" value="ZERO TAX" />
+            <column name="taxation_category_id" value="2" />
+            <where>code='TAX_00'</where>
+        </update>
+        <update tableName="billing_tax">
+            <column name="code" value="TAX_05_5" />
+            <column name="description" value="5.5%" />
+            <column name="tax_percentage" valueNumeric="5.500000000000" />
+            <where>code='TAX_05'</where>
+        </update>
+        <update tableName="billing_tax">
+            <column name="description" value="10%" />
+            <where>code='TAX_10'</where>
+        </update>
+        <update tableName="billing_tax">
+            <column name="description" value="18%" />
+            <where>code='TAX_18'</where>
+        </update>
+        <update tableName="billing_tax">
+            <column name="description" value="20%" />
+            <where>code='TAX_20'</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

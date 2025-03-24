@@ -798,7 +798,6 @@ public class ReratingService extends RatingService implements Serializable {
 	private void reportErrors(JobExecutionResultImpl jobExecutionResult, String key, List<Long> value, int toProcess) {
 		int errorsToCompute = value.size();
 		errorsToCompute = errorsToCompute == toProcess || errorsToCompute == 0 ? 0 : errorsToCompute;
-		jobExecutionResult.registerError("" + value.size() + " errors of: " + key + " IDs: " + value.stream().map(String::valueOf).collect(Collectors.joining(", ")), errorsToCompute);
-		jobExecutionResult.addNbItemsCorrectlyProcessed(-errorsToCompute);
+		jobExecutionResult.registerError("" + value.size() + " errors of: " + key + " IDs: " + value.stream().map(String::valueOf).collect(Collectors.joining(", ")), 0);
 	}
 }

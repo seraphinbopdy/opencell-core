@@ -271,15 +271,6 @@
 			<artifactId>commons-io</artifactId>
 			<scope>provided</scope>
 		</dependency>
-
-		<!-- SLF4J API -->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
-
 	</dependencies>
 	<build>
 		<plugins>

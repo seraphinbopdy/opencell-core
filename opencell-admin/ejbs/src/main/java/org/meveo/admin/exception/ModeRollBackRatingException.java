@@ -21,7 +21,6 @@ package org.meveo.admin.exception;
 import jakarta.ejb.ApplicationException;
 import org.meveo.apiv2.billing.ProcessCdrListResult;
 
-
 /**
  * Groups rating related exceptions
  * 
@@ -32,7 +31,7 @@ public class ModeRollBackRatingException extends RuntimeException {
 
     private static final long serialVersionUID = -4006839791846079300L;
 
-	private ProcessCdrListResult processCdrListResult;
+    private ProcessCdrListResult processCdrListResult;
 
     public ModeRollBackRatingException() {
         super();
@@ -49,17 +48,18 @@ public class ModeRollBackRatingException extends RuntimeException {
     public ModeRollBackRatingException(Throwable cause) {
         super(cause);
     }
-	
-	public ModeRollBackRatingException(ProcessCdrListResult processCdrListResult, String message) {
-		super(message);
-		this.processCdrListResult = processCdrListResult;
-	}
-	
-	public ProcessCdrListResult getProcessCdrListResult() {
-		return processCdrListResult;
-	}
 
+    public ModeRollBackRatingException(ProcessCdrListResult processCdrListResult, String message) {
+        super(message);
+        this.processCdrListResult = processCdrListResult;
+    }
 
+    public ProcessCdrListResult getProcessCdrListResult() {
+        return processCdrListResult;
+    }
 
-	
+    @Override
+    public synchronized Throwable fillInStackTrace() {
+        return null;
+    }
 }

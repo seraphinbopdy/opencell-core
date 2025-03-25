@@ -868,6 +868,7 @@ public class CustomerAccountService extends AccountService<CustomerAccount> {
 
 
     public BigDecimal getCustomerAccountBalanceForFilteredAO(DunningCollectionPlan collectionPlan, List<String> linkedOccTemplates, CustomerBalance customerBalance, CustomerAccount customerAccount) {
+        var enabledPaymentStatusStatus = List.of(InvoicePaymentStatusEnum.UNPAID, InvoicePaymentStatusEnum.PPAID);
         CustomerAccount customerAccount1 = collectionPlan != null ? collectionPlan.getCustomerAccount() : customerAccount;
         List<AccountOperation> accountOperations = accountOperationService.getAccountOperations(customerAccount1.getId(),
                 null,
@@ -878,7 +879,7 @@ public class CustomerAccountService extends AccountService<CustomerAccount> {
         for (AccountOperation ao : accountOperations) {
             if (ao instanceof RecordedInvoice ri) {
                 if (ri.getUnMatchingAmount().compareTo(BigDecimal.ZERO) > 0) {
-                    if (!ri.getInvoice().isDunningCollectionPlanTriggered()) {
+                    if (!ri.getInvoice().isDunningCollectionPlanTriggered() && enabledPaymentStatusStatus.contains(ri.getInvoice().getPaymentStatus())) {
                         acs.add(ao);
 
                         if(collectionPlan != null && !collectionPlan.getRelatedInvoices().contains(ri.getInvoice())){

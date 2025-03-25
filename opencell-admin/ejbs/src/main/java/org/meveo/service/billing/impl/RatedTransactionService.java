@@ -336,10 +336,13 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
             if (financeSettingsService.isBillingRedirectionRulesEnabled()) {
                 applyInvoicingRules(ratedTransaction);
             }
+
+            ratedTransaction.setCreator(currentUser.getUserName());
             create(ratedTransaction);
             walletOperation.setRatedTransaction(ratedTransaction);
             walletOperationService.update(walletOperation);
         }
+
         return ratedTransaction;
     }
 

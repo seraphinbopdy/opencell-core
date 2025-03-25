@@ -348,9 +348,4 @@ public class CalendarPeriod extends Calendar {
     public boolean isInitializationRequired() {
         return true;
     }
-
-    @Override
-    public String getCalendarType() {
-        return "PERIOD";
-    }
 }

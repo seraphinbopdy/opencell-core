@@ -41,7 +41,7 @@
                             <p:spacer width="8" />
                             <h:outputText value='#{file.name}' />
                         </p:commandLink>
-                        <p:commandLink action="#{filesBean.setSelectedFileName(file.name)}" rendered="#{!filesBean.isDirectory()}" update=":fileExplorer" process="@this">
+                        <p:commandLink action="#{filesBean.setSelectedFileName(file.name)}" rendered="#{!filesBean.isDirectory(file)}" update=":fileExplorer" process="@this">
                             <i class="pi pi-file-#{filesBean.getFileType(file.name)}-o pi-2x"/>
                             <p:spacer width="8" />
                             <h:outputText value='#{file.name}' />
@@ -119,7 +119,7 @@
                             <p:ajax />
                         </p:selectBooleanCheckbox>
                     </hftl:decorateFormField>
-                    <p:fileUpload fileUploadListener="#{filesBean.handleFileUpload}" multiple="true" mode="advanced" dragDropSupport="true" fileLimit="5" update=":fileExplorer"
+                    <p:fileUpload listener="#{filesBean.handleFileUpload}" multiple="true" mode="advanced" dragDropSupport="true" fileLimit="5" update=":fileExplorer"
                         styleClass="TexAlCenter clearLeft" />
 
                 </p:fieldset>

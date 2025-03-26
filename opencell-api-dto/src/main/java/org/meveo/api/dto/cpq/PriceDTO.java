@@ -140,7 +140,7 @@ public class PriceDTO extends BaseEntityDto {
 			RecurringChargeTemplate recurringCharge = (RecurringChargeTemplate) quotePrice.getChargeTemplate();
 			unitNbDecimal = recurringCharge.getUnitNbDecimal();
 			calendarCode = recurringCharge.getCalendar().getCode();
-			calendarType = recurringCharge.getCalendar().getCalendarType();
+			calendarType = recurringCharge.getCalendar().getCalendarTypeResolved();
 		}
 	   TaxCategory taxCategoryEntity = quotePrice.getQuoteArticleLine() != null ? quotePrice.getQuoteArticleLine().getBillableAccount().getTaxCategory()!=null ? quotePrice.getQuoteArticleLine().getBillableAccount().getTaxCategory(): 
 	    	quotePrice.getQuoteArticleLine().getBillableAccount().getCustomerAccount().getCustomer().getCustomerCategory().getTaxCategory() : null;

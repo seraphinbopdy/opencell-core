@@ -43,6 +43,7 @@ import org.meveo.admin.exception.IncorrectChargeInstanceException;
 import org.meveo.admin.exception.IncorrectChargeTemplateException;
 import org.meveo.admin.exception.InvalidELException;
 import org.meveo.admin.exception.RatingException;
+import org.meveo.api.dto.CalendarTypeEnum;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.event.qualifier.Rejected;
 import org.meveo.jpa.JpaAmpNewTx;
@@ -383,7 +384,7 @@ public class RecurringRatingService extends RatingService implements Serializabl
                 if (cal == null) {
                     throw new IncorrectChargeTemplateException("Recurring charge instance has no calendar: id=" + chargeInstance.getId());
                 }
-                if(cal.getCalendarType() != null && cal.getCalendarType().equals("BANKING") && currentPeriodToDate != null && currentPeriodToDate.compareTo(currentPeriodFromDate) == 0) {
+                if(CalendarTypeEnum.BANKING.name().equals(cal.getCalendarTypeResolved()) && currentPeriodToDate != null && currentPeriodToDate.compareTo(currentPeriodFromDate) == 0) {
                 	throw new IllegalStateException("The given date: " +currentPeriodFromDate +" is not in period [startDate,endDate] of banking Calendar: "+ cal.getCode());
                 }
                

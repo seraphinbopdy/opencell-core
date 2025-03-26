@@ -31,6 +31,7 @@ import org.meveo.model.ObservableEntity;
 import jakarta.persistence.Cacheable;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
+import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
@@ -126,6 +127,14 @@ public abstract class Calendar extends BusinessEntity {
 
     public String getCalendarType() {
         return calendarType;
+    }
+
+    /**
+     * Gets a resolved calendar type by using the DiscriminatorValue annotation.
+     * @return Calendar type.
+     */
+    public String getCalendarTypeResolved() {
+        return this.getClass().getAnnotation(DiscriminatorValue.class).value();
     }
 
     /**

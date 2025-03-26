@@ -132,9 +132,4 @@ public class CalendarYearly extends Calendar {
     public Date truncateDateTime(Date dateToTruncate) {
         return DateUtils.setTimeToZero(dateToTruncate);
     }
-
-    @Override
-    public String getCalendarType() {
-        return "YEARLY";
-    }
 }

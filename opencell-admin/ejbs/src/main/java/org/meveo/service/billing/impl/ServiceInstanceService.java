@@ -1447,7 +1447,7 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
             boolean keepNull = true;
             for (RecurringChargeInstance chargeInstance : serviceInstance.getRecurringChargeInstances()) {
 
-                if((!chargeInstance.getCalendar().getCalendarType().equals("PERIOD") || !isCalendarPeriodSupported(chargeInstance.getCalendar()))  && !chargeInstance.getCalendar().getCalendarType().equals("YEARLY")) {
+                if((!CalendarTypeEnum.PERIOD.name().equals(chargeInstance.getCalendar().getCalendarTypeResolved()) || !isCalendarPeriodSupported(chargeInstance.getCalendar()))  && !CalendarTypeEnum.YEARLY.name().equals(chargeInstance.getCalendar().getCalendarTypeResolved())) {
                     continue;
                 }
 
@@ -1515,9 +1515,9 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
         int rounding = appProvider.getInvoiceRounding() != 0 ? appProvider.getInvoiceRounding() : 2 ;
         RoundingMode roundingMode = appProvider.getRoundingMode().getRoundingMode();
         Calendar lCalendar = PersistenceUtils.initializeAndUnproxy(calendar);
-        if (CalendarTypeEnum.PERIOD.toString().equals(lCalendar.getCalendarType())) {
+        if (CalendarTypeEnum.PERIOD.name().equals(lCalendar.getCalendarTypeResolved())) {
             mrr = mrr.add(calculatePeriodBasedMRR(woAmount, ((CalendarPeriod) lCalendar).getPeriodUnit(), ((CalendarPeriod) lCalendar).getPeriodLength()));
-        } else if (CalendarTypeEnum.YEARLY.toString().equals(lCalendar.getCalendarType())) {
+        } else if (CalendarTypeEnum.YEARLY.name().equals(lCalendar.getCalendarTypeResolved())) {
             mrr = woAmount.multiply(BigDecimal.valueOf(((CalendarYearly)lCalendar).getDays().size())).divide(BigDecimal.valueOf(12), rounding, roundingMode);
         }
         return mrr;

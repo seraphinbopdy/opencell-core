@@ -843,7 +843,8 @@ public class RatedTransaction extends CFEntity implements ISearchable, IInvoicea
         this.taxPercent = walletOperation.getTaxPercent();
         this.serviceInstance = walletOperation.getServiceInstance();
         this.status = RatedTransactionStatusEnum.OPEN;
-        this.updated = new Date();
+        this.created = new Date();
+        this.updated = this.created;
         this.taxClass = walletOperation.getTaxClass();
         this.inputUnitOfMeasure = walletOperation.getInputUnitOfMeasure();
         this.ratingUnitOfMeasure = walletOperation.getRatingUnitOfMeasure();

@@ -15967,4 +15967,31 @@ Meaning that advances won’t be available for further invoices."/>
 			<column name="description_i18n" value='{"FRA":"Désactiver la mise à jour synchrone du MRR","ENG":"Disable synchronous MRR update"}'/>
 		</insert>
 	</changeSet>
+	<changeSet id="INTRD-29281_20210306" author="abdelkader.bouazza">
+		<insert tableName="com_message_template">
+			<column name="media" value="EMAIL" />
+			<column name="id" valueSequenceNext="com_msg_tmpl_seq" />
+			<column name="version" value="0" />
+			<column name="created" valueDate="${db.current.time}" />
+			<column name="code" value="REPORT_QUERY_SCHEDULED_RESULT" />
+			<column name="type" value="OTHER"/>
+			<column name="tag_start" value="#{"/>
+			<column name="tag_end" value="}" />
+			<column name="description" value="Report scheduled query result" />
+			<column name="subject" value="[opencell] Query result #{reportQueryName} #{startDate}" />
+			<column name="htmlcontent">
+				<![CDATA[Dear #{userName},<br>
+<br>
+The result for your query is ready.<br>
+Check the result on <a href="#{portalResultLink}">Opencell Portal</a><br>
+Query : #{reportQueryName}<br>
+Started : #{startDate}<br>
+Line count : #{lineCount}<br>
+<br>
+Best regards,<br>
+Opencell team.
+                ]]>
+			</column>
+		</insert>
+	</changeSet>
 </databaseChangeLog>

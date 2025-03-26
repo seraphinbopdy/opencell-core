@@ -17947,4 +17947,15 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
         </update>
     </changeSet>
 
+    <changeSet id="#INTRD-30183_20250326" author="zelmeliani">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="billing_rated_transaction" columnName="creator"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="billing_rated_transaction">
+            <column name="creator" type="varchar(100)" />
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

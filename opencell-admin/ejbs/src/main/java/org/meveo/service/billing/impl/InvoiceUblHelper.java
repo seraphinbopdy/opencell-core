@@ -178,7 +178,7 @@ public class InvoiceUblHelper {
 	public Path createInvoiceUBL(org.meveo.model.billing.Invoice invoice){
 		Customer customer = invoice.getBillingAccount().getCustomerAccount().getCustomer();
 		// no EBL for individual customer
-		if(customer.getCustomerCategory() == null || "CLIENT".equals(customer.getCustomerCategory().getCode())) {
+		if(!invoice.getBillingAccount().getIsCompany()) {
             log.warn("No UBL for individual customer : {}", customer.getCode());
 			return null;
 		}

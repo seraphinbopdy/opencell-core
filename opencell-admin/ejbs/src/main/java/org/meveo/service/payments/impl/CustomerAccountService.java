@@ -868,7 +868,7 @@ public class CustomerAccountService extends AccountService<CustomerAccount> {
 
 
     public BigDecimal getCustomerAccountBalanceForFilteredAO(DunningCollectionPlan collectionPlan, List<String> linkedOccTemplates, CustomerBalance customerBalance, CustomerAccount customerAccount) {
-        var enabledPaymentStatusStatus = List.of(InvoicePaymentStatusEnum.UNPAID, InvoicePaymentStatusEnum.PPAID);
+        List<InvoicePaymentStatusEnum> enabledPaymentStatusStatus = List.of(InvoicePaymentStatusEnum.UNPAID, InvoicePaymentStatusEnum.PPAID);
         CustomerAccount customerAccount1 = collectionPlan != null ? collectionPlan.getCustomerAccount() : customerAccount;
         List<AccountOperation> accountOperations = accountOperationService.getAccountOperations(customerAccount1.getId(),
                 null,

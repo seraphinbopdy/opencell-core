@@ -220,7 +220,7 @@ public class ReportExtractService extends BusinessService<ReportExtract> {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private FileDetails writeAsHtml(String filename, StringBuilder sbDir, ScrollableResults results, ReportExtract entity) throws BusinessException {
-        FileWriter fileWriter = null;
+        Writer fileWriter = null;
         Map<String, Object> row = null;
         int rowNumber = 0;
         StringBuilder tableHeader = new StringBuilder();
@@ -284,8 +284,8 @@ public class ReportExtractService extends BusinessService<ReportExtract> {
             // create the output file, must be html
             FileUtils.createDirectory(sbDir.toString());
             File file = new File(sbDir.toString() + File.separator + filename);
-            file.createNewFile();
-            fileWriter = new FileWriter(file);
+            FileUtils.createNewFile(file);
+            fileWriter = FileUtils.getWriter(file);
             fileWriter.write(template);
             return new FileDetails(filename, rowNumber);
         } catch (Exception e) {
@@ -361,8 +361,8 @@ public class ReportExtractService extends BusinessService<ReportExtract> {
                     counter = 0;
                     filename = new StringBuilder(path[0]).append("_").append(format("%04d", ++fileSufix)).append(".").append(path[1]).toString();
                     file = new File(sbDir + File.separator + filename);
-                    file.createNewFile();
-                    fileWriter = new FileWriter(file);
+                    FileUtils.createNewFile(file);
+                    fileWriter = FileUtils.getWriter(file);
                     fileNames.add(filename);
                     fileWriter.write(header.toString());
                     fileWriter.write(System.lineSeparator());

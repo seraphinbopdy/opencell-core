@@ -588,7 +588,7 @@ public class IngenicoDirectGatewayPayment implements GatewayPaymentInterface {
 
             MandateAddress address = new MandateAddress();
             if (customerAccount.getAddress() != null) {
-                address.setCity(customerAccount.getAddress().getCity());
+            	address.setCity(customerAccount.getAddress().getCity().replaceAll("\\d", ""));
                 address.setCountryCode(customerAccount.getAddress().getCountry() == null ? null : customerAccount.getAddress().getCountry().getCountryCode());
                 
                 String address1=customerAccount.getAddress().getAddress1();

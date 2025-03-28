@@ -171,7 +171,8 @@ public class JobExecutionService extends BaseService {
         jobCompletionCountDowns.put(jobInstance.getId(), countDown);
 
         try {
-            countDown.await(10, TimeUnit.SECONDS);
+	       // countDown.await(10, TimeUnit.SECONDS);
+	        countDown.await();
 
         } catch (InterruptedException e) {
             log.error("Interrupted while waiting for job {} with result ID {} to complete", jobInstance.getCode(), jobResultId, e);

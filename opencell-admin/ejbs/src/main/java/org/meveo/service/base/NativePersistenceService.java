@@ -1276,7 +1276,9 @@ public class NativePersistenceService extends BaseService {
         NativeQuery query = queryBuilder.getNativeQuery(getEntityManager(), true);
 
         if (config!=null && config.isCacheable()) {
-
+			if(fieldDataTypeMappings != null){
+				refreshTableFieldMapping(tableName);
+			}
             Map<String, CustomFieldTypeEnum> tableFieldTypes = fieldDataTypeMappings.get(tableName);
 
             if (tableFieldTypes != null) {

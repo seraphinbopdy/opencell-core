@@ -18,29 +18,27 @@
 
 package org.meveo.api.rest.admin;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.Hidden;
-
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.MediaType;
-
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 import org.meveo.api.dto.ActionStatus;
 import org.meveo.api.dto.admin.FileRequestDto;
 import org.meveo.api.dto.response.admin.GetFilesResponseDto;
 import org.meveo.api.rest.IBaseRs;
 import org.meveo.api.rest.admin.impl.FileUploadForm;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
 
 /**
  * @author Edward P. Legaspi
@@ -284,15 +282,15 @@ public interface FilesRs extends IBaseRs {
     ActionStatus uploadZippedFileBase64(FileRequestDto postData);
 
     /**
-     * Download file with a given file name.
+     * Download file with a given file name. Filename passed as part of URL path or query parameter.
      *
      * @param file file name
      * @return Request processing status
      */
     @GET
-    @Path("/downloadFile")
+    @Path("/downloadFile{fullFilePath:.*}")
 	@Operation(
-			summary=" Download file with a given file name. ",
+			summary=" Download file with a given file name. Filename passed as part of URL path or query parameter. ",
 			description=" Download file with a given file name. ",
 			operationId="    GET_Files_downloadFile",
 			responses= {
@@ -304,10 +302,9 @@ public interface FilesRs extends IBaseRs {
 								)
 				)}
 	)
-    ActionStatus downloadFile(@QueryParam("file") String file);
-
-
-
+    ActionStatus downloadFile(@PathParam("fullFilePath") @Parameter(description = "File to download, passed as part of URL path") String fullFilePath,
+            @QueryParam("file") @Parameter(description = "File to download, passed as query parameter") String file);
+    
 	/**
 	 * Move a file or directory from a given source path to a given destination path.
 	 *

@@ -38,6 +38,23 @@ public class BillingRunReportJobBean extends BaseJobBean {
     private MethodCallingUtils methodCallingUtils;
 
     public void execute(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance) {
+        
+        List<EntityReferenceWrapper> billingRunWrappers =
+                (List<EntityReferenceWrapper>) this.getParamOrCFValue(jobInstance, "billingRuns");
+        billingRunIds = billingRunWrappers != null ? extractBRIds(billingRunWrappers) : emptyList();
+        List<BillingRun> billingRuns = initJobAndGetDataToProcess();
+        methodCallingUtils.callMethodInNewTx(() -> executeInTx(jobExecutionResult, jobInstance));   
+
+        if (billingRuns != null && !billingRuns.isEmpty()) {
+            for (BillingRun billingRun : billingRuns) {
+                methodCallingUtils.callMethodInNewTx(() -> billingRunService.updateBillingRunJobExecution(billingRun.getId(), jobExecutionResult));
+            }
+        }
+        
+    }
+
+    private void executeInTx(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance) {
+
         List<EntityReferenceWrapper> billingRunWrappers =
                 (List<EntityReferenceWrapper>) this.getParamOrCFValue(jobInstance, "billingRuns");
         billingRunIds = billingRunWrappers != null ? extractBRIds(billingRunWrappers) : emptyList();
@@ -52,13 +69,8 @@ public class BillingRunReportJobBean extends BaseJobBean {
         } catch (Exception exception) {
             jobExecutionResult.registerError(exception.getMessage());
             log.error(exception.getMessage());
-        } finally {
-            if (billingRuns != null && !billingRuns.isEmpty()) {
-                for (BillingRun billingRun : billingRuns) {
-                    methodCallingUtils.callMethodInNewTx(() -> billingRunService.updateBillingRunJobExecution(billingRun.getId(), jobExecutionResult));
-                }
-            }
         }
+
     }
 
     private List<Long> extractBRIds(List<EntityReferenceWrapper> billingRunWrappers) {

@@ -117,7 +117,7 @@ public class ClusterEventPublisher implements Serializable {
     public Object publishEvent(IEntity entity, ClusterEventActionEnum action, Map<String, Object> additionalInformation, boolean expectResponse, String messageId, Long timeToWait) {
 
         // Don't send JMS messages if not running in cluster mode expect when its execution result lookup for Endpoint
-        if (!EjbUtils.isRunningInClusterMode() && action != ClusterEventActionEnum.getEndpointExecutionResult) {
+        if (!EjbUtils.isRunningInClusterMode() && action != ClusterEventActionEnum.getEndpointExecutionResult && action != ClusterEventActionEnum.jobExecutionCompleted) {
             return null;
         }
 

@@ -189,7 +189,6 @@
             <column name="description" value="Dummy payment pateway script"/>
             <column name="created" valueDate="${db.current.time}" />
             <column name="script"><![CDATA[package org.meveo.service.script;
-package org.meveo.service.script;
 
 import org.meveo.admin.exception.BusinessException;
 

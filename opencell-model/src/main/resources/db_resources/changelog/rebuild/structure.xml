@@ -20925,6 +20925,7 @@
     <changeSet id="#INTRD-28562_update_dunning_collection_plan_status" author="zelmeliani" />
     <changeSet id="#INTRD-30098_20250321" author="AbdellatifBARI" />
     <changeSet id="#INTRD-30183_20250326" author="zelmeliani" />
+    <changeSet id="INTRD-29281_20210306" author="abdelkader.bouazza" />
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

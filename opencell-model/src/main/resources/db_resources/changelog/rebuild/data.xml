@@ -15967,7 +15967,7 @@ Meaning that advances won’t be available for further invoices."/>
 			<column name="description_i18n" value='{"FRA":"Désactiver la mise à jour synchrone du MRR","ENG":"Disable synchronous MRR update"}'/>
 		</insert>
 	</changeSet>
-	<changeSet id="INTRD-29281_20210306" author="abdelkader.bouazza">
+	<changeSet id="INTRD-29281_20210306-rebuild" author="abdelkader.bouazza">
 		<insert tableName="com_message_template">
 			<column name="media" value="EMAIL" />
 			<column name="id" valueSequenceNext="com_msg_tmpl_seq" />

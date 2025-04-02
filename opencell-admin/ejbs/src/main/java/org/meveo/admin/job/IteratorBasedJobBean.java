@@ -144,7 +144,7 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
     /**
      * On WF 34 JVM 21 docker installation for some reason large objects can not be deserialized because of default filter.
      */
-    private static final ObjectInputFilter OBJECT_INPUT_FILTER = ObjectInputFilter.Config.createFilter("maxdepth=1000;maxarray=10000000;maxbytes=20000000");
+    private static final ObjectInputFilter OBJECT_INPUT_FILTER = ObjectInputFilter.Config.createFilter("maxdepth=1000;maxarray=10000000;maxbytes=1000000000");
 
     @Inject
     private MethodCallingUtils methodCallingUtils;

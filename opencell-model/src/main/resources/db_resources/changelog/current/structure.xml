@@ -5164,7 +5164,7 @@ Your name and surname
         </update>
     </changeSet>
 
-    <changeSet id="#INTRD-12827_20230904" author="zelmeliani">
+    <changeSet id="#INTRD-12827_20230904" author="zelmeliani" failOnError="false">
         <insert tableName="meveo_script_instance">
             <column name="id" valueSequenceNext="meveo_script_instance_seq" />
             <column name="version" valueNumeric="0" />

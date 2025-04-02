@@ -230,6 +230,9 @@
 		<field name="name" class="java.lang.String">
 			<description><![CDATA[quote/billableAccounts/quoteLots/quoteLot/@name]]></description>
 		</field>
+		<field name="language" class="java.lang.String">
+			<description><![CDATA[ancestor::quote/header/billingAccount/@lang]]></description>
+		</field>
 	</dataset>
 	<dataset name="taxList" uuid="65d763de-aa7b-4efc-a212-3638bd8300dc">
 		<query language="xPath"><![CDATA[/quote/header/taxDetail/taxes/tax]]></query>
@@ -257,6 +260,13 @@
 		</field>
 		<field name="country" class="java.lang.String">
 			<description><![CDATA[ancestor::quote/header/billingAccount/@country]]></description>
+		</field>
+		<field name="language" class="java.lang.String">
+			<description><![CDATA[ancestor::quote/header/billingAccount/@lang]]></description>
+		</field>
+		<field name="currencySymbol" class="java.lang.String">
+			<description><![CDATA[/quote/details/quotePrices/price/currencySymbol]]></description>
+			<property name="net.sf.jasperreports.xpath.field.expression" value="/quote/details/quotePrices/price/currencySymbol"/>
 		</field>
 		<sortField name="index"/>
 	</dataset>
@@ -286,6 +296,9 @@
 		</field>
 		<field name="country" class="java.lang.String">
 			<description><![CDATA[ancestor::quote/header/billingAccount/@country]]></description>
+		</field>
+		<field name="language" class="java.lang.String">
+			<description><![CDATA[ancestor::quote/header/billingAccount/@lang]]></description>
 		</field>
 	</dataset>
 	<dataset name="ba_prices" uuid="5584035b-3f01-4c5b-b63f-2bc9582f7d4a">
@@ -329,6 +342,9 @@
 		</field>
 		<field name="recurrencePeriodicity" class="java.lang.String">
 			<description><![CDATA[recurrencePeriodicity]]></description>
+		</field>
+		<field name="language" class="java.lang.String">
+			<description><![CDATA[ancestor::quote/header/billingAccount/@lang]]></description>
 		</field>
 	</dataset>
 	<dataset name="line_prices" uuid="f4a51d10-a40b-44a8-ab1f-124785a429d2">
@@ -391,6 +407,9 @@
 		<field name="country" class="java.lang.String">
 			<description><![CDATA[ancestor::quote/header/billingAccount/@country]]></description>
 		</field>
+		<field name="language" class="java.lang.String">
+			<description><![CDATA[ancestor::quote/header/billingAccount/@lang]]></description>
+		</field>
 	</dataset>
 	<dataset name="discountsFooter" uuid="f4a51d10-a40b-44a8-ab1f-124785a429d2">
 		<query language="xPath"><![CDATA[/quote/details]]></query>
@@ -452,6 +471,9 @@
 		<field name="country" class="java.lang.String">
 			<description><![CDATA[ancestor::quote/header/billingAccount/@country]]></description>
 		</field>
+		<field name="language" class="java.lang.String">
+			<description><![CDATA[ancestor::quote/header/billingAccount/@lang]]></description>
+		</field>
 	</dataset>
 	<parameter name="logoPath" forPrompting="false" class="java.lang.String">
 		<defaultValueExpression><![CDATA["./"]]></defaultValueExpression>
@@ -473,7 +495,8 @@
 		<description><![CDATA[/quote/details/quote/quoteDate]]></description>
 	</field>
 	<field name="quoteNumber" class="java.lang.String">
-		<description><![CDATA[/quote/details/quote/@quoteNumber]]></description>
+		<description><![CDATA[/quote/details/quote/quoteNumber]]></description>
+		<property name="net.sf.jasperreports.xpath.field.expression" value="/quote/details/quote/quoteNumber"/>
 	</field>
 	<field name="unitPriceWithoutTax_recurring" class="java.lang.String">
 		<description><![CDATA[/quote/details/quotePrices/price[@priceType='RECURRING']//unitPriceWithoutTax]]></description>
@@ -575,6 +598,10 @@
 	<field name="country" class="java.lang.String">
 		<description><![CDATA[/quote/header/billingAccount/@country]]></description>
 		<property name="net.sf.jasperreports.xpath.field.expression" value="/quote/header/billingAccount/address/country"/>
+	</field>
+	<field name="language" class="java.lang.String">
+		<description><![CDATA[/quote/header/billingAccount/@lang]]></description>
+		<property name="net.sf.jasperreports.xpath.field.expression" value="/quote/header/billingAccount/@lang"/>
 	</field>
 	<field name="countryName" class="java.lang.String">
 		<description><![CDATA[/quote/header/billingAccount/address/countryName]]></description>
@@ -751,12 +778,12 @@
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<pen lineWidth="0.0" lineColor="rgba(0, 0, 0, 0.0)"/>
 				</element>
-				<element kind="staticText" uuid="0aeff465-795c-4db5-9f5a-eea6c5d0d8f7" mode="Opaque" x="17" y="-63" width="159" height="23" forecolor="#030303" backcolor="#F2F4F5" fontName="SansSerif" fontSize="14.0" bold="true" hTextAlign="Left" vTextAlign="Middle">
-					<text><![CDATA[Bill to]]></text>
+				<element kind="textField" uuid="0aeff465-795c-4db5-9f5a-eea6c5d0d8f7" mode="Opaque" x="17" y="-63" width="159" height="23" forecolor="#030303" backcolor="#F2F4F5" fontName="SansSerif" fontSize="14.0" bold="true" hTextAlign="Left" vTextAlign="Middle">
+					<expression><![CDATA[($F{language}=="FRA" ? "Facturé à" : "Bill to")]]></expression>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					<box topPadding="0" leftPadding="20" bottomPadding="0" rightPadding="0">
+					<box topPadding="0" leftPadding="5" bottomPadding="0" rightPadding="0">
 						<pen lineWidth="5.0" lineColor="#FF8C00"/>
 						<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 						<leftPen lineWidth="1.5" lineStyle="Solid" lineColor="#FF0000"/>
@@ -764,12 +791,12 @@
 						<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					</box>
 				</element>
-				<element kind="staticText" uuid="740e143a-958c-4d3c-9305-79891906ab8a" mode="Opaque" x="300" y="-63" width="149" height="23" forecolor="#030303" backcolor="#F2F4F5" fontName="SansSerif" fontSize="14.0" bold="true" hTextAlign="Left" vTextAlign="Middle">
-					<text><![CDATA[Sell to]]></text>
+				<element kind="textField" uuid="740e143a-958c-4d3c-9305-79891906ab8a" mode="Opaque" x="300" y="-63" width="149" height="23" forecolor="#030303" backcolor="#F2F4F5" fontName="SansSerif" fontSize="14.0" bold="true" hTextAlign="Left" vTextAlign="Middle">
+					<expression><![CDATA[($F{language}=="FRA" ? "Vendu à" : "Sell to")]]></expression>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					<box topPadding="0" leftPadding="20" bottomPadding="0" rightPadding="0">
+					<box topPadding="0" leftPadding="5" bottomPadding="0" rightPadding="0">
 						<pen lineWidth="5.0" lineColor="#FF8C00"/>
 						<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 						<leftPen lineWidth="1.5" lineStyle="Solid" lineColor="#FF0000"/>
@@ -811,24 +838,21 @@
 	</group>
 	<group name="2">
 		<groupHeader>
-			<band height="296">
-				<element kind="rectangle" uuid="b574364c-d694-4cc9-907a-491064641b68" x="14" y="237" width="564" height="40" backcolor="#F2F2F2"/>
-				<element kind="staticText" uuid="3fc08cf9-48a2-439e-92e2-f05e3a3c9fcb" x="16" y="249" width="562" height="27" fontName="SansSerif" fontSize="10.0" bold="false">
-					<text><![CDATA[Any amounts owned that are not paid will due shall bear interest, from the time the payment was due until the time paid,          at a rate of 10% per annum compounded annually.]]></text>
-				</element>
-				<element kind="staticText" uuid="8847a726-4871-4242-b223-1d7434e57587" x="16" y="237" width="514" height="19" fontName="SansSerif" fontSize="10.0" bold="false">
-					<text><![CDATA[No early payment discount.]]></text>
+			<band height="327">
+				<element kind="rectangle" uuid="b574364c-d694-4cc9-907a-491064641b68" x="14" y="237" width="571" height="90" backcolor="#F2F2F2"/>
+				<element kind="textField" uuid="8847a726-4871-4242-b223-1d7434e57587" x="18" y="242" width="565" height="85" fontName="SansSerif" fontSize="10.0" bold="false">
+					<expression><![CDATA[($F{language}=="FRA" ? "Le présent devis est établi conformément aux conditions générales de vente qui s'appliquent à l'ensemble des commandes et demandes de prestations proposées. \nA sa demande une copie des conditions générales de vente ou des conditions particulières de vente peut lui être fournie par son interlocuteur commercial. \nDès la signature du présent devis, le client déclare avoir pris connaissance et accepte l'ensemble des conditions générales de vente, et le cas échéant des conditions particulières de vente liées aux prestations afférentes" : "This quote is established in accordance with the general conditions of sale which apply to all orders and requests for services offered. \nAt his request, a copy of the general conditions of sale or the specific conditions of sale can be provided to him by his commercial contact. \nUpon signing this quote, the customer declares that they have read and accept all of the general terms and conditions of sale, and where applicable, the specific terms and conditions of sale relating to the related services.")]]></expression>
 				</element>
 				<element kind="rectangle" uuid="ef23aa63-228b-43c3-bc44-29bc37f3fc8d" x="15" y="40" width="205" height="191" forecolor="#FFFFFF" backcolor="#F2F4F5" radius="0">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<pen lineWidth="0.0" lineColor="rgba(0, 0, 0, 0.0)"/>
 				</element>
-				<element kind="staticText" uuid="d9421f6a-7328-4791-b9df-cc1fea8ac385" mode="Opaque" x="16" y="40" width="127" height="23" forecolor="#030303" backcolor="#F2F4F5" fontName="SansSerif" fontSize="14.0" bold="true" hTextAlign="Left" vTextAlign="Middle">
-					<text><![CDATA[Comment]]></text>
+				<element kind="textField" uuid="d9421f6a-7328-4791-b9df-cc1fea8ac385" mode="Opaque" x="16" y="40" width="127" height="23" forecolor="#030303" backcolor="#F2F4F5" fontName="SansSerif" fontSize="14.0" bold="true" hTextAlign="Left" vTextAlign="Middle">
+					<expression><![CDATA[($F{language}=="FRA" ? "Commentaire" : "Comment")]]></expression>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					<box topPadding="0" leftPadding="20" bottomPadding="0" rightPadding="0">
+					<box topPadding="0" leftPadding="5" bottomPadding="0" rightPadding="0">
 						<pen lineWidth="5.0" lineColor="#FF8C00"/>
 						<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 						<leftPen lineWidth="1.5" lineStyle="Solid" lineColor="#FF0000"/>
@@ -845,10 +869,12 @@
 					<expression><![CDATA[($F{country}=="FR" || $F{country}=="UK") ? (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.FRENCH)).format(new Double($F{sumAmountWithTax}))) : (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.US)).format(new Double($F{sumAmountWithTax})))]]></expression>
 				</element>
 				<element kind="textField" uuid="aa7621f4-c480-4ae2-857f-9417e72a30bd" x="248" y="157" width="100" height="27" forecolor="#0D0101" fontName="SansSerif" fontSize="10.0" hTextAlign="Right" vTextAlign="Middle">
-					<expression><![CDATA[($F{caCountryCode}=="FR" || $F{caCountryCode}=="UK") ? (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.FRENCH)).format(new Double($F{sumAmountWithoutTax}))) : (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.US)).format(new Double($F{sumAmountWithoutTax})))]]></expression>
+					<expression><![CDATA[($F{caCountryCode}=="FR" || $F{caCountryCode}=="UK") ? 
+(new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.FRENCH)).format(new Double($F{sumAmountWithoutTax})) + " " + $F{currencySymbol}) : 
+(new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.US)).format(new Double($F{sumAmountWithoutTax})) + " " + $F{currencySymbol})]]></expression>
 				</element>
 				<element kind="textField" uuid="3ce339af-e6f9-4e85-a195-f0cdf7eea0c5" x="518" y="193" width="48" height="28" forecolor="#0D0101" fontName="SansSerif" fontSize="16.0" bold="false" hTextAlign="Left" vTextAlign="Middle">
-					<expression><![CDATA[$F{providerCurrencySymbol}]]></expression>
+					<expression><![CDATA[$F{currencySymbol}]]></expression>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
@@ -860,8 +886,8 @@
 						<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					</box>
 				</element>
-				<element kind="staticText" uuid="2ec5fba6-2ead-4a5f-a7cc-10e6d7fb20be" x="248" y="145" width="100" height="12" forecolor="#0D0101" fontName="SansSerif" fontSize="10.0" bold="true" italic="false" hTextAlign="Right" vTextAlign="Middle">
-					<text><![CDATA[Total w/o tax]]></text>
+				<element kind="textField" uuid="2ec5fba6-2ead-4a5f-a7cc-10e6d7fb20be" x="248" y="145" width="100" height="12" forecolor="#0D0101" fontName="SansSerif" fontSize="10.0" italic="false" bold="true" hTextAlign="Right" vTextAlign="Middle">
+					<expression><![CDATA[($F{language}=="FRA" ? "Total HT" : "Total w/o tax")]]></expression>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
@@ -873,8 +899,8 @@
 						<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					</box>
 				</element>
-				<element kind="staticText" uuid="07f4f924-4a07-4caf-be41-fa872177f18c" x="248" y="194" width="100" height="26" forecolor="#0D0101" fontName="SansSerif" fontSize="16.0" bold="false" italic="false" hTextAlign="Right" vTextAlign="Middle">
-					<text><![CDATA[Net to pay]]></text>
+				<element kind="textField" uuid="07f4f924-4a07-4caf-be41-fa872177f18c" x="248" y="194" width="100" height="26" forecolor="#0D0101" fontName="SansSerif" fontSize="16.0" italic="false" bold="false" hTextAlign="Right" vTextAlign="Middle">
+					<expression><![CDATA[($F{language}=="FRA" ? "Net à payer" : "Net to pay")]]></expression>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
@@ -889,8 +915,8 @@
 				<element kind="line" uuid="a9cbc2e8-1789-43d2-838d-ac82a1144ee9" x="248" y="158" width="309" height="1" forecolor="#999999">
 					<pen lineWidth="1.0" lineColor="#CCCCCC"/>
 				</element>
-				<element kind="staticText" uuid="6f3b8ccd-cce3-478a-b980-fe6f071eb9a0" x="374" y="145" width="73" height="12" forecolor="#0D0101" fontName="SansSerif" fontSize="10.0" bold="true" italic="false" hTextAlign="Right" vTextAlign="Middle">
-					<text><![CDATA[Total tax]]></text>
+				<element kind="textField" uuid="6f3b8ccd-cce3-478a-b980-fe6f071eb9a0" x="374" y="145" width="73" height="12" forecolor="#0D0101" fontName="SansSerif" fontSize="10.0" italic="false" bold="true" hTextAlign="Right" vTextAlign="Middle">
+					<expression><![CDATA[($F{language}=="FRA" ? "Taxe totale" : "Total tax")]]></expression>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
@@ -902,8 +928,8 @@
 						<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					</box>
 				</element>
-				<element kind="staticText" uuid="4d34a4d2-96c4-4247-ae84-ea671e405637" x="484" y="145" width="73" height="12" forecolor="#0D0101" fontName="SansSerif" fontSize="10.0" bold="true" italic="false" hTextAlign="Right" vTextAlign="Middle">
-					<text><![CDATA[Total incl. tax]]></text>
+				<element kind="textField" uuid="4d34a4d2-96c4-4247-ae84-ea671e405637" mode="Transparent" x="484" y="145" width="73" height="12" forecolor="#0D0101" fontName="SansSerif" fontSize="10.0" italic="false" bold="true" hTextAlign="Right" vTextAlign="Middle">
+					<expression><![CDATA[($F{language}=="FRA" ? "Total TTC" : "Total incl. tax")]]></expression>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
@@ -916,21 +942,21 @@
 					</box>
 				</element>
 				<element kind="textField" uuid="9d459e04-5e4e-4986-8323-014df051a770" x="458" y="157" width="99" height="27" forecolor="#0D0101" fontName="SansSerif" fontSize="10.0" hTextAlign="Right" vTextAlign="Middle">
-					<expression><![CDATA[($F{caCountryCode}=="FR" || $F{caCountryCode}=="UK") ? (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.FRENCH)).format(new Double($F{sumAmountWithTax}))) : (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.US)).format(new Double($F{sumAmountWithTax})))]]></expression>
+					<expression><![CDATA[($F{caCountryCode}=="FR" || $F{caCountryCode}=="UK") ? (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.FRENCH)).format(new Double($F{sumAmountWithTax})) + " " + $F{currencySymbol}) : (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.US)).format(new Double($F{sumAmountWithTax})) + " " + $F{currencySymbol})]]></expression>
 				</element>
 				<element kind="textField" uuid="b56a4b47-68c9-476f-ba30-a2f663963d12" x="348" y="157" width="99" height="27" forecolor="#0D0101" fontName="SansSerif" fontSize="10.0" hTextAlign="Right" vTextAlign="Middle">
-					<expression><![CDATA[($F{caCountryCode}=="FR" || $F{caCountryCode}=="UK") ? (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.FRENCH)).format(new Double($F{sumAmountTax}))) : (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.US)).format(new Double($F{sumAmountTax})))]]></expression>
+					<expression><![CDATA[($F{caCountryCode}=="FR" || $F{caCountryCode}=="UK") ? (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.FRENCH)).format(new Double($F{sumAmountTax})) + " " + $F{currencySymbol}) : (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.US)).format(new Double($F{sumAmountTax})) + " " + $F{currencySymbol})]]></expression>
 				</element>
-				<element kind="component" uuid="78b31ce1-104f-4b7f-a671-7776c1496f63" key="" positionType="Float" x="227" y="28" width="358" height="80" forecolor="#000000" printRepeatedValues="false" printWhenDetailOverflows="true">
+				<element kind="component" uuid="78b31ce1-104f-4b7f-a671-7776c1496f63" key="" positionType="Float" x="227" y="40" width="358" height="80" forecolor="#000000" printWhenDetailOverflows="true" printRepeatedValues="false">
 					<component kind="table" whenNoDataType="Blank">
 						<datasetRun uuid="f15bb70b-0e76-4d0e-9e54-2c887b8f216e" subDataset="taxList">
 							<dataSourceExpression><![CDATA[$P{REPORT_DATA_SOURCE}.dataSource("/quote/header/taxDetail/taxes/tax")]]></dataSourceExpression>
 						</datasetRun>
 						<column kind="single" uuid="b616e49a-baae-4c23-b17f-7b9d0969282b" width="30">
 							<tableHeader height="14" rowSpan="1">
-								<element kind="staticText" uuid="54016890-da20-4008-86e7-52712e6be2d1" x="0" y="0" width="30" height="14" fontName="SansSerif" fontSize="11.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+								<element kind="textField" uuid="54016890-da20-4008-86e7-52712e6be2d1" x="0" y="0" width="30" height="14" fontName="SansSerif" fontSize="11.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
 									<printWhenExpression><![CDATA[$V{PAGE_NUMBER}==1]]></printWhenExpression>
-									<text><![CDATA[VAT]]></text>
+									<expression><![CDATA[($F{language}=="FRA" ? "TVA" : "VAT")]]></expression>
 									<box leftPadding="2">
 										<leftPen lineWidth="0.0"/>
 									</box>
@@ -954,9 +980,9 @@
 						</column>
 						<column kind="single" uuid="da2fa8ac-2a8c-4099-a8c3-6850765d0409" width="180">
 							<tableHeader height="14" rowSpan="1">
-								<element kind="staticText" uuid="c2f2a7c1-181f-4ef5-946d-5f3b9a636829" x="0" y="0" width="180" height="14" fontName="SansSerif" fontSize="11.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+								<element kind="textField" uuid="c2f2a7c1-181f-4ef5-946d-5f3b9a636829" x="0" y="0" width="180" height="14" fontName="SansSerif" fontSize="11.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
 									<printWhenExpression><![CDATA[$V{PAGE_NUMBER}==1]]></printWhenExpression>
-									<text><![CDATA[VAT rate]]></text>
+									<expression><![CDATA[($F{language}=="FRA" ? "Taux TVA" : "VAT rate")]]></expression>
 									<box leftPadding="2">
 										<leftPen lineWidth="0.0"/>
 									</box>
@@ -982,7 +1008,7 @@
 							<tableHeader height="14" rowSpan="1">
 								<element kind="textField" uuid="5dd5e923-4b5f-42e3-9cad-ac9ed4d87faf" x="0" y="0" width="80" height="14" fontName="SansSerif" fontSize="11.0" bold="true" hTextAlign="Right" vTextAlign="Middle">
 									<printWhenExpression><![CDATA[$V{PAGE_NUMBER}==1]]></printWhenExpression>
-									<expression><![CDATA["Price w/o tax"]]></expression>
+									<expression><![CDATA[($F{language}=="FRA" ? "Prix HT" : "Price w/o tax")]]></expression>
 									<box leftPadding="2">
 										<leftPen lineWidth="0.0"/>
 									</box>
@@ -994,7 +1020,7 @@
 							<tableFooter height="11" rowSpan="1"/>
 							<detailCell height="15" rowSpan="1">
 								<element kind="textField" uuid="374907ae-b19d-472a-9f7c-c004a68f5af0" x="0" y="0" width="80" height="15" fontName="SansSerif" fontSize="11.0" blankWhenNull="true" printWhenDetailOverflows="true" bold="false" hTextAlign="Right" vTextAlign="Middle">
-									<expression><![CDATA[($F{country}=="FR" || $F{country}=="UK") ? (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.FRENCH)).format(new Double($F{amountWithoutTax}))) : (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.US)).format(new Double($F{amountWithoutTax})))]]></expression>
+									<expression><![CDATA[($F{country}=="FR" || $F{country}=="UK") ? (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.FRENCH)).format(new Double($F{amountWithoutTax})) + " " + $F{currencySymbol}) : (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.US)).format(new Double($F{amountWithoutTax})) + " " + $F{currencySymbol})]]></expression>
 								</element>
 								<box>
 									<pen lineWidth="0.0"/>
@@ -1009,7 +1035,7 @@
 							<tableHeader height="14" rowSpan="1">
 								<element kind="textField" uuid="dcb048fb-a31e-438e-8aab-3d3e179d0892" x="0" y="0" width="68" height="14" forecolor="#000000" fontName="SansSerif" fontSize="11.0" bold="true" hTextAlign="Right" vTextAlign="Middle">
 									<printWhenExpression><![CDATA[$V{PAGE_NUMBER}==1]]></printWhenExpression>
-									<expression><![CDATA["Tax"]]></expression>
+									<expression><![CDATA[($F{language}=="FRA" ? "Taxe" : "Tax")]]></expression>
 									<box leftPadding="2">
 										<leftPen lineWidth="0.0"/>
 										<rightPen lineWidth="0.0"/>
@@ -1022,7 +1048,7 @@
 							<tableFooter height="11" rowSpan="1"/>
 							<detailCell height="15" rowSpan="1">
 								<element kind="textField" uuid="43195940-f233-4089-acbe-885f248166f6" x="0" y="0" width="68" height="15" fontName="SansSerif" fontSize="11.0" pattern="#,##0.00" blankWhenNull="true" bold="false" hTextAlign="Right" vTextAlign="Middle">
-									<expression><![CDATA[($F{country}=="FR" || $F{country}=="UK") ? (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.FRENCH)).format(new Double($F{amountTax}))) : (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.US)).format(new Double($F{amountTax})))]]></expression>
+									<expression><![CDATA[($F{country}=="FR" || $F{country}=="UK") ? (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.FRENCH)).format(new Double($F{amountTax})) + " " + $F{currencySymbol}) : (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.US)).format(new Double($F{amountTax})) + " " + $F{currencySymbol})]]></expression>
 								</element>
 								<box>
 									<pen lineWidth="0.0"/>
@@ -1035,14 +1061,14 @@
 						</column>
 					</component>
 				</element>
-				<element kind="textField" uuid="730e3104-e9d7-436f-baf0-00e11484d9ad" x="227" y="110" width="358" height="35" forecolor="#878787" fontName="SansSerif" fontSize="9.0">
+				<element kind="textField" uuid="730e3104-e9d7-436f-baf0-00e11484d9ad" x="227" y="110" width="358" height="20" forecolor="#878787" fontName="SansSerif" fontSize="9.0">
 					<printWhenExpression><![CDATA[$F{vatex} != null && !$F{vatex}.isEmpty()]]></printWhenExpression>
-					<expression><![CDATA["VAT exoneration reason : " + $F{vatex}.replaceAll("\\|", "/n")]]></expression>
+					<expression><![CDATA[($F{language}=="FRA" ? "Motif d'exonération de TVA : " : "VAT exoneration reason : ") + $F{vatex}.replaceAll("\\|", "/n")]]></expression>
 				</element>
-				<element kind="textField" uuid="9591378c-523f-4c9b-85a9-7914c1671a31" x="19" y="67" width="191" height="152" fontName="SansSerif" fontSize="10.0" bold="false" hTextAlign="Left" vTextAlign="Top">
+				<element kind="textField" uuid="9591378c-523f-4c9b-85a9-7914c1671a31" x="22" y="67" width="191" height="152" fontName="SansSerif" fontSize="10.0" bold="false" hTextAlign="Left" vTextAlign="Top">
 					<expression><![CDATA[($F{comment}==null || $F{comment}.isEmpty()) ? "" : $F{comment}]]></expression>
 				</element>
-				<element kind="textField" uuid="f562496e-4728-4906-86f0-03c96d56c8b3" x="228" y="5" width="355" height="19" forecolor="#878787" fontName="SansSerif" fontSize="9.0" bold="false" hTextAlign="Left" vTextAlign="Bottom">
+				<element kind="textField" uuid="f562496e-4728-4906-86f0-03c96d56c8b3" x="228" y="18" width="355" height="19" forecolor="#878787" fontName="SansSerif" fontSize="9.0" bold="false" hTextAlign="Left" vTextAlign="Bottom">
 					<printWhenExpression><![CDATA[$F{baCurrencyRate} != null && !$F{baCurrencyRate}.isEmpty()]]></printWhenExpression>
 					<expression><![CDATA[(($F{baCurrencyRate}!=null && !String.valueOf($F{baCurrencyRate}).isEmpty() && !String.valueOf($F{baCurrencyRate}).equals("null") && new Double($F{baCurrencyRate}.replace(",", ".")) > 1d) ? "Rate applied against " + ($F{baCurrencyCode} != null ? $F{baCurrencyCode} : "") + " : " + (($F{country}=="FR" || $F{country}=="UK") ? (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.FRENCH)).format(new Double($F{baCurrencyRate}.replace(",", ".")))) : (new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance(Locale.US)).format(new Double($F{baCurrencyRate}.replace(",", "."))))) + " " + $F{baCurrencySymbol} : "")]]></expression>
 					<box bottomPadding="2"/>
@@ -1052,10 +1078,6 @@
 	</group>
 	<group name="4"/>
 	<pageHeader height="174">
-		<element kind="rectangle" uuid="38170fce-2c50-4a0b-93b9-613397a87fc2" x="369" y="25" width="215" height="73" forecolor="#FFFFFF" backcolor="#FFFFFF" radius="5">
-			<property name="com.jaspersoft.studio.unit.width" value="px"/>
-			<pen lineWidth="1.0" lineStyle="Solid" lineColor="#999999"/>
-		</element>
 		<element kind="textField" uuid="f18bd2ec-dda5-4906-b56e-4048fdedd163" x="566" y="9" width="17" height="20" markup="html" fontName="SansSerif" fontSize="10.0" evaluationTime="Report" blankWhenNull="false" bold="false">
 			<expression><![CDATA[$V{PAGE_NUMBER}]]></expression>
 		</element>
@@ -1063,7 +1085,7 @@
 			<expression><![CDATA["Page "+$V{PAGE_NUMBER}+"/"]]></expression>
 		</element>
 		<element kind="textField" uuid="be664544-5902-48e9-9ae7-c26d07ecd4f1" x="380" y="27" width="198" height="20" fontName="SansSerif" fontSize="11.0" bold="false" hTextAlign="Left" vTextAlign="Middle">
-			<expression><![CDATA["Quote: " + $F{quoteCode}]]></expression>
+			<expression><![CDATA[($F{language}=="FRA" ? "Devis: " : "Quote: ") + $F{quoteNumber}]]></expression>
 		</element>
 		<element kind="textField" uuid="d2740111-2d63-49a8-82e1-67165a94cf83" x="380" y="74" width="198" height="20" fontName="SansSerif" fontSize="11.0" bold="false" hTextAlign="Left" vTextAlign="Middle">
 			<expression><![CDATA["Version: " + $F{quoteVersion}]]></expression>
@@ -1071,21 +1093,21 @@
 		<element kind="textField" uuid="3bfec27e-c691-4eb8-a80e-c1de7650c058" x="380" y="43" width="198" height="20" fontName="SansSerif" fontSize="11.0" bold="false" hTextAlign="Left" vTextAlign="Middle">
 			<expression><![CDATA["Date: " + ($F{caCountryCode}=="US" ? java.time.LocalDate.parse(($F{quoteDate}).substring(0,10), java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd")).format(java.time.format.DateTimeFormatter.ofPattern("MM/dd/yyyy")) : java.time.LocalDate.parse($F{quoteDate}.substring(0, 10), java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd")).format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")))]]></expression>
 		</element>
-		<element kind="image" uuid="3a507fd9-2958-42dc-b452-26696f92232b" x="0" y="-1" width="202" height="61" scaleImage="RealSize" hImageAlign="Left" vImageAlign="Middle">
+		<element kind="image" uuid="3a507fd9-2958-42dc-b452-26696f92232b" x="-3" y="-1" width="202" height="61" scaleImage="RealSize" hImageAlign="Left" vImageAlign="Middle">
 			<expression><![CDATA[$P{logoPath}+"Pictos/opensoft.jpg"]]></expression>
 		</element>
 		<element kind="textField" uuid="1dd2dce0-cdf5-416b-aa6e-da9fe01d0134" x="380" y="59" width="198" height="20" fontName="SansSerif" fontSize="11.0" bold="false" hTextAlign="Left" vTextAlign="Middle">
-			<expression><![CDATA["Valid until: " + ($F{caCountryCode}=="US" ? java.time.LocalDate.parse(($F{quoteVersionEndDate}).substring(0,10), java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd")).format(java.time.format.DateTimeFormatter.ofPattern("MM/dd/yyyy")) : java.time.LocalDate.parse($F{quoteVersionEndDate}.substring(0, 10), java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd")).format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")))]]></expression>
+			<expression><![CDATA[($F{language}=="FRA" ? "Valide jusque: " : "Valid until: ") + ($F{caCountryCode}=="US" ? java.time.LocalDate.parse(($F{quoteVersionEndDate}).substring(0,10), java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd")).format(java.time.format.DateTimeFormatter.ofPattern("MM/dd/yyyy")) : java.time.LocalDate.parse($F{quoteVersionEndDate}.substring(0, 10), java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd")).format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")))]]></expression>
 		</element>
 	</pageHeader>
-	<pageFooter height="49">
-		<element kind="frame" uuid="5f6046f5-92c4-4f41-939f-862433cdc80b" mode="Opaque" x="0" y="7" width="595" height="40" backcolor="#F2F4F5">
+	<pageFooter height="59">
+		<element kind="frame" uuid="5f6046f5-92c4-4f41-939f-862433cdc80b" mode="Opaque" x="0" y="17" width="595" height="40" backcolor="#F2F4F5">
 			<element kind="textField" uuid="ed1c1086-d238-4927-b1a2-317f25e4aaad" mode="Transparent" x="10" y="0" width="575" height="40" forecolor="#030303" backcolor="rgba(255, 255, 255, 0.0)" markup="styled" fontName="SansSerif" fontSize="9.6" hTextAlign="Left" vTextAlign="Middle">
-				<expression><![CDATA[(($F{sellerDescription}!=null && !String.valueOf($F{sellerDescription}).isEmpty() && !String.valueOf($F{sellerDescription}).equals("null")) ? "<style isBold='true'>" + $F{sellerDescription} + "</style> - " : "") +
+				<expression><![CDATA[(($F{sellerDescription}!=null && !String.valueOf($F{sellerDescription}).isEmpty() && !String.valueOf($F{sellerDescription}).equals("null")) ? "<style isBold='true'>" + $F{sellerDescription} + "</style> " : "") +
 (($F{sellerLegalType}!=null && !String.valueOf($F{sellerLegalType}).isEmpty() && !String.valueOf($F{sellerLegalType}).equals("null")) ? $F{sellerLegalType} : "") + 
 (($F{sellerRegNo}!=null && !String.valueOf($F{sellerRegNo}).isEmpty() && !String.valueOf($F{sellerRegNo}).equals("null")) ? "<style isBold='true'> - Reg.nr.: </style>" + $F{sellerRegNo} : "")
 +
-(($F{sellerVatNo}!=null && !String.valueOf($F{sellerVatNo}).isEmpty() && !String.valueOf($F{sellerVatNo}).equals("null")) ? "<style isBold='true'> - VAT Number </style>" + $F{sellerVatNo} : "")
+(($F{sellerVatNo}!=null && !String.valueOf($F{sellerVatNo}).isEmpty() && !String.valueOf($F{sellerVatNo}).equals("null")) ? "<style isBold='true'>" + ($F{language}=="FRA" ? " - N° TVA " : " - VAT Number ")+ "</style>" + $F{sellerVatNo} : "")
 +  " - "
 + (($F{sellerAddress1}!=null && !String.valueOf($F{sellerAddress1}).isEmpty() && !String.valueOf($F{sellerAddress1}).equals("null")) ? " " + $F{sellerAddress1} : "")
 + (($F{sellerAddress2}!=null && !String.valueOf($F{sellerAddress2}).isEmpty() && !String.valueOf($F{sellerAddress2}).equals("null")) ? " " + $F{sellerAddress2} : "")

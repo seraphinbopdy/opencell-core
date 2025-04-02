@@ -12341,6 +12341,7 @@ Your name and surname
     
 
     <changeSet id="#INTRD-19464_20231225" author="ZBARIKI">
+    	<validCheckSum>9:dba857c04eeb80f3bb2b9c62f1b2ee1e</validCheckSum>
         <insert tableName="meveo_script_instance">
             <column name="id" valueSequenceNext="meveo_script_instance_seq" />
             <column name="version" valueNumeric="0" />

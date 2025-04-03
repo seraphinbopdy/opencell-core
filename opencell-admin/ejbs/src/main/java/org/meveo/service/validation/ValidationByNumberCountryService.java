@@ -7,8 +7,11 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
-import java.util.concurrent.CompletableFuture;
+import java.time.Duration;
+import java.util.Objects;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -22,19 +25,16 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import jakarta.ejb.Stateless;
-import jakarta.inject.Inject;
-
 @Stateless
 public class ValidationByNumberCountryService {
     
     @Inject private ParamBeanFactory paramBeanFactory;
     protected static Logger log = LoggerFactory.getLogger(ValidationByNumberCountryService.class);
     
+    private static final Duration RETRY_DELAY = Duration.ofSeconds(2);
+    
     public boolean getValByValNbCountryCode(String valNb, String countryCode) {
         ParamBean instanceParamBean = paramBeanFactory.getInstance();
-        
-        boolean valueValideNodeBoolean = false;
         try {            
             HttpClient client = HttpClient.newHttpClient();
             String data = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:urn=\"urn:ec.europa.eu:taxud:vies:services:checkVat:types\">\r\n"
@@ -47,20 +47,48 @@ public class ValidationByNumberCountryService {
                     + "   </soapenv:Body>\r\n"
                     + "</soapenv:Envelope>";
             String uri = instanceParamBean.getProperty("checkVatService.api", "http://ec.europa.eu/taxation_customs/vies/services/checkVatService");
+            int maxRetries = Integer.valueOf(instanceParamBean.getProperty("checkVatService.api.maxRetries", "3"));
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(uri))
                     .POST(BodyPublishers.ofString(data))
                     .build();
-            CompletableFuture<String> cf = client.sendAsync(request, BodyHandlers.ofString())
-            .thenApply(HttpResponse::body);
-            String responseStr = cf.get();
-            valueValideNodeBoolean = parseXml(responseStr);
+            
+            int attempt = 0;
+            Exception lastException = null;
+            while (attempt <= maxRetries) {
+                try {
+                    HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
+                    
+                    if (response.statusCode() == 200) {
+                    	String responseStr = response.body();
+                    	return parseXml(responseStr);
+                    } else if (attempt < maxRetries) {
+                        Thread.sleep(RETRY_DELAY.toMillis());
+                    }
+                } catch (Exception e) {
+                    lastException = e;
+                    if (attempt < maxRetries) {
+                        try {
+                            Thread.sleep(RETRY_DELAY.toMillis());
+                        } catch (InterruptedException ie) {
+                            Thread.currentThread().interrupt();
+                            log.error("getValByValNbCountryCode validation interrupted error ", e.getMessage());
+                            throw new BusinessException(ie.getMessage());
+                        }
+                    }
+                }
+                attempt++;
+            }
+            
+            throw new BusinessException("Validation failed after " + maxRetries + " attempts", 
+                    Objects.requireNonNullElse(lastException, 
+                    new RuntimeException("Unknown error")));
+            
         } catch (Exception e) {
             log.error("getValByValNbCountryCode error ", e.getMessage());
             throw new BusinessException(e.getMessage());
         }
         
-        return valueValideNodeBoolean;
     }
     
     private static Document convertStringToXMLDocument(String xmlString) 

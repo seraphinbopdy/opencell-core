@@ -60,7 +60,7 @@ public class ReRatingV2Job extends Job {
         result.put(Job.CF_WAITING_MILLIS, CustomFieldTemplateUtils.buildCF(Job.CF_WAITING_MILLIS, resourceMessages.getString("jobExecution.waitingMillis"), CustomFieldTypeEnum.LONG,
                 "tab:Configuration:0;fieldGroup:Configuration:0;field:1", "0", JOB_INSTANCE_RE_RATING_V2_JOB));
         result.put(CF_NR_ITEMS_PER_TX, CustomFieldTemplateUtils.buildCF(CF_NR_ITEMS_PER_TX, resourceMessages.getString("jobExecution.numberOfItems"), CustomFieldTypeEnum.LONG,
-                "tab:Configuration:0;fieldGroup:Configuration:0;field:2", "1000", true, JOB_INSTANCE_RE_RATING_V2_JOB));
+                "tab:Configuration:0;fieldGroup:Configuration:0;field:2", "500", true, JOB_INSTANCE_RE_RATING_V2_JOB));
 
         CustomFieldTemplate cft = CustomFieldTemplateUtils.buildCF(CF_OPERATIONS_STARTING_DATE,
                 resourceMessages.getString("jobExecution.operation.starting.date","edr"), CustomFieldTypeEnum.LIST,

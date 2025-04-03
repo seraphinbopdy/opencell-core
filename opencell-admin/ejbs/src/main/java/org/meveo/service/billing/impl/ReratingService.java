@@ -770,13 +770,19 @@ public class ReratingService extends RatingService implements Serializable {
 	public void applyMassRerate(List<Long> ids, boolean useSamePricePlan, JobExecutionResultImpl jobExecutionResult, Date limitDate) {
 		String dateCondition = limitDate != null ? " AND wo.operationDate>:limitDate" : "";
 		String readWOsQuery = "FROM WalletOperation wo left join fetch wo.chargeInstance ci left join fetch wo.edr edr WHERE wo.status='TO_RERATE' "+dateCondition+" AND wo.id IN (:ids)";
-		int toProcess=ids.size();
+
 		Query query=getEntityManager().createQuery(readWOsQuery, WalletOperation.class);
 		query.setParameter("ids", ids);
 		if(limitDate != null) {
 			query.setParameter("limitDate", limitDate);
 		}
 		List<WalletOperation> walletOperations = query.getResultList();
+		int toProcess=walletOperations.size();
+		if(toProcess!=ids.size()) {
+			log.info("number of WOs to rerate {} is less than expected {} WOs",toProcess,ids.size());
+		}
+		List<Long> toProcessIds = walletOperations.stream().map(WalletOperation::getId).collect(Collectors.toList());
+
 		Map<String, List<Long>> errorsMap = new HashMap<>();
 		walletOperations.stream().forEach(operationToRerate -> {
 		    try {
@@ -787,11 +793,11 @@ public class ReratingService extends RatingService implements Serializable {
 		});
 		
 		errorsMap.forEach((key, value) ->reportErrors(jobExecutionResult, key, value, toProcess));
-		ids.removeAll(errorsMap.values().stream().flatMap(List::stream).collect(Collectors.toList()));
-		if(!ids.isEmpty()) {
+		toProcessIds.removeAll(errorsMap.values().stream().flatMap(List::stream).collect(Collectors.toList()));
+		if(!toProcessIds.isEmpty()) {
 			Date now = new Date();
 			String updateILQuery = "UPDATE WalletOperation SET status='RERATED', updated = :now where id in (:ids) ";
-			getEntityManager().createQuery(updateILQuery).setParameter("ids", ids).setParameter("now", now).executeUpdate();
+			getEntityManager().createQuery(updateILQuery).setParameter("ids", toProcessIds).setParameter("now", now).executeUpdate();
 		}
 	}
 

@@ -9,6 +9,7 @@ definitions:
   steps:
     - step: &build-test-sonarcloud
         name: Build, test and analyze on SonarCloud
+        size: 2x           # Use a machine with 2x memory and CPU
         caches:
           - maven
           - sonar

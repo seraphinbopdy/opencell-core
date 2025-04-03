@@ -22,6 +22,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.StringUtils;
@@ -58,10 +59,14 @@ import jakarta.ejb.TransactionAttribute;
 import jakarta.ejb.TransactionAttributeType;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DunningCollectionPlanApiService implements ApiService<DunningCollectionPlan> {
 
     private static final String SWITCH = "SWITCH";
+
+    protected Logger log = LoggerFactory.getLogger(getClass());
 
     @Inject
     private GlobalSettingsVerifier globalSettingsVerifier;
@@ -287,6 +292,8 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
         return dunningPolicyService.availablePoliciesForSwitch(invoice);
     }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @Transactional
     public Optional<DunningCollectionPlan> pauseCollectionPlan(DunningCollectionPlanPause dunningCollectionPlanPause, Long id) {
         globalSettingsVerifier.checkActivateDunning();
         var collectionPlanToPause = findById(id).orElseThrow(() -> new EntityDoesNotExistsException(NO_DUNNING_FOUND + id));
@@ -299,6 +306,9 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
         }
         collectionPlanToPause = dunningCollectionPlanService.pauseCollectionPlan(dunningCollectionPlanPause.getForcePause(), dunningCollectionPlanPause.getPauseUntil(),
             collectionPlanToPause, dunningPauseReason, dunningCollectionPlanPause.getRetryPaymentOnResumeDate());
+
+        List<Long> invoiceIds = collectionPlanToPause.getRelatedInvoices().stream().map(Invoice::getId).collect(Collectors.toList());
+        log.debug("Pause collection plan with id {} and related invoices {}", collectionPlanToPause.getId(), invoiceIds);
 
         auditLogService.trackOperation("PAUSE Reason : " + dunningPauseReason.getPauseReason(), new Date(), collectionPlanToPause, collectionPlanToPause.getCollectionPlanNumber());
         return of(collectionPlanToPause);
@@ -374,10 +384,15 @@ public class DunningCollectionPlanApiService implements ApiService<DunningCollec
         }
     }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @Transactional
     public Optional<DunningCollectionPlan> resumeCollectionPlan(Long id) {
         globalSettingsVerifier.checkActivateDunning();
         var collectionPlanToResume = findById(id).orElseThrow(() -> new EntityDoesNotExistsException(NO_DUNNING_FOUND + id));
         collectionPlanToResume = dunningCollectionPlanService.resumeCollectionPlan(collectionPlanToResume);
+
+        List<Long> invoiceIds = collectionPlanToResume.getRelatedInvoices().stream().map(Invoice::getId).collect(Collectors.toList());
+        log.debug("Resume collection plan with id {} and related invoices {}", collectionPlanToResume.getId(), invoiceIds);
 
         String origine = (collectionPlanToResume != null) ? collectionPlanToResume.getCollectionPlanNumber() : "";
         auditLogService.trackOperation("RESUME", new Date(), collectionPlanToResume, origine);

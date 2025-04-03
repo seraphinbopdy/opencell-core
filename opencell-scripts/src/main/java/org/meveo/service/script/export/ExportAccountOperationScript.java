@@ -2,6 +2,7 @@ package org.meveo.service.script.export;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.Writer;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -63,8 +64,8 @@ public class ExportAccountOperationScript extends ReportExtractScript {
             String strFilename = String.valueOf(initContext.get(ReportExtractScript.FILENAME));
             LOGGER.debug("output={}", strFilename);
             File file = new File(dir + File.separator + strFilename);
-            file.createNewFile();
-            FileWriter fileWriter = new FileWriter(file);
+            FileUtils.createNewFile(file);
+            Writer fileWriter = FileUtils.getWriter(file);
             fileWriter.write(sb.toString());
             fileWriter.close();
             LOGGER.debug("#####################Ending of script ExportAccountOperationScript");

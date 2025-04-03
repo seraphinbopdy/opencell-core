@@ -94,6 +94,7 @@ import org.meveo.service.cpq.TagService;
 import org.meveo.service.cpq.rule.ReplacementRulesExecutor;
 import org.meveo.service.cpq.rule.SelectedAttributes;
 import org.meveo.service.crm.impl.CustomerBrandService;
+import org.apache.commons.collections.CollectionUtils;
 
 /**
  * @author Tarik FAKHOURI
@@ -867,15 +868,25 @@ public class ProductApi extends BaseApi {
 		}
 	}
 	private void processProductVersionAttributes(ProductVersionDto postData, ProductVersion productVersion) {
-		Set<ProductVersionAttributeDTO> attributeCodes = postData.getProductAttributes(); 
-		productVersion.getAttributes().clear();
+		Set<ProductVersionAttributeDTO> attributeCodes = postData.getProductAttributes();
 		if(attributeCodes != null && !attributeCodes.isEmpty()){
-            List<ProductVersionAttribute> attributes = new ArrayList<>();
+			if (productVersion.getAttributes() == null) {
+				productVersion.setAttributes(new HashSet<>());
+			}
+			Set<ProductVersionAttribute> attributes = productVersion.getAttributes();
+			attributes.clear();
 			for(ProductVersionAttributeDTO attr:attributeCodes) {
-                var currentSequence = attr.getSequence();
+				 var currentSequence = attr.getSequence();
 				Attribute attribute = attributeService.findByCode(attr.getAttributeCode());
 				if(attribute == null) { 
                     throw new EntityDoesNotExistsException(Attribute.class, attr.getAttributeCode());
+				}
+				List<CommercialRuleHeader> commercialRuleHeaders = new ArrayList<>(commercialRuleHeaderService.getProductAttributeRules(attr.getAttributeCode(), postData.getProductCode()));
+				if(CollectionUtils.isNotEmpty(commercialRuleHeaders)) {
+					commercialRuleHeaders.forEach(commercialRuleHeader -> {
+						var newCommercialRuleHeader = new CommercialRuleHeader(commercialRuleHeader);
+						commercialRuleHeaderService.create(newCommercialRuleHeader);
+					});
 				}
 				ProductVersionAttribute productAttribute = new ProductVersionAttribute();
 				productAttribute.setProductVersion(productVersion);
@@ -891,9 +902,8 @@ public class ProductApi extends BaseApi {
 				productAttribute.setValidationType(attr.getValidationType());
 				//productVersionAttributeService.checkValidationPattern(productAttribute);
 				validateTemplateAttribute(productAttribute);
-                attributes.add(productAttribute);
+				attributes.add(productAttribute);
 			}
-            productVersion.getAttributes().addAll(attributes);
 		}
 	}
 	@Inject

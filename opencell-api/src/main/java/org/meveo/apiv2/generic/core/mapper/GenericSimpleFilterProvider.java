@@ -5,7 +5,7 @@ import static com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter.f
 import java.util.Arrays;
 import java.util.Set;
 
-import org.hibernate.collection.spi.PersistentBag;
+import org.hibernate.collection.spi.AbstractPersistentCollection;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -41,7 +41,7 @@ class GenericSimpleFilterProvider extends SimpleFilterProvider {
             {
                 if (include(writer)) {
                 	Object prop = ((BeanPropertyWriter)writer).get(pojo);
-                	if(!isNestedEntityCandidate(writer.getName(), jgen) && prop instanceof PersistentBag && !Persistence.getPersistenceUtil().isLoaded(prop)) {
+                	if(!isNestedEntityCandidate(writer.getName(), jgen) && prop instanceof AbstractPersistentCollection && !Persistence.getPersistenceUtil().isLoaded(pojo, writer.getName())) {
                 		return;
                 	}
                     writer.serializeAsField(pojo, jgen, provider);

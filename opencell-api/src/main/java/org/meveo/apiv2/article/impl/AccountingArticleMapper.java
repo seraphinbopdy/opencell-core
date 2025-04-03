@@ -57,20 +57,20 @@ public class AccountingArticleMapper extends ResourceMapper<org.meveo.apiv2.arti
         invoiceSubCategory.setCode(resource.getInvoiceSubCategory().getCode());
         AccountingArticle accountingArticleEntity = new AccountingArticle(resource.getCode(), resource.getDescription(), taxClass, invoiceSubCategory);
         if (resource.getAccountingCode() != null) {
-            AccountingCode accountingCode = new AccountingCode();
-            accountingCode.setId(resource.getAccountingCode().getId());
-            accountingCode.setCode(resource.getAccountingCode().getCode());
-            accountingArticleEntity.setAccountingCode(accountingCode);
-        }
+                AccountingCode accountingCode = new AccountingCode();
+                accountingCode.setId(resource.getAccountingCode().getId());
+                accountingCode.setCode(resource.getAccountingCode().getCode());
+                accountingArticleEntity.setAccountingCode(accountingCode);
+            }
         if (resource.getArticleFamily() != null) {
             final ArticleFamily articleFamily = new ArticleFamily(resource.getArticleFamily().getId());
             articleFamily.setCode(resource.getArticleFamily().getCode());
             accountingArticleEntity.setArticleFamily(articleFamily);
         }
-        accountingArticleEntity.setAnalyticCode1(resource.getAnalyticCode1());
-        accountingArticleEntity.setAnalyticCode2(resource.getAnalyticCode2());
-        accountingArticleEntity.setAnalyticCode3(resource.getAnalyticCode3());
-        accountingArticleEntity.setUnitPrice(resource.getUnitPrice());
+                accountingArticleEntity.setAnalyticCode1(resource.getAnalyticCode1());
+                accountingArticleEntity.setAnalyticCode2(resource.getAnalyticCode2());
+                accountingArticleEntity.setAnalyticCode3(resource.getAnalyticCode3());
+            accountingArticleEntity.setUnitPrice(resource.getUnitPrice());
         if (resource.getLanguageDescriptions() != null && !resource.getLanguageDescriptions().isEmpty()) {
             for (LanguageDescriptionDto languageDescription : resource.getLanguageDescriptions()) {
                 accountingArticleEntity.getDescriptionI18n().put(languageDescription.getLanguageCode(), languageDescription.getDescription());
@@ -78,14 +78,15 @@ public class AccountingArticleMapper extends ResourceMapper<org.meveo.apiv2.arti
         }
 
         if (resource.getInvoiceType() != null) {
-            final InvoiceType invoiceType = new InvoiceType();
-            invoiceType.setId(resource.getInvoiceType().getId());
-            invoiceType.setCode(resource.getInvoiceType().getCode());
-            accountingArticleEntity.setInvoiceType(invoiceType);
+                final InvoiceType invoiceType = new InvoiceType();
+                invoiceType.setId(resource.getInvoiceType().getId());
+                invoiceType.setCode(resource.getInvoiceType().getCode());
+                accountingArticleEntity.setInvoiceType(invoiceType);
+            }
+        if(resource.getInvoiceTypeEl() != null) {
+            accountingArticleEntity.setInvoiceTypeEl(resource.getInvoiceTypeEl());
         }
-        accountingArticleEntity.setColumnCriteriaEL(resource.getColumCriteriaEL());
-        accountingArticleEntity.setAccountingCodeEl(resource.getAccountingCodeEl());
-        accountingArticleEntity.setInvoiceTypeEl(resource.getInvoiceTypeEl());
+                accountingArticleEntity.setAccountingCodeEl(resource.getAccountingCodeEl());
         accountingArticleEntity.setIgnoreAggregation(resource.getIgnoreAggregation());
         accountingArticleEntity.setPhysical(resource.getPhysical());
         return accountingArticleEntity;

@@ -40,8 +40,11 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.meveo.admin.async.SynchronizedIterator;
 import org.meveo.admin.exception.BusinessException;
+import org.meveo.admin.exception.ModeRollBackRatingException;
 import org.meveo.admin.exception.RatingException;
 import org.meveo.admin.job.MediationJobBean;
+import org.meveo.api.dto.ActionStatus;
+import org.meveo.api.dto.ActionStatusEnum;
 import org.meveo.api.dto.billing.CdrErrorDto;
 import org.meveo.api.dto.billing.ChargeCDRResponseDto;
 import org.meveo.api.dto.billing.ChargeCDRResponseDto.CdrError;
@@ -492,6 +495,9 @@ public class MediationApiService {
 
                                 ratingResult = usageRatingService.rateUsage(edr, isVirtual, rateTriggeredEdrs, maxDepth, 0, null, true);
                                 if (ratingResult.getRatingException() != null) {
+	                                ActionStatus actionStatus = new ActionStatus();
+	                                actionStatus.setStatus(ActionStatusEnum.FAIL);
+	                                cdrProcessingResult.setActionStatus(actionStatus);
                                     throw ratingResult.getRatingException();
                                 }
                                 if (ratingResult.getWalletOperations() != null) {
@@ -600,11 +606,7 @@ public class MediationApiService {
                     new CdrError(cdr.getRejectReasonException() != null ? cdr.getRejectReasonException().getClass().getSimpleName() : null, cdr.getRejectReason(), cdr.getLine())));
 
                 if (cdrProcessingResult.getMode() == ROLLBACK_ON_ERROR) {
-                    if (cdr.getRejectReasonException() != null && cdr.getRejectReasonException() instanceof BusinessException) {
-                        throw new BusinessException(cdr.getRejectReasonException());
-                    } else {
-                        throw new BusinessException(cdr.getRejectReason());
-                    }
+	                throw new ModeRollBackRatingException(cdrProcessingResult, cdr.getRejectReason());
                 }
 
                 rejectededCdrEventProducer.fire(cdr);

@@ -1,5 +1,12 @@
 package org.meveo.admin.job;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputFilter;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,6 +69,7 @@ import jakarta.ejb.TransactionAttribute;
 import jakarta.ejb.TransactionAttributeType;
 import jakarta.enterprise.event.Event;
 import jakarta.inject.Inject;
+import jakarta.jms.BytesMessage;
 import jakarta.jms.ConnectionFactory;
 import jakarta.jms.Destination;
 import jakarta.jms.JMSConnectionFactory;
@@ -127,6 +135,16 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
      * Remote MQ connection password
      */
     private static final String REMOTE_MQ_ADMIN_PASSWORD = "REMOTE_MQ_ADMIN_PASSWORD";
+
+    /**
+     * A number of items in a message that would result in a large MQ message
+     */
+    private static final int LARGE_MESSAGE_ITEM_COUNT = 2500;
+
+    /**
+     * On WF 34 JVM 21 docker installation for some reason large objects can not be deserialized because of default filter.
+     */
+    private static final ObjectInputFilter OBJECT_INPUT_FILTER = ObjectInputFilter.Config.createFilter("maxdepth=1000;maxarray=10000000;maxbytes=1000000000");
 
     @Inject
     private MethodCallingUtils methodCallingUtils;
@@ -696,7 +714,33 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
                     JMSProducer jmsProducer = context.createProducer();
                     jmsProducer.setDisableMessageID(true);
                     jmsProducer.setDisableMessageTimestamp(true);
-                    jmsProducer.send(jobQueue, (Serializable) itemsToProcess);
+
+                    // For a large message, data is send/received as an input stream
+                    if (itemsToProcess.size() > LARGE_MESSAGE_ITEM_COUNT) {
+
+                        try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); ObjectOutputStream oos = new ObjectOutputStream(baos);) {
+
+                            oos.writeObject(itemsToProcess);
+
+                            try (BufferedInputStream inputStream = new BufferedInputStream(new ByteArrayInputStream(baos.toByteArray()))) {
+
+                                BytesMessage message = context.createBytesMessage();
+                                message.setBooleanProperty(ItertatorJobMessageListener.IS_LARGE_MESSAGE, true);
+                                message.setObjectProperty("JMS_AMQ_InputStream", inputStream);
+                                jmsProducer.send(jobQueue, message);
+
+                            } catch (Exception e) {
+                                log.error("Failed to serialize or publish large message to a queue", e);
+                            }
+
+                        } catch (Exception e) {
+                            log.error("Failed to serialize or publish large message to a queue", e);
+                        }
+
+                        // Otherwise send as a serializable object
+                    } else {
+                        jmsProducer.send(jobQueue, (Serializable) itemsToProcess);
+                    }
 
                     nrOfItemsProcessedByThread += nrOfItemsInBatch;
                     nrMessages++;
@@ -710,6 +754,7 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
         };
 
         return task;
+
     }
 
     /**
@@ -757,95 +802,91 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
      * @return A task definition
      */
     private Runnable getDataProcessingTask(String jobInstanceCode, Iterator<T> dataIterator, int threadNr, MeveoUser lastCurrentUser, boolean isRunningAsJobManager, boolean spreadOverCluster, Queue jobQueue,
-    		int batchSize, JobExecutionResultImpl jobExecutionResult, boolean isNewTx, boolean useMultipleItemProcessing, BiConsumer<T, JobExecutionResultImpl> processSingleItemFunction,
-    		BiConsumer<List<T>, JobExecutionResultImpl> processMultipleItemFunction, CountDownLatch countDown) {
+            int batchSize, JobExecutionResultImpl jobExecutionResult, boolean isNewTx, boolean useMultipleItemProcessing, BiConsumer<T, JobExecutionResultImpl> processSingleItemFunction,
+            BiConsumer<List<T>, JobExecutionResultImpl> processMultipleItemFunction, CountDownLatch countDown) {
 
-    	String auditOriginName = jobExecutionResult.getJobInstance().getJobTemplate() + "/" + jobInstanceCode;
-    	Long jobInstanceId = jobExecutionResult.getJobInstance().getId();
-    	
-    	Runnable task = () -> {
-    		
-    		ItertatorJobMessageListener messageListener = null;
-        	if (spreadOverCluster) {
-        		messageListener = new ItertatorJobMessageListener(countDown, isNewTx, useMultipleItemProcessing, processSingleItemFunction, processMultipleItemFunction, jobExecutionResult);
-        	}
-    		
-    		try (JMSContext jmsContext = spreadOverCluster ?
-    				jmsConnectionFactory.createContext(System.getenv(REMOTE_MQ_ADMIN_USER), System.getenv(REMOTE_MQ_ADMIN_PASSWORD), JMSContext.CLIENT_ACKNOWLEDGE) : null) {
+        String auditOriginName = jobExecutionResult.getJobInstance().getJobTemplate() + "/" + jobInstanceCode;
+        Long jobInstanceId = jobExecutionResult.getJobInstance().getId();
 
-    			if (spreadOverCluster) {
-    				jmsContext.setExceptionListener(e -> log.error("Exception while consuming Job processing data messages", e));
-    				JMSConsumer jmsConsumer = jmsContext.createConsumer(jobQueue);
-    				jmsContext.stop(); // Context is autostarted when consumer is created
-    				jmsConsumer.setMessageListener(messageListener);
-    			}
+        Runnable task = () -> {
 
-    			Thread.currentThread().setName(jobInstanceCode + "-" + threadNr);
+            ItertatorJobMessageListener messageListener = null;
+            if (spreadOverCluster) {
+                messageListener = new ItertatorJobMessageListener(countDown, isNewTx, useMultipleItemProcessing, processSingleItemFunction, processMultipleItemFunction, jobExecutionResult);
+            }
 
-    			currentUserProvider.reestablishAuthentication(lastCurrentUser);
+            try (JMSContext jmsContext = spreadOverCluster ? jmsConnectionFactory.createContext(System.getenv(REMOTE_MQ_ADMIN_USER), System.getenv(REMOTE_MQ_ADMIN_PASSWORD), JMSContext.CLIENT_ACKNOWLEDGE) : null) {
 
-    			AuditOrigin.setAuditOriginAndName(ChangeOriginEnum.JOB, auditOriginName);
-    			int nrOfItemsProcessedByThread = 0;
+                if (spreadOverCluster) {
+                    jmsContext.setExceptionListener(e -> log.error("Exception while consuming Job processing data messages", e));
+                    JMSConsumer jmsConsumer = jmsContext.createConsumer(jobQueue);
+                    jmsContext.stop(); // Context is autostarted when consumer is created
+                    jmsConsumer.setMessageListener(messageListener);
+                }
 
-    			// First process data from a DB based iterator
-    			if (isRunningAsJobManager) {
+                Thread.currentThread().setName(jobInstanceCode + "-" + threadNr);
 
-    				mainLoop:
-    					while (true) {
+                currentUserProvider.reestablishAuthentication(lastCurrentUser);
 
-    						List<T> itemsToProcess = getNextItemsToProcess(batchSize, dataIterator, jobExecutionResult.getJobInstance().getId());
-    						if (itemsToProcess.isEmpty()) {
-    							break mainLoop;
-    						}
+                AuditOrigin.setAuditOriginAndName(ChangeOriginEnum.JOB, auditOriginName);
+                int nrOfItemsProcessedByThread = 0;
 
-    						processItems(itemsToProcess, isNewTx, useMultipleItemProcessing, processSingleItemFunction, processMultipleItemFunction, jobExecutionResult);
+                // First process data from a DB based iterator
+                if (isRunningAsJobManager) {
 
-    						int nrOfItemsInBatch = itemsToProcess.size();
-    						nrOfItemsProcessedByThread += nrOfItemsInBatch;
-    					}
-    			}
+                    mainLoop: while (true) {
 
-    			int nrOfItemsDb = nrOfItemsProcessedByThread;
-    			int nrOfItemsQueue = 0;
-    			int nrofMessages = 0;
+                        List<T> itemsToProcess = getNextItemsToProcess(batchSize, dataIterator, jobExecutionResult.getJobInstance().getId());
+                        if (itemsToProcess.isEmpty()) {
+                            break mainLoop;
+                        }
 
-    			// Continue processing messages from a message queue if applicable
-    			if (spreadOverCluster && !isJobRequestedToStop(jobInstanceId)) {
+                        processItems(itemsToProcess, isNewTx, useMultipleItemProcessing, processSingleItemFunction, processMultipleItemFunction, jobExecutionResult);
 
-    				jmsContext.start();
-    				try {
-    					countDown.await();
+                        int nrOfItemsInBatch = itemsToProcess.size();
+                        nrOfItemsProcessedByThread += nrOfItemsInBatch;
+                    }
+                }
 
-    					// Now need to wait until all messages were processed, as countDown is released once the last message is received, not when all messages are processed
-    					// Polling is done
-    					String queueName = jobQueue.getQueueName();
-    					do {
-    						Thread.sleep(2000);
-    					} while (!isJobRequestedToStop(jobInstanceId) && !areAllMessagesConsumed(jobInstanceCode, queueName));
+                int nrOfItemsDb = nrOfItemsProcessedByThread;
+                int nrOfItemsQueue = 0;
+                int nrofMessages = 0;
 
-    				} catch (InterruptedException e) {
-    					log.error("Job message listener was interrupted", e);
-    				} catch (JMSException e) {
-    					log.error("Failed to obtain queue name", e);
-    				}
+                // Continue processing messages from a message queue if applicable
+                if (spreadOverCluster && !isJobRequestedToStop(jobInstanceId)) {
 
-    				nrOfItemsQueue = messageListener.getItemCount();
-    				nrofMessages = messageListener.getMsgCount();
-    				nrOfItemsProcessedByThread += nrOfItemsQueue;
+                    jmsContext.start();
+                    try {
+                        countDown.await();
 
-    			}
+                        // Now need to wait until all messages were processed, as countDown is released once the last message is received, not when all messages are processed
+                        // Polling is done
+                        String queueName = jobQueue.getQueueName();
+                        do {
+                            Thread.sleep(2000);
+                        } while (!isJobRequestedToStop(jobInstanceId) && !areAllMessagesConsumed(jobInstanceCode, queueName));
 
-    			log.info("Thread {} processed {} items: {} from db and {} from {} messages", Thread.currentThread().getName(), nrOfItemsProcessedByThread, nrOfItemsDb, nrOfItemsQueue, nrofMessages);
+                    } catch (InterruptedException e) {
+                        log.error("Job message listener was interrupted", e);
+                    } catch (JMSException e) {
+                        log.error("Failed to obtain queue name", e);
+                    }
 
-    		} catch (Exception e) {
-    			log.error("An error occurred during data processing", e);
-    		}
-    	};
+                    nrOfItemsQueue = messageListener.getItemCount();
+                    nrofMessages = messageListener.getMsgCount();
+                    nrOfItemsProcessedByThread += nrOfItemsQueue;
 
-    	return task;
+                }
+
+                log.info("Thread {} processed {} items: {} from db and {} from {} messages", Thread.currentThread().getName(), nrOfItemsProcessedByThread, nrOfItemsDb, nrOfItemsQueue, nrofMessages);
+
+            } catch (Exception e) {
+                log.error("An error occurred during data processing", e);
+            }
+        };
+
+        return task;
     }
-
-
 
     /**
      * Process items
@@ -1173,9 +1214,14 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
     private class ItertatorJobMessageListener implements MessageListener {
 
         /**
-         * A content of a message indicating that its a last message to be processed
+         * A property of a message indicating that its a last message to be processed
          */
         public static final String EOF_MESSAGE = "eof";
+
+        /**
+         * A property of a message indicating that its a large message
+         */
+        public static final String IS_LARGE_MESSAGE = "ilm";
 
         private int msgCount = 0;
         private int itemCount = 0;
@@ -1211,6 +1257,7 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
             return itemCount;
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public void onMessage(Message msg) {
 
@@ -1227,10 +1274,35 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
 
                     msg.acknowledge();
 
+                    // A regular data payload message
                 } else {
+                    List<T> itemsToProcess = null;
 
-                    @SuppressWarnings("unchecked")
-                    List<T> itemsToProcess = (List<T>) msg.getBody(Serializable.class);
+                    // Large message is send/received as a stream
+                    if (msg.getBooleanProperty(IS_LARGE_MESSAGE)) {
+
+                        try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); BufferedOutputStream bufferedOutput = new BufferedOutputStream(baos)) {
+
+                            // Save the stream and wait until the entire message is written before continuing.
+                            msg.setObjectProperty("JMS_AMQ_SaveStream", baos);
+
+                            try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray()))) {
+                                ois.setObjectInputFilter(OBJECT_INPUT_FILTER);
+                                itemsToProcess = (List<T>) ois.readObject();
+                            } catch (Exception e) {
+                                Logger log = LoggerFactory.getLogger(this.getClass());
+                                log.error("Failed to deserialize large message.", e);
+                            }
+
+                        } catch (Exception e) {
+                            Logger log = LoggerFactory.getLogger(this.getClass());
+                            log.error("Failed to deserialize large message.", e);
+                        }
+
+                        // Smaller messages are send/received as serialized object
+                    } else {
+                        itemsToProcess = (List<T>) msg.getBody(Serializable.class);
+                    }
                     msgCount++;
                     itemCount = itemCount + itemsToProcess.size();
                     processItems(itemsToProcess, isNewTx, useMultipleItemProcessing, processSingleItemFunction, processMultipleItemFunction, jobExecutionResult);

@@ -152,17 +152,25 @@ public class AccountingArticleApiService implements AccountingArticleServiceBase
         }
 
         if (baseEntity.getAccountingCode() != null) {
-            AccountingCode accountingCode = accountingArticleService.tryToFindByCodeOrId(baseEntity.getAccountingCode());
-            if (accountingCode == null)
-                throw new BadRequestException("No accountingCode found");
-            accountingArticle.setAccountingCode(accountingCode);
+            if(baseEntity.getAccountingCode().getId() != null || !isBlank(baseEntity.getAccountingCode().getCode())) {
+                AccountingCode accountingCode = accountingArticleService.tryToFindByCodeOrId(baseEntity.getAccountingCode());
+                if (accountingCode == null)
+                    throw new BadRequestException("No accountingCode found");
+                accountingArticle.setAccountingCode(accountingCode);
+            } else {
+                accountingArticle.setAccountingCode(null);
+            }
         }
 
         if (baseEntity.getArticleFamily() != null) {
-            ArticleFamily articleFamily = accountingArticleService.tryToFindByCodeOrId(baseEntity.getArticleFamily());
-            if (articleFamily == null)
-                throw new BadRequestException("No articleFamily found");
-            accountingArticle.setArticleFamily(articleFamily);
+            if(baseEntity.getArticleFamily().getId() != null || !isBlank(baseEntity.getArticleFamily().getCode())) {
+                ArticleFamily articleFamily = accountingArticleService.tryToFindByCodeOrId(baseEntity.getArticleFamily());
+                if (articleFamily == null)
+                    throw new BadRequestException("No articleFamily found");
+                accountingArticle.setArticleFamily(articleFamily);
+            } else {
+                accountingArticle.setArticleFamily(null);
+            }
         }
 
         if (!isBlank(baseEntity.getDescription())) {
@@ -174,16 +182,28 @@ public class AccountingArticleApiService implements AccountingArticleServiceBase
             accountingArticle.getDescriptionI18n().putAll((baseEntity.getDescriptionI18n()));
         }
 
-        if (!isBlank(baseEntity.getAnalyticCode1())) {
-            accountingArticle.setAnalyticCode1(baseEntity.getAnalyticCode1());
+        if (baseEntity.getAnalyticCode1() != null) {
+            if(isBlank(baseEntity.getAnalyticCode1())) {
+                accountingArticle.setAnalyticCode1(null);
+            } else {
+                accountingArticle.setAnalyticCode1(baseEntity.getAnalyticCode1());
+            }
         }
 
-        if (!isBlank(baseEntity.getAnalyticCode2())) {
-            accountingArticle.setAnalyticCode2(baseEntity.getAnalyticCode2());
+        if (baseEntity.getAnalyticCode2() != null) {
+            if(isBlank(baseEntity.getAnalyticCode2())) {
+                accountingArticle.setAnalyticCode2(null);
+            } else {
+                accountingArticle.setAnalyticCode2(baseEntity.getAnalyticCode2());
+            }
         }
 
-        if (!isBlank(baseEntity.getAnalyticCode3())) {
-            accountingArticle.setAnalyticCode3(baseEntity.getAnalyticCode3());
+        if (baseEntity.getAnalyticCode3() != null) {
+            if(isBlank(baseEntity.getAnalyticCode3())) {
+                accountingArticle.setAnalyticCode3(null);
+            } else {
+                accountingArticle.setAnalyticCode3(baseEntity.getAnalyticCode3());
+            }
         }
         
         if (baseEntity.getUnitPrice() != null) {
@@ -195,22 +215,38 @@ public class AccountingArticleApiService implements AccountingArticleServiceBase
         }
         
         if (baseEntity.getInvoiceType() != null) {
-            InvoiceType invoiceType = invoiceTypeService.tryToFindByCodeOrId(baseEntity.getInvoiceType());
-            if (invoiceType == null)
-                throw new BadRequestException("No invoiceType found");
-            accountingArticle.setInvoiceType(invoiceType);
+            if(baseEntity.getInvoiceType().getId() != null || !isBlank(baseEntity.getInvoiceType().getCode())) {
+                InvoiceType invoiceType = invoiceTypeService.tryToFindByCodeOrId(baseEntity.getInvoiceType());
+                if (invoiceType == null)
+                    throw new BadRequestException("No invoiceType found");
+                accountingArticle.setInvoiceType(invoiceType);
+            } else {
+                accountingArticle.setInvoiceType(null);
+            }
         }
         
         if (baseEntity.getInvoiceTypeEl() != null) {
-            accountingArticle.setInvoiceTypeEl(baseEntity.getInvoiceTypeEl());
+            if(isBlank(baseEntity.getInvoiceTypeEl())) {
+                accountingArticle.setInvoiceTypeEl(null);
+            } else {
+                accountingArticle.setInvoiceTypeEl(baseEntity.getInvoiceTypeEl());
+            }
         }
 
         if(baseEntity.getAccountingCodeEl() != null) {
-            accountingArticle.setAccountingCodeEl(baseEntity.getAccountingCodeEl());
+            if(isBlank(baseEntity.getAccountingCodeEl())) {
+                accountingArticle.setAccountingCodeEl(null);
+            } else {
+                accountingArticle.setAccountingCodeEl(baseEntity.getAccountingCodeEl());
+            }
         }
 
         if(baseEntity.getColumnCriteriaEL() != null) {
-            accountingArticle.setColumnCriteriaEL(baseEntity.getColumnCriteriaEL());
+            if(isBlank(baseEntity.getColumnCriteriaEL())) {
+                accountingArticle.setColumnCriteriaEL(null);
+            } else {
+                accountingArticle.setColumnCriteriaEL(baseEntity.getColumnCriteriaEL());
+            }
         }
         
         if(baseEntity.getAllowanceCode() != null) {

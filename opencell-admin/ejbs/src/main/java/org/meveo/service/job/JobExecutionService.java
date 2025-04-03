@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.collections.MapUtils;
@@ -170,7 +171,8 @@ public class JobExecutionService extends BaseService {
         jobCompletionCountDowns.put(jobInstance.getId(), countDown);
 
         try {
-            countDown.await();
+	       // countDown.await(10, TimeUnit.SECONDS);
+	        countDown.await();
 
         } catch (InterruptedException e) {
             log.error("Interrupted while waiting for job {} with result ID {} to complete", jobInstance.getCode(), jobResultId, e);

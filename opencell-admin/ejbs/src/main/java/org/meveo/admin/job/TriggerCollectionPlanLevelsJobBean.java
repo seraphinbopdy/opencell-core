@@ -4,9 +4,6 @@ import static org.meveo.model.billing.InvoicePaymentStatusEnum.PAID;
 import static org.meveo.model.dunning.DunningActionInstanceStatusEnum.DONE;
 import static org.meveo.model.dunning.DunningActionInstanceStatusEnum.TO_BE_DONE;
 import static org.meveo.model.payments.ActionModeEnum.AUTOMATIC;
-import static org.meveo.model.payments.DunningCollectionPlanStatusEnum.ACTIVE;
-import static org.meveo.model.payments.DunningCollectionPlanStatusEnum.FAILED;
-import static org.meveo.model.payments.DunningCollectionPlanStatusEnum.SUCCESS;
 import static org.meveo.model.shared.DateUtils.addDaysToDate;
 
 import java.math.BigDecimal;
@@ -39,6 +36,7 @@ import org.meveo.model.payments.CustomerAccount;
 import org.meveo.model.payments.CustomerBalance;
 import org.meveo.model.payments.DunningCollectionPlanStatusEnum;
 import org.meveo.model.payments.OCCTemplate;
+import org.meveo.service.billing.impl.InvoiceService;
 import org.meveo.service.payments.impl.CustomerAccountService;
 import org.meveo.service.payments.impl.DunningActionInstanceService;
 import org.meveo.service.payments.impl.DunningCollectionPlanService;
@@ -72,6 +70,9 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
 
     @Inject
     private DunningSettingsService dunningSettingsService;
+
+    @Inject
+    private InvoiceService invoiceService;
 
     @EJB
     private TriggerCollectionPlanLevelsJobBean jobBean;
@@ -148,14 +149,14 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
      */
     private void checkAndUpdateCollectionPlanWhenPaidInvoice(DunningCollectionPlan processedCollectionPlan, DunningSettings pDunningSettings) {
         if (pDunningSettings.getDunningMode().equals(DunningModeEnum.INVOICE_LEVEL)) {
-            if(processedCollectionPlan.getStatus().getStatus() == ACTIVE && processedCollectionPlan.getRelatedInvoice().getPaymentStatus() == PAID) {
+            if(processedCollectionPlan.getStatus().getStatus() == DunningCollectionPlanStatusEnum.ONGOING && processedCollectionPlan.getRelatedInvoice().getPaymentStatus() == PAID) {
                 finalizeCollectionPlan(processedCollectionPlan);
             }
         } else if (pDunningSettings.getDunningMode().equals(DunningModeEnum.CUSTOMER_LEVEL)) {
             CustomerBalance customerBalance = pDunningSettings.getCustomerBalance();
             CustomerAccount customerAccount = processedCollectionPlan.getCustomerAccount();
             List<String> linkedOccTemplates = getOccTemplateCodesToUse(customerBalance);
-            BigDecimal balance = customerAccountService.getCustomerAccountBalanceForUnpaidInvoices(customerAccount, linkedOccTemplates, customerBalance);
+            BigDecimal balance = customerAccountService.getCustomerAccountBalanceForUnpaidInvoices(processedCollectionPlan, linkedOccTemplates, customerBalance);
 
             if (processedCollectionPlan.getRelatedPolicy().getMinBalanceTrigger() != null &&
                     balance.compareTo(BigDecimal.valueOf(processedCollectionPlan.getRelatedPolicy().getMinBalanceTrigger())) < 0) {
@@ -183,12 +184,12 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
         }
 
         // Check if collection plan is active and invoice is paid
-        if(collectionPlan.getStatus().getStatus() == ACTIVE && collectionPlan.getRelatedInvoice().getPaymentStatus() == PAID) {
+        if(collectionPlan.getStatus().getStatus() == DunningCollectionPlanStatusEnum.ONGOING && collectionPlan.getRelatedInvoice().getPaymentStatus() == PAID) {
             // Ignore levels and actions after paying invoice
             collectionPlanService.ignoreLevelsAndActionsAfterStoppingDunningCollectionPlanOrPayingInvoice(collectionPlan);
 
             // Update collection plan status to success
-            collectionPlan.setStatus(collectionPlanStatusService.findByStatus(SUCCESS));
+            collectionPlan.setStatus(collectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.RECOVERED));
             collectionPlan.setNextActionDate(null);
             collectionPlan.setNextAction(null);
             collectionPlanService.update(collectionPlan);
@@ -265,19 +266,19 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
 
                         // Set current dunning level sequence
                     if (nextLevel < collectionPlan.getDunningLevelInstances().size()) {
-                        collectionPlan.setCurrentDunningLevelSequence(collectionPlan.getDunningLevelInstances().get(nextLevel).getSequence());
+                        collectionPlan.setCurrentDunningLevelSequence(levelInstance.getSequence() + 1);
                     }
 
                         // Update collection plan status to FAILED if is end of dunning and invoice is unpaid
                     if (levelInstance.getDunningLevel() != null && levelInstance.getDunningLevel().isEndOfDunningLevel() && collectionPlan.getRelatedInvoice().getPaymentStatus().equals(InvoicePaymentStatusEnum.UNPAID)) {
-                        collectionPlan.setStatus(collectionPlanStatusService.findByStatus(FAILED));
+                        collectionPlan.setStatus(collectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.UNRECOVERED));
                         collectionPlan.setNextAction(null);
                         collectionPlan.setNextActionDate(null);
                     }
 
                         // Update collection plan status to SUCCESS if is end of dunning and invoice is paid
                     if (collectionPlan.getRelatedInvoice().getPaymentStatus().equals(InvoicePaymentStatusEnum.PAID)) {
-                        collectionPlan.setStatus(collectionPlanStatusService.findByStatus(SUCCESS));
+                        collectionPlan.setStatus(collectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.RECOVERED));
                             collectionPlan.setNextAction(null);
                             collectionPlan.setNextActionDate(null);
                     }
@@ -301,11 +302,11 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                 collectionPlan.setNextActionDate(null);
                 collectionPlan.setNextAction(null);
                 if (collectionPlan.getRelatedInvoice().getPaymentStatus().equals(InvoicePaymentStatusEnum.UNPAID)) {
-                    collectionPlan.setStatus(collectionPlanStatusService.findByStatus(FAILED));
+                    collectionPlan.setStatus(collectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.UNRECOVERED));
                     updateCollectionPlan = true;
                 }
                 if (collectionPlan.getRelatedInvoice().getPaymentStatus().equals(InvoicePaymentStatusEnum.PAID)) {
-                    collectionPlan.setStatus(collectionPlanStatusService.findByStatus(SUCCESS));
+                    collectionPlan.setStatus(collectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.RECOVERED));
                     updateCollectionPlan = true;
                 }
             }
@@ -339,10 +340,15 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
 
         CustomerBalance customerBalance = dunningSettings.getCustomerBalance();
         List<String> linkedOccTemplates = getOccTemplateCodesToUse(customerBalance);
-        BigDecimal balance = customerAccountService.getCustomerAccountBalanceForUnpaidInvoices(collectionPlan.getCustomerAccount(), linkedOccTemplates, customerBalance);
+        BigDecimal balance = customerAccountService.getCustomerAccountBalanceForUnpaidInvoices(collectionPlan, linkedOccTemplates, customerBalance);
+
+        if (balance != null && balance.compareTo(collectionPlan.getBalance()) != 0) {
+            collectionPlan.setBalance(balance);
+            updateCollectionPlan = true;
+        }
 
         // Check if collection plan is active and invoice is paid
-        if(collectionPlan.getStatus().getStatus() == ACTIVE && balance.compareTo(BigDecimal.valueOf(collectionPlan.getRelatedPolicy().getMinBalanceTrigger())) < 0) {
+        if(collectionPlan.getStatus().getStatus() == DunningCollectionPlanStatusEnum.ONGOING && balance.compareTo(BigDecimal.valueOf(collectionPlan.getRelatedPolicy().getMinBalanceTrigger())) < 0) {
             finalizeCollectionPlan(collectionPlan);
         } else {
             // sort collection by sequence and also with flag end of dunning
@@ -430,19 +436,21 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
 
                         // Set current dunning level sequence
                         if (nextLevel < collectionPlan.getDunningLevelInstances().size()) {
-                            collectionPlan.setCurrentDunningLevelSequence(collectionPlan.getDunningLevelInstances().get(nextLevel).getSequence());
+                            collectionPlan.setCurrentDunningLevelSequence(levelInstance.getSequence() + 1);
                         }
 
                         // Update collection plan status to FAILED if is end of dunning and invoice is unpaid
-                        if (levelInstance.getDunningLevel() != null && levelInstance.getDunningLevel().isEndOfDunningLevel() && (levelInstance.getDunningLevel().getMinBalance() == null || balance.compareTo(levelInstance.getDunningLevel().getMinBalance()) > 0)) {
-                            collectionPlan.setStatus(collectionPlanStatusService.findByStatus(FAILED));
+                        if (levelInstance.getDunningLevel() != null && levelInstance.getDunningLevel().isEndOfDunningLevel() && levelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.DONE
+                                && (levelInstance.getDunningLevel().getMinBalance() == null || balance.compareTo(levelInstance.getDunningLevel().getMinBalance()) > 0)) {
+                            collectionPlan.setStatus(collectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.UNRECOVERED));
                             collectionPlan.setNextAction(null);
                             collectionPlan.setNextActionDate(null);
                         }
 
                         // Update collection plan status to SUCCESS if is end of dunning and invoice is paid
-                        if (levelInstance.getDunningLevel() != null && levelInstance.getDunningLevel().isEndOfDunningLevel() && (levelInstance.getDunningLevel().getMinBalance() == null || balance.compareTo(levelInstance.getDunningLevel().getMinBalance()) < 0)) {
-                            collectionPlan.setStatus(collectionPlanStatusService.findByStatus(SUCCESS));
+                        if (levelInstance.getDunningLevel() != null && levelInstance.getDunningLevel().isEndOfDunningLevel()
+                                && (levelInstance.getDunningLevel().getMinBalance() == null || balance.compareTo(levelInstance.getDunningLevel().getMinBalance()) < 0)) {
+                            collectionPlan.setStatus(collectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.RECOVERED));
                             collectionPlan.setNextAction(null);
                             collectionPlan.setNextActionDate(null);
                         }
@@ -458,7 +466,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                         }
 
                         if(collectionPlan.getBalance().equals(0) && allPaid) {
-                            collectionPlan.setStatus(collectionPlanStatusService.findByStatus(SUCCESS));
+                            collectionPlan.setStatus(collectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.RECOVERED));
                             collectionPlan.setNextAction(null);
                             collectionPlan.setNextActionDate(null);
                         }
@@ -484,11 +492,11 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                 collectionPlan.setNextActionDate(null);
                 collectionPlan.setNextAction(null);
                 if (balance.compareTo(BigDecimal.valueOf(collectionPlan.getRelatedPolicy().getMinBalanceTrigger())) > 0) {
-                    collectionPlan.setStatus(collectionPlanStatusService.findByStatus(FAILED));
+                    collectionPlan.setStatus(collectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.UNRECOVERED));
                     updateCollectionPlan = true;
                 }
                 if (balance.compareTo(BigDecimal.valueOf(collectionPlan.getRelatedPolicy().getMinBalanceTrigger())) < 0) {
-                    collectionPlan.setStatus(collectionPlanStatusService.findByStatus(SUCCESS));
+                    collectionPlan.setStatus(collectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.RECOVERED));
                     updateCollectionPlan = true;
                 }
             }
@@ -497,6 +505,12 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
         updateCollectionPlan = updateCollectionPlan(collectionPlan, updateCollectionPlan);
 
         if (updateCollectionPlan) {
+            collectionPlan.getRelatedInvoices().forEach(invoice -> {
+                invoice.setCollectionPlan(collectionPlan);
+                invoice.setDunningCollectionPlanTriggered(true);
+                invoiceService.update(invoice);
+            });
+
             collectionPlanService.update(collectionPlan);
         }
     }
@@ -509,7 +523,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
     private void stopCollectionPlan(List<Long> collectionPlanIds) {
         collectionPlanIds.forEach(collectionPlanId -> {
             DunningCollectionPlan collectionPlan = collectionPlanService.findById(collectionPlanId);
-            if(collectionPlan.getStatus().getStatus() == ACTIVE || collectionPlan.getStatus().getStatus() == DunningCollectionPlanStatusEnum.PAUSED) {
+            if(collectionPlan.getStatus().getStatus() == DunningCollectionPlanStatusEnum.ONGOING || collectionPlan.getStatus().getStatus() == DunningCollectionPlanStatusEnum.PAUSED) {
                 collectionPlan.setStatus(collectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.STOPPED));
                 collectionPlanService.update(collectionPlan);
             }
@@ -543,7 +557,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
         // Ignore levels and actions after balance is less than min balance trigger
         collectionPlanService.ignoreLevelsAndActionsAfterStoppingDunningCollectionPlanOrPayingInvoice(collectionPlan);
         // Update collection plan status to success
-        collectionPlan.setStatus(collectionPlanStatusService.findByStatus(SUCCESS));
+        collectionPlan.setStatus(collectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.RECOVERED));
         collectionPlan.setNextActionDate(null);
         collectionPlan.setNextAction(null);
         collectionPlan.setCloseDate(new Date());
@@ -578,7 +592,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
      */
     private boolean updateCollectionPlan(DunningCollectionPlan collectionPlan, boolean updateCollectionPlan) {
         if(collectionPlan.getDunningLevelInstances().get(collectionPlan.getDunningLevelInstances().size() - 1).getLevelStatus().equals(DunningLevelInstanceStatusEnum.IGNORED)) {
-            collectionPlan.setStatus(collectionPlanStatusService.findByStatus(SUCCESS));
+            collectionPlan.setStatus(collectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.RECOVERED));
             collectionPlan.setNextAction(null);
             collectionPlan.setNextActionDate(null);
         }

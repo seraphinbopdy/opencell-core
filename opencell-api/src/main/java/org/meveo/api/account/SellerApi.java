@@ -289,6 +289,7 @@ public class SellerApi extends AccountEntityApi {
         
         if (StringUtils.isNotBlank(postData.getRegistrationNo())) {
         	RegistrationNumber registrationNumber = new RegistrationNumber();
+        	registrationNumber.updateAudit(currentUser);
         	registrationNumber.setRegistrationNo(postData.getRegistrationNo());
             
             if (StringUtils.isNotBlank(postData.getIsoICDCode())) {            

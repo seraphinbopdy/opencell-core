@@ -249,6 +249,12 @@ public class RatedTransaction extends CFEntity implements ISearchable, IInvoicea
     private Date created;
 
     /**
+     * Username of a user that created the record/entity
+     */
+    @Column(name = "creator", updatable = false, length = 100)
+    private String creator;
+
+    /**
      * Wallet instance associated to rated transaction
      */
     @ManyToOne(fetch = FetchType.LAZY)
@@ -675,7 +681,7 @@ public class RatedTransaction extends CFEntity implements ISearchable, IInvoicea
     private TradingCurrency tradingCurrency;
 
     /**
-     * 
+     *
      * filled only for price lines related to applied discounts, and contains the application sequence composed by the concatenation of the DP sequence and DPI sequence
      */
     @Column(name = "sequence")
@@ -837,7 +843,8 @@ public class RatedTransaction extends CFEntity implements ISearchable, IInvoicea
         this.taxPercent = walletOperation.getTaxPercent();
         this.serviceInstance = walletOperation.getServiceInstance();
         this.status = RatedTransactionStatusEnum.OPEN;
-        this.updated = new Date();
+        this.created = new Date();
+        this.updated = this.created;
         this.taxClass = walletOperation.getTaxClass();
         this.inputUnitOfMeasure = walletOperation.getInputUnitOfMeasure();
         this.ratingUnitOfMeasure = walletOperation.getRatingUnitOfMeasure();
@@ -1685,6 +1692,14 @@ public class RatedTransaction extends CFEntity implements ISearchable, IInvoicea
 
     public void setCreated(Date created) {
         this.created = created;
+    }
+
+    public String getCreator() {
+        return creator;
+    }
+
+    public void setCreator(String creator) {
+        this.creator = creator;
     }
 
     /**

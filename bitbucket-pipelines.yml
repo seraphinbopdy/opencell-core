@@ -1,7 +1,7 @@
-image: maven:3.8.5-openjdk-17
+image: maven:3.9-eclipse-temurin-21
 
 clone:
-  depth: full              # SonarCloud scanner needs the full history to assign issues properly
+  depth: 75              # SonarCloud scanner needs the full history to assign issues properly
 
 definitions:
   caches:
@@ -9,6 +9,7 @@ definitions:
   steps:
     - step: &build-test-sonarcloud
         name: Build, test and analyze on SonarCloud
+        size: 2x           # Use a machine with 2x memory and CPU
         caches:
           - maven
           - sonar

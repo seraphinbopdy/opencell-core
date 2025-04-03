@@ -1446,6 +1446,20 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
      * @throws RatingException Operation rerating failure due to lack of funds, data validation, inconsistency or other rating related failure
      */
     protected RatingResult rateRatedWalletOperation(WalletOperation walletOperationToRerate, boolean useSamePricePlan) throws BusinessException, RatingException {
+    	return rateRatedWalletOperation(walletOperationToRerate, useSamePricePlan, true);
+    }
+    	
+    	
+    /**
+     * Get a rerated copy of a wallet operation. New wallet operation is not persisted nor status of wallet operation to rerate is changed
+     *
+     * @param walletOperationToRerate wallet operation to be rerated
+     * @param useSamePricePlan true if same price plan will be used
+     * @param cancelRT true if we should try to cancel related RT
+     * @throws BusinessException business exception
+     * @throws RatingException Operation rerating failure due to lack of funds, data validation, inconsistency or other rating related failure
+     */
+    protected RatingResult rateRatedWalletOperation(WalletOperation walletOperationToRerate, boolean useSamePricePlan, boolean cancelRT) throws BusinessException, RatingException {
     	RatingResult ratingResult = new RatingResult();
         WalletOperation operation = walletOperationToRerate.getUnratedClone();
         operation.setOperationDate(operation.getEdr() != null ? operation.getEdr().getEventDate() : operation.getOperationDate());
@@ -1486,7 +1500,7 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
             operation.setChargeMode(ChargeApplicationModeEnum.RERATING);
 
             ChargeInstance chargeInstance = operation.getChargeInstance();
-            if (walletOperationToRerate.getRatedTransaction() != null) {
+			if (cancelRT && walletOperationToRerate.getRatedTransaction() != null && walletOperationToRerate.getRatedTransaction().getStatus()!=CANCELED) {
                 walletOperationToRerate.getRatedTransaction().setRejectReason("Origin wallet operation has been rerated");
                 walletOperationToRerate.getRatedTransaction().setStatus(CANCELED);
                 walletOperationToRerate.getRatedTransaction().setUpdater(currentUser.getUserName());

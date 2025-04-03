@@ -18,10 +18,6 @@
 
 package org.meveo.api.rest.admin.impl;
 
-import jakarta.enterprise.context.RequestScoped;
-import jakarta.inject.Inject;
-import jakarta.interceptor.Interceptors;
-
 import org.meveo.api.admin.FilesApi;
 import org.meveo.api.dto.ActionStatus;
 import org.meveo.api.dto.admin.FileRequestDto;
@@ -30,6 +26,10 @@ import org.meveo.api.logging.WsRestApiInterceptor;
 import org.meveo.api.rest.admin.FilesRs;
 import org.meveo.api.rest.impl.BaseRs;
 import org.meveo.model.bi.FlatFile;
+
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
 
 /**
  * @author Edward P. Legaspi
@@ -186,8 +186,17 @@ public class FilesRsImpl extends BaseRs implements FilesRs {
     }
 
     @Override
-    public ActionStatus downloadFile(String file) {
+    public ActionStatus downloadFile(String fullFilePath, String file) {
+
         ActionStatus result = new ActionStatus();
+
+        if (file == null && fullFilePath != null) {
+            if (fullFilePath.startsWith("/")) {
+                file = fullFilePath.substring(1);
+            } else {
+                file = fullFilePath;
+            }
+        }
 
         try {
             filesApi.downloadFile(file, httpServletResponse);

@@ -99,7 +99,8 @@ public class AuditContext {
 		boolean result = false;
 		File file = new File(_propertyFile);
 		try {
-			if (file.createNewFile()) {
+			if (!FileUtils.existsFile(file)) {
+				FileUtils.createNewFile(file);
 				// create new file and initialize configuration from default
 				auditConfiguration.init();
 				saveConfiguration();

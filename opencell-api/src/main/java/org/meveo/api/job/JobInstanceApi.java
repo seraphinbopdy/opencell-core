@@ -258,6 +258,10 @@ public class JobInstanceApi extends BaseCrudApi<JobInstance, JobInstanceDto> {
             jobInstance.setJobStatusReportFrequency(postData.getJobStatusReportFrequency());
         }
 
+        if (postData.isDisabled() != null) {
+            jobInstance.setDisabled(postData.isDisabled());
+        }
+
         // Create any missing CFT for a given provider and job
         Map<String, CustomFieldTemplate> jobCustomFields = job.getCustomFields();
         if (jobCustomFields != null) {

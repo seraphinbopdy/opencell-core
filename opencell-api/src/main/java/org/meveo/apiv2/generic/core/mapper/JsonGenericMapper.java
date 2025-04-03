@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
 import com.fasterxml.jackson.databind.ser.PropertyWriter;
 import jakarta.persistence.Persistence;
+import org.hibernate.collection.spi.AbstractPersistentCollection;
 import org.hibernate.collection.spi.PersistentBag;
 import org.meveo.apiv2.generic.GenericPaginatedResource;
 import org.meveo.apiv2.generic.core.mapper.module.GenericModule;
@@ -90,7 +91,7 @@ public class JsonGenericMapper extends ObjectMapper {
                     if (include(writer)) {
                         Object prop = ((BeanPropertyWriter)writer).get(pojo);
                         GenericSimpleFilterProvider genericSimpleFilterProvider = (GenericSimpleFilterProvider) simpleFilterProvider;
-                        if(!genericSimpleFilterProvider.isNestedEntityCandidate(writer.getName(), jgen) && prop instanceof PersistentBag && !Persistence.getPersistenceUtil().isLoaded(prop)) {
+                        if(!genericSimpleFilterProvider.isNestedEntityCandidate(writer.getName(), jgen) && prop instanceof AbstractPersistentCollection && !Persistence.getPersistenceUtil().isLoaded(pojo, writer.getName())) {
                             return;
                         }
                         writer.serializeAsField(pojo, jgen, provider);

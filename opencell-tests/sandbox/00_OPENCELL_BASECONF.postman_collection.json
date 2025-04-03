@@ -1,10 +1,11 @@
 {
 	"info": {
-		"_postman_id": "3bb203a6-8b0e-4450-a261-819f855eaa77",
-		"name": "00_OPENCELL_V17.X - V1",
+		"_postman_id": "cf398b1a-8e88-4949-88c8-ef8c862a422b",
+		"name": "00_OPENCELL_V17.0.X - V3",
 		"description": "# Introduction\n\nThis configuration file is designed to be a basis for all configurations provided by Opencell.  \nIt merely contains most common general settings and a catalog of services implementing various rating models.\n\n# Configuring Opencell\n\nThere are 2 main ways for configuring _**Opencell**_:\n\n- GUI (_Administration GUI_ and _Marketing Manager_)\n    \n- API (all Opencell configuration and operations can be performed using our extensive API library)\n    \n\nThe most flexible way is using APIs which currently are available as **Rest** and **Soap**.  \nThe **Soap** API are deprecated, so will won't mention them anymore.\n\n## Tools\n\nAny tools able to send HTTP requests will do.  \nOne could even just script _curl_ calls using shell script.  \nBut of course, a more user friendly tool will make things easier.\n\nHere at _**Opencell**_, we prefer **Postman** ([https://getpostman.com](https://getpostman.com)):\n\n- it has a modern, friendly interface\n    \n- Sets of API request can be organized into collections, themselves structured into a folder tree.\n    \n- Collections can be exported as _JSON_ files or shared with other team members using collaboration features (payed version)\n    \n- it allows to uses variables at different levels (collection, environement, global) and to execute _Javascript_ scripts before and after executing API calls which allows great flexibility and API response testing.\n    \n\n# Configuration documentation guidelines\n\nIn order to document our configuration, we make full used of the internal documentation capabilities of the Markdown fields on Postman Objects\n\n## Default template for _Collection_ documentation\n\n## Default template for _Folder_ documentation\n\n## Default template for _Request_ documentation\n\n# Tips & guidelines\n\nHere follow a few tips for understanding this collection.\n\n## Collection pre-request script\n\n``` javascript\npm.globals.set(\"timestamp.iso\", (new Date()).toISOString());\npm.globals.set(\"request.label\", pm.info.requestName);\nvar parts = pm.info.requestName.split(\"|\");\nfor(let i=0; i    pm.globals.set(\"request.label.\"+i, parts[i]);\n}\n\n ```\n\n## Configuration guidelines\n\n## Entities\n\n__XXX\n\n### Custom Fields\n\nCF___ XXX\n\nwill be discarded for inherited\n\n#### Custom field visibility\n\nSE____XXX\n\nare used in CFT.applicableOnEl to show CFT on entities\n\n## Entity abbreviation\n\n| code | entity |\n| --- | --- |\n| P | Provider |\n| S | Seller |\n| C | Customer |\n| CA | Customer Account |\n| BA | Billing Account |\n| UA | User Account |\n| SU | Subscription |\n| AP | Access Point |\n| OF | Offer Template |\n| SE | Service Template and Instance |\n| CH | Charge Template |\n| PP | Price Plan |\n| CN | Counter |\n| ICAT | Invoice Category |\n| ISCAT | Invoice SubCategory |\n| CAL | Calendar |\n| BC | Billing Cycle |",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "10527021"
+		"_exporter_id": "4732430",
+		"_collection_link": "https://grey-comet-717407.postman.co/workspace/OpenCell~f2ec3afc-604a-47ad-b692-222adcce092d/collection/4732430-cf398b1a-8e88-4949-88c8-ef8c862a422b?action=share&source=collection_link&creator=4732430"
 	},
 	"item": [
 		{
@@ -237,7 +238,7 @@
 												],
 												"body": {
 													"mode": "raw",
-													"raw": "{\r\n    \"code\": \"{{request.label.1}}\",\r\n    \"description\": \"{{request.label.2}}\",\r\n    \"currencyCode\": \"EUR\",\r\n    \"countryCode\": \"FR\",\r\n    \"languageCode\": \"FRA\",\r\n    \"address\": {\r\n        \"address1\": \"14 rue Crespin du Gast\",\r\n        \"address2\": \"Esc. A\",\r\n        \"address3\": null,\r\n        \"zipCode\": \"75011\",\r\n        \"city\": \"PARIS\",\r\n        \"country\": \"FR\",\r\n        \"state\": null\r\n    },\r\n    \"isoICDCode\": \"0002\",\r\n    \"registrationNo\": \"123123123123\",\r\n    \"contactInformation\": {\r\n        \"email\": \"billing@opencellsoft.com\",\r\n        \"phone\": \"0123456789\",\r\n        \"mobile\": \"0678912345\",\r\n        \"fax\": null\r\n    }\r\n}"
+													"raw": "{\r\n    \"code\": \"{{request.label.1}}\",\r\n    \"description\": \"{{request.label.2}}\",\r\n    \"currencyCode\": \"EUR\",\r\n    \"countryCode\": \"FR\",\r\n    \"languageCode\": \"FRA\",\r\n    \"address\": {\r\n        \"address1\": \"14 rue Crespin du Gast\",\r\n        \"address2\": \"Esc. A\",\r\n        \"address3\": null,\r\n        \"zipCode\": \"75011\",\r\n        \"city\": \"PARIS\",\r\n        \"country\": \"FR\",\r\n        \"state\": null\r\n    },\r\n    \"registrationNumbers\" :   [\r\n        {\r\n            \"registrationNo\" : \"123123123123\",\r\n            \"isoIcdCode\" : \"0002\"\r\n        }\r\n    ],\r\n    \"contactInformation\": {\r\n        \"email\": \"billing@opencellsoft.com\",\r\n        \"phone\": \"0123456789\",\r\n        \"mobile\": \"0678912345\",\r\n        \"fax\": null\r\n    }\r\n}"
 												},
 												"url": {
 													"raw": "{{opencell.url}}/seller/createOrUpdate",
@@ -32362,7 +32363,8 @@
 													"  }, 1000);\r",
 													""
 												],
-												"type": "text/javascript"
+												"type": "text/javascript",
+												"packages": {}
 											}
 										}
 									],
@@ -32376,7 +32378,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\r\n    \"cdrs\": [\r\n        \"2024-02-01T01:00:00.000Z;250;SU-24000007;ENERGY_CHARGING;PARTENAIRE_1;;;\"\r\n    ],\r\n    \"isRateTriggeredEdr\": \"true\",\r\n    \"maxDepth\": \"2\",\r\n    \"mode\": \"ROLLBACK_ON_ERROR\"\r\n}"
+											"raw": "{\r\n    \"cdrs\": [\r\n        \"2024-02-01T01:00:00.000Z;250;MANUAL_SUB_CUSTOMER015;ENERGY_CHARGING;PARTENAIRE_1;;;\"\r\n    ],\r\n    \"isRateTriggeredEdr\": \"true\",\r\n    \"maxDepth\": \"2\",\r\n    \"mode\": \"ROLLBACK_ON_ERROR\"\r\n}"
 										},
 										"url": {
 											"raw": "{{opencell.url}}/v2/mediation/cdrs/chargeCdrList",
@@ -32410,7 +32412,8 @@
 													"  }, 1000);\r",
 													""
 												],
-												"type": "text/javascript"
+												"type": "text/javascript",
+												"packages": {}
 											}
 										}
 									],
@@ -32424,7 +32427,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\r\n    \"cdrs\": [\r\n        \"2024-02-01T01:00:00.000Z;254;SU-24000016;SU-24000017;50.33;BORNE_BN77_00014;;\"\r\n    ],\r\n    \"isRateTriggeredEdr\": \"true\",\r\n    \"maxDepth\": \"2\",\r\n    \"mode\": \"ROLLBACK_ON_ERROR\"\r\n}"
+											"raw": "{\r\n    \"cdrs\": [\r\n        \"2024-02-01T01:00:00.000Z;254;MANUAL_SUB_CUSTOMER016;ENERGY_CHARGING;50.33;BORNE_BN77_00014;;\"\r\n    ],\r\n    \"isRateTriggeredEdr\": \"true\",\r\n    \"maxDepth\": \"2\",\r\n    \"mode\": \"ROLLBACK_ON_ERROR\"\r\n}"
 										},
 										"url": {
 											"raw": "{{opencell.url}}/v2/mediation/cdrs/chargeCdrList",
@@ -38155,9 +38158,9 @@
 											}
 										},
 										"url": {
-											"raw": "{{opencell.url.RESTful}}/catalog/offerTemplate",
+											"raw": "{{opencell.url}}/catalog/offerTemplate",
 											"host": [
-												"{{opencell.url.RESTful}}"
+												"{{opencell.url}}"
 											],
 											"path": [
 												"catalog",
@@ -38182,9 +38185,9 @@
 											}
 										},
 										"url": {
-											"raw": "{{opencell.url.RESTful}}/catalog/products",
+											"raw": "{{opencell.url}}/catalog/products",
 											"host": [
-												"{{opencell.url.RESTful}}"
+												"{{opencell.url}}"
 											],
 											"path": [
 												"catalog",
@@ -38209,9 +38212,9 @@
 											}
 										},
 										"url": {
-											"raw": "{{opencell.url.RESTful}}/catalog/oneShotChargeTemplate/createOrUpdate",
+											"raw": "{{opencell.url}}/catalog/oneShotChargeTemplate/createOrUpdate",
 											"host": [
-												"{{opencell.url.RESTful}}"
+												"{{opencell.url}}"
 											],
 											"path": [
 												"catalog",
@@ -38237,9 +38240,9 @@
 											}
 										},
 										"url": {
-											"raw": "{{opencell.url.RESTful}}/catalog/pricePlan/createOrUpdate",
+											"raw": "{{opencell.url}}/catalog/pricePlan/createOrUpdate",
 											"host": [
-												"{{opencell.url.RESTful}}"
+												"{{opencell.url}}"
 											],
 											"path": [
 												"catalog",
@@ -38265,9 +38268,9 @@
 											}
 										},
 										"url": {
-											"raw": "{{opencell.url.RESTful}}/catalog/pricePlan/pricePlanMatrixVersion",
+											"raw": "{{opencell.url}}/catalog/pricePlan/pricePlanMatrixVersion",
 											"host": [
-												"{{opencell.url.RESTful}}"
+												"{{opencell.url}}"
 											],
 											"path": [
 												"catalog",
@@ -38293,9 +38296,9 @@
 											}
 										},
 										"url": {
-											"raw": "{{opencell.url.RESTful}}/catalog/pricePlan/PPM_Charge%20One%20Shot%20IP/pricePlanMatrixVersions/1/pricePlanMatrixLines/updateWithoutDelete",
+											"raw": "{{opencell.url}}/catalog/pricePlan/PPM_Charge%20One%20Shot%20IP/pricePlanMatrixVersions/1/pricePlanMatrixLines/updateWithoutDelete",
 											"host": [
-												"{{opencell.url.RESTful}}"
+												"{{opencell.url}}"
 											],
 											"path": [
 												"catalog",
@@ -38325,9 +38328,9 @@
 											}
 										},
 										"url": {
-											"raw": "{{opencell.url.RESTful}}/catalog/pricePlan/PPM_Charge%20One%20Shot%20IP/pricePlanMatrixVersions/1/status/PUBLISHED",
+											"raw": "{{opencell.url}}/catalog/pricePlan/PPM_Charge%20One%20Shot%20IP/pricePlanMatrixVersions/1/status/PUBLISHED",
 											"host": [
-												"{{opencell.url.RESTful}}"
+												"{{opencell.url}}"
 											],
 											"path": [
 												"catalog",
@@ -38357,9 +38360,9 @@
 											}
 										},
 										"url": {
-											"raw": "{{opencell.url.RESTful}}/catalog/chargeTemplates/Charge%20One%20Shot%20IP/status/ACTIVE",
+											"raw": "{{opencell.url}}/catalog/chargeTemplates/Charge%20One%20Shot%20IP/status/ACTIVE",
 											"host": [
-												"{{opencell.url.RESTful}}"
+												"{{opencell.url}}"
 											],
 											"path": [
 												"catalog",
@@ -38387,9 +38390,9 @@
 											}
 										},
 										"url": {
-											"raw": "{{opencell.url.RESTful}}/catalog/products/Produit_IP",
+											"raw": "{{opencell.url}}/catalog/products/Produit_IP",
 											"host": [
-												"{{opencell.url.RESTful}}"
+												"{{opencell.url}}"
 											],
 											"path": [
 												"catalog",
@@ -38415,9 +38418,9 @@
 											}
 										},
 										"url": {
-											"raw": "{{opencell.url.RESTful}}/catalog/products/Produit_IP/productVersions/1/status/PUBLISHED",
+											"raw": "{{opencell.url}}/catalog/products/Produit_IP/productVersions/1/status/PUBLISHED",
 											"host": [
-												"{{opencell.url.RESTful}}"
+												"{{opencell.url}}"
 											],
 											"path": [
 												"catalog",
@@ -38447,9 +38450,9 @@
 											}
 										},
 										"url": {
-											"raw": "{{opencell.url.RESTful}}/catalog/products/Produit_IP/status/ACTIVE",
+											"raw": "{{opencell.url}}/catalog/products/Produit_IP/status/ACTIVE",
 											"host": [
-												"{{opencell.url.RESTful}}"
+												"{{opencell.url}}"
 											],
 											"path": [
 												"catalog",
@@ -38477,9 +38480,9 @@
 											}
 										},
 										"url": {
-											"raw": "{{opencell.url.RESTful}}/catalog/offerTemplate",
+											"raw": "{{opencell.url}}/catalog/offerTemplate",
 											"host": [
-												"{{opencell.url.RESTful}}"
+												"{{opencell.url}}"
 											],
 											"path": [
 												"catalog",
@@ -38504,9 +38507,9 @@
 											}
 										},
 										"url": {
-											"raw": "{{opencell.url.RESTful}}/catalog/offerTemplate/Offre_IP/update/status?status=ACTIVE&validFrom=&validTo=",
+											"raw": "{{opencell.url}}/catalog/offerTemplate/Offre_IP/update/status?status=ACTIVE&validFrom=&validTo=",
 											"host": [
-												"{{opencell.url.RESTful}}"
+												"{{opencell.url}}"
 											],
 											"path": [
 												"catalog",
@@ -38553,9 +38556,9 @@
 											}
 										},
 										"url": {
-											"raw": "{{opencell.url.RESTful}}/account/accountHierarchy/createCRMAccountHierarchy",
+											"raw": "{{opencell.url}}/account/accountHierarchy/createCRMAccountHierarchy",
 											"host": [
-												"{{opencell.url.RESTful}}"
+												"{{opencell.url}}"
 											],
 											"path": [
 												"account",
@@ -38605,9 +38608,9 @@
 											}
 										},
 										"url": {
-											"raw": "{{opencell.url.RESTful}}/cpq/quotes",
+											"raw": "{{opencell.url}}/cpq/quotes",
 											"host": [
-												"{{opencell.url.RESTful}}"
+												"{{opencell.url}}"
 											],
 											"path": [
 												"cpq",
@@ -38632,9 +38635,9 @@
 											}
 										},
 										"url": {
-											"raw": "{{opencell.url.RESTful}}/cpq/quotes/quoteItems",
+											"raw": "{{opencell.url}}/cpq/quotes/quoteItems",
 											"host": [
-												"{{opencell.url.RESTful}}"
+												"{{opencell.url}}"
 											],
 											"path": [
 												"cpq",
@@ -38660,9 +38663,9 @@
 											}
 										},
 										"url": {
-											"raw": "{{opencell.url.RESTful}}/cpq/quotes",
+											"raw": "{{opencell.url}}/cpq/quotes",
 											"host": [
-												"{{opencell.url.RESTful}}"
+												"{{opencell.url}}"
 											],
 											"path": [
 												"cpq",
@@ -38678,9 +38681,9 @@
 										"method": "PUT",
 										"header": [],
 										"url": {
-											"raw": "{{opencell.url.RESTful}}/cpq/quotes/quoteVersions/{{IP_quote_code}}/1/status/PUBLISHED",
+											"raw": "{{opencell.url}}/cpq/quotes/quoteVersions/{{IP_quote_code}}/1/status/PUBLISHED",
 											"host": [
-												"{{opencell.url.RESTful}}"
+												"{{opencell.url}}"
 											],
 											"path": [
 												"cpq",
@@ -38701,9 +38704,9 @@
 										"method": "POST",
 										"header": [],
 										"url": {
-											"raw": "{{opencell.url.RESTful}}/cpq/quotes/{{IP_quote_code}}/quoteVersions/1/orderPlacement",
+											"raw": "{{opencell.url}}/cpq/quotes/{{IP_quote_code}}/quoteVersions/1/orderPlacement",
 											"host": [
-												"{{opencell.url.RESTful}}"
+												"{{opencell.url}}"
 											],
 											"path": [
 												"cpq",
@@ -38812,9 +38815,9 @@
 											}
 										},
 										"url": {
-											"raw": "{{opencell.url.RESTful}}/orderManagement/commercialOrders",
+											"raw": "{{opencell.url}}/orderManagement/commercialOrders",
 											"host": [
-												"{{opencell.url.RESTful}}"
+												"{{opencell.url}}"
 											],
 											"path": [
 												"orderManagement",
@@ -38839,9 +38842,9 @@
 											}
 										},
 										"url": {
-											"raw": "{{opencell.url.RESTful}}/orderManagement/commercialOrders/{{IP_quote_order_id}}/status/FINALIZED",
+											"raw": "{{opencell.url}}/orderManagement/commercialOrders/{{IP_quote_order_id}}/status/FINALIZED",
 											"host": [
-												"{{opencell.url.RESTful}}"
+												"{{opencell.url}}"
 											],
 											"path": [
 												"orderManagement",
@@ -38869,9 +38872,9 @@
 											}
 										},
 										"url": {
-											"raw": "{{opencell.url.RESTful}}/orderManagement/commercialOrders/{{IP_quote_order_id}}/orderProgress/20",
+											"raw": "{{opencell.url}}/orderManagement/commercialOrders/{{IP_quote_order_id}}/orderProgress/20",
 											"host": [
-												"{{opencell.url.RESTful}}"
+												"{{opencell.url}}"
 											],
 											"path": [
 												"orderManagement",
@@ -38990,9 +38993,9 @@
 											}
 										},
 										"url": {
-											"raw": "{{opencell.url.RESTful}}/orderManagement/commercialOrders/{{IP_quote_order_id}}/orderProgress/50",
+											"raw": "{{opencell.url}}/orderManagement/commercialOrders/{{IP_quote_order_id}}/orderProgress/50",
 											"host": [
-												"{{opencell.url.RESTful}}"
+												"{{opencell.url}}"
 											],
 											"path": [
 												"orderManagement",
@@ -39112,9 +39115,9 @@
 											}
 										},
 										"url": {
-											"raw": "{{opencell.url.RESTful}}/orderManagement/commercialOrders/{{IP_quote_order_id}}/orderProgress/100",
+											"raw": "{{opencell.url}}/orderManagement/commercialOrders/{{IP_quote_order_id}}/orderProgress/100",
 											"host": [
-												"{{opencell.url.RESTful}}"
+												"{{opencell.url}}"
 											],
 											"path": [
 												"orderManagement",
@@ -39336,9 +39339,9 @@
 									}
 								},
 								"url": {
-									"raw": "{{opencell.url.RESTful}}/account/accountHierarchy/createCRMAccountHierarchy",
+									"raw": "{{opencell.url}}/account/accountHierarchy/createCRMAccountHierarchy",
 									"host": [
-										"{{opencell.url.RESTful}}"
+										"{{opencell.url}}"
 									],
 									"path": [
 										"account",
@@ -39576,8 +39579,13 @@
 					"    pm.test(\"is.success\", function () {",
 					"        pm.expect(pm.response.code).to.be.oneOf([200,204,201,202]);",
 					"    });   ",
-					"}",
-					""
+					"",
+					"    if (pm.response.code !=200 && pm.response.code !=204 && pm.response.code !=201 && pm.response.code !=202 ){",
+					"        pm.test(pm.response.text(), function () {",
+					"            pm.expect(\"This is response body\").equals(\"\");",
+					"        }); ",
+					"    }",
+					"}"
 				]
 			}
 		}

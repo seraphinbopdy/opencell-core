@@ -5164,7 +5164,7 @@ Your name and surname
         </update>
     </changeSet>
 
-    <changeSet id="#INTRD-12827_20230904" author="zelmeliani">
+    <changeSet id="#INTRD-12827_20230904" author="zelmeliani" failOnError="false">
         <insert tableName="meveo_script_instance">
             <column name="id" valueSequenceNext="meveo_script_instance_seq" />
             <column name="version" valueNumeric="0" />
@@ -13997,7 +13997,8 @@ Meaning that advances won’t be available for further invoices."/>
     </changeSet>
 
     <changeSet id="INTRD-23757_240606" author="Mohammed_ElAzzouzi" failOnError="false">
-        <sql>CREATE INDEX edr_created_index ON rating_edr USING btree(((created)::date))</sql>
+    	<validCheckSum>ANY</validCheckSum>
+        <sql>CREATE INDEX IF NOT EXISTS edr_created_index ON rating_edr USING btree(((created)::date));</sql>
     </changeSet>
 
     <changeSet id="INTRD-24460_updatei18n" author="a.rouaguebe">
@@ -15717,6 +15718,7 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
     </changeSet>
     
     <changeSet id="#INTRD-5220_20241205" author="AbdellatifBARI">
+    	<validCheckSum>8:26adfbbe31c48373fb90b92664baedd1</validCheckSum>
         <createTable tableName="billing_subscriptions_purchase_orders">
             <column name="subscription_id" type="BIGINT">
                 <constraints nullable="false"/>
@@ -17882,6 +17884,107 @@ public class MarkWOToReratePreScript extends PreUpdateHugeEntityScript {
             <column name="code" valueComputed="${uuid_function}"/> 
             <where>code IS NULL OR code = ''</where>
         </update>
+    </changeSet>
+    <changeSet id="INTRD-29281_20210306" author="abdelkader.bouazza">
+        <insert tableName="com_message_template">
+            <column name="media" value="EMAIL" />
+            <column name="id" valueSequenceNext="com_msg_tmpl_seq" />
+            <column name="version" value="0" />
+            <column name="created" valueDate="${db.current.time}" />
+            <column name="code" value="REPORT_QUERY_SCHEDULED_RESULT" />
+            <column name="type" value="OTHER"/>
+            <column name="tag_start" value="#{"/>
+            <column name="tag_end" value="}" />
+            <column name="description" value="Report scheduled query result" />
+            <column name="subject" value="[opencell] Query result #{reportQueryName} #{startDate}" />
+            <column name="htmlcontent">
+                <![CDATA[Dear #{userName},<br>
+<br>
+The result for your query is ready.<br>
+Check the result on <a href="#{portalResultLink}">Opencell Portal</a><br>
+Query : #{reportQueryName}<br>
+Started : #{startDate}<br>
+Line count : #{lineCount}<br>
+<br>
+Best regards,<br>
+Opencell team.
+                ]]>
+            </column>
+        </insert>
+    </changeSet>
+
+   <changeSet id="#INTRD-28562_update_dunning_collection_plan_status" author="zelmeliani">
+       <update tableName="dunning_collection_plan_statuses">
+           <column name="status" value="PAUSED"/>
+           <column name="color_code" value="#FFA000"/>
+           <where>status = 'PAUSED'</where>
+       </update>
+       <update tableName="dunning_collection_plan_statuses">
+           <column name="status" value="STOPPED"/>
+           <column name="color_code" value="#00C853"/>
+           <where>status = 'STOPPED'</where>
+       </update>
+       <update tableName="dunning_collection_plan_statuses">
+           <column name="status" value="RECOVERED"/>
+           <column name="color_code" value="#00C853"/>
+           <column name="description" value="RECOVERED_DUNNING"/>
+           <where>status = 'SUCCESS'</where>
+       </update>
+       <update tableName="dunning_collection_plan_statuses">
+           <column name="status" value="UNRECOVERED"/>
+           <column name="color_code" value="#F44336"/>
+           <column name="description" value="UNRECOVERED_DUNNING"/>
+           <where>status = 'FAILED'</where>
+       </update>
+       <update tableName="dunning_collection_plan_statuses">
+           <column name="status" value="ONGOING"/>
+           <column name="color_code" value="#1976D2"/>
+           <column name="description" value="ONGOING_DUNNING"/>
+           <where>status = 'ACTIVE'</where>
+       </update>
+       <update tableName="dunning_collection_plan_statuses">
+           <column name="status" value="ONGOING"/>
+           <column name="color_code" value="#1976D2"/>
+           <column name="description" value="ONGOING_DUNNING"/>
+           <where>status = 'ACTIVE'</where>
+       </update>
+    </changeSet>
+
+    <changeSet id="#INTRD-30098_20250321" author="AbdellatifBARI">
+        <update tableName="billing_tax">
+            <column name="description" value="ZERO TAX" />
+            <column name="taxation_category_id" value="2" />
+            <where>code='TAX_00'</where>
+        </update>
+        <update tableName="billing_tax">
+            <column name="code" value="TAX_05_5" />
+            <column name="description" value="5.5%" />
+            <column name="tax_percentage" valueNumeric="5.500000000000" />
+            <where>code='TAX_05'</where>
+        </update>
+        <update tableName="billing_tax">
+            <column name="description" value="10%" />
+            <where>code='TAX_10'</where>
+        </update>
+        <update tableName="billing_tax">
+            <column name="description" value="18%" />
+            <where>code='TAX_18'</where>
+        </update>
+        <update tableName="billing_tax">
+            <column name="description" value="20%" />
+            <where>code='TAX_20'</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="#INTRD-30183_20250326" author="zelmeliani">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="billing_rated_transaction" columnName="creator"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="billing_rated_transaction">
+            <column name="creator" type="varchar(100)" />
+        </addColumn>
     </changeSet>
 
 </databaseChangeLog>

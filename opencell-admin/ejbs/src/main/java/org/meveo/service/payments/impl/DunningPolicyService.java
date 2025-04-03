@@ -1,6 +1,5 @@
 package org.meveo.service.payments.impl;
 
-import static java.util.Collections.EMPTY_LIST;
 import static java.util.Comparator.comparing;
 import static java.util.Optional.ofNullable;
 import static org.meveo.model.dunning.PolicyConditionTargetEnum.valueOf;
@@ -356,7 +355,7 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
      * @return Number of collection plans
      */
     public int processEligibleInvoice(Map<DunningPolicy, List<Invoice>> eligibleInvoice) {
-        DunningCollectionPlanStatus collectionPlanStatus = collectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.ACTIVE);
+        DunningCollectionPlanStatus collectionPlanStatus = collectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.ONGOING);
         AtomicInteger dunningCollectionPlanNumber = new AtomicInteger(0);
         for (Map.Entry<DunningPolicy, List<Invoice>> entry : eligibleInvoice.entrySet()) {
             DunningPolicy policy = refreshOrRetrieve(entry.getKey());
@@ -575,7 +574,7 @@ public class DunningPolicyService extends PersistenceService<DunningPolicy> {
      * @return Number of collection plans
      */
     public int processEligibleCustomerAccounts(Map<DunningPolicy, Map<CustomerAccount, BigDecimal>> eligibleCustomerAccountsByPolicy, List<String> linkedOccTemplates, CustomerBalance customerBalance) {
-        DunningCollectionPlanStatus collectionPlanStatus = collectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.ACTIVE);
+        DunningCollectionPlanStatus collectionPlanStatus = collectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.ONGOING);
         AtomicInteger dunningCollectionPlanNumber = new AtomicInteger(0);
         for (Map.Entry<DunningPolicy, Map<CustomerAccount, BigDecimal>> entry : eligibleCustomerAccountsByPolicy.entrySet()) {
             // Refresh dunning policy

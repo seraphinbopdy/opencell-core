@@ -93,6 +93,7 @@ import org.meveo.model.billing.UntdidTaxationCategory;
 import org.meveo.model.billing.UserAccount;
 import org.meveo.model.billing.VatDateCodeEnum;
 import org.meveo.model.cpq.commercial.CommercialOrder;
+import org.meveo.model.crm.Customer;
 import org.meveo.model.crm.Provider;
 import org.meveo.model.payments.*;
 import org.meveo.model.shared.Address;
@@ -103,6 +104,8 @@ import org.meveo.service.admin.impl.TradingCurrencyService;
 import org.meveo.service.base.ValueExpressionWrapper;
 import org.meveo.service.cpq.order.CommercialOrderService;
 import org.meveo.service.crm.impl.ProviderService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
@@ -147,6 +150,7 @@ public class InvoiceUblHelper {
 	public static final String SIREN = "0002";
 	private static final String IV = "IV";
 	private static final String UNCL_3035 = "UNCL 3035";
+	private static final Logger log = LoggerFactory.getLogger(InvoiceUblHelper.class);
 
 	private Map<String, String> descriptionMap = new HashMap<>();
 	private static int rounding = 2;
@@ -172,6 +176,12 @@ public class InvoiceUblHelper {
 	public static InvoiceUblHelper getInstance(){ return  INSTANCE; }
 
 	public Path createInvoiceUBL(org.meveo.model.billing.Invoice invoice){
+		Customer customer = invoice.getBillingAccount().getCustomerAccount().getCustomer();
+		// no EBL for individual customer
+		if(!invoice.getBillingAccount().getIsCompany()) {
+            log.warn("No UBL for individual customer : {}", customer.getCode());
+			return null;
+		}
 		Invoice invoiceXml = new ObjectFactory().createInvoice();
 		InvoiceType invoiceType = invoice.getInvoiceType();
 		CreditNote creditNote = null;
@@ -407,8 +417,14 @@ public class InvoiceUblHelper {
 
 			startDate.setValue(toXmlDate(source.getStartDate()));
 			endDate.setValue(toXmlDate(source.getEndDate()));
+
+			VatDateCodeEnum vatDateCode = einvoiceSettingService.findEinvoiceSetting().getVatDateCode();
+			DescriptionCode descriptionCode = objectFactorycommonBasic.createDescriptionCode();
+			descriptionCode.setValue(String.valueOf(vatDateCode.getPaidToDays()));
+
 			periodType.setStartDate(startDate);
 			periodType.setEndDate(endDate);
+			periodType.getDescriptionCodes().add(descriptionCode);
 			target.getInvoicePeriods().add(periodType);
 		}
 
@@ -1322,7 +1338,8 @@ public class InvoiceUblHelper {
 
 		if(tax != null && tax.getUntdidTaxationCategory() != null) {
 			UntdidTaxationCategory untdidTaxationCategory = tax.getUntdidTaxationCategory();
-			if(!untdidTaxationCategory.getSemanticModel().equalsIgnoreCase("Standard rate")){
+			var noExemptionListValue = List.of("S", "Z", "L", "M");
+			if(!noExemptionListValue.contains(untdidTaxationCategory.getCode())){
 				TaxExemptionReason taxExemptionReason = objectFactorycommonBasic.createTaxExemptionReason();
 				taxExemptionReason.setValue(untdidTaxationCategory.getSemanticModel());
 				taxCategoryType.getTaxExemptionReasons().add(taxExemptionReason);

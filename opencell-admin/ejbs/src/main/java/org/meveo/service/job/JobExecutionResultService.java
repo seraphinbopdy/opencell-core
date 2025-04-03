@@ -68,7 +68,8 @@ public class JobExecutionResultService extends PersistenceService<JobExecutionRe
 
         if (result.getId() == null) {
             create(result);
-
+            commit();
+            
         } else {
 
             // Not interested in tracking job execution history when no work was done

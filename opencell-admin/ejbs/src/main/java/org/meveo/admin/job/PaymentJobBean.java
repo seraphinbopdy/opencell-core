@@ -245,7 +245,7 @@ public class PaymentJobBean extends IteratorBasedJobBean<PaymentItem> {
 
         AccountOperation ao = accountOperationService.findById(paymentItem.accountOperationId);
         paymentItem.amountToPay = ao.getUnMatchingAmount().multiply(oneHundred).longValue();
-        CustomerAccount customerAccount = customerAccountService.findById(ao.getCustomerAccount().getId());
+        CustomerAccount customerAccount = ao.getCustomerAccount();
         PaymentResponseDto doPaymentResponseDto = new PaymentResponseDto();
         try {
             if (operationCategory == OperationCategoryEnum.CREDIT) {

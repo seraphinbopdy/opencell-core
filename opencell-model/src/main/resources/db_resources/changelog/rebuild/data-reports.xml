@@ -1609,6 +1609,6 @@ Opencell team.
                 ]]>
             </column>
         </insert>
-    </changeSet>               
+    </changeSet>
 
 </databaseChangeLog>

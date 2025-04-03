@@ -83,7 +83,7 @@ public class DunningPolicyResourceImplTest {
 
         DunningCollectionPlanStatus collectionPlanStatus = new DunningCollectionPlanStatus();
         collectionPlanStatus.setId(1L);
-        collectionPlanStatus.setStatus(DunningCollectionPlanStatusEnum.FAILED);
+        collectionPlanStatus.setStatus(DunningCollectionPlanStatusEnum.UNRECOVERED);
 
         when(dunningPolicyApiService.updateTotalLevels(any())).thenReturn(of(dunningPolicy));
         when(dunningPolicyApiService.create(any())).thenReturn(dunningPolicy);

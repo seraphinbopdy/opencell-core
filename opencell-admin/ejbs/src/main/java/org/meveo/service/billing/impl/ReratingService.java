@@ -669,7 +669,7 @@ public class ReratingService extends RatingService implements Serializable {
         try {
 
             // Create a new Wallet operation based on a Wallet operation that is being rerated
-            ratingResult = rateRatedWalletOperation(operationToRerate, useSamePricePlan);
+            ratingResult = rateRatedWalletOperation(operationToRerate, useSamePricePlan, update);
             WalletOperation newWO = ratingResult.getWalletOperations().stream().filter(e -> e.getDiscountPlanType() == null).findFirst().orElse(null);
 
             newWO.setReratedWalletOperation(operationToRerate);
@@ -791,7 +791,6 @@ public class ReratingService extends RatingService implements Serializable {
 		        errorsMap.computeIfAbsent(e.getMessage(), k -> new ArrayList<>()).add(operationToRerate.getId());
 		    }
 		});
-		
 		errorsMap.forEach((key, value) ->reportErrors(jobExecutionResult, key, value, toProcess));
 		toProcessIds.removeAll(errorsMap.values().stream().flatMap(List::stream).collect(Collectors.toList()));
 		if(!toProcessIds.isEmpty()) {

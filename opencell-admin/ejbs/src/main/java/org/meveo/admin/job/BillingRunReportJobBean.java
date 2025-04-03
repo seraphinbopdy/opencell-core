@@ -10,6 +10,7 @@ import static org.meveo.model.billing.BillingRunStatusEnum.OPEN;
 import java.util.List;
 import java.util.Map;
 
+import org.meveo.commons.utils.MethodCallingUtils;
 import org.meveo.model.billing.BillingRun;
 import org.meveo.model.billing.BillingRunReport;
 import org.meveo.model.billing.BillingRunReportTypeEnum;
@@ -33,12 +34,33 @@ public class BillingRunReportJobBean extends BaseJobBean {
 
     private List<Long> billingRunIds;
 
+    @Inject
+    private MethodCallingUtils methodCallingUtils;
+
     public void execute(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance) {
+        
         List<EntityReferenceWrapper> billingRunWrappers =
                 (List<EntityReferenceWrapper>) this.getParamOrCFValue(jobInstance, "billingRuns");
         billingRunIds = billingRunWrappers != null ? extractBRIds(billingRunWrappers) : emptyList();
+        List<BillingRun> billingRuns = initJobAndGetDataToProcess();
+        methodCallingUtils.callMethodInNewTx(() -> executeInTx(jobExecutionResult, jobInstance));   
+
+        if (billingRuns != null && !billingRuns.isEmpty()) {
+            for (BillingRun billingRun : billingRuns) {
+                methodCallingUtils.callMethodInNewTx(() -> billingRunService.updateBillingRunJobExecution(billingRun.getId(), jobExecutionResult));
+            }
+        }
+        
+    }
+
+    private void executeInTx(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance) {
+
+        List<EntityReferenceWrapper> billingRunWrappers =
+                (List<EntityReferenceWrapper>) this.getParamOrCFValue(jobInstance, "billingRuns");
+        billingRunIds = billingRunWrappers != null ? extractBRIds(billingRunWrappers) : emptyList();
+        List<BillingRun> billingRuns = null;
         try {
-            List<BillingRun> billingRuns = initJobAndGetDataToProcess();
+            billingRuns = initJobAndGetDataToProcess();
             jobExecutionResult.setNbItemsToProcess(billingRuns.size());
             Map<String, Object> filters = jobInstance.getRunTimeValues() != null
                     ? (Map<String, Object>) jobInstance.getRunTimeValues().get("filters") : null;
@@ -48,6 +70,7 @@ public class BillingRunReportJobBean extends BaseJobBean {
             jobExecutionResult.registerError(exception.getMessage());
             log.error(exception.getMessage());
         }
+
     }
 
     private List<Long> extractBRIds(List<EntityReferenceWrapper> billingRunWrappers) {
@@ -69,10 +92,10 @@ public class BillingRunReportJobBean extends BaseJobBean {
     }
 
     private int createBillingRunReport(List<BillingRun> billingRuns, JobExecutionResultImpl jobExecutionResult,
+
                                        Map<String, Object> filters, BillingRunReportTypeEnum reportType) {
         int countOfReportCreated = 0;
         for (BillingRun billingRun : billingRuns) {
-            billingRunService.updateBillingRunJobExecution(billingRun.getId(), jobExecutionResult);
             if (filters != null && !filters.isEmpty()) {
                 filters.put("billingRun", billingRun);
             }
@@ -80,10 +103,8 @@ public class BillingRunReportJobBean extends BaseJobBean {
                     billingRunReportService.createBillingRunReport(billingRun, reportType);
             billingRun = billingRunService.refreshOrRetrieve(billingRun);
             billingRun.setPreInvoicingReport(billingRunReport);
-            billingRun.addJobExecutions(jobExecutionResult);
             billingRunService.update(billingRun);
             countOfReportCreated++;
-
         }
         return countOfReportCreated;
     }

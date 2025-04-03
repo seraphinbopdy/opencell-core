@@ -12147,6 +12147,7 @@
 			<column name="creator" value="OPENCELL.ADMIN"/>
 			<column name="version" valueNumeric="1"/>
 			<column name="status" value="STOPPED"/>
+			<column name="color_code" value="#00C853"/>
 			<column name="description" value="STOPPED_DUNNING"/>
 			<column name="dunning_settings_id" valueSequenceCurrent="dunning_settings_seq"/>
 		</insert>
@@ -12155,29 +12156,29 @@
 			<column name="created" valueDate="${db.current.time}"/>
 			<column name="creator" value="OPENCELL.ADMIN"/>
 			<column name="version" valueNumeric="1"/>
-			<column name="status" value="SUCCESS"/>
-			<column name="color_code" value="#1976D2"/>
-			<column name="description" value="SUCCESSFUL_DUNNING"/>
-			<column name="dunning_settings_id" valueSequenceCurrent="dunning_settings_seq"/>
-		</insert>
-		<insert tableName="dunning_collection_plan_statuses">
-			<column name="id" valueSequenceNext="dunning_collection_plan_statuses_seq"/>
-			<column name="created" valueDate="${db.current.time}"/>
-			<column name="creator" value="OPENCELL.ADMIN"/>
-			<column name="version" valueNumeric="1"/>
-			<column name="status" value="FAILED"/>
-			<column name="color_code" value="#F44336"/>
-			<column name="description" value="FAILED_DUNNING"/>
-			<column name="dunning_settings_id" valueSequenceCurrent="dunning_settings_seq"/>
-		</insert>
-		<insert tableName="dunning_collection_plan_statuses">
-			<column name="id" valueSequenceNext="dunning_collection_plan_statuses_seq"/>
-			<column name="created" valueDate="${db.current.time}"/>
-			<column name="creator" value="OPENCELL.ADMIN"/>
-			<column name="version" valueNumeric="1"/>
-			<column name="status" value="ACTIVE"/>
+			<column name="status" value="RECOVERED"/>
 			<column name="color_code" value="#00C853"/>
-			<column name="description" value="ACTIVE_DUNNING"/>
+			<column name="description" value="RECOVERED_DUNNING"/>
+			<column name="dunning_settings_id" valueSequenceCurrent="dunning_settings_seq"/>
+		</insert>
+		<insert tableName="dunning_collection_plan_statuses">
+			<column name="id" valueSequenceNext="dunning_collection_plan_statuses_seq"/>
+			<column name="created" valueDate="${db.current.time}"/>
+			<column name="creator" value="OPENCELL.ADMIN"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="status" value="UNRECOVERED"/>
+			<column name="color_code" value="#F44336"/>
+			<column name="description" value="UNRECOVERED_DUNNING"/>
+			<column name="dunning_settings_id" valueSequenceCurrent="dunning_settings_seq"/>
+		</insert>
+		<insert tableName="dunning_collection_plan_statuses">
+			<column name="id" valueSequenceNext="dunning_collection_plan_statuses_seq"/>
+			<column name="created" valueDate="${db.current.time}"/>
+			<column name="creator" value="OPENCELL.ADMIN"/>
+			<column name="version" valueNumeric="1"/>
+			<column name="status" value="ONGOING"/>
+			<column name="color_code" value="#1976D2"/>
+			<column name="description" value="ONGOING_DUNNING"/>
 			<column name="dunning_settings_id" valueSequenceCurrent="dunning_settings_seq"/>
 		</insert>    
     </changeSet>
@@ -15964,6 +15965,33 @@ Meaning that advances won’t be available for further invoices."/>
 			<column name="code" value="disableSynchronousMrrUpdate"/>
 			<column name="description" value="Disable synchronous MRR update"/>
 			<column name="description_i18n" value='{"FRA":"Désactiver la mise à jour synchrone du MRR","ENG":"Disable synchronous MRR update"}'/>
+		</insert>
+	</changeSet>
+	<changeSet id="INTRD-29281_20210306-rebuild" author="abdelkader.bouazza">
+		<insert tableName="com_message_template">
+			<column name="media" value="EMAIL" />
+			<column name="id" valueSequenceNext="com_msg_tmpl_seq" />
+			<column name="version" value="0" />
+			<column name="created" valueDate="${db.current.time}" />
+			<column name="code" value="REPORT_QUERY_SCHEDULED_RESULT" />
+			<column name="type" value="OTHER"/>
+			<column name="tag_start" value="#{"/>
+			<column name="tag_end" value="}" />
+			<column name="description" value="Report scheduled query result" />
+			<column name="subject" value="[opencell] Query result #{reportQueryName} #{startDate}" />
+			<column name="htmlcontent">
+				<![CDATA[Dear #{userName},<br>
+<br>
+The result for your query is ready.<br>
+Check the result on <a href="#{portalResultLink}">Opencell Portal</a><br>
+Query : #{reportQueryName}<br>
+Started : #{startDate}<br>
+Line count : #{lineCount}<br>
+<br>
+Best regards,<br>
+Opencell team.
+                ]]>
+			</column>
 		</insert>
 	</changeSet>
 </databaseChangeLog>

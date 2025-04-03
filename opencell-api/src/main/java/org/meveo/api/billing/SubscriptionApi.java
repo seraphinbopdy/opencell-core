@@ -829,6 +829,7 @@ public class SubscriptionApi extends BaseApi {
                 }
                 if (serviceToActivateDto.getSubscriptionDate() != null) {
                     serviceInstance.setSubscriptionDate(serviceToActivateDto.getSubscriptionDate());
+                    serviceInstance.setDeliveryDate(serviceToActivateDto.getSubscriptionDate());
                 }
                 if (serviceToActivateDto.getQuantity() != null) {
                     serviceInstance.setQuantity(serviceToActivateDto.getQuantity());
@@ -3523,11 +3524,15 @@ public class SubscriptionApi extends BaseApi {
             // Product data
             if (StringUtils.isNotBlank(postData.getProductCode())) {
                 Product product = productService.findByCode(postData.getProductCode());
-                ProductVersion pVersion = new ProductVersion();
-                pVersion.setProduct(product);
-                serviceInstance.setCode(product.getCode());
-                serviceInstance.setProductVersion(pVersion);
+                if (product != null) {
+                    serviceInstance.setCode(product.getCode());
+                    Optional<ProductVersion> pVersion = productService.getCurrentPublishedVersion(product.getCode(), postData.getOperationDate());
+                    if(pVersion.isPresent()) {
+                        serviceInstance.setProductVersion(pVersion.get());
+                    }
+                }
             }
+
             // add attributes
             for (AttributeInstanceDto attributeInstanceDto : postData.getAttributes()) {
                 AttributeInstance attributeInstance = new AttributeInstance();

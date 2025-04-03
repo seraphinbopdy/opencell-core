@@ -17987,4 +17987,12 @@ Opencell team.
         </addColumn>
     </changeSet>
 
+    <changeSet id="#INTRD-30413_collection_plan_status_color" author="zelmeliani">
+        <update tableName="dunning_collection_plan_statuses">
+            <column name="status" value="STOPPED"/>
+            <column name="color_code" value="#808080"/>
+            <where>status = 'STOPPED'</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

@@ -12341,7 +12341,7 @@ Your name and surname
     
 
     <changeSet id="#INTRD-19464_20231225" author="ZBARIKI">
-    	<validCheckSum>9:dba857c04eeb80f3bb2b9c62f1b2ee1e</validCheckSum>
+    	<validCheckSum>8:564d7e826e98886cf01f9d12e0d4534e</validCheckSum>
         <insert tableName="meveo_script_instance">
             <column name="id" valueSequenceNext="meveo_script_instance_seq" />
             <column name="version" valueNumeric="0" />
@@ -13997,7 +13997,8 @@ Meaning that advances won’t be available for further invoices."/>
     </changeSet>
 
     <changeSet id="INTRD-23757_240606" author="Mohammed_ElAzzouzi" failOnError="false">
-        <sql>CREATE INDEX edr_created_index ON rating_edr USING btree(((created)::date))</sql>
+    	<validCheckSum>ANY</validCheckSum>
+        <sql>CREATE INDEX IF NOT EXISTS edr_created_index ON rating_edr USING btree(((created)::date));</sql>
     </changeSet>
 
     <changeSet id="INTRD-24460_updatei18n" author="a.rouaguebe">

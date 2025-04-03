@@ -1,7 +1,7 @@
 image: maven:3.9-eclipse-temurin-21
 
 clone:
-  depth: full              # SonarCloud scanner needs the full history to assign issues properly
+  depth: 75              # SonarCloud scanner needs the full history to assign issues properly
 
 definitions:
   caches:

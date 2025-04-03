@@ -405,9 +405,13 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
         }
     }
 
-    private void updateAllDunningLevelInstancesDate(DunningCollectionPlan collectionPlanToPause, Integer pauseDuration) {
+    /**
+     * Refresh level instances
+     * @param collectionPlan Collection plan to pause
+     */
+    private void updateAllDunningLevelInstancesDate(DunningCollectionPlan collectionPlan, Integer pauseDuration) {
         // Get the dunning level instance to be done and shift the execution date
-        collectionPlanToPause.getDunningLevelInstances().forEach(levelInstance -> {
+        collectionPlan.getDunningLevelInstances().forEach(levelInstance -> {
             if (DunningLevelInstanceStatusEnum.TO_BE_DONE == levelInstance.getLevelStatus()) {
                 levelInstance.setExecutionDate(addDaysToDate(levelInstance.getExecutionDate(), pauseDuration));
                 levelInstance.getActions().forEach(actionInstance -> {
@@ -490,10 +494,37 @@ public class DunningCollectionPlanService extends PersistenceService<DunningColl
         collectionPlanToStop.setNextAction(null);
 	}
 
-    @JpaAmpNewTx
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    /**
+     * Resume a collection plan
+     * @param collectionPlanToResume Collection plan to resume
+     * @return {@link DunningCollectionPlan}
+     */
 	public DunningCollectionPlan resumeCollectionPlan(DunningCollectionPlan collectionPlanToResume) {
-		return resumeCollectionPlan(collectionPlanToResume, true);
+        collectionPlanToResume = retrieveIfNotManaged(collectionPlanToResume);
+        collectionPlanToResume = refreshLevelInstances(collectionPlanToResume);
+        DunningCollectionPlanStatus dunningCollectionPlanStatus = dunningCollectionPlanStatusService.refreshOrRetrieve(collectionPlanToResume.getStatus());
+
+        if(!dunningCollectionPlanStatus.getStatus().equals(DunningCollectionPlanStatusEnum.PAUSED)) {
+            throw new BusinessApiException("Collection Plan with id " + collectionPlanToResume.getId() + " cannot be resumed, the collection plan is not paused");
+        }
+
+        Optional<DunningLevelInstance> dunningLevelInstance = collectionPlanToResume.getDunningLevelInstances()
+                .stream().max(Comparator.comparing(DunningLevelInstance::getId));
+        if(dunningLevelInstance.isEmpty()) {
+            throw new BusinessApiException("No dunning level instances found for the collection plan with id "+collectionPlanToResume.getId());
+        }
+
+        DunningCollectionPlanStatus collectionPlanStatus = dunningCollectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.ONGOING);
+        collectionPlanToResume.setStatus(collectionPlanStatus);
+        collectionPlanToResume.setPauseReason(null);
+        int pause = collectionPlanToResume.getPauseDuration();
+        collectionPlanToResume.addPauseDuration((int) daysBetween(collectionPlanToResume.getPausedUntilDate(), new Date()));
+        collectionPlanToResume.setNextActionDate(addDaysToDate(collectionPlanToResume.getNextActionDate(), (int) daysBetween(collectionPlanToResume.getPausedUntilDate(), new Date())));
+        collectionPlanToResume.setPausedUntilDate(null);
+        update(collectionPlanToResume);
+
+        updateAllDunningLevelInstancesDate(collectionPlanToResume, collectionPlanToResume.getPauseDuration() - pause);
+        return collectionPlanToResume;
 	}
 	
     @JpaAmpNewTx

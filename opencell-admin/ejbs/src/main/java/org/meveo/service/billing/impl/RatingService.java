@@ -380,7 +380,7 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
         walletOperation.setSortIndex(sortIndex);
         walletOperation.setEdr(edr);
 		if(walletOperation.getBillingAccount() != null) {
-			walletOperation.setTradingCurrency(getEntityManager().getReference(UserAccount.class, walletOperation.getBillingAccount().getTradingCurrency().getId()));
+			walletOperation.setTradingCurrency(getEntityManager().getReference(TradingCurrency.class, walletOperation.getBillingAccount().getTradingCurrency().getId()));
 		}
 		if(chargeInstance.getUserAccount() != null) {
 			var userAccount = userAccountService.findByIdUsingCache(chargeInstance.getUserAccount().getId(), Arrays.asList("wallet"));

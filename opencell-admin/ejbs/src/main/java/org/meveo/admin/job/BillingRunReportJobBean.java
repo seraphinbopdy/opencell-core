@@ -58,7 +58,7 @@ public class BillingRunReportJobBean extends BaseJobBean {
         List<EntityReferenceWrapper> billingRunWrappers =
                 (List<EntityReferenceWrapper>) this.getParamOrCFValue(jobInstance, "billingRuns");
         billingRunIds = billingRunWrappers != null ? extractBRIds(billingRunWrappers) : emptyList();
-        List<BillingRun> billingRuns = null;
+        List<BillingRun> billingRuns;
         try {
             billingRuns = initJobAndGetDataToProcess();
             jobExecutionResult.setNbItemsToProcess(billingRuns.size());
@@ -91,8 +91,7 @@ public class BillingRunReportJobBean extends BaseJobBean {
         return billingRunService.getBillingRuns(NEW, OPEN);
     }
 
-    private int createBillingRunReport(List<BillingRun> billingRuns, JobExecutionResultImpl jobExecutionResult,
-
+    private int createBillingRunReport(List<BillingRun> billingRuns, JobExecutionResultImpl result,
                                        Map<String, Object> filters, BillingRunReportTypeEnum reportType) {
         int countOfReportCreated = 0;
         for (BillingRun billingRun : billingRuns) {
@@ -103,6 +102,7 @@ public class BillingRunReportJobBean extends BaseJobBean {
                     billingRunReportService.createBillingRunReport(billingRun, reportType);
             billingRun = billingRunService.refreshOrRetrieve(billingRun);
             billingRun.setPreInvoicingReport(billingRunReport);
+            billingRun.addJobExecutions(result);
             billingRunService.update(billingRun);
             countOfReportCreated++;
         }

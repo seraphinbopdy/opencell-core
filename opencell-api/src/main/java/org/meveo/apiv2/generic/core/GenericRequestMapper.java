@@ -86,16 +86,6 @@ public class GenericRequestMapper {
             return MapUtils.isNotEmpty(genericPagingAndFiltering.getFilters());
         }
 
-        if(MapUtils.isNotEmpty(genericPagingAndFiltering.getFilters())) {
-            return Stream.of(genericPagingAndFiltering.getSortBy()
-                                                      .split(","))
-                         .filter(s -> !s.isBlank() && s.contains("."))
-                         .allMatch(s -> {
-                             Field field = ReflectionUtils.getField(entityClass, s.split("\\.")[0]);
-                             return field.isAnnotationPresent(Embedded.class);
-                         });
-        }
-
         return false;
     }
 

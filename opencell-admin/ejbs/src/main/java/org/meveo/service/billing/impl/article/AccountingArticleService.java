@@ -206,7 +206,7 @@ public class AccountingArticleService extends BusinessService<AccountingArticle>
 			} else {
 				ParamBean paramBean = ParamBean.getInstance();
 				String defaultArticle = paramBean.getProperty("default.article", "ART-STD");
-                accountingArticle = findByCode(defaultArticle, Arrays.asList("taxClass"));
+                accountingArticle = findByCode(defaultArticle, Arrays.asList("taxClass"), true);
 
                 if (accountingArticle != null) {
                     Hibernate.initialize(accountingArticle);

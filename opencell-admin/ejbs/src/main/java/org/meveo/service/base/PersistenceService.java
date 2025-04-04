@@ -409,12 +409,30 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
     public E findById(Long id, List<String> fetchFields) {
         return findById(id, fetchFields, false);
     }
+    
+    public E findByIdUsingCache(Long id, List<String> fetchFields) {
+        return findById(id, fetchFields, false, true);
+    }
 
     /**
      * @see org.meveo.service.base.local.IPersistenceService#findById(java.lang.Long, java.util.List, boolean)
      */
     @SuppressWarnings("unchecked")
     public E findById(Long id, List<String> fetchFields, boolean refresh) {
+    	return findById( id,  fetchFields,  refresh, false);
+    }
+    	
+    	
+    /**
+     * @see org.meveo.service.base.local.IPersistenceService#findById(java.lang.Long, java.util.List, boolean)
+     * @param id entity id
+     * @param fetchFields fields to left join fetch
+     * @param refresh refresh entityManager
+     * @param useCache query will be cacheable if true
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public E findById(Long id, List<String> fetchFields, boolean refresh, boolean useCache) {
         log.trace("Find {}/{} by id with refresh {}", entityClass.getSimpleName(), id, refresh);
         final Class<? extends E> productClass = getEntityClass();
         StringBuilder queryString = new StringBuilder("from " + productClass.getName() + " a");
@@ -426,6 +444,10 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
         queryString.append(" where a.id = :id");
         Query query = getEntityManager().createQuery(queryString.toString());
         query.setParameter("id", id);
+        
+        if (useCache) {
+            query.setHint("org.hibernate.cacheable", true);
+        }
 
         List<E> results = query.getResultList();
         E e = null;

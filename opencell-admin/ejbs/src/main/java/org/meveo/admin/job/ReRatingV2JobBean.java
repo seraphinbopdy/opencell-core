@@ -92,7 +92,7 @@ public class ReRatingV2JobBean extends IteratorBasedJobBean<List<Long>> {
 
 		lastWOPartitionDate = getOperationDate(jobInstance);
 		
-		final long configuredNrPerTx = (Long) this.getParamOrCFValue(jobInstance, ReRatingV2Job.CF_NR_ITEMS_PER_TX, 500L);
+		final long configuredNrPerTx = (Long) this.getParamOrCFValue(jobInstance, ReRatingV2Job.CF_NR_ITEMS_PER_TX, 100L);
 		
 		entityManager = emWrapper.getEntityManager();
 		statelessSession = entityManager.unwrap(Session.class).getSessionFactory().openStatelessSession();

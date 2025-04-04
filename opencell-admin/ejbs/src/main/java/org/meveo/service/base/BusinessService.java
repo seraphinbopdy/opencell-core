@@ -102,7 +102,19 @@ public abstract class BusinessService<P extends BusinessEntity> extends Persiste
      * @return A single entity matching code
      */
     public P findByCode(String code, List<String> fetchFields) {
-        return findByCode(code, fetchFields, null, null, null);
+        return findByCode(code, fetchFields, false);
+    }
+    
+    /**
+     * Find entity by code - strict match.
+     * 
+     * @param code Code to match
+     * @param fetchFields Fields to fetch
+     * @param useCache use cache
+     * @return A single entity matching code
+     */
+    public P findByCode(String code, List<String> fetchFields, boolean useCache) {
+        return findByCode(code, fetchFields, useCache, null, null, null);
     }
 
     /**
@@ -116,6 +128,20 @@ public abstract class BusinessService<P extends BusinessEntity> extends Persiste
      */
     @SuppressWarnings("unchecked")
     protected P findByCode(String code, List<String> fetchFields, String additionalSql, Object... additionalParameters) {
+    	return findByCode(code, fetchFields, false, additionalSql, additionalParameters);
+    }
+    /**
+     * Find entity by code - strict match.
+     * 
+     * @param code Code to match
+     * @param fetchFields Fields to fetch
+     * @param useCache use cache
+     * @param additionalSql Additional sql to append to the find clause
+     * @param additionalParameters An array of Parameter names and values for additional sql
+     * @return A single entity matching code
+     */
+    @SuppressWarnings("unchecked")
+    protected P findByCode(String code, List<String> fetchFields, boolean useCache, String additionalSql, Object... additionalParameters) {
 
         if (StringUtils.isBlank(code)) {
             return null;
@@ -128,14 +154,14 @@ public abstract class BusinessService<P extends BusinessEntity> extends Persiste
         }
 
         try {
-            return (P) qb.getQuery(getEntityManager()).getSingleResult();
+            return (P) qb.getQuery(getEntityManager()).setHint("org.hibernate.cacheable", useCache).getSingleResult();
 
         } catch (NoResultException e) {
             log.debug("No {} of code {} found", getEntityClass().getSimpleName(), code);
             return null;
         } catch (NonUniqueResultException e) {
             log.error("More than one entity of type {} with code {} found. A first entry is returned.", entityClass, code);
-            return (P) qb.getQuery(getEntityManager()).getResultList().get(0);
+            return (P) qb.getQuery(getEntityManager()).setHint("org.hibernate.cacheable", useCache).getResultList().get(0);
         }
     }
 

@@ -123,7 +123,7 @@ public class ProductManagementApiService extends BaseApi {
 
         // Handle price publication based on publishPrice flag
         if (postData.getPublishPrice() == null || (postData.getPublishPrice() !=null && postData.getPublishPrice())) {
-            pricePlanMatrixVersionApi.updateProductVersionStatus(pricePlanCode, 1, VersionStatusEnum.PUBLISHED);
+            pricePlanMatrixVersionApi.updateProductVersionStatus(pricePlanCode, 1, VersionStatusEnum.PUBLISHED, false);
             entityManager.flush();
             genericChargeTemplateApi.updateStatus(oneShotChargeTemplate.getCode(), ChargeTemplateStatusEnum.ACTIVE.name());
             entityManager.flush();
@@ -192,7 +192,7 @@ public class ProductManagementApiService extends BaseApi {
         entityManager.flush();
 
 
-        pricePlanMatrixVersionApi.updateProductVersionStatus(pricePlanMatrixDto.getCode(), 1, VersionStatusEnum.PUBLISHED);
+        pricePlanMatrixVersionApi.updateProductVersionStatus(pricePlanMatrixDto.getCode(), 1, VersionStatusEnum.PUBLISHED, false);
         genericChargeTemplateApi.updateStatus(recurringChargeTemplateDto.getCode(), ChargeTemplateStatusEnum.ACTIVE.name());
 
         ProductDto productDto = new ProductDto();
@@ -239,7 +239,7 @@ public class ProductManagementApiService extends BaseApi {
         entityManager.flush();
 
 
-        pricePlanMatrixVersionApi.updateProductVersionStatus(pricePlanMatrixDto.getCode(), 1, VersionStatusEnum.PUBLISHED);
+        pricePlanMatrixVersionApi.updateProductVersionStatus(pricePlanMatrixDto.getCode(), 1, VersionStatusEnum.PUBLISHED, false);
         genericChargeTemplateApi.updateStatus(usageChargeTemplateDto.getCode(), ChargeTemplateStatusEnum.ACTIVE.name());
 
         ProductDto productDto = new ProductDto();

@@ -304,7 +304,7 @@ public class PricePlanMatrixVersionApi extends BaseCrudApi<PricePlanMatrixVersio
         return pricePlanMatrixVersion;
     }
 
-    public GetPricePlanVersionResponseDto updateProductVersionStatus(String pricePlanMatrixCode, int currentVersion, VersionStatusEnum status) {
+    public GetPricePlanVersionResponseDto updateProductVersionStatus(String pricePlanMatrixCode, int currentVersion, VersionStatusEnum status, boolean returnPricePlanMatrixLine) {
         try {
             PricePlanMatrixVersion pricePlanMatrixVersion = pricePlanMatrixVersionService.findByPricePlanAndVersion(pricePlanMatrixCode, currentVersion);
             if (pricePlanMatrixVersion == null) {
@@ -347,7 +347,9 @@ public class PricePlanMatrixVersionApi extends BaseCrudApi<PricePlanMatrixVersio
                         });
             }
             pricePlanMatrixVersionService.updateProductVersionStatus(pricePlanMatrixVersion, status);
-            return new GetPricePlanVersionResponseDto(pricePlanMatrixVersion);
+            GetPricePlanVersionResponseDto getPricePlanVersionResponseDto = new GetPricePlanVersionResponseDto();
+            getPricePlanVersionResponseDto.setPricePlanVersion(new PricePlanMatrixVersionDto(pricePlanMatrixVersion, returnPricePlanMatrixLine));
+            return getPricePlanVersionResponseDto;
         } catch (BusinessException e) {
             throw new MeveoApiException(e);
         }

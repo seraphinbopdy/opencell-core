@@ -1591,12 +1591,12 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
             result.append(prefix);
             prefix = ",";
             String dateFormat = "MM/dd/yyyy";
-            if (inv.getInvoice().getTradingCountry() != null) {
-                dateFormat = "US".equalsIgnoreCase(inv.getInvoice().getTradingCountry().getCode()) ? "MM/dd/yyyy" : "dd/MM/yyyy";
+            if (inv.getLinkedInvoiceValue().getTradingCountry() != null) {
+                dateFormat = "US".equalsIgnoreCase(inv.getLinkedInvoiceValue().getTradingCountry().getCode()) ? "MM/dd/yyyy" : "dd/MM/yyyy";
             }
-            result.append(inv.getInvoice().getStatus() == InvoiceStatusEnum.VALIDATED ? inv.getInvoice().getInvoiceNumber() : "Draft")
+            result.append(inv.getLinkedInvoiceValue().getStatus() == InvoiceStatusEnum.VALIDATED ? inv.getLinkedInvoiceValue().getInvoiceNumber() : "Draft")
                     .append(" (invoiced on ")
-                    .append(DateUtils.formatDateWithPattern(inv.getInvoice().getInvoiceDate(), dateFormat))
+                    .append(DateUtils.formatDateWithPattern(inv.getLinkedInvoiceValue().getInvoiceDate(), dateFormat))
                     .append(")");
         }
         return result.toString();

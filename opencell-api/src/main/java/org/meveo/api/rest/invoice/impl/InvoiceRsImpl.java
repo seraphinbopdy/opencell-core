@@ -115,7 +115,6 @@ public class InvoiceRsImpl extends BaseRs implements InvoiceRs {
         } catch (Exception e) {
             processException(e, result.getActionStatus());
         }
-        log.info("generateInvoice Response={}", result);
         return result;
     }
 
@@ -145,7 +144,6 @@ public class InvoiceRsImpl extends BaseRs implements InvoiceRs {
         } catch (Exception e) {
             processException(e, result.getActionStatus());
         }
-        log.info("getXMLInvoice Response={}", result);
         return result;
     }
 
@@ -171,7 +169,6 @@ public class InvoiceRsImpl extends BaseRs implements InvoiceRs {
         } catch (Exception e) {
             processException(e, result.getActionStatus());
         }
-        log.info("getPdfInvoice Response={}", result);
         return result;
     }
 
@@ -185,7 +182,6 @@ public class InvoiceRsImpl extends BaseRs implements InvoiceRs {
         } catch (Exception e) {
             processException(e, result.getActionStatus());
         }
-        log.info("getPdfInvoice Response={}", result);
         return result;
     }
 
@@ -284,7 +280,6 @@ public class InvoiceRsImpl extends BaseRs implements InvoiceRs {
         } catch (Exception e) {
             processException(e, result.getActionStatus());
         }
-        log.info("generateInvoice Response={}", result);
         return result;
     }
 

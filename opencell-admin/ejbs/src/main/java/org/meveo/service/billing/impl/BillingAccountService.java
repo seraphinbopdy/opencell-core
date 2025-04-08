@@ -57,6 +57,8 @@ import jakarta.persistence.NoResultException;
 import jakarta.persistence.NonUniqueResultException;
 import jakarta.persistence.Query;
 
+import static org.meveo.model.catalog.DiscountPlanTypeEnum.*;
+
 /**
  * The Class BillingAccountService.
  *
@@ -517,8 +519,8 @@ public class BillingAccountService extends AccountService<BillingAccount> {
     }
 
     public BillingAccount instantiateDiscountPlan(BillingAccount entity, DiscountPlan dp) throws BusinessException {
-        if (dp.getDiscountPlanType() != null && (dp.getDiscountPlanType().equals(DiscountPlanTypeEnum.OFFER) || dp.getDiscountPlanType().equals(DiscountPlanTypeEnum.PROMO_CODE)
-        		|| dp.getDiscountPlanType().equals(DiscountPlanTypeEnum.PRODUCT))) {
+	    List<DiscountPlanTypeEnum> allowedTypes = List.of(OFFER, PROMO_CODE, PRODUCT, INVOICE);
+        if (dp.getDiscountPlanType() != null && (allowedTypes.contains(dp.getDiscountPlanType()))) {
         for (UserAccount userAccount : entity.getUsersAccounts()) {
             UserAccount userAccountById = userAccountService.findById(userAccount.getId());
             for (Subscription subscription : userAccountById.getSubscriptions()) {

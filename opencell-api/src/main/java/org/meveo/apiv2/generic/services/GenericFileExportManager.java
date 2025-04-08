@@ -104,15 +104,24 @@ public class GenericFileExportManager {
 
     public String export(String entityName, List<Map<String, Object>> mapResult, String fileType, Map<String, GenericFieldDetails> fieldDetails, List<String> ordredColumn, String locale, String fieldsSeparator, String decimalSeparator, String fileNameExtension, ExcelExportConfiguration configuration){
     	log.debug("Save directory "+paramBeanFactory.getChrootDir());
-    	DateTimeFormatter formatter = new DateTimeFormatterBuilder().appendValue(YEAR, 4, 10, SignStyle.EXCEEDS_PAD).appendValue(MONTH_OF_YEAR, 2).appendValue(DAY_OF_MONTH, 2)
-        		.appendLiteral('-').appendValue(HOUR_OF_DAY, 2).appendValue(MINUTE_OF_HOUR, 2).appendValue(SECOND_OF_MINUTE, 2).toFormatter();
-        String time = LocalDateTime.now().format(formatter);
+        String time = LocalDateTime.now().format(getDateTimeFormatter());
     	saveDirectory = paramBeanFactory.getChrootDir() + File.separator + PATH_STRING_FOLDER + entityName + File.separator +time.substring(0,8) + File.separator;
         if (mapResult != null && !mapResult.isEmpty()) {        	
             Path filePath = saveAsRecord(entityName, mapResult, fileType, fieldDetails, ordredColumn, locale, fieldsSeparator, decimalSeparator, fileNameExtension, configuration);
             return filePath == null? null : filePath.toString();
         }
         return null;
+    }
+
+    private static  DateTimeFormatter getDateTimeFormatter() {
+        return new DateTimeFormatterBuilder()
+                .appendValue(YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
+                .appendValue(MONTH_OF_YEAR, 2)
+                .appendValue(DAY_OF_MONTH, 2)
+                .appendLiteral('-')
+                .appendValue(HOUR_OF_DAY, 2)
+                .appendValue(MINUTE_OF_HOUR, 2)
+                .appendValue(SECOND_OF_MINUTE, 2).toFormatter();
     }
 
     private Path saveAsRecord(String fileName, List<Map<String, Object>> records, String fileType, Map<String, GenericFieldDetails> fieldDetails, List<String> ordredColumn, String locale, String fieldsSeparator, String decimalSeparator, String fileNameExtension) {
@@ -124,14 +133,11 @@ public class GenericFileExportManager {
      * @param fileName
      * @param records
      * @param fileType
-     * @param time 
      * @return
      */
     private Path saveAsRecord(String fileName, List<Map<String, Object>> records, String fileType, Map<String, GenericFieldDetails> fieldDetails, List<String> ordredColumn, String locale, String fieldsSeparator, String decimalSeparator, String fileNameExtension, ExcelExportConfiguration configuration) {
         String extensionFile = null;
-        DateTimeFormatter formatter = new DateTimeFormatterBuilder().appendValue(DAY_OF_MONTH, 2).appendValue(MONTH_OF_YEAR, 2).appendValue(YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
-                .appendLiteral('-').appendValue(HOUR_OF_DAY, 2).appendValue(MINUTE_OF_HOUR, 2).appendValue(SECOND_OF_MINUTE, 2).appendValue(MILLI_OF_SECOND, 3).toFormatter();
-        String time = LocalDateTime.now().format(formatter);
+        String time = LocalDateTime.now().format(getDateTimeFormatter());
         
         try {
         	
@@ -450,12 +456,10 @@ public class GenericFileExportManager {
         log.info("Export Aged Balance - Entity Name: {}, File Type: {}, Locale: {}", entityName, fileType, locale);
 
         String filename = FR_AGED_BALANCE_FILENAME;
-        DateTimeFormatter formatter = new DateTimeFormatterBuilder().appendValue(DAY_OF_MONTH, 2).appendValue(MONTH_OF_YEAR, 2).appendValue(YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
-                .appendLiteral('-').appendValue(HOUR_OF_DAY, 2).appendValue(MINUTE_OF_HOUR, 2).appendValue(SECOND_OF_MINUTE, 2).toFormatter();
         SimpleDateFormat format = new SimpleDateFormat(FR_DATE_FORMAT);
 
         // Set Time to create file in the export directory
-        String time = LocalDateTime.now().format(formatter);
+        String time = LocalDateTime.now().format(getDateTimeFormatter());
         saveDirectory = paramBeanFactory.getChrootDir() + File.separator + PATH_STRING_FOLDER_NO_GENERIC + entityName + File.separator + time.substring(0,8) + File.separator;
 
         // Manage locale language FR or Others (EN)

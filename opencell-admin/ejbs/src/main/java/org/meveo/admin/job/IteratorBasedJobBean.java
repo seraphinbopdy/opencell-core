@@ -1,7 +1,6 @@
 package org.meveo.admin.job;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputFilter;
@@ -137,9 +136,9 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
     private static final String REMOTE_MQ_ADMIN_PASSWORD = "REMOTE_MQ_ADMIN_PASSWORD";
 
     /**
-     * A number of items in a message that would result in a large MQ message
+     * A size in bytes of a payload of a message, that would be treated as large MQ message and send via stream
      */
-    private static final int LARGE_MESSAGE_ITEM_COUNT = 2500;
+    private static final int LARGE_MESSAGE_BYTE_SIZE = 2900000;
 
     /**
      * On WF 34 JVM 21 docker installation for some reason large objects can not be deserialized because of default filter.
@@ -715,16 +714,19 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
                     jmsProducer.setDisableMessageID(true);
                     jmsProducer.setDisableMessageTimestamp(true);
 
-                    // For a large message, data is send/received as an input stream
-                    if (itemsToProcess.size() > LARGE_MESSAGE_ITEM_COUNT) {
+                    try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); ObjectOutputStream oos = new ObjectOutputStream(baos);) {
 
-                        try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); ObjectOutputStream oos = new ObjectOutputStream(baos);) {
+                        oos.writeObject(itemsToProcess);
 
-                            oos.writeObject(itemsToProcess);
+                        byte[] bytes = baos.toByteArray();
 
-                            try (BufferedInputStream inputStream = new BufferedInputStream(new ByteArrayInputStream(baos.toByteArray()))) {
+                        BytesMessage message = context.createBytesMessage();
 
-                                BytesMessage message = context.createBytesMessage();
+                        // For a large message, data is send/received as an input stream
+                        if (bytes.length > LARGE_MESSAGE_BYTE_SIZE) {
+
+                            try (BufferedInputStream inputStream = new BufferedInputStream(new ByteArrayInputStream(bytes))) {
+
                                 message.setBooleanProperty(ItertatorJobMessageListener.IS_LARGE_MESSAGE, true);
                                 message.setObjectProperty("JMS_AMQ_InputStream", inputStream);
                                 jmsProducer.send(jobQueue, message);
@@ -733,13 +735,15 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
                                 log.error("Failed to serialize or publish large message to a queue", e);
                             }
 
-                        } catch (Exception e) {
-                            log.error("Failed to serialize or publish large message to a queue", e);
+                            // Otherwise send as a serializable object
+                        } else {
+
+                            message.writeBytes(bytes);
+                            jmsProducer.send(jobQueue, message);
                         }
 
-                        // Otherwise send as a serializable object
-                    } else {
-                        jmsProducer.send(jobQueue, (Serializable) itemsToProcess);
+                    } catch (Exception e) {
+                        log.error("Failed to serialize or publish message to a queue", e);
                     }
 
                     nrOfItemsProcessedByThread += nrOfItemsInBatch;
@@ -1281,7 +1285,7 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
                     // Large message is send/received as a stream
                     if (msg.getBooleanProperty(IS_LARGE_MESSAGE)) {
 
-                        try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); BufferedOutputStream bufferedOutput = new BufferedOutputStream(baos)) {
+                        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();) {
 
                             // Save the stream and wait until the entire message is written before continuing.
                             msg.setObjectProperty("JMS_AMQ_SaveStream", baos);
@@ -1301,12 +1305,22 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
 
                         // Smaller messages are send/received as serialized object
                     } else {
-                        itemsToProcess = (List<T>) msg.getBody(Serializable.class);
+                        try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(msg.getBody(byte[].class)))) {
+                            ois.setObjectInputFilter(OBJECT_INPUT_FILTER);
+                            itemsToProcess = (List<T>) ois.readObject();
+                        } catch (Exception e) {
+                            Logger log = LoggerFactory.getLogger(this.getClass());
+                            log.error("Failed to deserialize message.", e);
+                        }
                     }
                     msgCount++;
-                    itemCount = itemCount + itemsToProcess.size();
-                    processItems(itemsToProcess, isNewTx, useMultipleItemProcessing, processSingleItemFunction, processMultipleItemFunction, jobExecutionResult);
 
+                    if (itemsToProcess != null) {
+                        itemCount = itemCount + itemsToProcess.size();
+                        processItems(itemsToProcess, isNewTx, useMultipleItemProcessing, processSingleItemFunction, processMultipleItemFunction, jobExecutionResult);
+                    }
+
+                    // Message is acknowledged after processing in all cases, so bad message would not obstruct the others
                     msg.acknowledge();
                 }
             } catch (JMSException e) {

@@ -12147,7 +12147,7 @@
 			<column name="creator" value="OPENCELL.ADMIN"/>
 			<column name="version" valueNumeric="1"/>
 			<column name="status" value="STOPPED"/>
-			<column name="color_code" value="#00C853"/>
+			<column name="color_code" value="#808080"/>
 			<column name="description" value="STOPPED_DUNNING"/>
 			<column name="dunning_settings_id" valueSequenceCurrent="dunning_settings_seq"/>
 		</insert>

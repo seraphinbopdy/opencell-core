@@ -1,5 +1,6 @@
 package org.meveo.apiv2.ordering.services;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.meveo.api.exception.BusinessApiException;
 import org.meveo.api.exception.InvalidParameterException;
 import org.meveo.apiv2.ordering.resource.oo.OpenOrderDto;
@@ -63,7 +64,11 @@ public class OpenOrderApiService extends PersistenceService<OpenOrder>{
             if(openOrder.getOpenOrderQuote().getThresholds() != null){
                 thresholds.addAll(openOrder.getOpenOrderQuote().getThresholds());
             }
-            thresholds.addAll(thresholdMapper.toEntities(dto.getThresholds()));
+            if(dto.getThresholds().isEmpty()){
+                thresholds.addAll(new ArrayList<>());
+            }else if(dto.getThresholds() != null && !dto.getThresholds().isEmpty()){
+                thresholds.addAll(thresholdMapper.toEntities(dto.getThresholds()));
+            }
             openOrder.setThresholds(thresholds);
         }
         if (null != dto.getTags()) {

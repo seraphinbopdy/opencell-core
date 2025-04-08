@@ -905,7 +905,7 @@ public class CustomerAccountService extends AccountService<CustomerAccount> {
         Map<Object, Object> params = new HashMap<>();
         // set these variable on email template
         // Balance :  dunningBalanceCode, dunningBalanceDescription
-        params.put("customerAccountBalance", collectionPlan.getBalance());
+        params.put("customerAccountBalance", customerAccountBalanceDue(collectionPlan.getCustomerAccount(), null));
         params.put("currencySymbol", collectionPlan.getCustomerAccount().getTradingCurrency() != null ? collectionPlan.getCustomerAccount().getTradingCurrency().getSymbol() : null);
         // get default CustomerBalance
         List<Long> operrationIds = new ArrayList<>();

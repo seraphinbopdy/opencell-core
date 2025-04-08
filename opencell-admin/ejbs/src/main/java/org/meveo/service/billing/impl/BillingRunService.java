@@ -19,6 +19,7 @@ package org.meveo.service.billing.impl;
 
 import static java.math.BigDecimal.ZERO;
 import static java.util.Collections.EMPTY_LIST;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.commons.collections4.ListUtils.partition;
@@ -1813,13 +1814,14 @@ public class BillingRunService extends PersistenceService<BillingRun> {
         Query selectQuery = getEntityManager().createNamedQuery("BillingRun.calculateBRStatisticsByInvoices");
         selectQuery.setParameter("billingRunId", billingRun.getId());
         Object[] result = (Object[]) selectQuery.getSingleResult();
-        BigDecimal amountWithTax = (BigDecimal) result[0];
-        BigDecimal amountTax = (BigDecimal) result[1];
-        BigDecimal amountWithoutTax = (BigDecimal) result[2];
+        BigDecimal amountWithTax = ofNullable((BigDecimal) result[0]).orElse(ZERO);
+        BigDecimal amountTax = ofNullable((BigDecimal) result[1]).orElse(ZERO);
+        BigDecimal amountWithoutTax = ofNullable((BigDecimal) result[2]).orElse(ZERO);
         Integer countBA = ((Long) result[3]).intValue();
         Integer countInvoices = ((Long) result[4]).intValue();
 
-        billingRun = billingRunExtensionService.updateBillingRun(billingRun.getId(), null, countBA, billingRun.getStatus(), null, amountWithTax, amountWithoutTax, amountTax, countInvoices);
+        billingRun = billingRunExtensionService.updateBillingRun(billingRun.getId(), null, countBA,
+                billingRun.getStatus(), null, amountWithTax, amountWithoutTax, amountTax, countInvoices);
         return billingRun;
     }
 }

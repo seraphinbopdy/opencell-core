@@ -1856,6 +1856,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
             context.setProperty("net.sf.jasperreports.export.pdfa.conformance", PdfaConformanceEnum.PDFA_1A.getName());
             context.setProperty("net.sf.jasperreports.export.pdfa.icc.profile.path", resDir + File.separator + billingTemplateName + File.separator + "srgb.icc");
             context.setProperty("net.sf.jasperreports.xpath.executer.factory", "net.sf.jasperreports.jaxen.util.xml.JaxenXPathExecuterFactory");
+            context.setProperty("net.sf.jasperreports.export.pdfa.tagged", "true");
             
             JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
 

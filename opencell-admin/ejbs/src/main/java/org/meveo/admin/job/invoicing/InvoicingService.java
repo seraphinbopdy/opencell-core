@@ -24,6 +24,7 @@ import org.meveo.admin.exception.BusinessException;
 import org.meveo.commons.utils.NumberUtils;
 import org.meveo.commons.utils.ParamBean;
 import org.meveo.commons.utils.StringUtils;
+import org.meveo.event.qualifier.InvoiceNumberAssigned;
 import org.meveo.model.I18nDescripted;
 import org.meveo.model.admin.Seller;
 import org.meveo.model.billing.BillingAccount;
@@ -60,8 +61,8 @@ import org.meveo.service.base.PersistenceService;
 import org.meveo.service.base.ValueExpressionWrapper;
 import org.meveo.service.billing.impl.BillingAccountService;
 import org.meveo.service.billing.impl.InvoiceService;
-import org.meveo.service.billing.impl.PurchaseOrderService;
 import org.meveo.service.billing.impl.InvoiceTypeService;
+import org.meveo.service.billing.impl.PurchaseOrderService;
 import org.meveo.service.billing.impl.RejectedBillingAccountService;
 import org.meveo.service.billing.impl.ServiceSingleton;
 import org.meveo.service.billing.impl.SubscriptionService;
@@ -76,6 +77,7 @@ import jakarta.ejb.AsyncResult;
 import jakarta.ejb.Stateless;
 import jakarta.ejb.TransactionAttribute;
 import jakarta.ejb.TransactionAttributeType;
+import jakarta.enterprise.event.Event;
 import jakarta.inject.Inject;
 import jakarta.persistence.Query;
 
@@ -120,6 +122,10 @@ public class InvoicingService extends PersistenceService<Invoice> {
     private SubscriptionService subscriptionService;
     @Inject
     private PurchaseOrderService PurchaseOrderService;
+    
+    @Inject
+    @InvoiceNumberAssigned
+    private Event<Invoice> invoiceNumberAssignedEventProducer;
 
 	/** Creates the aggregates and invoice async. group of BAs at a time in a separate transaction.
 	 *
@@ -228,6 +234,9 @@ public class InvoicingService extends PersistenceService<Invoice> {
 		invoices.forEach(invoice -> {
             invoiceService.create(invoice);
             invoiceService.postCreate(invoice);
+            if(isFullAutomatic) {
+            	invoiceNumberAssignedEventProducer.fire(invoice);
+            }
         });
     }
     

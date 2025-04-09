@@ -380,10 +380,10 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
         walletOperation.setSortIndex(sortIndex);
         walletOperation.setEdr(edr);
 		if(walletOperation.getBillingAccount() != null) {
-			walletOperation.setTradingCurrency(tradingCurrencyService.findById(walletOperation.getBillingAccount().getTradingCurrency().getId()));
+			walletOperation.setTradingCurrency(getEntityManager().getReference(TradingCurrency.class, walletOperation.getBillingAccount().getTradingCurrency().getId()));
 		}
 		if(chargeInstance.getUserAccount() != null) {
-			var userAccount = userAccountService.findById(chargeInstance.getUserAccount().getId(), Arrays.asList("wallet"));
+			var userAccount = userAccountService.findByIdUsingCache(chargeInstance.getUserAccount().getId(), Arrays.asList("wallet"));
 			walletOperation.setWallet(userAccount.getWallet());
 		}
 		if(chargeInstance.getCurrency() != null) {
@@ -676,7 +676,7 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
             Seller seller=bareWalletOperation.getSeller()!=null?bareWalletOperation.getSeller():customer.getSeller();
           //Get the list of seller (current and parents)
             List<Seller> sellers = new ArrayList<>();
-			seller = sellerService.findById(seller.getId(), Arrays.asList("seller"));
+			seller = sellerService.findByIdUsingCache(seller.getId(), Arrays.asList("seller"));
 			getSeller(seller, sellers);
 			List<Long> sellerIds = sellers.stream().map(Seller::getId).collect(Collectors.toList());
             List<Long> ids = customers.stream().map(Customer::getId).collect(Collectors.toList());

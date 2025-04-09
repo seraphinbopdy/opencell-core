@@ -583,13 +583,14 @@ public class CustomFieldTemplateService extends BusinessService<CustomFieldTempl
 
         if (templates != null) {
             CustomFieldTemplate existingCustomField = null;
+            boolean updateCurrentCFT = updateExisting;
             for (CustomFieldTemplate cft : templates) {
-                updateExisting = updateExisting || (cft.getTags() != null && cft.getTags().contains(UPDATE_EXISTING));
+            	updateCurrentCFT = updateExisting || (cft.getTags() != null && cft.getTags().contains(UPDATE_EXISTING));
                 if (!allTemplates.containsKey(cft.getCode())) {
                     log.debug("Create a missing CFT {} for {} entity", cft.getCode(), appliesTo);
                     create(cft);
                     allTemplates.put(cft.getCode(), cft);
-                } else if (updateExisting) {
+                } else if (updateCurrentCFT) {
                     existingCustomField = allTemplates.get(cft.getCode());
                     existingCustomField.setDescription(cft.getDescription());
                     existingCustomField.setStorageType(cft.getStorageType());

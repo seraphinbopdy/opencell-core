@@ -2353,7 +2353,8 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
                 billingRunFilters = new HashMap<>(billingRun.getFilters());
             }
             billingRunFilters.put("status", RatedTransactionStatusEnum.OPEN.toString());
-            billingRunFilters.put("usageDate", billingRun.getLastTransactionDate().toString());
+            billingRunFilters.put("toRange usageDate", billingRun.getLastTransactionDate().toString());
+            billingRunFilters.put("fromOptionalRange invoicingDate", billingRun.getInvoiceDate().toString());
         }
         if(billingRun.getStatus() == OPEN) {
             additionalFilter.append("or (a.billingRun.id = ").append(billingRun.getId()).append(")");

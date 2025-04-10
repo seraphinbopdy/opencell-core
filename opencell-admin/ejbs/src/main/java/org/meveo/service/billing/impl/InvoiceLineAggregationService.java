@@ -411,7 +411,7 @@ public class InvoiceLineAggregationService implements Serializable {
             groupBy.add("userAccount.id");
         }
 
-        if (!aggregationConfiguration.isAggregationPerUnitAmount()) {
+        if (aggregationConfiguration.isAggregationPerUnitAmount()) {
             if (appProvider.isEntreprise()) {
                 groupBy.add("unitAmountWithoutTax");
             } else {

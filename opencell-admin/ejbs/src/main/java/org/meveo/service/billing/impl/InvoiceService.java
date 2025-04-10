@@ -5900,7 +5900,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
                 AccountingArticle accountingArticle = invoiceLine.getAccountingArticle();
                 accountingArticle = accountingArticleService.retrieveIfNotManaged(accountingArticle);
                 if (!StringUtils.isBlank(accountingArticle.getInvoiceTypeEl())) {
-                	String invoiceTypeCode = evaluateInvoiceTypeEl(accountingArticle.getInvoiceTypeEl(), invoiceLine);
+                	String invoiceTypeCode = invoiceTypeService.evaluateInvoiceTypeEl(accountingArticle.getInvoiceTypeEl(), invoiceLine);
                     invoiceType = invoiceTypeService.findByCode(invoiceTypeCode);
                 }
                 if (invoiceType == null) {

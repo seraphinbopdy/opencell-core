@@ -4095,8 +4095,6 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
         boolean linkInvoiceToOrders = paramBeanFactory.getInstance().getPropertyAsBoolean("order.linkInvoiceToOrders", true);
         // TODO add  commercialOrder.linkInvoiceToCommercialOrders to paramBean
-        StringBuilder translationSCKeySb = new StringBuilder();
-        StringBuilder taxChangeKeySb = new StringBuilder();
         boolean linkInvoiceToCommercialOrders = paramBeanFactory.getInstance().getPropertyAsBoolean("commercialOrder.linkInvoiceToCommercialOrders", true);
         boolean taxWasRecalculated = false;
 
@@ -4120,9 +4118,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
             if (calculateTaxOnSubCategoryLevel && !invoiceable.isTaxOverriden()) {
 
                 TaxClass taxClass = em.getReference(TaxClass.class, invoiceable.getTaxClassId());
-                String taxChangeKey = taxChangeKeySb.append(billingAccount.getId()).append("_")
-                        .append(invoiceable.getTaxClassId()).toString();
-                taxChangeKeySb.setLength(0);
+                String taxChangeKey = billingAccount.getId() + "_" + invoiceable.getTaxClassId();
 
                 Object[] changedToTax = taxChangeMap.get(taxChangeKey);
                 if (changedToTax == null) {
@@ -4149,12 +4145,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
                 scAggregate = new SubCategoryInvoiceAgregate(invoiceSubCategory, billingAccount, isAggregateByUA ? userAccount : null, isAggregateByUA ? wallet : null, invoice, invoiceSubCategory.getAccountingCode());
                 scAggregate.updateAudit(currentUser);
 
-                String translationSCKey = translationSCKeySb.append("SC_")
-                        .append(invoiceable.getInvoiceSubCategoryId())
-                        .append("_")
-                        .append(languageCode)
-                        .toString();
-                translationSCKeySb.setLength(0);
+                String translationSCKey = "SC_" + invoiceable.getInvoiceSubCategoryId() + "_" + languageCode;
                 String descTranslated = descriptionMap.get(translationSCKey);
                 if (descTranslated == null) {
                     descTranslated = invoiceSubCategory.getDescriptionOrCode();
@@ -4218,20 +4209,24 @@ public class InvoiceService extends PersistenceService<Invoice> {
         List<DiscountPlanItem> subscriptionApplicableDiscountPlanItems = new ArrayList<>();
         List<DiscountPlanItem> billingAccountApplicableDiscountPlanItems = new ArrayList<>();
 
-        subscription = subscription != null ? subscriptionService.retrieveIfNotManaged(subscription) : subscription;
+        if (subscription != null) {
+            subscription = subscriptionService.refreshOrRetrieve(subscription);
+        }
         if (subscription != null && subscription.getDiscountPlanInstances() != null && !subscription.getDiscountPlanInstances().isEmpty()) {
             addApplicableDiscount(subscriptionApplicableDiscountPlanItems,  subscription.getDiscountPlanInstances(), billingAccount, customerAccount, invoice);
         }
 
         // Calculate derived aggregate amounts for subcategory aggregate, create category aggregates, discount aggregates and tax aggregates
+        BigDecimal[] amounts = null;
         Map<String, CategoryInvoiceAgregate> categoryAggregates = new HashMap<>();
         List<SubCategoryInvoiceAgregate> discountAggregates = new ArrayList<>();
         Map<String, TaxInvoiceAgregate> taxAggregates = new HashMap<>();
 
         // Create category aggregates
+        boolean anyUseSpecificConversion = subCategoryAggregates.stream().anyMatch(SubCategoryInvoiceAgregate::isUseSpecificPriceConversion);
         for (SubCategoryInvoiceAgregate scAggregate : subCategoryAggregates) {
             List<InvoiceLine> erronedLines = scAggregate.getInvoiceLinesToAssociate()
-                    .parallelStream()
+                    .stream()
                     .filter(invoiceLine -> invoiceLine.getTax() == null && !invoiceLine.getTaxMode().equals(InvoiceLineTaxModeEnum.RATE))
                     .collect(toList());
             if (!erronedLines.isEmpty()) {
@@ -4335,9 +4330,9 @@ public class InvoiceService extends PersistenceService<Invoice> {
             // Add tax aggregate or update its amounts
 
             if (calculateTaxOnSubCategoryLevel && !isExonerated && !amountCumulativeForTax.isEmpty()) {
-                Tax tax;
+
                 for (Map.Entry<Tax, SubcategoryInvoiceAgregateAmount> amountByTax : amountCumulativeForTax.entrySet()) {
-                    tax = amountByTax.getKey();
+                    Tax tax = amountByTax.getKey();
                     if (BigDecimal.ZERO.compareTo(amountByTax.getValue().getAmount(!isEnterprise)) == 0) {
                         continue;
                     }
@@ -4356,7 +4351,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         // If tax calculation is not done at subcategory level, then call a global script to do calculation for the whole invoice
         if (!isExonerated && !calculateTaxOnSubCategoryLevel && (invoice.getInvoiceType() != null) && (invoice.getInvoiceType().getTaxScript() != null)) {
             taxAggregates = taxScriptService.createTaxAggregates(invoice.getInvoiceType().getTaxScript().getCode(), invoice);
-            if (taxAggregates != null && !taxAggregates.isEmpty()) {
+            if (taxAggregates != null) {
                 for (TaxInvoiceAgregate taxAggregate : taxAggregates.values()) {
                     taxAggregate.setInvoice(invoice);
                     invoice.addInvoiceAggregate(taxAggregate);
@@ -4414,8 +4409,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         final BigDecimal amountWithTax = invoice.getAmountWithTax() != null ? invoice.getAmountWithTax() : BigDecimal.ZERO;
         invoice.setNetToPay(amountWithTax.add(invoice.getDueBalance() != null ? invoice.getDueBalance() : BigDecimal.ZERO));
 		if(CollectionUtils.isEmpty(invoice.getInvoiceLines()) && CollectionUtils.isNotEmpty(subCategoryAggregates)){
-            invoice.getInvoiceLines().clear();
-            subCategoryAggregates.forEach(sub -> invoice.getInvoiceLines().addAll(sub.getInvoiceLinesToAssociate()));
+			invoice.setInvoiceLines(subCategoryAggregates.stream().flatMap(sub -> sub.getInvoiceLinesToAssociate().stream()).collect(toList()));
 		}
         if(invoice.getInvoiceLines() != null && !invoice.getInvoiceLines().isEmpty()) {
             BigDecimal amountDiscount = invoice.getInvoiceLines()
@@ -5898,9 +5892,9 @@ public class InvoiceService extends PersistenceService<Invoice> {
             
             if (invoiceProcessTypeEnum == null || invoiceProcessTypeEnum == InvoiceProcessTypeEnum.AUTOMATIC) {
                 AccountingArticle accountingArticle = invoiceLine.getAccountingArticle();
-                accountingArticle = accountingArticleService.retrieveIfNotManaged(accountingArticle);
-                if (!StringUtils.isBlank(accountingArticle.getInvoiceTypeEl())) {
-                	String invoiceTypeCode = invoiceTypeService.evaluateInvoiceTypeEl(accountingArticle.getInvoiceTypeEl(), invoiceLine);
+                accountingArticle = accountingArticleService.refreshOrRetrieve(accountingArticle);
+                if (!isBlank(accountingArticle.getInvoiceTypeEl())) {
+                    String invoiceTypeCode = evaluateInvoiceTypeEl(accountingArticle.getInvoiceTypeEl(), invoiceLine);
                     invoiceType = invoiceTypeService.findByCode(invoiceTypeCode);
                 }
                 if (invoiceType == null) {
@@ -5918,8 +5912,9 @@ public class InvoiceService extends PersistenceService<Invoice> {
             }
             
             paymentMethod = resolvePMethod(billingAccount, billingCycle, defaultPaymentMethod, invoiceLine);
+            invoiceLine.setSubscription(subscriptionService.refreshOrRetrieve(invoiceLine.getSubscription()));
             Seller seller = getSelectedSeller(invoiceLine);
-            String invoiceKey = buildInvoiceKey(billingAccount, invoiceLine, seller, invoiceType, paymentMethod);
+            String invoiceKey = billingAccount.getId() +  (seller!=null ? "_"+seller.getId():null) + "_" + invoiceType.getId() + (paymentMethod != null ? "_" + paymentMethod.getId() : "") + "_" + invoiceLine.getOpenOrderNumber();
             InvoiceLinesGroup ilGroup = invoiceLinesGroup.get(invoiceKey);
             if (ilGroup == null) {
                 ilGroup = new InvoiceLinesGroup(billingAccount, billingCycle != null ? billingCycle : billingAccount.getBillingCycle(), seller, invoiceType, false, invoiceKey, paymentMethod, invoiceLine.getOpenOrderNumber());
@@ -5942,21 +5937,6 @@ public class InvoiceService extends PersistenceService<Invoice> {
         }
         return new InvoiceLinesToInvoice(moreIls, convertedIlGroups);
 
-    }
-
-    private String buildInvoiceKey(BillingAccount billingAccount, InvoiceLine invoiceLine, Seller seller,
-                                   InvoiceType invoiceType, PaymentMethod paymentMethod) {
-        StringBuilder invoiceKeyJoiner = new StringBuilder("_");
-        invoiceKeyJoiner.append(billingAccount.getId());
-        if (seller != null) {
-            invoiceKeyJoiner.append(seller.getId());
-        }
-        invoiceKeyJoiner.append(invoiceType.getId());
-        if (paymentMethod != null) {
-            invoiceKeyJoiner.append(paymentMethod.getId());
-        }
-        invoiceKeyJoiner.append(invoiceLine.getOpenOrderNumber());
-        return invoiceKeyJoiner.toString();
     }
     
     private String evaluateInvoiceTypeEl(String expression, InvoiceLine invoiceLine) throws InvalidELException {
@@ -6564,8 +6544,8 @@ public class InvoiceService extends PersistenceService<Invoice> {
         for (InvoiceLine invoiceLine : invoiceLines) {
 
             addFixedDiscount(invoiceLine);
-            invoiceLine.setSubscription(invoiceLine.getSubscription());
-            invoiceLine.setAccountingArticle(invoiceLine.getAccountingArticle());
+            invoiceLine.setSubscription(subscriptionService.refreshOrRetrieve(invoiceLine.getSubscription()));
+            invoiceLine.setAccountingArticle(accountingArticleService.refreshOrRetrieve(invoiceLine.getAccountingArticle()));
             InvoiceSubCategory invoiceSubCategory = invoiceLine.getAccountingArticle().getInvoiceSubCategory();
 
             scaKey = invoiceSubCategory.getId().toString();
@@ -7035,12 +7015,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
                 toUpdate.setLastAppliedRate(lastAppliedRate);
                 toUpdate.setLastAppliedRateDate(new Date());
 
-                toUpdate.getInvoiceAgregates()
-                        .forEach(invoiceAggregate -> {
-                            if(invoiceAggregate instanceof TaxInvoiceAgregate) {
-                                invoiceAgregateService.update(invoiceAggregate);
-                            }
-                });
+                refreshInvoiceLineAndAggregateAmounts(toUpdate);
             }
         }
 

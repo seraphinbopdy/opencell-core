@@ -64,11 +64,10 @@ public class OpenOrderApiService extends PersistenceService<OpenOrder>{
             if(openOrder.getOpenOrderQuote().getThresholds() != null){
                 thresholds.addAll(openOrder.getOpenOrderQuote().getThresholds());
             }
-            if(dto.getThresholds().isEmpty()){
-                thresholds.addAll(new ArrayList<>());
-            }else if(dto.getThresholds() != null && !dto.getThresholds().isEmpty()){
+            if(CollectionUtils.isNotEmpty(dto.getThresholds())){
                 thresholds.addAll(thresholdMapper.toEntities(dto.getThresholds()));
             }
+            
             openOrder.setThresholds(thresholds);
         }
         if (null != dto.getTags()) {

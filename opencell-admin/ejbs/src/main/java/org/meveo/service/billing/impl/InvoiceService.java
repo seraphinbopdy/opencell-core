@@ -5898,15 +5898,13 @@ public class InvoiceService extends PersistenceService<Invoice> {
             
             if (invoiceProcessTypeEnum == null || invoiceProcessTypeEnum == InvoiceProcessTypeEnum.AUTOMATIC) {
                 AccountingArticle accountingArticle = invoiceLine.getAccountingArticle();
-                if(accountingArticle != null) {
-	                accountingArticle = accountingArticleService.retrieveIfNotManaged(accountingArticle);
-	                if (!StringUtils.isBlank(accountingArticle.getInvoiceTypeEl())) {
-	                	String invoiceTypeCode = evaluateInvoiceTypeEl(accountingArticle.getInvoiceTypeEl(), invoiceLine);
-	                    invoiceType = invoiceTypeService.findByCode(invoiceTypeCode);
-	                }
-	                if (invoiceType == null) {
-	                    invoiceType = accountingArticle.getInvoiceType();
-	                }
+                accountingArticle = accountingArticleService.retrieveIfNotManaged(accountingArticle);
+                if (!StringUtils.isBlank(accountingArticle.getInvoiceTypeEl())) {
+                	String invoiceTypeCode = evaluateInvoiceTypeEl(accountingArticle.getInvoiceTypeEl(), invoiceLine);
+                    invoiceType = invoiceTypeService.findByCode(invoiceTypeCode);
+                }
+                if (invoiceType == null) {
+                    invoiceType = accountingArticle.getInvoiceType();
                 }
                 if (invoiceType == null) {
                     invoiceType = defaultInvoiceType;
@@ -5914,7 +5912,8 @@ public class InvoiceService extends PersistenceService<Invoice> {
                 if (invoiceType == null) {
                     invoiceType = determineInvoiceType(false, isDraft, billingCycle, billingRun, billingAccount);
                 }
-            } else {
+            }
+            else {
                 invoiceType = defaultInvoiceType;
             }
             

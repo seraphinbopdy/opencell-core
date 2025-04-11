@@ -1,7 +1,7 @@
 package org.meveo.admin.job;
 
+import static java.lang.Long.valueOf;
 import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.toList;
 import static org.meveo.model.billing.BillingRunReportTypeEnum.BILLED_RATED_TRANSACTIONS;
 import static org.meveo.model.billing.BillingRunReportTypeEnum.OPEN_RATED_TRANSACTIONS;
 import static org.meveo.model.billing.BillingRunStatusEnum.NEW;
@@ -38,19 +38,7 @@ public class BillingRunReportJobBean extends BaseJobBean {
     private MethodCallingUtils methodCallingUtils;
 
     public void execute(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance) {
-        
-        List<EntityReferenceWrapper> billingRunWrappers =
-                (List<EntityReferenceWrapper>) this.getParamOrCFValue(jobInstance, "billingRuns");
-        billingRunIds = billingRunWrappers != null ? extractBRIds(billingRunWrappers) : emptyList();
-        List<BillingRun> billingRuns = initJobAndGetDataToProcess();
-        methodCallingUtils.callMethodInNewTx(() -> executeInTx(jobExecutionResult, jobInstance));   
-
-        if (billingRuns != null && !billingRuns.isEmpty()) {
-            for (BillingRun billingRun : billingRuns) {
-                methodCallingUtils.callMethodInNewTx(() -> billingRunService.updateBillingRunJobExecution(billingRun.getId(), jobExecutionResult));
-            }
-        }
-        
+        methodCallingUtils.callMethodInNewTx(() -> executeInTx(jobExecutionResult, jobInstance));
     }
 
     private void executeInTx(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance) {
@@ -78,15 +66,15 @@ public class BillingRunReportJobBean extends BaseJobBean {
             return emptyList();
         }
         return billingRunWrappers.stream()
-                    .map(br -> Long.valueOf(br.getCode().split("/")[0]))
-                    .collect(toList());
+                    .map(br -> valueOf(br.getCode().split("/")[0]))
+                    .toList();
     }
 
     private List<BillingRun> initJobAndGetDataToProcess() {
         if(billingRunIds != null && !billingRunIds.isEmpty()) {
             return billingRunIds.stream()
                     .map(id -> billingRunService.findById(id))
-                    .collect(toList());
+                    .toList();
         }
         return billingRunService.getBillingRuns(NEW, OPEN);
     }

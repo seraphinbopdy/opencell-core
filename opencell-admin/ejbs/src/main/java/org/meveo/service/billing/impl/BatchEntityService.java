@@ -199,6 +199,7 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
             if (isRunningAsJobManager(jobExecutionResult)) {
                 batchEntity.setJobInstance(jobInstance);
                 batchEntity.setStatus(BatchEntityStatusEnum.FAILURE);
+                batchEntity.setJobExecutionResult(jobExecutionResult);
                 update(batchEntity);
             }
         }
@@ -224,6 +225,7 @@ public class BatchEntityService extends PersistenceService<BatchEntity> {
     private void update(JobExecutionResultImpl jobExecutionResult, JobInstance jobInstance, BatchEntity batchEntity) {
         if (isRunningAsJobManager(jobExecutionResult)) {
             batchEntity.setJobInstance(jobInstance);
+            batchEntity.setJobExecutionResult(jobExecutionResult);
             if (hasError(jobExecutionResult)) {
                 batchEntity.setStatus(BatchEntityStatusEnum.FAILURE);
             } else {

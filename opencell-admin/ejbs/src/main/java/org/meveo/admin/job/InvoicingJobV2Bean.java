@@ -176,7 +176,8 @@ public class InvoicingJobV2Bean extends BaseJobBean {
 		if ((billingRun.getProcessType() == BillingProcessTypesEnum.FULL_AUTOMATIC || billingRun.getProcessType() == BillingProcessTypesEnum.AUTOMATIC) 
                 && (BillingRunStatusEnum.POSTINVOICED.equals(billingRun.getStatus()) 
                         || BillingRunStatusEnum.POSTVALIDATED.equals(billingRun.getStatus())
-                        || BillingRunStatusEnum.REJECTED.equals(billingRun.getStatus()))) {
+                        || BillingRunStatusEnum.REJECTED.equals(billingRun.getStatus()))
+                        || DRAFT_INVOICES.equals(billingRun.getStatus())) {
             billingRunService.applyAutomaticValidationActions(billingRun, InvoiceStatusEnum.DRAFT);
             billingRun = billingRunService.refreshOrRetrieve(billingRun);
             

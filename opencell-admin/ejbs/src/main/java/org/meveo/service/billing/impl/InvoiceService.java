@@ -298,7 +298,12 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.data.JRXmlDataSource;
 import net.sf.jasperreports.engine.util.JRLoader;
+import net.sf.jasperreports.pdf.JRPdfExporter;
+import net.sf.jasperreports.pdf.SimplePdfExporterConfiguration;
 import net.sf.jasperreports.pdf.type.PdfaConformanceEnum;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
+import net.sf.jasperreports.engine.JasperReport;
 
 /**
  * The Class InvoiceService.
@@ -1856,11 +1861,14 @@ public class InvoiceService extends PersistenceService<Invoice> {
             context.setProperty("net.sf.jasperreports.export.pdfa.conformance", PdfaConformanceEnum.PDFA_1A.getName());
             context.setProperty("net.sf.jasperreports.export.pdfa.icc.profile.path", resDir + File.separator + billingTemplateName + File.separator + "srgb.icc");
             context.setProperty("net.sf.jasperreports.xpath.executer.factory", "net.sf.jasperreports.jaxen.util.xml.JaxenXPathExecuterFactory");
-            context.setProperty("net.sf.jasperreports.export.pdfa.tagged", "true");
-            
             JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
-
-            JasperExportManager.exportReportToPdfFile(jasperPrint, pdfFullFilename);
+            JRPdfExporter exporter = new JRPdfExporter();
+            exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+            exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(pdfFullFilename)); 
+            SimplePdfExporterConfiguration configuration = new SimplePdfExporterConfiguration();
+            exporter.setConfiguration(configuration);
+            configuration.setTagged(true);
+            exporter.exportReport();
 
             if ("true".equals(paramBeanFactory.getInstance().getProperty("invoice.pdf.addWaterMark", "true"))) {
                 if (invoice.getInvoiceType().getCode().equals(paramBeanFactory.getInstance().getProperty("invoiceType.draft.code", "DRAFT")) || (invoice.isDraft() != null && invoice.isDraft())) {

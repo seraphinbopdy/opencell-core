@@ -855,19 +855,12 @@ public class CustomTableService extends NativePersistenceService {
      * @throws ValidationException
      */
     public List<Map<String, Object>> convertValues(List<Map<String, Object>> values, Map<String, CustomFieldTemplate> cftsMap, boolean discardNull) throws ValidationException {
-
-        if (values == null) {
-            return null;
-        }
-        List<Map<String, Object>> convertedValues = new LinkedList<>();
-
         String[] datePatterns = new String[] { DateUtils.DATE_TIME_PATTERN, paramBean.getDateTimeFormat(), DateUtils.DATE_PATTERN, paramBean.getDateFormat() };
-
-        for (Map<String, Object> value : values) {
-            convertedValues.add(convertValue(value, cftsMap, discardNull, datePatterns));
-        }
-
-        return convertedValues;
+        return Optional.ofNullable(values)
+                .orElse(List.of())
+                .stream()
+                .map(val -> convertValue(val, cftsMap, discardNull, datePatterns))
+                .toList();
     }
 
     /**

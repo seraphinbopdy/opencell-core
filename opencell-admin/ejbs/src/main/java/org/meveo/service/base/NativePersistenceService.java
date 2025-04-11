@@ -1439,7 +1439,7 @@ public class NativePersistenceService extends BaseService {
         // value != null ? value.getClass().isArray() : null);
 
         // Nothing to cast - same data type
-        if (targetClass.isAssignableFrom(value.getClass()) && !expectedList) {
+        if (targetClass.isAssignableFrom(value.getClass()) && !expectedList && !targetClass.isAssignableFrom(Boolean.class)) {
             return extractString(value, targetClass, cft);
             // A list is expected as value. If value is not a list, parse value as comma separated string and convert each value separately
         } else if (expectedList) {
@@ -1478,22 +1478,15 @@ public class NativePersistenceService extends BaseService {
         Date dateVal = null;
         List listVal = null;
 
-        if (value instanceof Number) {
-            numberVal = (Number) value;
-        } else if (value instanceof BigDecimal) {
-            bdVal = (BigDecimal) value;
-        } else if (value instanceof Boolean) {
-            booleanVal = (Boolean) value;
-        } else if (value instanceof java.sql.Timestamp) {
-            dateVal = new Date(((java.sql.Timestamp) value).getTime());
-        } else if (value instanceof Date) {
-            dateVal = (Date) value;
-        } else if (value instanceof String) {
-            stringVal = (String) value;
-        } else if (value instanceof List) {
-            listVal = (List) value;
-        } else {
-            throw new ValidationException("Unrecognized data type for value " + value + " type " + value.getClass());
+        switch (value) {
+            case Number number -> numberVal = number;
+            case Boolean b -> booleanVal = b;
+            case Timestamp timestamp -> dateVal = new Date(timestamp.getTime());
+            case Date date -> dateVal = date;
+            case String s -> stringVal = s;
+            case List list -> listVal = list;
+            default ->
+                    throw new ValidationException("Unrecognized data type for value " + value + " type " + value.getClass());
         }
 
         try {
@@ -1509,7 +1502,7 @@ public class NativePersistenceService extends BaseService {
 
             } else if (targetClass == Boolean.class || (targetClass.isPrimitive() && targetClass.getName().equals("boolean"))) {
                 if (booleanVal != null) {
-                    return value;
+                    return booleanVal ? 1 : 0;
                 }
             } else if (targetClass == Date.class) {
                 if (dateVal != null) {

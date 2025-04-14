@@ -32,6 +32,7 @@ import org.meveo.model.persistence.CustomFieldJsonDataType;
 import org.meveo.security.keycloak.CurrentUserProvider;
 import org.meveo.service.audit.AuditOrigin;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import jakarta.annotation.Resource;
@@ -111,6 +112,8 @@ public class EntityManagerProvider {
                 EntityManager emProxy = (EntityManager) Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class<?>[] { EntityManager.class }, (proxy, method, args) -> {
                     if (em.getTransaction() != null && em.getTransaction().isActive()) {
                         em.joinTransaction();
+                    } else {
+                        log.error("Will NOT join transaction from Factory wrapper");
                     }
                     return method.invoke(em, args);
                 });
@@ -265,7 +268,7 @@ public class EntityManagerProvider {
 
     /**
      * Set a variable in DB connection with an auditing context - current username and origin of method<br/>
-     * This method should be called every time a new TX is started so variables are present for DB trigger<br/>
+     * This method should be called every time a new TX is started so variables are present for DB trigger. Variable will be set once per session.<br/>
      * Note that EntityManager (EntityManagerWrapper) is produced as request scope bean. <br/>
      * For cases when a method A, that runs in NO TX mode, calls methods B and C, that run in TX mode and use injected entityManager, EntityManagerWrapper will be produced in method B and audit context will be set at
      * EntityManagerWrapper production time. Yet in a new TX of method C, audit variables will be lost and thus need to be set again.<br/>
@@ -276,30 +279,27 @@ public class EntityManagerProvider {
     public static void setAuditContext(EntityManager entityManager) {
         Session session = entityManager.unwrap(Session.class);
 
-        String username = CurrentUserProvider.getCurrentUsername();
-        ChangeOriginEnum auditOrigin = AuditOrigin.getAuditOrigin();
-        String auditOriginName = AuditOrigin.getAuditOriginName();
+        boolean auditWasSet = session.getProperties() != null && session.getProperties().containsKey("opencell_audit_info");
 
-        session.doWork(connection -> {
-            try {
-                try (Statement statement = connection.createStatement()) {
-                    statement.execute("SET LOCAL var.opencell_audit_info = '" + username + "~~" + auditOrigin + "~~" + auditOriginName + "'");
+        if (!auditWasSet) {
+
+            String username = CurrentUserProvider.getCurrentUsername();
+            ChangeOriginEnum auditOrigin = AuditOrigin.getAuditOrigin();
+            String auditOriginName = AuditOrigin.getAuditOriginName();
+
+            String auditInfo = username + "~~" + auditOrigin + "~~" + auditOriginName;
+
+            session.doWork(connection -> {
+                try {
+                    try (Statement statement = connection.createStatement()) {
+                        statement.execute("SET LOCAL var.opencell_audit_info = '" + auditInfo + "'");
 //                    statement.setQueryTimeout(1);
-//                   
-//                    if (username != null) {
-//                        statement.addBatch("SET LOCAL var.opencell_user = '" + username + "'");
-//                    }
-//                    if (auditOrigin != null) {
-//                        statement.addBatch("SET LOCAL var.opencell_origin = '" + auditOrigin + "'");
-//                    }
-//                    if (auditOriginName != null) {
-//                        statement.addBatch("SET LOCAL var.opencell_origin_name = '" + auditOriginName + "'");
-//                    }
-//                    statement.executeBatch();
+                    }
+                } catch (SQLException e) {
+                    throw new IllegalStateException(e);
                 }
-            } catch (SQLException e) {
-                throw new IllegalStateException(e);
-            }
-        });
+            });
+            session.setProperty("opencell_audit_info", auditInfo);
+        }
     }
 }

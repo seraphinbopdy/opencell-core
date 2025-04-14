@@ -1866,8 +1866,8 @@ public class InvoiceService extends PersistenceService<Invoice> {
             exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
             exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(pdfFullFilename)); 
             SimplePdfExporterConfiguration configuration = new SimplePdfExporterConfiguration();
-            exporter.setConfiguration(configuration);
             configuration.setTagged(true);
+            exporter.setConfiguration(configuration); 
             exporter.exportReport();
 
             if ("true".equals(paramBeanFactory.getInstance().getProperty("invoice.pdf.addWaterMark", "true"))) {

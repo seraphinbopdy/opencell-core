@@ -324,7 +324,7 @@ public class PricePlanMatrixVersionApi extends BaseCrudApi<PricePlanMatrixVersio
                 versions.stream()
                         .filter(ppmv -> !pricePlanMatrixVersion.getId().equals(ppmv.getId()) && VersionStatusEnum.PUBLISHED.equals(ppmv.getStatus()))
                         .forEach(ppmv -> {
-                            if(ppmv.getValidity() == null || (ppmv.getValidity() != null && ppmv.getValidity().isCorrespondsToPeriod(pricePlanMatrixVersion.getValidity(), false))) {
+                            if(!status.equals(VersionStatusEnum.CLOSED) && (ppmv.getValidity() == null || (ppmv.getValidity() != null && ppmv.getValidity().isCorrespondsToPeriod(pricePlanMatrixVersion.getValidity(), false)))) {
                                 var formatter = new SimpleDateFormat("dd/MM/yyyy");
                                 String sourceFrom = pricePlanMatrixVersion.getValidity() != null && pricePlanMatrixVersion.getValidity().getFrom() != null ? formatter.format(pricePlanMatrixVersion.getValidity().getFrom()) : "";
                                 String sourceTo = pricePlanMatrixVersion.getValidity() != null && pricePlanMatrixVersion.getValidity().getTo() != null ? formatter.format(pricePlanMatrixVersion.getValidity().getTo()) : "";

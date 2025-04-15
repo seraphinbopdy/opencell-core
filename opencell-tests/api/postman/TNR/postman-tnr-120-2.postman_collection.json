@@ -233,7 +233,8 @@
 							"    pm.response.to.have.status(200);\r",
 							"});"
 						],
-						"type": "text/javascript"
+						"type": "text/javascript",
+						"packages": {}
 					}
 				},
 				{
@@ -242,7 +243,8 @@
 						"exec": [
 							"setTimeout(function(){}, 20000);"
 						],
-						"type": "text/javascript"
+						"type": "text/javascript",
+						"packages": {}
 					}
 				}
 			],
@@ -251,7 +253,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"code\": \"8_PDF\",\r\n    \"disabled\": false,\r\n    \"jobCategory\": \"INVOICING\",\r\n    \"jobTemplate\": \"PDFInvoiceGenerationJob\",\r\n\r\n    \"customFields\": {\r\n            \"customField\": [\r\n                {\r\n                    \"code\": \"waitingMillis\",\r\n                    \"description\": \"Waiting before next launch (ms)\",\r\n                    \"fieldType\": \"LONG\",\r\n                    \"longValue\": 0,\r\n                    \"guiPosition\": \"tab:Configuration:0;field:1\"\r\n                },\r\n                {\r\n                    \"code\": \"nbRuns\",\r\n                    \"description\": \"Number of parallel execution\",\r\n                    \"fieldType\": \"LONG\",\r\n                    \"longValue\": 2,\r\n                    \"guiPosition\": \"tab:Configuration:0;field:0\"\r\n                },\r\n                {\r\n                    \"code\": \"invoicesToProcess\",\r\n                    \"description\": \"Invoices To Process\",\r\n                    \"fieldType\": \"LIST\",\r\n                    \"stringValue\": \"FinalOnly\",\r\n                    \"guiPosition\": \"tab:Configuration:0;field:2\"\r\n                }\r\n            ]\r\n        },\r\n    \"active\": true,\r\n    \r\n    \"verboseReport\": true\r\n}",
+					"raw": "{\r\n    \"code\": \"8_PDF\",\r\n    \"disabled\": false,\r\n    \"jobCategory\": \"INVOICING\",\r\n    \"jobTemplate\": \"PDFInvoiceGenerationJob\",\r\n    \"processNextJobOnError\": true,\r\n\r\n    \"customFields\": {\r\n            \"customField\": [\r\n                {\r\n                    \"code\": \"waitingMillis\",\r\n                    \"description\": \"Waiting before next launch (ms)\",\r\n                    \"fieldType\": \"LONG\",\r\n                    \"longValue\": 0,\r\n                    \"guiPosition\": \"tab:Configuration:0;field:1\"\r\n                },\r\n                {\r\n                    \"code\": \"nbRuns\",\r\n                    \"description\": \"Number of parallel execution\",\r\n                    \"fieldType\": \"LONG\",\r\n                    \"longValue\": 2,\r\n                    \"guiPosition\": \"tab:Configuration:0;field:0\"\r\n                },\r\n                {\r\n                    \"code\": \"invoicesToProcess\",\r\n                    \"description\": \"Invoices To Process\",\r\n                    \"fieldType\": \"LIST\",\r\n                    \"stringValue\": \"FinalOnly\",\r\n                    \"guiPosition\": \"tab:Configuration:0;field:2\"\r\n                }\r\n            ]\r\n        },\r\n    \"active\": true,\r\n    \r\n    \"verboseReport\": true\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -282,7 +284,8 @@
 							"    pm.response.to.have.status(200);\r",
 							"});"
 						],
-						"type": "text/javascript"
+						"type": "text/javascript",
+						"packages": {}
 					}
 				},
 				{
@@ -291,7 +294,8 @@
 						"exec": [
 							"setTimeout(function(){}, 20000);"
 						],
-						"type": "text/javascript"
+						"type": "text/javascript",
+						"packages": {}
 					}
 				}
 			],
@@ -300,7 +304,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"code\": \"7_XML\",\r\n    \"jobCategory\": \"INVOICING\",\r\n    \"jobTemplate\": \"XMLInvoiceGenerationJob\",\r\n    \"active\": true,\r\n     \"customFields\": {\r\n            \"customField\": [\r\n               \r\n                {\r\n                    \"code\": \"invoicesToProcess\",\r\n                    \"description\": \"Invoices To Process\",\r\n                    \"fieldType\": \"CHECKBOX_LIST\",\r\n                    \"languageDescriptions\": [],\r\n                    \"stringValue\": \"FinalOnly\",\r\n                    \"guiPosition\": \"tab:Configuration:0;field:2\",\r\n                    \"value\": [\r\n                        {\r\n                            \"value\": \"VALIDATED\"\r\n                        }\r\n                    ]\r\n                },\r\n                {\r\n                    \"code\": \"waitingMillis\",\r\n                    \"description\": \"Waiting before next launch (ms)\",\r\n                    \"fieldType\": \"LONG\",\r\n                    \"longValue\": 0,\r\n                    \"guiPosition\": \"tab:Configuration:0;field:1\"\r\n                },\r\n                {\r\n                    \"code\": \"nbRuns\",\r\n                    \"description\": \"Number of parallel execution\",\r\n                    \"fieldType\": \"LONG\",\r\n                    \"longValue\": 2,\r\n                    \"guiPosition\": \"tab:Configuration:0;field:0\"\r\n                }\r\n            ]\r\n        },\r\n    \"followingJob\": \"8_PDF\",\r\n    \"verboseReport\": true\r\n}",
+					"raw": "{\r\n    \"code\": \"7_XML\",\r\n    \"jobCategory\": \"INVOICING\",\r\n    \"jobTemplate\": \"XMLInvoiceGenerationJob\",\r\n    \"active\": true,\r\n    \"processNextJobOnError\": true,\r\n     \"customFields\": {\r\n            \"customField\": [\r\n               \r\n                {\r\n                    \"code\": \"invoicesToProcess\",\r\n                    \"description\": \"Invoices To Process\",\r\n                    \"fieldType\": \"CHECKBOX_LIST\",\r\n                    \"languageDescriptions\": [],\r\n                    \"stringValue\": \"FinalOnly\",\r\n                    \"guiPosition\": \"tab:Configuration:0;field:2\",\r\n                    \"value\": [\r\n                        {\r\n                            \"value\": \"VALIDATED\"\r\n                        }\r\n                    ]\r\n                },\r\n                {\r\n                    \"code\": \"waitingMillis\",\r\n                    \"description\": \"Waiting before next launch (ms)\",\r\n                    \"fieldType\": \"LONG\",\r\n                    \"longValue\": 0,\r\n                    \"guiPosition\": \"tab:Configuration:0;field:1\"\r\n                },\r\n                {\r\n                    \"code\": \"nbRuns\",\r\n                    \"description\": \"Number of parallel execution\",\r\n                    \"fieldType\": \"LONG\",\r\n                    \"longValue\": 2,\r\n                    \"guiPosition\": \"tab:Configuration:0;field:0\"\r\n                }\r\n            ]\r\n        },\r\n    \"followingJob\": \"8_PDF\",\r\n    \"verboseReport\": true\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -331,7 +335,8 @@
 							"    pm.response.to.have.status(200);\r",
 							"});"
 						],
-						"type": "text/javascript"
+						"type": "text/javascript",
+						"packages": {}
 					}
 				},
 				{
@@ -340,7 +345,8 @@
 						"exec": [
 							"setTimeout(function(){}, 20000);"
 						],
-						"type": "text/javascript"
+						"type": "text/javascript",
+						"packages": {}
 					}
 				}
 			],
@@ -349,7 +355,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"code\": \"Invoicing_Job_V3\",\r\n    \"description\": \"Invoicing Job V3\",\r\n    \"disabled\": false,\r\n    \"jobCategory\": \"INVOICING\",\r\n    \"jobTemplate\": \"InvoicingJobV3\",\r\n    \"active\": true,\r\n    \"customFields\": {\r\n        \"customField\": [\r\n            {\r\n                \"code\": \"waitingMillis\",\r\n                \"description\": \"Waiting before next launch (ms)\",\r\n                \"fieldType\": \"LONG\",\r\n                \"longValue\": 0,\r\n                \"guiPosition\": \"tab:Configuration:0;field:1\"\r\n            },\r\n            {\r\n                \"code\": \"nbRuns\",\r\n                \"description\": \"Number of parallel execution\",\r\n                \"fieldType\": \"LONG\",\r\n                \"longValue\": -1,\r\n                \"guiPosition\": \"tab:Configuration:0;field:0\"\r\n            }\r\n        ]\r\n    },\r\n    \"limitToSingleNode\": true,\r\n    \"verboseReport\": true,\r\n    \"followingJob\": \"7_XML\"\r\n}",
+					"raw": "{\r\n    \"code\": \"Invoicing_Job_V3\",\r\n    \"description\": \"Invoicing Job V3\",\r\n    \"disabled\": false,\r\n    \"jobCategory\": \"INVOICING\",\r\n    \"jobTemplate\": \"InvoicingJobV3\",\r\n    \"active\": true,\r\n    \"processNextJobOnError\": true,\r\n    \"customFields\": {\r\n        \"customField\": [\r\n            {\r\n                \"code\": \"waitingMillis\",\r\n                \"description\": \"Waiting before next launch (ms)\",\r\n                \"fieldType\": \"LONG\",\r\n                \"longValue\": 0,\r\n                \"guiPosition\": \"tab:Configuration:0;field:1\"\r\n            },\r\n            {\r\n                \"code\": \"nbRuns\",\r\n                \"description\": \"Number of parallel execution\",\r\n                \"fieldType\": \"LONG\",\r\n                \"longValue\": -1,\r\n                \"guiPosition\": \"tab:Configuration:0;field:0\"\r\n            }\r\n        ]\r\n    },\r\n    \"limitToSingleNode\": true,\r\n    \"verboseReport\": true,\r\n    \"followingJob\": \"7_XML\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -400,7 +406,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"code\": \"Invoice_Lines_Job_V2\",\r\n    \"jobCategory\": \"INVOICING\",\r\n    \"jobTemplate\": \"InvoiceLinesJob\",\r\n    \"active\": true,\r\n    \"limitToSingleNode\": true,\r\n    \"verboseReport\": true,\r\n    \"followingJob\": \"Invoicing_Job_V3\"\r\n}",
+					"raw": "{\r\n    \"code\": \"Invoice_Lines_Job_V2\",\r\n    \"jobCategory\": \"INVOICING\",\r\n    \"jobTemplate\": \"InvoiceLinesJob\",\r\n    \"active\": true,\r\n    \"limitToSingleNode\": true,\r\n    \"verboseReport\": true,\r\n    \"processNextJobOnError\": true,\r\n    \"followingJob\": \"Invoicing_Job_V3\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -431,7 +437,8 @@
 							"    pm.response.to.have.status(200);\r",
 							"});"
 						],
-						"type": "text/javascript"
+						"type": "text/javascript",
+						"packages": {}
 					}
 				},
 				{
@@ -440,7 +447,8 @@
 						"exec": [
 							"setTimeout(function(){}, 20000);"
 						],
-						"type": "text/javascript"
+						"type": "text/javascript",
+						"packages": {}
 					}
 				}
 			],
@@ -449,7 +457,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"code\": \"ArticleMappingJob\",\r\n    \"jobCategory\": \"INVOICING\",\r\n    \"jobTemplate\": \"ArticleMappingJob\",\r\n    \"active\": true,\r\n    \r\n    \"limitToSingleNode\": true,\r\n    \"verboseReport\": true,\r\n    \"followingJob\": \"Invoice_Lines_Job_V2\"\r\n}",
+					"raw": "{\r\n    \"code\": \"ArticleMappingJob\",\r\n    \"jobCategory\": \"INVOICING\",\r\n    \"jobTemplate\": \"ArticleMappingJob\",\r\n    \"active\": true,\r\n    \"processNextJobOnError\": true,\r\n    \"limitToSingleNode\": true,\r\n    \"verboseReport\": true,\r\n    \"followingJob\": \"Invoice_Lines_Job_V2\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -480,7 +488,8 @@
 							"    pm.response.to.have.status(200);\r",
 							"});"
 						],
-						"type": "text/javascript"
+						"type": "text/javascript",
+						"packages": {}
 					}
 				},
 				{
@@ -489,7 +498,8 @@
 						"exec": [
 							"setTimeout(function(){}, 20000);"
 						],
-						"type": "text/javascript"
+						"type": "text/javascript",
+						"packages": {}
 					}
 				}
 			],
@@ -498,7 +508,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"code\": \"BillingRunJob\",\r\n    \"disabled\": false,\r\n    \"jobCategory\": \"INVOICING\",\r\n    \"jobTemplate\": \"BillingRunJob\",\r\n    \r\n    \"active\": true,\r\n    \"customFields\": {\r\n        \"customField\": [\r\n            {\r\n                \"code\": \"BillingRunJob_lastTransactionDate\",\r\n                \"description\": \"Last Transaction Date\",\r\n                \"fieldType\": \"DATE\", \r\n                \"dateValue\":  \"{{currentdate}}\",\r\n                \"guiPosition\": \"tab:Configuration:0;field:0\"\r\n            },\r\n            {\r\n                \"code\": \"BillingRunJob_billingCycle\",\r\n                \"description\": \"Billing Cycles\",\r\n                \"fieldType\": \"ENTITY\",\r\n                \"guiPosition\": \"tab:Configuration:0;field:2\",\r\n                \"value\": [\r\n                    {\r\n                        \"value\": {\r\n                            \"entityReferenceValue\": {\r\n                                \"classname\": \"org.meveo.model.billing.BillingCycle\",\r\n                                \"classnameCode\": null,\r\n                                \"code\": \"CYC_INV_MT_1\"\r\n                            }\r\n                        }\r\n                    }\r\n                ]\r\n            },\r\n            {\r\n                \"code\": \"BillingRunJob_invoiceDate\",\r\n                \"description\": \"invoice Date\",\r\n                \"fieldType\": \"DATE\",\r\n                \"dateValue\": \"{{currentdate}}\" ,\r\n                \"guiPosition\": \"tab:Configuration:0;field:1\"\r\n            },\r\n            {\r\n                    \"code\": \"BillingRunJob_billingRun_Process\",\r\n                    \"description\": \"Type\",\r\n                    \"fieldType\": \"LIST\",\r\n                    \"stringValue\": \"3\",\r\n                    \"guiPosition\": \"tab:Configuration:0;field:3\"\r\n                }\r\n        ]\r\n    },\r\n    \"timerCode\": \"Monthly\",\r\n    \"followingJob\":\"ArticleMappingJob\",\r\n    \"verboseReport\": true\r\n}\r\n",
+					"raw": "{\r\n    \"code\": \"BillingRunJob\",\r\n    \"disabled\": false,\r\n    \"jobCategory\": \"INVOICING\",\r\n    \"jobTemplate\": \"BillingRunJob\",\r\n    \"processNextJobOnError\": true,\r\n    \r\n    \"active\": true,\r\n    \"customFields\": {\r\n        \"customField\": [\r\n            {\r\n                \"code\": \"BillingRunJob_lastTransactionDate\",\r\n                \"description\": \"Last Transaction Date\",\r\n                \"fieldType\": \"DATE\", \r\n                \"dateValue\":  \"{{currentdate}}\",\r\n                \"guiPosition\": \"tab:Configuration:0;field:0\"\r\n            },\r\n            {\r\n                \"code\": \"BillingRunJob_billingCycle\",\r\n                \"description\": \"Billing Cycles\",\r\n                \"fieldType\": \"ENTITY\",\r\n                \"guiPosition\": \"tab:Configuration:0;field:2\",\r\n                \"value\": [\r\n                    {\r\n                        \"value\": {\r\n                            \"entityReferenceValue\": {\r\n                                \"classname\": \"org.meveo.model.billing.BillingCycle\",\r\n                                \"classnameCode\": null,\r\n                                \"code\": \"CYC_INV_MT_1\"\r\n                            }\r\n                        }\r\n                    }\r\n                ]\r\n            },\r\n            {\r\n                \"code\": \"BillingRunJob_invoiceDate\",\r\n                \"description\": \"invoice Date\",\r\n                \"fieldType\": \"DATE\",\r\n                \"dateValue\": \"{{currentdate}}\" ,\r\n                \"guiPosition\": \"tab:Configuration:0;field:1\"\r\n            },\r\n            {\r\n                    \"code\": \"BillingRunJob_billingRun_Process\",\r\n                    \"description\": \"Type\",\r\n                    \"fieldType\": \"LIST\",\r\n                    \"stringValue\": \"3\",\r\n                    \"guiPosition\": \"tab:Configuration:0;field:3\"\r\n                }\r\n        ]\r\n    },\r\n    \"timerCode\": \"Monthly\",\r\n    \"followingJob\":\"ArticleMappingJob\",\r\n    \"verboseReport\": true\r\n}\r\n",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -529,7 +539,8 @@
 							"    pm.response.to.have.status(200);\r",
 							"});"
 						],
-						"type": "text/javascript"
+						"type": "text/javascript",
+						"packages": {}
 					}
 				},
 				{
@@ -538,7 +549,8 @@
 						"exec": [
 							"setTimeout(function(){}, 20000);"
 						],
-						"type": "text/javascript"
+						"type": "text/javascript",
+						"packages": {}
 					}
 				}
 			],
@@ -547,7 +559,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"code\": \"5_RatedTransactions\",\r\n    \"disabled\": false,\r\n    \"jobCategory\": \"INVOICING\",\r\n    \"jobTemplate\": \"RatedTransactionsJob\",\r\n    \"active\": true,\r\n     \"customFields\": {\r\n            \"customField\": [\r\n                {\r\n                    \"code\": \"waitingMillis\",\r\n                    \"description\": \"Waiting before next launch (ms)\",\r\n                    \"fieldType\": \"LONG\",\r\n                    \"longValue\": 0,\r\n                    \"guiPosition\": \"tab:Configuration:0;fieldGroup:Configuration:0;field:1\"\r\n                },\r\n                {\r\n                    \"code\": \"nbRuns\",\r\n                    \"description\": \"Number of parallel execution\",\r\n                    \"fieldType\": \"LONG\",\r\n                    \"longValue\": 2,\r\n                    \"guiPosition\": \"tab:Configuration:0;fieldGroup:Configuration:0;field:0\"\r\n                }\r\n            ]\r\n        },\r\n    \"followingJob\": \"BillingRunJob\",\r\n    \"verboseReport\": true\r\n}",
+					"raw": "{\r\n    \"code\": \"5_RatedTransactions\",\r\n    \"disabled\": false,\r\n    \"jobCategory\": \"INVOICING\",\r\n    \"jobTemplate\": \"RatedTransactionsJob\",\r\n    \"active\": true,\r\n    \"processNextJobOnError\": true,\r\n     \"customFields\": {\r\n            \"customField\": [\r\n                {\r\n                    \"code\": \"waitingMillis\",\r\n                    \"description\": \"Waiting before next launch (ms)\",\r\n                    \"fieldType\": \"LONG\",\r\n                    \"longValue\": 0,\r\n                    \"guiPosition\": \"tab:Configuration:0;fieldGroup:Configuration:0;field:1\"\r\n                },\r\n                {\r\n                    \"code\": \"nbRuns\",\r\n                    \"description\": \"Number of parallel execution\",\r\n                    \"fieldType\": \"LONG\",\r\n                    \"longValue\": 2,\r\n                    \"guiPosition\": \"tab:Configuration:0;fieldGroup:Configuration:0;field:0\"\r\n                }\r\n            ]\r\n        },\r\n    \"followingJob\": \"BillingRunJob\",\r\n    \"verboseReport\": true\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -578,7 +590,8 @@
 							"    pm.response.to.have.status(200);\r",
 							"});"
 						],
-						"type": "text/javascript"
+						"type": "text/javascript",
+						"packages": {}
 					}
 				},
 				{
@@ -587,7 +600,8 @@
 						"exec": [
 							"setTimeout(function(){}, 20000);"
 						],
-						"type": "text/javascript"
+						"type": "text/javascript",
+						"packages": {}
 					}
 				}
 			],
@@ -596,7 +610,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"code\": \"4_UsageRating\",\r\n    \"jobCategory\": \"RATING\",\r\n    \"jobTemplate\": \"UsageRatingJob\",\r\n    \"active\": true,\r\n    \"limitToSingleNode\": true,\r\n\r\n    \"followingJob\": \"5_RatedTransactions\",\r\n    \"verboseReport\": true,\r\n    \"customFields\": {\r\n            \"customField\": [\r\n                {\r\n                    \"code\": \"waitingMillis\",\r\n                    \"description\": \"Waiting before next launch (ms)\",\r\n                    \"fieldType\": \"LONG\",\r\n                    \"longValue\": 0,\r\n                    \"guiPosition\": \"tab:Configuration:0;field:1\"\r\n                },\r\n                {\r\n                    \"code\": \"nbRuns\",\r\n                    \"description\": \"Number of parallel execution\",\r\n                    \"fieldType\": \"LONG\",\r\n                    \"longValue\": 2,\r\n                    \"guiPosition\": \"tab:Configuration:0;field:0\"\r\n                }\r\n            ]\r\n        }\r\n    \r\n}",
+					"raw": "{\r\n    \"code\": \"4_UsageRating\",\r\n    \"jobCategory\": \"RATING\",\r\n    \"jobTemplate\": \"UsageRatingJob\",\r\n    \"active\": true,\r\n    \"limitToSingleNode\": true,\r\n    \"processNextJobOnError\": true,\r\n\r\n    \"followingJob\": \"5_RatedTransactions\",\r\n    \"verboseReport\": true,\r\n    \"customFields\": {\r\n            \"customField\": [\r\n                {\r\n                    \"code\": \"waitingMillis\",\r\n                    \"description\": \"Waiting before next launch (ms)\",\r\n                    \"fieldType\": \"LONG\",\r\n                    \"longValue\": 0,\r\n                    \"guiPosition\": \"tab:Configuration:0;field:1\"\r\n                },\r\n                {\r\n                    \"code\": \"nbRuns\",\r\n                    \"description\": \"Number of parallel execution\",\r\n                    \"fieldType\": \"LONG\",\r\n                    \"longValue\": 2,\r\n                    \"guiPosition\": \"tab:Configuration:0;field:0\"\r\n                }\r\n            ]\r\n        }\r\n    \r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -627,7 +641,8 @@
 							"    pm.response.to.have.status(200);\r",
 							"});"
 						],
-						"type": "text/javascript"
+						"type": "text/javascript",
+						"packages": {}
 					}
 				},
 				{
@@ -636,7 +651,8 @@
 						"exec": [
 							"setTimeout(function(){}, 20000);"
 						],
-						"type": "text/javascript"
+						"type": "text/javascript",
+						"packages": {}
 					}
 				}
 			],
@@ -645,7 +661,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"code\": \"3_UsageRating\",\r\n    \"jobCategory\": \"RATING\",\r\n    \"jobTemplate\": \"UsageRatingJob\",\r\n    \"active\": true,\r\n    \"limitToSingleNode\": true,\r\n    \"verboseReport\": true,\r\n    \"followingJob\": \"4_UsageRating\",\r\n    \"customFields\": {\r\n        \"customField\": [\r\n            {\r\n                \"code\": \"waitingMillis\",\r\n                \"description\": \"Waiting before next launch (ms)\",\r\n                \"fieldType\": \"LONG\",\r\n                \"longValue\": 0,\r\n                \"guiPosition\": \"tab:Configuration:0;field:1\"\r\n            },\r\n            {\r\n                \"code\": \"nbRuns\",\r\n                \"description\": \"Number of parallel execution\",\r\n                \"fieldType\": \"LONG\",\r\n                \"longValue\": 2,\r\n                \"guiPosition\": \"tab:Configuration:0;field:0\"\r\n            }\r\n        ]\r\n    }\r\n}",
+					"raw": "{\r\n    \"code\": \"3_UsageRating\",\r\n    \"jobCategory\": \"RATING\",\r\n    \"jobTemplate\": \"UsageRatingJob\",\r\n    \"active\": true,\r\n    \"limitToSingleNode\": true,\r\n    \"verboseReport\": true,\r\n    \"processNextJobOnError\": true,\r\n    \"followingJob\": \"4_UsageRating\",\r\n    \"customFields\": {\r\n        \"customField\": [\r\n            {\r\n                \"code\": \"waitingMillis\",\r\n                \"description\": \"Waiting before next launch (ms)\",\r\n                \"fieldType\": \"LONG\",\r\n                \"longValue\": 0,\r\n                \"guiPosition\": \"tab:Configuration:0;field:1\"\r\n            },\r\n            {\r\n                \"code\": \"nbRuns\",\r\n                \"description\": \"Number of parallel execution\",\r\n                \"fieldType\": \"LONG\",\r\n                \"longValue\": 2,\r\n                \"guiPosition\": \"tab:Configuration:0;field:0\"\r\n            }\r\n        ]\r\n    }\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -676,7 +692,8 @@
 							"    pm.response.to.have.status(200);\r",
 							"});"
 						],
-						"type": "text/javascript"
+						"type": "text/javascript",
+						"packages": {}
 					}
 				},
 				{
@@ -685,7 +702,8 @@
 						"exec": [
 							"setTimeout(function(){}, 20000);"
 						],
-						"type": "text/javascript"
+						"type": "text/javascript",
+						"packages": {}
 					}
 				}
 			],
@@ -694,7 +712,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n   \r\n    \"code\": \"1_Mediation\",\r\n        \"disabled\": false,\r\n        \"jobCategory\": \"MEDIATION\",\r\n        \"jobTemplate\": \"MediationJob\",\r\n        \"active\": true,\r\n        \"customFields\": {\r\n            \"customField\": [\r\n                {\r\n                    \"code\": \"waitingMillis\",\r\n                    \"description\": \"Waiting before next launch (ms)\",\r\n                    \"fieldType\": \"LONG\",\r\n                    \"longValue\": 0,\r\n                    \"guiPosition\": \"tab:Configuration:0;field:1\"\r\n                },\r\n                {\r\n                    \"code\": \"nbRuns\",\r\n                    \"description\": \"Number of parallel execution\",\r\n                    \"fieldType\": \"LONG\",\r\n                    \"longValue\": 1,\r\n                    \"guiPosition\": \"tab:Configuration:0;field:0\"\r\n                }\r\n            ]\r\n        },\r\n        \"limitToSingleNode\": true,\r\n         \"followingJob\": \"3_UsageRating\",\r\n        \"verboseReport\": true\r\n    }\r\n   \r\n    \r\n}",
+					"raw": "{\r\n   \r\n    \"code\": \"1_Mediation\",\r\n        \"disabled\": false,\r\n        \"jobCategory\": \"MEDIATION\",\r\n        \"jobTemplate\": \"MediationJob\",\r\n        \"active\": true,\r\n        \"processNextJobOnError\": true,\r\n        \"customFields\": {\r\n            \"customField\": [\r\n                {\r\n                    \"code\": \"waitingMillis\",\r\n                    \"description\": \"Waiting before next launch (ms)\",\r\n                    \"fieldType\": \"LONG\",\r\n                    \"longValue\": 0,\r\n                    \"guiPosition\": \"tab:Configuration:0;field:1\"\r\n                },\r\n                {\r\n                    \"code\": \"nbRuns\",\r\n                    \"description\": \"Number of parallel execution\",\r\n                    \"fieldType\": \"LONG\",\r\n                    \"longValue\": 1,\r\n                    \"guiPosition\": \"tab:Configuration:0;field:0\"\r\n                }\r\n            ]\r\n        },\r\n        \"limitToSingleNode\": true,\r\n         \"followingJob\": \"3_UsageRating\",\r\n        \"verboseReport\": true\r\n    }\r\n   \r\n    \r\n",
 					"options": {
 						"raw": {
 							"language": "json"

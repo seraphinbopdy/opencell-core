@@ -1024,7 +1024,7 @@ public class CounterInstanceService extends PersistenceService<CounterInstance> 
             if (counterPeriod == null) {
                 continue;
             }
-            CounterValueChangeInfo counterValueChangeInfo = accumulateCounterValue(counterPeriod, wo, isVirtual);
+            CounterValueChangeInfo counterValueChangeInfo = accumulateCounterValue(counterPeriod, chargeInstance, wo, isVirtual);
             counterValueChangeInfos.add(counterValueChangeInfo);
 
             if (counterValueChangeInfo.isChange()) {// && (auditOrigin.getAuditOrigin() == ChangeOriginEnum.API || auditOrigin.getAuditOrigin() == ChangeOriginEnum.INBOUND_REQUEST)) {
@@ -1046,13 +1046,14 @@ public class CounterInstanceService extends PersistenceService<CounterInstance> 
 
     /**
      * Increment accumulator counter value for a given counter period
-     * 
-     * @param counterPeriod Counter period
+     *
+     * @param counterPeriod   Counter period
+     * @param chargeInstance Charge instance
      * @param walletOperation Wallet operation to get amount to increment by
-     * @param isVirtual Is this a virtual operation - no counter period entity exists nor should be persisted
+     * @param isVirtual       Is this a virtual operation - no counter period entity exists nor should be persisted
      * @return Counter value change summary - the previous, deduced and new counter value
      */
-    private CounterValueChangeInfo accumulateCounterValue(CounterPeriod counterPeriod, WalletOperation walletOperation, boolean isVirtual) {
+    private CounterValueChangeInfo accumulateCounterValue(CounterPeriod counterPeriod, ChargeInstance chargeInstance, WalletOperation walletOperation, boolean isVirtual) {
 
         BigDecimal previousValue = counterPeriod.getValue();
         CounterInstance counterInstance = counterPeriod.getCounterInstance();
@@ -1063,7 +1064,7 @@ public class CounterInstanceService extends PersistenceService<CounterInstance> 
         BigDecimal value = BigDecimal.ZERO;
 
         if (isMultiValuesApplied) {
-            value = applyMultiAccumulatedValue(counterPeriod, walletOperation);
+            value = applyMultiAccumulatedValue(counterPeriod, chargeInstance, walletOperation);
 
         } else {
             if (CounterTypeEnum.USAGE_AMOUNT.equals(counterPeriod.getCounterType())) {
@@ -1093,18 +1094,21 @@ public class CounterInstanceService extends PersistenceService<CounterInstance> 
 
     /**
      * Accumulate counter multi values, Each value is stored in map with a key evaluated for an EL expression. If value can not be resolved, a value of ZERO will be considered
-     * 
-     * @param counterPeriod the counter period
+     *
+     * @param counterPeriod   the counter period
+     * @param chargeInstance the charge instance
      * @param walletOperation the wallet operation
      * @return A value applied
      */
-    private BigDecimal applyMultiAccumulatedValue(CounterPeriod counterPeriod, WalletOperation walletOperation) {
+    private BigDecimal applyMultiAccumulatedValue(CounterPeriod counterPeriod, ChargeInstance chargeInstance, WalletOperation walletOperation) {
         CounterTemplate counterTemplate = counterPeriod.getCounterInstance().getCounterTemplate();
         BigDecimal value = evaluateValueElExpression(counterTemplate.getValueEl(), walletOperation);
         String key = evaluateKeyElExpression(counterTemplate.getKeyEl(), walletOperation);
         if (value == null || key == null) {
             return BigDecimal.ZERO;
         }
+        value = value.setScale(chargeInstance.getChargeTemplate().getUnitNbDecimal(), chargeInstance.getChargeTemplate().getRoundingMode().getRoundingMode());
+
         if (counterPeriod.getAccumulatedValues() == null) {
             Map<String, BigDecimal> accumulatedValues = new HashMap<>();
             accumulatedValues.put(key, value);

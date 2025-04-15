@@ -1,7 +1,6 @@
 package org.meveo.admin.job;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputFilter;
@@ -865,6 +864,8 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
 
                 // Continue processing messages from a message queue if applicable
                 if (spreadOverCluster && !isJobRequestedToStop(jobInstanceId)) {
+
+                    log.debug("Switching to consume messages from a queue");
 
                     jmsContext.start();
                     try {

@@ -31,6 +31,7 @@ import org.meveo.model.billing.WalletOperationStatusEnum;
 import org.meveo.model.rating.EDR;
 import org.meveo.security.CurrentUser;
 import org.meveo.security.MeveoUser;
+import org.meveo.service.billing.impl.InvoiceLineService;
 import org.meveo.service.billing.impl.RatedTransactionService;
 import org.meveo.service.billing.impl.ReratingService;
 import org.meveo.service.billing.impl.WalletOperationService;
@@ -66,6 +67,9 @@ public class ReratingServiceTest {
     
     @Mock
     private AccountingArticleService accountingArticleService;
+	
+	@Mock
+	private InvoiceLineService invoiceLineService;
 
     @Mock
     @CurrentUser

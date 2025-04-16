@@ -123,9 +123,9 @@ public class ProductManagementApiServiceTest extends TestCase {
         assertThat(pricePlanVersion.getMatrix()).isFalse();
         assertThat(pricePlanVersion.getPricePlanMatrixCode()).isEqualTo(pricePlan.getCode());
         
-        verify(pricePlanMatrixVersionApi).updateProductVersionStatus(pricePlan.getCode(), 1, VersionStatusEnum.PUBLISHED);
+        verify(pricePlanMatrixVersionApi).updateProductVersionStatus(pricePlan.getCode(), 1, VersionStatusEnum.PUBLISHED, true);
         
-        verify(pricePlanMatrixVersionApi).updateProductVersionStatus(pricePlan.getCode(), 1, VersionStatusEnum.PUBLISHED);
+        verify(pricePlanMatrixVersionApi).updateProductVersionStatus(pricePlan.getCode(), 1, VersionStatusEnum.PUBLISHED, true);
         
         verify(genericChargeTemplateApi).updateStatus(postData.getChargeCode(), ChargeTemplateStatusEnum.ACTIVE.name());
 
@@ -207,9 +207,9 @@ public class ProductManagementApiServiceTest extends TestCase {
         assertThat(pricePlanVersion.getMatrix()).isFalse();
         assertThat(pricePlanVersion.getPricePlanMatrixCode()).isEqualTo(pricePlan.getCode());
 
-        verify(pricePlanMatrixVersionApi).updateProductVersionStatus(pricePlan.getCode(), 1, VersionStatusEnum.PUBLISHED);
+        verify(pricePlanMatrixVersionApi).updateProductVersionStatus(pricePlan.getCode(), 1, VersionStatusEnum.PUBLISHED, true);
 
-        verify(pricePlanMatrixVersionApi).updateProductVersionStatus(pricePlan.getCode(), 1, VersionStatusEnum.PUBLISHED);
+        verify(pricePlanMatrixVersionApi).updateProductVersionStatus(pricePlan.getCode(), 1, VersionStatusEnum.PUBLISHED, true);
 
         verify(genericChargeTemplateApi).updateStatus(postData.getChargeCode(), ChargeTemplateStatusEnum.ACTIVE.name());
 
@@ -291,9 +291,9 @@ public class ProductManagementApiServiceTest extends TestCase {
         assertThat(pricePlanVersion.getMatrix()).isFalse();
         assertThat(pricePlanVersion.getPricePlanMatrixCode()).isEqualTo(pricePlan.getCode());
 
-        verify(pricePlanMatrixVersionApi).updateProductVersionStatus(pricePlan.getCode(), 1, VersionStatusEnum.PUBLISHED);
+        verify(pricePlanMatrixVersionApi).updateProductVersionStatus(pricePlan.getCode(), 1, VersionStatusEnum.PUBLISHED, true);
 
-        verify(pricePlanMatrixVersionApi).updateProductVersionStatus(pricePlan.getCode(), 1, VersionStatusEnum.PUBLISHED);
+        verify(pricePlanMatrixVersionApi).updateProductVersionStatus(pricePlan.getCode(), 1, VersionStatusEnum.PUBLISHED, true);
 
         verify(genericChargeTemplateApi).updateStatus(postData.getChargeCode(), ChargeTemplateStatusEnum.ACTIVE.name());
 

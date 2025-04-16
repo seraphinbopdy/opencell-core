@@ -266,6 +266,7 @@ public interface PricePlanRs extends IBaseRs {
      * @param pricePlanMatrixCode
      * @param status
      * @param pricePlanMatrixVersion
+     * @param returnPricePlanMatrixLine
      * @return
      */
     @PUT
@@ -279,8 +280,10 @@ public interface PricePlanRs extends IBaseRs {
                     @ApiResponse(responseCode = "400", description = "the status of the price plan matrix is already closed")
             })
     Response updatePricePlanMatrixVersionStatus(@Parameter(description = "The price plan matrix code", required = true)  @PathParam("pricePlanMatrixCode") String pricePlanMatrixCode,
-    											@Parameter(description = "The price plan matrix version", required = true)  @PathParam("pricePlanMatrixVersion") int pricePlanMatrixVersion,
-    											@Parameter(description = "The status of Price plan", required = true)  @PathParam("status") VersionStatusEnum status);
+                                                @Parameter(description = "The price plan matrix version", required = true)  @PathParam("pricePlanMatrixVersion") int pricePlanMatrixVersion,
+                                                @Parameter(description = "The status of Price plan", required = true)  @PathParam("status") VersionStatusEnum status,
+                                                @Parameter(description = "Indicate if returning pricePlanMatrixLine") @DefaultValue("true")
+                                                @QueryParam("returnPricePlanMatrixLine") boolean returnPricePlanMatrixLine);
 
     @GET
     @Path("/pricePlanMatrixVersions")

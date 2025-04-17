@@ -34,6 +34,7 @@ import org.meveo.model.crm.custom.CustomFieldValues;
 import org.meveo.model.customEntities.CustomEntityTemplate;
 import org.meveo.model.jobs.JobInstance;
 
+
 public class CustomFieldInstanceServiceTest {
     private CustomFieldInstanceService sut = new CustomFieldInstanceService();
 

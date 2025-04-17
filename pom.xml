@@ -30,6 +30,7 @@
 		<version.pdfbox>3.0.2</version.pdfbox>
 		<jackson.version>2.17.0</jackson.version> <!-- wildfly 33 -->
 		<commons.io.version>2.16.1</commons.io.version>
+		<version.barcode>1.5-beta1</version.barcode>
 		<java.version>21</java.version>
 		<version.ingenico-connect-sdk>6.31.0</version.ingenico-connect-sdk>
 		<version.worldline.onlinepayments-sdk>3.5.0</version.worldline.onlinepayments-sdk>
@@ -546,9 +547,9 @@
 				<version>5.5.13.4</version>
 			</dependency>
 			<dependency>
-				<groupId>com.singingbush</groupId>
-				<artifactId>barcode4j</artifactId>
-				<version>2.2.4</version>
+				<groupId>net.sourceforge.barbecue</groupId>
+				<artifactId>barbecue</artifactId>
+				<version>${version.barcode}</version> 
 			</dependency>
 			<dependency>
 				<groupId>com.github.spullara.mustache.java</groupId>

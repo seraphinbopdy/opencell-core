@@ -18,6 +18,7 @@
 
 package org.meveo.api.helpers.document;
 
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -39,8 +40,10 @@ import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotation;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationWidget;
 import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
 import org.apache.pdfbox.pdmodel.interactive.form.PDField;
-import org.krysalis.barcode4j.impl.code128.Code128Bean;
-import org.krysalis.barcode4j.output.bitmap.BitmapCanvasProvider;
+import net.sourceforge.barbecue.Barcode;
+import net.sourceforge.barbecue.BarcodeException;
+import net.sourceforge.barbecue.BarcodeFactory;
+import net.sourceforge.barbecue.output.OutputException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -295,21 +298,29 @@ public class PDFBuilder {
      * @return the PD image X object
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    private PDImageXObject generateBarCodeImage(String barCode,PDField pdField) throws IOException {
+    private PDImageXObject generateBarCodeImage(String barCode, PDField pdField) throws IOException {
         try {
-            Code128Bean code128Bean = new Code128Bean();
-            BitmapCanvasProvider canvas = new BitmapCanvasProvider(150, BufferedImage.TYPE_BYTE_BINARY, false, 0);
-            code128Bean.generateBarcode(canvas, barCode);
-            canvas.finish();
+            Barcode barcode = BarcodeFactory.createCode128(barCode);
+            barcode.setBarHeight(40);
+            barcode.setBarWidth(2);
+            barcode.setDrawingText(false);
 
-            BufferedImage bufferedImage = canvas.getBufferedImage();
+            int width = barcode.getWidth();
+            int height = barcode.getHeight();
+
+            BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            Graphics2D g2d = bufferedImage.createGraphics();
+            barcode.draw(g2d, 0, 0);
+            g2d.dispose();
+
             return JPEGFactory.createFromImage(this.currentTemplateDoc, bufferedImage);
 
-        } catch (IOException e) {
+        } catch (OutputException | IOException | BarcodeException e) {
             LOG.error("error generateBarCodeImage : code = {}, value = {} , pdField = {} ", barCode, pdField, e.getMessage());
-            throw e;
+            throw new IOException("Barcode generation failed", e);
         }
     }
+
     
     /**
      * With barcode fieds.

@@ -25,6 +25,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.junit.Test;
 import org.meveo.model.ICustomFieldEntity;
 import org.meveo.model.crm.custom.CustomFieldValues;
@@ -122,5 +125,20 @@ public class CustomFieldInstanceServiceTest {
         CustomFieldValues cfValuesNullSafe = jobInstance.getCfValuesNullSafe();
         assertEquals("nice person", cfValuesNullSafe.getValue("description"));
         assertEquals(190D, cfValuesNullSafe.getValue("height"));
+    }
+
+    @Test
+    public void mapShouldContainEmptyValue() {
+
+        CustomFieldValues cfValues = new CustomFieldValues();
+
+        Map<String, String> mapOfValues = new LinkedHashMap<>();
+        mapOfValues.put("log_level", "debug");
+        mapOfValues.put("cf_job_replay_ids", "");
+        mapOfValues.put("origine_evenement_list", "0;1");
+
+        cfValues.setValue("ScriptingJob_variables", mapOfValues);
+
+        assertEquals("{\"ScriptingJob_variables\":[{\"mapString\":{\"log_level\":\"debug\",\"cf_job_replay_ids\":\"\",\"origine_evenement_list\":\"0;1\"}}]}", cfValues.asJson());
     }
 }

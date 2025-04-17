@@ -20,9 +20,6 @@ package org.meveo.jpa;
 
 import java.io.Serializable;
 
-import org.meveo.model.audit.ChangeOriginEnum;
-import org.meveo.service.audit.AuditOrigin;
-
 import jakarta.persistence.EntityManager;
 
 /**
@@ -73,13 +70,11 @@ public class EntityManagerWrapper implements Serializable {
      */
     public EntityManager getEntityManager() {
 
-        // Set Audit context on EM in case it is Application managed persistence context (GUI and multitenancy) or audit origin is anything other than JOB
-        // The later rule is useful in cases when a single (API for example) method that runs in NO TX will call multiple methods that do run in TX.
+        // Set Audit context on EM. A context will be set only once per session.
+        // In cases when a single (API for example) method that runs in NO TX will call multiple methods that do run in TX.
         // As EntityManager is produced as request scope bean, it will be instantiated only on a call to the first method and not to the second one.
         // As second method runs in a new TX, all audit parameters will be lost.
-        if (amp || AuditOrigin.getAuditOrigin() != ChangeOriginEnum.JOB) {
-            EntityManagerProvider.setAuditContext(entityManager);
-        }
+        EntityManagerProvider.setAuditContext(entityManager);
         return entityManager;
     }
 
@@ -106,9 +101,7 @@ public class EntityManagerWrapper implements Serializable {
         // log.error("AKK EMW setting a nested EM");
         previousEntityManager = entityManager;
         entityManager = newEntityManager;
-        if (amp || AuditOrigin.getAuditOrigin() != ChangeOriginEnum.JOB) {
-            EntityManagerProvider.setAuditContext(entityManager);
-        }
+        EntityManagerProvider.setAuditContext(entityManager);
     }
 
     /**
@@ -126,9 +119,7 @@ public class EntityManagerWrapper implements Serializable {
         entityManager.close();
         entityManager = previousEntityManager;
         previousEntityManager = null;
-        if (amp || AuditOrigin.getAuditOrigin() != ChangeOriginEnum.JOB) {
-            EntityManagerProvider.setAuditContext(entityManager);
-        }
+        EntityManagerProvider.setAuditContext(entityManager);
     }
 
     /**

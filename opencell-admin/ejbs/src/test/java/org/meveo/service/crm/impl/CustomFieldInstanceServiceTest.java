@@ -19,30 +19,108 @@
 package org.meveo.service.crm.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import org.meveo.model.ICustomFieldEntity;
+import org.meveo.model.crm.custom.CustomFieldValues;
 import org.meveo.model.customEntities.CustomEntityTemplate;
+import org.meveo.model.jobs.JobInstance;
 
 public class CustomFieldInstanceServiceTest {
     private CustomFieldInstanceService sut = new CustomFieldInstanceService();
 
     @Test
     public void should_return_class_if_className_contains_custom_table_ref() throws ClassNotFoundException {
-        //Given
+        // Given
         String className = "org.meveo.model.customEntities.CustomEntityTemplate - TABLE_1";
-        //When
+        // When
         Class<?> clazz = sut.trimTableNameAndGetClass(className);
-        //Then
+        // Then
         assertThat(clazz).isEqualTo(CustomEntityTemplate.class);
     }
 
     @Test
     public void should_return_class_if_className_is_right() throws ClassNotFoundException {
-        //Given
+        // Given
         String className = "org.meveo.model.customEntities.CustomEntityTemplate";
-        //When
+        // When
         Class<?> clazz = sut.trimTableNameAndGetClass(className);
-        //Then
+        // Then
         assertThat(clazz).isEqualTo(CustomEntityTemplate.class);
+    }
+
+    @Test
+    public void testGetCfValuesNullSafe_WhenCurrentInstanceIsNull_ShouldReturnNewInstance() {
+        ICustomFieldEntity customFieldEntityUnderTest = new JobInstance();
+
+        // Given
+        customFieldEntityUnderTest.setCfValuesAsJson(null);
+
+        assertNull(customFieldEntityUnderTest.getCfValues());
+
+        // When
+        CustomFieldValues cfValues = customFieldEntityUnderTest.getCfValuesNullSafe();
+
+        // Then
+        assertNotNull(cfValues);
+        assertSame(cfValues, customFieldEntityUnderTest.getCfValues());
+    }
+
+    @Test
+    public void testGetCfValuesNullSafe_WhenCurrentInstanceIsNotNull_ShouldReturnSameInstance() {
+
+        ICustomFieldEntity customFieldEntityUnderTest = new JobInstance();
+
+        // Given
+        customFieldEntityUnderTest.setCfValuesAsJson("{}");
+
+        assertNotNull(customFieldEntityUnderTest.getCfValues());
+
+        // When
+        CustomFieldValues cfValuesNullSafe = customFieldEntityUnderTest.getCfValuesNullSafe();
+        CustomFieldValues cfValues = customFieldEntityUnderTest.getCfValues();
+
+        // Then
+        assertNotNull(cfValuesNullSafe);
+        assertNotNull(cfValues);
+        assertSame(cfValuesNullSafe, cfValues);
+    }
+
+    @Test
+    public void testEncryptCfValues_WhenCurrentInstanceIsNotNull_ShouldEncryptValues() {
+
+        ICustomFieldEntity customFieldEntityUnderTest = new JobInstance();
+
+        // Given
+        customFieldEntityUnderTest.setCfValuesAsJson("{}");
+
+        // When
+        customFieldEntityUnderTest.encryptCfValues();
+
+        // Then
+        CustomFieldValues cfValues = customFieldEntityUnderTest.getCfValuesNullSafe();
+        assertTrue(cfValues.isEncrypted());
+    }
+
+    @Test
+    public void shouldSetCFValueUsingSetCFValueMethod() {
+        // Arrange
+        JobInstance jobInstance = new JobInstance();
+
+        // Act
+        jobInstance.setCfValue("description", "nice person");
+        jobInstance.setCfValue("height", 190D);
+
+        assertEquals(jobInstance.getCfValuesAsJson(), "{\"description\":[{\"string\":\"nice person\"}],\"height\":[{\"double\":190.0}]}");
+
+        // Assert
+        CustomFieldValues cfValuesNullSafe = jobInstance.getCfValuesNullSafe();
+        assertEquals("nice person", cfValuesNullSafe.getValue("description"));
+        assertEquals(190D, cfValuesNullSafe.getValue("height"));
     }
 }

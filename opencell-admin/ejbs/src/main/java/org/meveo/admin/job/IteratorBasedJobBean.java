@@ -6,7 +6,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputFilter;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -378,6 +377,8 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
             countDown = new CountDownLatch(1);
             countDowns.put(jobInstance.getId(), countDown);
 
+            log.info("{}/{} Will submit {} task(s) to process data", jobInstance.getJobTemplate(), jobInstance.getCode(), nbThreads);
+
             // Create data processing tasks
             for (int k = 0; k < nbThreads; k++) {
 
@@ -591,6 +592,8 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
         Long jobDurationLimit = jobExecutionResultService.getJobDurationLimit(jobExecutionResult, jobInstance);
         Long jobTimeLimit = jobExecutionResultService.getJobTimeLimit(jobExecutionResult, jobInstance);
 
+        String auditOriginName = jobExecutionResult.getJobInstance().getJobTemplate() + "/" + jobInstanceCode;
+
         final AtomicLong durationLimit = jobDurationLimit != null ? new AtomicLong(jobDurationLimit) : null;
         final AtomicLong timeLimit = jobTimeLimit != null ? new AtomicLong(jobTimeLimit) : null;
 
@@ -598,6 +601,7 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
             Thread.currentThread().setName(jobInstanceCode + "-ReportJobStatus");
 
             currentUserProvider.reestablishAuthentication(lastCurrentUser);
+            AuditOrigin.setAuditOriginAndName(ChangeOriginEnum.JOB, auditOriginName);
 
             log.debug("Thread {} will store job progress", Thread.currentThread().getName());
 
@@ -674,14 +678,18 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
 
         Runnable task = () -> {
             try (JMSContext context = jmsConnectionFactory.createContext(System.getenv(REMOTE_MQ_ADMIN_USER), System.getenv(REMOTE_MQ_ADMIN_PASSWORD), JMSContext.CLIENT_ACKNOWLEDGE)) {
+
                 Thread.currentThread().setName(jobInstanceCode + "-PublishToCluster-" + threadNr);
 
                 currentUserProvider.reestablishAuthentication(lastCurrentUser);
 
                 log.debug("Thread {} will publish data for cluster-wide data processing", Thread.currentThread().getName());
 
+                long publishStartTime = System.currentTimeMillis();
+
                 int nrOfItemsProcessedByThread = 0;
                 int nrMessages = 0;
+                context.setClientID(EjbUtils.getCurrentClusterNode() + "_" + jobInstanceCode + "_publish_" + threadNr);
 
                 context.start();
 
@@ -706,7 +714,8 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
 
                     // Check if job is not stopped yet
                     if (isJobRequestedToStop(jobInstanceId)) {
-                        log.info("Thread {} published {} data items in {} messages for cluster-wide data processing before it was canceled", Thread.currentThread().getName(), nrOfItemsProcessedByThread, nrMessages);
+                        log.info("Thread {} published {} data items in {} messages in {} milis for cluster-wide data processing before it was canceled", Thread.currentThread().getName(), nrOfItemsProcessedByThread,
+                            nrMessages, System.currentTimeMillis() - publishStartTime);
                         return;
                     }
 
@@ -750,7 +759,8 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
                     nrMessages++;
                 }
 
-                log.info("Thread {} published {} data items in {} messages for cluster-wide data processing", Thread.currentThread().getName(), nrOfItemsProcessedByThread, nrMessages);
+                log.info("Thread {} published {} data items in {} messages in {} milis for cluster-wide data processing", Thread.currentThread().getName(), nrOfItemsProcessedByThread, nrMessages,
+                    System.currentTimeMillis() - publishStartTime);
 
             } catch (Exception e) {
                 log.error("Exception occurred while publishing data to queue", e);
@@ -814,30 +824,23 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
 
         Runnable task = () -> {
 
-            ItertatorJobMessageListener messageListener = null;
-            if (spreadOverCluster) {
-                messageListener = new ItertatorJobMessageListener(countDown, isNewTx, useMultipleItemProcessing, processSingleItemFunction, processMultipleItemFunction, jobExecutionResult);
-            }
+            currentUserProvider.reestablishAuthentication(lastCurrentUser);
 
-            try (JMSContext jmsContext = spreadOverCluster ? jmsConnectionFactory.createContext(System.getenv(REMOTE_MQ_ADMIN_USER), System.getenv(REMOTE_MQ_ADMIN_PASSWORD), JMSContext.CLIENT_ACKNOWLEDGE) : null) {
+            AuditOrigin.setAuditOriginAndName(ChangeOriginEnum.JOB, auditOriginName);
 
-                if (spreadOverCluster) {
-                    jmsContext.setExceptionListener(e -> log.error("Exception while consuming Job processing data messages", e));
-                    JMSConsumer jmsConsumer = jmsContext.createConsumer(jobQueue);
-                    jmsContext.stop(); // Context is autostarted when consumer is created
-                    jmsConsumer.setMessageListener(messageListener);
-                }
+            int nrOfItemsProcessedByThread = 0;
+            int nrOfItemsDb = 0;
+            int nrOfItemsQueue = 0;
+            int nrofMessages = 0;
 
-                Thread.currentThread().setName(jobInstanceCode + "-" + threadNr);
+            // First process data from a DB based iterator.
+            // Applicable when not spreading data processing over multiple cluster nodes OR when its a main node in the multinode processing scenario
+            if (isRunningAsJobManager) {
+                Thread.currentThread().setName(jobInstanceCode + "-" + threadNr + "-DB");
 
-                currentUserProvider.reestablishAuthentication(lastCurrentUser);
+                log.info("Consuming data from DB for data processing");
 
-                AuditOrigin.setAuditOriginAndName(ChangeOriginEnum.JOB, auditOriginName);
-                int nrOfItemsProcessedByThread = 0;
-
-                // First process data from a DB based iterator
-                if (isRunningAsJobManager) {
-
+                try {
                     mainLoop: while (true) {
 
                         List<T> itemsToProcess = getNextItemsToProcess(batchSize, dataIterator, jobExecutionResult.getJobInstance().getId());
@@ -848,45 +851,60 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
                         processItems(itemsToProcess, isNewTx, useMultipleItemProcessing, processSingleItemFunction, processMultipleItemFunction, jobExecutionResult);
 
                         int nrOfItemsInBatch = itemsToProcess.size();
-                        nrOfItemsProcessedByThread += nrOfItemsInBatch;
+                        nrOfItemsDb += nrOfItemsInBatch;
                     }
+                } catch (Exception e) {
+                    log.error("An error occurred during data processing", e);
                 }
+            }
 
-                int nrOfItemsDb = nrOfItemsProcessedByThread;
-                int nrOfItemsQueue = 0;
-                int nrofMessages = 0;
+            // Then process data from a message queue if spreading data processing over multiple cluster nodes
+            if (spreadOverCluster) {
 
-                // Continue processing messages from a message queue if applicable
-                if (spreadOverCluster && !isJobRequestedToStop(jobInstanceId)) {
+                Thread.currentThread().setName(jobInstanceCode + "-" + threadNr + "-MQ");
 
-                    jmsContext.start();
+                try (JMSContext jmsContext = jmsConnectionFactory.createContext(System.getenv(REMOTE_MQ_ADMIN_USER), System.getenv(REMOTE_MQ_ADMIN_PASSWORD), JMSContext.CLIENT_ACKNOWLEDGE);) {
+
+                    String queueName = jobQueue.getQueueName();
+
+                    log.info("Consuming data from queue {} for cluster-wide data processing", queueName);
+
+                    jmsContext.setClientID(EjbUtils.getCurrentClusterNode() + "_" + jobInstanceCode + "_consume_" + threadNr);
+                    jmsContext.setExceptionListener(e -> log.error("Exception while consuming Job processing data messages", e));
+                    JMSConsumer jmsConsumer = jmsContext.createConsumer(jobQueue);
+                    // Context is autostarted when consumer is created
+                    ItertatorJobMessageListener messageListener = new ItertatorJobMessageListener(isNewTx, useMultipleItemProcessing, processSingleItemFunction, processMultipleItemFunction, jobExecutionResult,
+                        lastCurrentUser, auditOriginName, threadNr);
+                    jmsConsumer.setMessageListener(messageListener);
+
                     try {
-                        countDown.await();
 
                         // Now need to wait until all messages were processed, as countDown is released once the last message is received, not when all messages are processed
-                        // Polling is done
-                        String queueName = jobQueue.getQueueName();
+                        countDown.await();
+
+                        log.info("EOF message was consumed somewhere. Will poll queue {} for unprocessed messages", queueName);
+
+                        // Do polling every 2s for all messages to be consumed
                         do {
                             Thread.sleep(2000);
                         } while (!isJobRequestedToStop(jobInstanceId) && !areAllMessagesConsumed(jobInstanceCode, queueName));
 
                     } catch (InterruptedException e) {
                         log.error("Job message listener was interrupted", e);
-                    } catch (JMSException e) {
-                        log.error("Failed to obtain queue name", e);
                     }
 
                     nrOfItemsQueue = messageListener.getItemCount();
                     nrofMessages = messageListener.getMsgCount();
-                    nrOfItemsProcessedByThread += nrOfItemsQueue;
 
+                } catch (Exception e) {
+                    log.error("An error occurred during data processing", e);
                 }
-
-                log.info("Thread {} processed {} items: {} from db and {} from {} messages", Thread.currentThread().getName(), nrOfItemsProcessedByThread, nrOfItemsDb, nrOfItemsQueue, nrofMessages);
-
-            } catch (Exception e) {
-                log.error("An error occurred during data processing", e);
             }
+
+            nrOfItemsProcessedByThread = nrOfItemsQueue + nrOfItemsDb;
+
+            log.info("Thread {} processed {} items: {} from db and {} from {} messages", Thread.currentThread().getName(), nrOfItemsProcessedByThread, nrOfItemsDb, nrOfItemsQueue, nrofMessages);
+
         };
 
         return task;
@@ -1229,22 +1247,38 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
 
         private int msgCount = 0;
         private int itemCount = 0;
-//        private CountDownLatch countDown;
         private boolean isNewTx;
         private boolean useMultipleItemProcessing;
         private BiConsumer<T, JobExecutionResultImpl> processSingleItemFunction;
         private BiConsumer<List<T>, JobExecutionResultImpl> processMultipleItemFunction;
         private JobExecutionResultImpl jobExecutionResult;
+        private MeveoUser currentUser;
+        private String auditOriginName;
+        private int threadNr;
 
-        public ItertatorJobMessageListener(CountDownLatch countDown, boolean isNewTx, boolean useMultipleItemProcessing, BiConsumer<T, JobExecutionResultImpl> processSingleItemFunction,
-                BiConsumer<List<T>, JobExecutionResultImpl> processMultipleItemFunction, JobExecutionResultImpl jobExecutionResult) {
+        /**
+         * A message listener for JMS messages that were published by IteratorBased type job.
+         * 
+         * @param isNewTx Shall processing be done in a new transaction
+         * @param useMultipleItemProcessing Shall items be processed in batch
+         * @param processSingleItemFunction A function to process single item
+         * @param processMultipleItemFunction A function to process multiple items
+         * @param jobExecutionResult Job execution result
+         * @param currentUser Current user
+         * @param auditOriginName Audit origin name
+         * @param threadNr Thread number
+         */
+        public ItertatorJobMessageListener(boolean isNewTx, boolean useMultipleItemProcessing, BiConsumer<T, JobExecutionResultImpl> processSingleItemFunction,
+                BiConsumer<List<T>, JobExecutionResultImpl> processMultipleItemFunction, JobExecutionResultImpl jobExecutionResult, MeveoUser currentUser, String auditOriginName, int threadNr) {
 
-//            this.countDown = countDown;
             this.isNewTx = isNewTx;
             this.useMultipleItemProcessing = useMultipleItemProcessing;
             this.processMultipleItemFunction = processMultipleItemFunction;
             this.processSingleItemFunction = processSingleItemFunction;
             this.jobExecutionResult = jobExecutionResult;
+            this.currentUser = currentUser;
+            this.auditOriginName = auditOriginName;
+            this.threadNr = threadNr;
         }
 
         /**
@@ -1265,9 +1299,19 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
         @Override
         public void onMessage(Message msg) {
 
+            Thread.currentThread().setName(jobExecutionResult.getJobInstance().getCode() + "-" + threadNr + "-MQ-ML");
+
             if (isJobRequestedToStop(jobExecutionResult.getJobInstance().getId())) {
+                Logger log = LoggerFactory.getLogger(this.getClass());
+                log.info("Job was requested to stop.");
                 return;
             }
+
+            // Reestablish authentication
+            currentUserProvider.reestablishAuthentication(currentUser);
+
+            // Set audit origin
+            AuditOrigin.setAuditOriginAndName(ChangeOriginEnum.JOB, auditOriginName);
 
             try {
                 // Indicates that a last message in a queue was reached and further processing should stop

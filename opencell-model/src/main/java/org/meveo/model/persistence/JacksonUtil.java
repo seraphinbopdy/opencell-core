@@ -90,7 +90,7 @@ public class JacksonUtil {
         try {
             ObjectMapper om = OBJECT_MAPPER.get();
 
-            om.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+            om.setSerializationInclusion(JsonInclude.Include.NON_NULL);
             om.setVisibility(PropertyAccessor.FIELD, Visibility.ANY); // AK added, so that in case of immutable classes, private fields, that do not have setters, are also serialized
             om.configure(MapperFeature.PROPAGATE_TRANSIENT_MARKER, true);
             om.configure(MapperFeature.REQUIRE_SETTERS_FOR_GETTERS, true); // AK Do not change to false, as it will serialize all getXXX() methods, which might not be related to actual fields

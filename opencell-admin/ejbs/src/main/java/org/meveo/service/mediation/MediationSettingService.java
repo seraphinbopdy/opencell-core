@@ -144,8 +144,9 @@ public class MediationSettingService extends PersistenceService<MediationSetting
 
                         if (edr.getId() != null) {
                             edrService.remove(edr);
+                        }else{
+	                        edrIterate.remove();
                         }
-                        edrIterate.remove();
                     }
                 }
             }

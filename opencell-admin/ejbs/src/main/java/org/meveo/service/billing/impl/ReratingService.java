@@ -21,6 +21,7 @@ import org.meveo.model.RatingResult;
 import org.meveo.model.billing.Amounts;
 import org.meveo.model.billing.BillingRun;
 import org.meveo.model.billing.ChargeInstance;
+import org.meveo.model.billing.InvoiceLine;
 import org.meveo.model.billing.InvoiceLineStatusEnum;
 import org.meveo.model.billing.RecurringChargeInstance;
 import org.meveo.model.billing.ServiceInstance;
@@ -140,6 +141,9 @@ public class ReratingService extends RatingService implements Serializable {
 
     @EJB
     private ReratingService reratingService;
+	
+	@Inject
+	private InvoiceLineService invoiceLineService;
 
     /**
      * Re-rate service instance charges
@@ -628,9 +632,17 @@ public class ReratingService extends RatingService implements Serializable {
         for (Entry<Long, ILAdjustments> ilInfo : ilAdjustments.entrySet()) {
             Long ilId = ilInfo.getKey();
             ILAdjustments ilAdjustment = ilInfo.getValue();
-            em.createNamedQuery("InvoiceLine.updateByIncrementalModeWoutDates" + (ilAdjustment.isAverageUnitAmounts() ? "WithAverageUnitAmounts" : ""))
-                .setParameter("deltaAmountWithoutTax", ilAdjustment.getAmountWithoutTax()).setParameter("deltaAmountWithTax", ilAdjustment.getAmountWithTax()).setParameter("deltaAmountTax", ilAdjustment.getAmountTax())
-                .setParameter("deltaQuantity", ilAdjustment.getQuantity()).setParameter("id", ilId).setParameter("now", date).executeUpdate();
+			InvoiceLine il = invoiceLineService.findById(ilId);
+			BigDecimal quantity = ilAdjustment.getQuantity();
+			String queryName = "InvoiceLine.updateByIncrementalModeWoutDates" + (ilAdjustment.isAverageUnitAmounts() ? "WithAverageUnitAmounts" : "");
+			if(il != null && il.getQuantity().add(quantity).compareTo(BigDecimal.ZERO) == 0 && ilAdjustment.isAverageUnitAmounts()) {
+				queryName = queryName + "AndQuantityZERO";
+				
+			}
+	        em.createNamedQuery(queryName)
+			        .setParameter("deltaAmountWithoutTax", ilAdjustment.getAmountWithoutTax()).setParameter("deltaAmountWithTax", ilAdjustment.getAmountWithTax()).setParameter("deltaAmountTax", ilAdjustment.getAmountTax())
+			        .setParameter("deltaQuantity", ilAdjustment.getQuantity()).setParameter("id", ilId).setParameter("now", date).executeUpdate();
+	        invoiceLineService.refresh(il);
         }
 
         // No reason to reject rerating

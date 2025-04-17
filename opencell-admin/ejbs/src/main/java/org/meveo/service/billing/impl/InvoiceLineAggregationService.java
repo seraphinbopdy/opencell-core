@@ -464,7 +464,7 @@ public class InvoiceLineAggregationService implements Serializable {
 	        mapToInvoiceLineTable.put("order_number", "((agr.order_number is null and ivl.order_number is null) or agr.order_number = ivl.order_number)");
 		}
 		if(aggregationConfiguration.isDisableAggregation() || !aggregationConfiguration.isIgnoreUserAccounts()) {
-	        mapToInvoiceLineTable.put("user_account_id", "((agr.user_account_id is null and ivl.user_account is null) or agr.user_account_id =  ivl.user_account_id)");
+	        mapToInvoiceLineTable.put("user_account_id", "((agr.user_account_id is null and ivl.user_account_id is null) or agr.user_account_id =  ivl.user_account_id)");
 		}
 		if(aggregationConfiguration.isDisableAggregation() || !aggregationConfiguration.isAggregationPerUnitAmount()) {
 			if (appProvider.isEntreprise()) {

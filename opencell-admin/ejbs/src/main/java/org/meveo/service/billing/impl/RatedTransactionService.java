@@ -2347,20 +2347,20 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
         Map<String, Object> billingRunFilters = new HashMap<>();
         StringBuilder additionalFilter = new StringBuilder();
         if(billingRun.getStatus() == NEW || billingRun.getStatus() == OPEN) {
-            if(billingRun.getBillingCycle() != null) {
+            if(billingRun.getBillingCycle() != null && billingRun.getBillingCycle().getFilters() != null) {
                 billingRunFilters = new HashMap<>(billingRun.getBillingCycle().getFilters());
             } else {
-                billingRunFilters = new HashMap<>(billingRun.getFilters());
+                billingRunFilters = billingRun.getFilters() != null ? new HashMap<>(billingRun.getFilters()) : new HashMap<>();
             }
             billingRunFilters.put("status", RatedTransactionStatusEnum.OPEN.toString());
             billingRunFilters.put("toRange usageDate", billingRun.getLastTransactionDate().toString());
-            billingRunFilters.put("fromOptionalRange invoicingDate", billingRun.getInvoiceDate().toString());
+            billingRunFilters.put("toOptionalRange invoicingDate", billingRun.getInvoiceDate().toString());
         }
-        if(billingRun.getStatus() == OPEN) {
-            additionalFilter.append("or (a.billingRun.id = ").append(billingRun.getId()).append(")");
+        if(OPEN == billingRun.getStatus()) {
+            additionalFilter.append(" or (a.billingRun.id = ").append(billingRun.getId()).append(")");
         }
-        if(billingRun.getStatus() != NEW
-                && billingRun.getStatus() != OPEN && billingRun.getStatus() != CREATING_INVOICE_LINES) {
+        if(NEW != billingRun.getStatus()
+                && billingRun.getStatus() != OPEN && CREATING_INVOICE_LINES != billingRun.getStatus()) {
             billingRunFilters.put("billingRun", billingRun);
         }
         QueryBuilder queryBuilder = getQueryFromFilters(billingRunFilters, null, emptyList(), true);

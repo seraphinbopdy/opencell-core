@@ -186,7 +186,7 @@ public class CustomerAccountApi extends AccountEntityApi {
         }
 
         handleMissingParameters(postData);
-        checkPmPreffered(postData.getPaymentMethods());
+        checkPmPreferred(postData.getPaymentMethods());
 
         if (postData.getPaymentMethods() != null) {
             for (PaymentMethodDto paymentMethodDto : postData.getPaymentMethods()) {
@@ -278,7 +278,7 @@ public class CustomerAccountApi extends AccountEntityApi {
         }
 
         handleMissingParametersAndValidate(postData);
-        checkPmPreffered(postData.getPaymentMethods());
+        checkPmPreferred(postData.getPaymentMethods());
 
         // check if already exists
         CustomerAccount customerAccount = customerAccountService.findByCode(postData.getCode());
@@ -294,21 +294,21 @@ public class CustomerAccountApi extends AccountEntityApi {
     }
     
     
-    private void checkPmPreffered(List<PaymentMethodDto> paymentMethods) throws BusinessApiException{
-      	 int cptPrefered = 0;
+    private void checkPmPreferred(List<PaymentMethodDto> paymentMethods) throws BusinessApiException{
+      	 int cptPreferred = 0;
       	 if (paymentMethods != null) {
                for (PaymentMethodDto paymentMethodDto : paymentMethods) {                
                    if(paymentMethodDto.isPreferred()) {
-                   	cptPrefered++;
+                   	cptPreferred++;
                    }
                }
            }else {
-           	cptPrefered = 1;
+           	cptPreferred = 1;
            }
-      	 if(cptPrefered == 0) {
+      	 if(cptPreferred == 0) {
            	throw new BusinessApiException("No PM is marked as preferred");
            }
-      	 if(cptPrefered > 1) {
+      	 if(cptPreferred > 1) {
             	throw new BusinessApiException("Only one PM should be marked as preferred");
             }
    		

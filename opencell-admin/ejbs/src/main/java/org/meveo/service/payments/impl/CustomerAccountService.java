@@ -668,7 +668,6 @@ public class CustomerAccountService extends AccountService<CustomerAccount> {
         }
         
 
-        entity.ensureOnePreferredPaymentMethod();
         return super.update(entity);
     }
 

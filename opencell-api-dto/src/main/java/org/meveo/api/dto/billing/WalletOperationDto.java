@@ -35,6 +35,7 @@ import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import org.meveo.model.cpq.commercial.OrderInfo;
 
 /**
  * The Class WalletOperationDto.
@@ -225,6 +226,7 @@ public class WalletOperationDto extends BaseEntityDto implements IEntityDto {
     /** The WO  business key. */
     private String businessKey;
 
+    private OrderInfo orderInfo;
     /**
      * Instantiates a new wallet operation dto.
      */
@@ -315,7 +317,7 @@ public class WalletOperationDto extends BaseEntityDto implements IEntityDto {
         transactionalAmountWithoutTax = walletOperation.getTransactionalAmountWithoutTax();
         transactionalAmountWithTax = walletOperation.getTransactionalAmountWithTax();
         transactionalAmountTax = walletOperation.getTransactionalAmountTax();
-
+        orderInfo = walletOperation.getOrderInfo();
     }
 
     /**
@@ -1121,7 +1123,15 @@ public class WalletOperationDto extends BaseEntityDto implements IEntityDto {
 		this.businessKey = businessKey;
 	}
 
-	@Override
+    public OrderInfo getOrderInfo() {
+        return orderInfo;
+    }
+
+    public void setOrderInfo(OrderInfo orderInfo) {
+        this.orderInfo = orderInfo;
+    }
+
+    @Override
     public String toString() {
         return "WalletOperationDto [code=" + code + ", description=" + description + ", userAccount=" + userAccount + ", subscription=" + subscription + ", walletTemplate="
                 + walletTemplate + ", seller=" + seller + ", chargeInstance=" + chargeInstance + ", chargeInstanceId=" + chargeInstanceId + ", currency=" + currency + ", type="
@@ -1129,6 +1139,6 @@ public class WalletOperationDto extends BaseEntityDto implements IEntityDto {
                 + ", unitAmountWithTax=" + unitAmountWithTax + ", unitAmountTax=" + unitAmountTax + ", quantity=" + quantity + ", amountWithoutTax=" + amountWithoutTax
                 + ", amountWithTax=" + amountWithTax + ", amountTax=" + amountTax + ", parameter1=" + parameter1 + ", parameter2=" + parameter2 + ", parameter3=" + parameter3
                 + ", parameterExtra=" + parameterExtra + ", orderNumber=" + orderNumber + ", startDate=" + startDate + ", endDate=" + endDate + ", operationDate=" + operationDate
-                + ", subscriptionDate=" + subscriptionDate + ", offerCode=" + offerCode + "]";
+                + ", subscriptionDate=" + subscriptionDate + ", offerCode=" + offerCode + ", orderInfo=" + orderInfo + "]";
     }
 }

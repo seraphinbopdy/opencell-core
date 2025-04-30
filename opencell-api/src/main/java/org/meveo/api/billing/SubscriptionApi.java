@@ -160,6 +160,7 @@ import org.meveo.model.cpq.Product;
 import org.meveo.model.cpq.ProductVersion;
 import org.meveo.model.cpq.commercial.CommercialOrder;
 import org.meveo.model.cpq.commercial.OrderAttribute;
+import org.meveo.model.cpq.commercial.OrderProduct;
 import org.meveo.model.cpq.enums.AttributeTypeEnum;
 import org.meveo.model.cpq.enums.PriceVersionDateSettingEnum;
 import org.meveo.model.cpq.enums.ProductStatusEnum;
@@ -3526,10 +3527,7 @@ public class SubscriptionApi extends BaseApi {
                 Product product = productService.findByCode(postData.getProductCode());
                 if (product != null) {
                     serviceInstance.setCode(product.getCode());
-                    Optional<ProductVersion> pVersion = productService.getCurrentPublishedVersion(product.getCode(), postData.getOperationDate());
-                    if(pVersion.isPresent()) {
-                        serviceInstance.setProductVersion(pVersion.get());
-                    }
+                    productService.getCurrentPublishedVersion(product.getCode(), postData.getOperationDate()).ifPresent(serviceInstance::setProductVersion);
                 }
             }
 
@@ -3571,6 +3569,10 @@ public class SubscriptionApi extends BaseApi {
             } else {
                 serviceInstance = alreadyInstantiatedServices.get(0);
             }
+        }
+        if(postData.getOrderProductId() != null){
+            OrderProduct orderProduct = serviceInstanceService.getEntityManager().getReference(OrderProduct.class, postData.getOrderProductId());
+            serviceInstance.setOrderProduct(orderProduct);
         }
         return serviceInstance;
     }

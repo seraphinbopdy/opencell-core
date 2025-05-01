@@ -55,6 +55,7 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.meveo.admin.exception.BusinessException;
+import org.meveo.commons.utils.EjbUtils;
 import org.meveo.commons.utils.FileUtils;
 import org.meveo.commons.utils.InvoiceCategoryComparatorUtils;
 import org.meveo.commons.utils.ParamBean;
@@ -231,7 +232,29 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
 	
 	@Inject
 	protected PaymentTermService paymentTermService;
-
+// please each service is add don't forget to manually add it to lookupServices method
+	
+	
+	
+	/**
+	 
+	 * used instantiate all services for scripts
+	 
+	 */
+	
+	public void lookupServices() {
+		paymentTermService = (PaymentTermService) EjbUtils.getServiceInterface(PaymentTermService.class);
+		accountEntitySearchService = (AccountEntitySearchService) EjbUtils.getServiceInterface(AccountEntitySearchService.class);
+		invoiceService = (InvoiceService) EjbUtils.getServiceInterface(InvoiceService.class);
+		ratedTransactionService = (RatedTransactionService) EjbUtils.getServiceInterface(RatedTransactionService.class);
+		customFieldInstanceService = (CustomFieldInstanceService) EjbUtils.getServiceInterface(CustomFieldInstanceService.class);
+		billingAccountService = (BillingAccountService) EjbUtils.getServiceInterface(BillingAccountService.class);
+		invoiceTypeService = (InvoiceTypeService) EjbUtils.getServiceInterface(InvoiceTypeService.class);
+		serviceSingleton = (ServiceSingleton) EjbUtils.getServiceInterface(ServiceSingleton.class);
+		walletOperationService = (WalletOperationService) EjbUtils.getServiceInterface(WalletOperationService.class);
+		invoiceLineService = (InvoiceLineService) EjbUtils.getServiceInterface(InvoiceLineService.class);
+		invoiceSubTotalsService = (InvoiceSubTotalsService) EjbUtils.getServiceInterface(InvoiceSubTotalsService.class);
+	}
     /**
      * Create XML invoice and store its content in a file. Note: Just creates a file - does not update invoice with file information
      *

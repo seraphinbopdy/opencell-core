@@ -31,6 +31,7 @@ import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import org.meveo.model.cpq.commercial.OrderProduct;
 
 /**
  * The Class ApplyOneShotChargeInstanceRequestDto.
@@ -132,6 +133,11 @@ public class ApplyOneShotChargeInstanceRequestDto extends BaseEntityDto {
      * The commercial order id.
      */
     private Long commercialOrderId;
+
+    /**
+     * The order product id.
+     */
+    private Long orderProductId;
 
     /**
      * The custom fields.
@@ -469,5 +475,13 @@ public class ApplyOneShotChargeInstanceRequestDto extends BaseEntityDto {
      */
     public void setCommercialOrderId(Long commercialOrderId) {
         this.commercialOrderId = commercialOrderId;
+    }
+
+    public Long getOrderProductId() {
+        return orderProductId;
+    }
+
+    public void setOrderProductId(Long orderProductId) {
+        this.orderProductId = orderProductId;
     }
 }

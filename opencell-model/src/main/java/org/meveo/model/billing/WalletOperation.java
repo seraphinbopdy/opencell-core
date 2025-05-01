@@ -50,6 +50,7 @@ import org.meveo.model.catalog.RoundingModeEnum;
 import org.meveo.model.catalog.UnitOfMeasure;
 import org.meveo.model.cpq.commercial.CommercialOrder;
 import org.meveo.model.cpq.commercial.OrderInfo;
+import org.meveo.model.cpq.commercial.OrderProduct;
 import org.meveo.model.cpq.contract.Contract;
 import org.meveo.model.cpq.contract.ContractItem;
 import org.meveo.model.pricelist.PriceListLine;
@@ -753,8 +754,13 @@ public class WalletOperation extends CFEntity {
         this.inputQuantity = inputQuantity;
         OrderInfo orderInfo = new OrderInfo();
         orderInfo.setOrder(commercialOrder != null ? commercialOrder : (chargeInstance.getSubscription() != null ? chargeInstance.getSubscription().getOrder() : null));
-        orderInfo.setProductVersion(chargeInstance.getServiceInstance().getProductVersion());
-        orderInfo.setOrderProduct(chargeInstance.getServiceInstance().getOrderProduct());
+        this.serviceInstance = chargeInstance.getServiceInstance();
+        orderInfo.setProductVersion(serviceInstance.getProductVersion());
+        OrderProduct orderProduct = serviceInstance.getOrderProduct();
+        if(orderProduct!=null){
+            orderInfo.setOrderProduct(orderProduct);
+            orderInfo.setOrderLot(orderProduct.getOrderServiceCommercial());
+        }
         this.orderInfo = orderInfo;
 
         // TODO AKK in what case prevails customized description of chargeInstance??
@@ -778,8 +784,8 @@ public class WalletOperation extends CFEntity {
             this.counter = ((UsageChargeInstance) chargeInstance).getCounter();
 
         } else if (chargeInstance.getChargeMainType() == ChargeTemplate.ChargeMainTypeEnum.ONESHOT) {
-            if (chargeInstance.getServiceInstance() != null) {
-                this.subscriptionDate = chargeInstance.getServiceInstance().getSubscriptionDate();
+            if (serviceInstance != null) {
+                this.subscriptionDate = serviceInstance.getSubscriptionDate();
             } else if (chargeInstance.getSubscription() != null) {
                 this.subscriptionDate = chargeInstance.getSubscription().getSubscriptionDate();
             }
@@ -790,7 +796,7 @@ public class WalletOperation extends CFEntity {
         this.userAccount = chargeInstance.getUserAccount();
         this.invoicingDate = invoicingDate;
         this.seller = chargeInstance.getSeller();
-        this.serviceInstance = chargeInstance.getServiceInstance();
+
         this.subscription = chargeInstance.getSubscription();
         this.currency = chargeInstance.getCurrency().getCurrency();
 

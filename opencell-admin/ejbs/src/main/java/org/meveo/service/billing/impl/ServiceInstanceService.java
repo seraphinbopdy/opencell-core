@@ -1458,7 +1458,7 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
 
                         //methodCallingUtils.callMethodInNewTx(() -> {
                             RecurringChargeInstance rci = recurringChargeInstanceService.findById(chargeInstance.getId());
-                            if (rci != null) {
+                            if (rci != null && rci.getChargedToDate() == null) {
                                 rci.setChargeDate(new Date());
                                 rci.setChargedToDate(new Date());
                             }

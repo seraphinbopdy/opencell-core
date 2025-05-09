@@ -138,6 +138,8 @@ public class InvoicingJobV2Bean extends BaseJobBean {
     private void executeBillingRun(BillingRun billingRun, JobInstance jobInstance, JobExecutionResultImpl result, ScriptInstance billingRunValidationScript, boolean v11Process) {
     	boolean prevalidatedAutomaticPrevBRStatus = false;
         result.addReport((!StringUtils.isBlank(result.getReport()) ? "," : "") + "Billing run #" + billingRun.getId());
+        boolean firstPassAutomatic = billingRun.getStatus() == INVOICE_LINES_CREATED && billingRun.getProcessType() == AUTOMATIC;
+        
 
         if(billingRun.getStatus() == INVOICE_LINES_CREATED
                 && (billingRun.getProcessType() == AUTOMATIC || billingRun.getProcessType() == FULL_AUTOMATIC)) {
@@ -197,7 +199,7 @@ public class InvoicingJobV2Bean extends BaseJobBean {
         if(result.getInvoiceCount() == 0 && billingRun.getInvoiceNumber() != null) {
             result.setInvoiceCount(billingRun.getInvoiceNumber());
         }
-        if(billingRun.getStatus() == POSTVALIDATED) {
+        if (!firstPassAutomatic || billingRun.getStatus() == POSTVALIDATED) {
             assignInvoiceNumberAndIncrementBAInvoiceDatesAndGenerateAO(billingRun, result);
             if(!billingRunService.isBillingRunContainingRejectedInvoices(billingRun.getId())) {
                 billingRun = billingRunExtensionService.updateBillingRun(billingRun.getId(), null,null, VALIDATED, null);
@@ -249,14 +251,8 @@ public class InvoicingJobV2Bean extends BaseJobBean {
         // Find and process invoices
         for (InvoicesToNumberInfo invoicesToNumberInfo : invoiceSummary) {
 
-            List<Long> invoiceIds = invoiceService.getInvoiceIds(billingRun.getId(), invoicesToNumberInfo.getInvoiceTypeId(), invoicesToNumberInfo.getSellerId(), invoicesToNumberInfo.getInvoiceDate());
-            // Validate that what was retrieved as summary matches the details
-            if (invoiceIds.size() != invoicesToNumberInfo.getNrOfInvoices().intValue()) {
-                throw new BusinessException(String.format("Number of invoices retrieved %s dont match the expected number %s for %s/%s/%s/%s", invoiceIds.size(), invoicesToNumberInfo.getNrOfInvoices(),
-                    billingRun.getId(), invoicesToNumberInfo.getInvoiceTypeId(), invoicesToNumberInfo.getSellerId(), invoicesToNumberInfo.getInvoiceDate()));
-            }
+            List<Long> invoiceIds = invoiceService.getInvoiceIdsToBeValidated(billingRun, invoicesToNumberInfo);
 
-            invoiceIds.removeIf(invoiceId -> invoiceService.isNotEligibleForValidation(invoiceId));
             // Assign invoice numbers
             BiConsumer<Long, JobExecutionResultImpl> task =
                     (invoiceId, jobResult) -> invoiceService.assignInvoiceNumberAndRecalculateDates(invoiceId, invoicesToNumberInfo);

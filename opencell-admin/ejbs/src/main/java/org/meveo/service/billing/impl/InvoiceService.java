@@ -3591,10 +3591,38 @@ public class InvoiceService extends PersistenceService<Invoice> {
      * @param invoiceDate Invoice date
      * @return A list of invoice identifiers
      */
+    @Deprecated
     public List<Long> getInvoiceIds(Long billingRunId, Long invoiceTypeId, Long sellerId, Date invoiceDate) {
         return getEntityManager().createNamedQuery("Invoice.byBrItSelDate", Long.class).setParameter("billingRunId", billingRunId).setParameter("invoiceTypeId", invoiceTypeId).setParameter("sellerId", sellerId)
             .setParameter("invoiceDate", invoiceDate).getResultList();
     }
+
+	/**
+	 * Retrieve invoice ids matching billing run, invoice type, seller and invoice date combination, without rejected ones
+	 * @param billingRun
+	 * @param invoicesToNumberInfo
+	 * @return
+	 */
+	public List<Long> getInvoiceIdsToBeValidated(BillingRun billingRun, InvoicesToNumberInfo invoicesToNumberInfo) {
+		Long invoiceTypeId = invoicesToNumberInfo.getInvoiceTypeId();
+		Date invoiceDate = invoicesToNumberInfo.getInvoiceDate();
+		Long sellerId = invoicesToNumberInfo.getSellerId();
+		Long allInvoicesCount = getEntityManager().createNamedQuery("Invoice.countByBrItSelDate", Long.class)
+				.setParameter("billingRunId", billingRun.getId()).setParameter("invoiceTypeId", invoiceTypeId)
+				.setParameter("sellerId", sellerId).setParameter("invoiceDate", invoiceDate).getSingleResult();
+
+		// Validate that what was retrieved as summary matches the details
+		if (allInvoicesCount != invoicesToNumberInfo.getNrOfInvoices().intValue()) {
+			throw new BusinessException(
+					String.format("Number of invoices retrieved %s dont match the expected number %s for %s/%s/%s/%s",
+							allInvoicesCount, invoicesToNumberInfo.getNrOfInvoices(), billingRun.getId(),
+							invoicesToNumberInfo.getInvoiceTypeId(), invoicesToNumberInfo.getSellerId(),
+							invoicesToNumberInfo.getInvoiceDate()));
+		}
+		return getEntityManager().createNamedQuery("Invoice.byBrItSelDate", Long.class)
+				.setParameter("billingRunId", billingRun.getId()).setParameter("invoiceTypeId", invoiceTypeId)
+				.setParameter("sellerId", sellerId).setParameter("invoiceDate", invoiceDate).getResultList();
+	}
 
     /**
      * Retrieve billingAccount ids matching billing run, invoice type, seller and invoice date combination.

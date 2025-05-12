@@ -19,10 +19,12 @@ import jakarta.inject.Inject;
 public class ImportCustomerBankDetailsJob extends Job {    
     @Inject
     private ImportCustomerBankDetailsJobBean importCustomerBankDetailsJobBean;
+    
+    private static final String APPLIES_TO_NAME = "JobInstance_ImportCustomerBankDetailsJob";
 
     @Override
     protected JobExecutionResultImpl execute(JobExecutionResultImpl result, JobInstance jobInstance) throws BusinessException {
-        importCustomerBankDetailsJobBean.execute(result, jobInstance.getParametres());
+        importCustomerBankDetailsJobBean.execute(result, jobInstance);
         return result;
     }
 
@@ -33,23 +35,27 @@ public class ImportCustomerBankDetailsJob extends Job {
 
     @Override
     public Map<String, CustomFieldTemplate> getCustomFields() {
-        Map<String, CustomFieldTemplate> result = new HashMap<String, CustomFieldTemplate>();
-        generateCustomFields(result, CF_NB_RUNS, "jobExecution.nbRuns", "-1", "tab:Configuration:0;field:0");
-        generateCustomFields(result, Job.CF_WAITING_MILLIS, "jobExecution.waitingMillis", "0", "tab:Configuration:0;field:1");
+    	 Map<String, CustomFieldTemplate> result = new HashMap<String, CustomFieldTemplate>();    
+        CustomFieldTemplate nbRuns = new CustomFieldTemplate();
+        nbRuns.setCode("ImportCustomerBankDetailsJob_nbRuns");
+        nbRuns.setAppliesTo(APPLIES_TO_NAME);
+        nbRuns.setActive(true);
+        nbRuns.setDescription(resourceMessages.getString("jobExecution.nbRuns"));
+        nbRuns.setFieldType(CustomFieldTypeEnum.LONG);
+        nbRuns.setValueRequired(false);
+        nbRuns.setDefaultValue("1");
+        result.put("nbRuns", nbRuns);
 
+        CustomFieldTemplate waitingMillis = new CustomFieldTemplate();
+        waitingMillis.setCode("ImportCustomerBankDetailsJob_waitingMillis");
+        waitingMillis.setAppliesTo(APPLIES_TO_NAME);
+        waitingMillis.setActive(true);
+        waitingMillis.setDescription(resourceMessages.getString("jobExecution.waitingMillis"));
+        waitingMillis.setFieldType(CustomFieldTypeEnum.LONG);
+        waitingMillis.setValueRequired(false);
+        waitingMillis.setDefaultValue("0");
+        result.put("waitingMillis", waitingMillis);
         return result;
     }
     
-    private void generateCustomFields(Map<String, CustomFieldTemplate> result, String code, String description, String defaultVaue, String guiPosition) {
-        CustomFieldTemplate customFieldNbRuns = new CustomFieldTemplate();
-        customFieldNbRuns.setCode(code);
-        customFieldNbRuns.setAppliesTo("JobInstance_ImportCustomerBankDetailsJob");
-        customFieldNbRuns.setActive(true);
-        customFieldNbRuns.setDescription(resourceMessages.getString(description));
-        customFieldNbRuns.setFieldType(CustomFieldTypeEnum.LONG);
-        customFieldNbRuns.setValueRequired(false);
-        customFieldNbRuns.setDefaultValue(defaultVaue);
-        customFieldNbRuns.setGuiPosition(guiPosition);
-        result.put(code, customFieldNbRuns);
-    }    
 }

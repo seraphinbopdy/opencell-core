@@ -69,7 +69,8 @@ import jakarta.persistence.Transient;
         @NamedQuery(name = "PaymentMethod.getPreferredPaymentMethodForCA", query = "select m from PaymentMethod m where m.customerAccount.id =:caId and m.preferred=true"),
         @NamedQuery(name = "PaymentMethod.listByCustomerAccount", query = "select m from PaymentMethod m inner join m.customerAccount ca where ca=:customerAccount"),
         @NamedQuery(name = "PaymentMethod.listByIbanAndBicFi", query = "select m from PaymentMethod m where m.bankCoordinates.iban=:Iban and (m.bankCoordinates.bic=:Bic or m.bankCoordinates.bic=:BicXXX ) and m.disabled is :Disable"),
-        @NamedQuery(name = "PaymentMethod.listByIbanAndBicFiAll", query = "select m from PaymentMethod m where m.bankCoordinates.iban=:Iban and (m.bankCoordinates.bic=:Bic or m.bankCoordinates.bic=:BicXXX )"),        @NamedQuery(name = "PaymentMethod.isReferenced", query = "select count(pm) from PaymentMethod pm "
+        @NamedQuery(name = "PaymentMethod.listByIbanAndBicFiAll", query = "select m from PaymentMethod m where m.bankCoordinates.iban=:Iban and (m.bankCoordinates.bic=:Bic or m.bankCoordinates.bic=:BicXXX )"),        
+        @NamedQuery(name = "PaymentMethod.isReferenced", query = "select count(pm) from PaymentMethod pm "
                 + "left join Subscription sub on sub.paymentMethod.id = pm.id "
                 + "left join BillingAccount ba on ba.paymentMethod.id = pm.id "
                 + "left join Invoice inv on inv.paymentMethod.id = pm.id and inv.status = org.meveo.model.billing.InvoiceStatusEnum.VALIDATED "

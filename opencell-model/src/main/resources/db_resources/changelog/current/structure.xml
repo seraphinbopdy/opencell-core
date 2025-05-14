@@ -17994,5 +17994,14 @@ Opencell team.
             <where>status = 'STOPPED'</where>
         </update>
     </changeSet>
+    
+    <changeSet id="#INTRD-30169_20250509" author="anasseh">
+        <createIndex tableName="ar_payment_token" indexName="ar_token_bic_idx">
+            <column name="bic" />
+       </createIndex>
+        <createIndex tableName="ar_payment_token" indexName="ar_token_iban_idx">
+            <column name="iban" />
+        </createIndex>
+   </changeSet>
 
 </databaseChangeLog>

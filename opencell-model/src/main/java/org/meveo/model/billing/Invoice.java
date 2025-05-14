@@ -154,8 +154,10 @@ import jakarta.validation.constraints.Size;
 	    @NamedNativeQuery(name = "Invoice.linkWithSubscriptionsByBR", query = "INSERT INTO billing_invoices_subscriptions (invoice_id, subscription_id) "
 	            + "	SELECT DISTINCT il.invoice_id, rt.subscription_id FROM billing_rated_transaction rt " + "	INNER JOIN billing_invoice_line il ON rt.invoice_line_id = il.id "
 	            + "	WHERE il.status = 'BILLED' and il.billing_run_id=:billingRunId", hints = {
-                        @QueryHint(name = HibernateHints.HINT_NATIVE_SPACES, value = "billing_invoices_subscriptions") })
-
+                        @QueryHint(name = HibernateHints.HINT_NATIVE_SPACES, value = "billing_invoices_subscriptions") }),
+        @NamedNativeQuery(name = "Invoice.cancelInvoiceAdvances", query = "UPDATE billing_invoice liv SET invoice_balance = liv.invoice_balance + li.amount FROM billing_linked_invoices li WHERE li.id = liv.id AND li.id in (:invoiceIds) "),
+        @NamedNativeQuery(name = "Invoice.cancelInvoice", query = "update billing_invoice set status = 'CANCELED', reject_reason = null, invoice_validation_rule_id = null, updated=:now, updater=:updater where id in (:invoiceIds) "),
+        @NamedNativeQuery(name = "Invoice.getEligibleInvoiceListForCancellation", query = "select inv.id, inv.status from billing_invoice inv where inv.status in (:status) AND inv.id in (:invoiceIds) "),
 })
 public class Invoice extends AuditableCFEntity implements ISearchable {
 

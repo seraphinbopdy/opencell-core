@@ -43,6 +43,7 @@ import org.meveo.apiv2.billing.impl.EinvoiceResourceImpl;
 import org.meveo.apiv2.billing.impl.InvoiceLinesResourceImpl;
 import org.meveo.apiv2.billing.impl.InvoiceResourceImpl;
 import org.meveo.apiv2.billing.impl.InvoiceValidationRulesResourceImpl;
+import org.meveo.apiv2.billing.impl.InvoicesResourceImpl;
 import org.meveo.apiv2.billing.impl.InvoicingResourceImpl;
 import org.meveo.apiv2.billing.impl.MediationResourceImpl;
 import org.meveo.apiv2.billing.impl.RatedTransactionResourceImpl;
@@ -203,7 +204,7 @@ public class JaxRsActivatorApiV2 extends Application {
 				SignatureRequestResourceImpl.class, AuditDataConfigurationResourceImpl.class, AuditDataLogResourceImpl.class, EinvoiceResourceImpl.class, BatchEntityResourceImpl.class, FilesResourceImpl.class,
                 ProductManagementRsImpl.class, HugeEntityResourceImpl.class, PaymentTermResourceImpl.class, CustomActionResourceImpl.class,
                 BillingAccountV2ResourceImpl.class, AccountHierarchyV2ResourceImpl.class, CustomerV2ResourceImpl.class, CustomerAccountV2ResourceImpl.class, UserAccountsV2ResourceImpl.class,
-                LanguageResourceImpl.class, ModeRollBackRatingExceptionMapper.class
+                LanguageResourceImpl.class, ModeRollBackRatingExceptionMapper.class, InvoicesResourceImpl.class
         ));
 
         resources.add(GenericJacksonProvider.class);

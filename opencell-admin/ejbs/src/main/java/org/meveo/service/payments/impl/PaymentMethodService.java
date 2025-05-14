@@ -596,11 +596,6 @@ public class PaymentMethodService extends PersistenceService<PaymentMethod> {
             Query query = getEntityManager().createNamedQuery(nameQuery);
             query.setParameter("Iban", iban);
             query.setParameter("Bic", bic);
-            if(bic.length() == 8) {
-            	bic = bic+"XXX";
-            }
-            query.setParameter("BicXXX", bic);
-            
             if (disable !=null) {
                 query.setParameter("Disable", disable);
             }

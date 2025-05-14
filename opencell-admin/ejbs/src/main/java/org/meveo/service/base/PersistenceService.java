@@ -1374,7 +1374,7 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
                                                                     // BaseApi.castFilterValue logic
                         }
 
-                        String fieldNamePrefix = entry.getKey().replace("cfValues", "");
+                        String fieldNamePrefix = entry.getKey().replace("cfValuesAsJson", "").replace("cfValues", "");
                         for (String fieldName : fieldInfo.getAllFields()) {
                             transformedFilter = extractCustomFieldSyntax(type, value.getClass(), transformedFilter, fieldName, fieldNamePrefix);
                         }

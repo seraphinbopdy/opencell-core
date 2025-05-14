@@ -30,6 +30,13 @@
                     <hftl:formField id="accountingCodeId" label="#{messages['customerCategory.accountingCode']}" field="accountingCode" valueLabelField="code"
                         listenerUpdate="@this" popup="true" popupId="accountingCodePopup" showResetButton="true" />
                     <hftl:formField label="#{messages['customerCategory.exoneratedFromTaxes']}" field="exoneratedFromTaxes" listenerUpdate="taxExonerationRelated" />
+                    <hftl:decorateFormField fieldId="defaultSeller" label="#{messages['seller.default']}">
+                        <p:selectOneMenu id="defaultSeller" value="#{customerCategoryBean.entity.defaultSeller}">
+                            <hftl:objectConverter />
+                            <f:selectItem itemLabel="#{messages['commons.select']}" />
+                            <f:selectItems value="#{sellerListBean.listAll()}" var="seller_" itemLabel="#{seller_.code}" itemValue="#{seller_}" />
+                        </p:selectOneMenu>
+                    </hftl:decorateFormField>
                     <hftl:formField label="#{messages['customerCategory.exonerationTaxEl']}" field="exonerationTaxEl" textArea="true" rows="1" maxlength="2000" newLine="true"
                         listenerUpdate="taxExonerationRelated" />
                     <h:panelGroup id="taxExonerationRelated">

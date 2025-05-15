@@ -2390,6 +2390,7 @@ public class AccountHierarchyApi extends BaseApi {
 				return;
 			}
 		} else if(subscriptionDto.getStatus() == null) {
+            subscriptionApi.update(subscriptionDto);
             return;
         }
 		String errorMsg = "Transition from status : " + (subscription != null ? subscription.getStatus() : null) + " to status : " + subscriptionDto.getStatus() + " is not allowed";

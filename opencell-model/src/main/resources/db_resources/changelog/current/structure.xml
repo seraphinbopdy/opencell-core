@@ -17995,4 +17995,12 @@ Opencell team.
         </update>
     </changeSet>
 
+    <changeSet id="INTRD-31176_delete_fk" author="a.rouaguebe_ext">
+        <preConditions onFail="MARK_RAN" >
+            <foreignKeyConstraintExists foreignKeyName="fk_wallet_operation_order_product" />
+        </preConditions>
+        <comment>Foreign key fk_wallet_operation_order_product exist and will be dropped</comment>
+        <dropForeignKeyConstraint baseTableName="billing_wallet_operation" constraintName="fk_wallet_operation_order_product"/>
+    </changeSet>
+
 </databaseChangeLog>

@@ -754,12 +754,14 @@ public class WalletOperation extends CFEntity {
         this.inputQuantity = inputQuantity;
         OrderInfo orderInfo = new OrderInfo();
         orderInfo.setOrder(commercialOrder != null ? commercialOrder : (chargeInstance.getSubscription() != null ? chargeInstance.getSubscription().getOrder() : null));
+        orderInfo.setProductVersion(chargeInstance.getServiceInstance().getProductVersion());
         this.serviceInstance = chargeInstance.getServiceInstance();
         orderInfo.setProductVersion(serviceInstance.getProductVersion());
         OrderProduct orderProduct = serviceInstance.getOrderProduct();
         if(orderProduct!=null){
             orderInfo.setOrderProduct(orderProduct);
             orderInfo.setOrderLot(orderProduct.getOrderServiceCommercial());
+            orderInfo.setOrderOffer(orderProduct.getOrderOffer());
         }
         this.orderInfo = orderInfo;
 
@@ -778,14 +780,12 @@ public class WalletOperation extends CFEntity {
 
         if (chargeInstance.getChargeMainType() == ChargeTemplate.ChargeMainTypeEnum.RECURRING) {
             this.subscriptionDate = ((RecurringChargeInstance) chargeInstance).getSubscriptionDate();
-
         } else if (chargeInstance.getChargeMainType() == ChargeTemplate.ChargeMainTypeEnum.USAGE) {
             this.subscriptionDate = chargeInstance.getSubscription().getSubscriptionDate();
             this.counter = ((UsageChargeInstance) chargeInstance).getCounter();
-
         } else if (chargeInstance.getChargeMainType() == ChargeTemplate.ChargeMainTypeEnum.ONESHOT) {
-            if (serviceInstance != null) {
-                this.subscriptionDate = serviceInstance.getSubscriptionDate();
+            if (chargeInstance.getServiceInstance() != null) {
+                this.subscriptionDate = chargeInstance.getServiceInstance().getSubscriptionDate();
             } else if (chargeInstance.getSubscription() != null) {
                 this.subscriptionDate = chargeInstance.getSubscription().getSubscriptionDate();
             }

@@ -90,6 +90,7 @@ import org.meveo.service.billing.impl.WalletService;
 import org.meveo.service.billing.impl.article.AccountingArticleService;
 import org.meveo.service.catalog.impl.CounterTemplateService;
 import org.meveo.service.catalog.impl.ProductChargeTemplateMappingService;
+import org.meveo.service.cpq.order.OrderProductService;
 import org.meveo.service.crm.impl.CustomerService;
 import org.meveo.service.payments.impl.CustomerAccountService;
 import org.meveo.service.securityDeposit.impl.FinanceSettingsService;
@@ -170,6 +171,9 @@ public class AccountsManagementApiService {
     
     @Inject
     private FinanceSettingsService financeSettingsService;
+
+    @Inject
+    private OrderProductService orderProductService;
 
     @Resource(lookup = "java:jboss/ee/concurrency/executor/job_executor")
     protected ManagedExecutorService executor;
@@ -726,8 +730,13 @@ public class AccountsManagementApiService {
 				log.info("applyOneShotChargeInstance #{}", chargePosition);
 				AppliedChargeResponseDto oshoDto;
 				if (result.getMode() == ROLLBACK_ON_ERROR) {
-					OneShotChargeInstance osho = subscriptionApi.applyOneShotChargeInstance(chargeToApply, isVirtual);
-					oshoDto = createAppliedChargeResponseDto(osho, returnWalletOperations, returnWalletOperationDetails);
+                    OneShotChargeInstance osho = subscriptionApi.applyOneShotChargeInstance(chargeToApply, isVirtual);
+                    oshoDto = createAppliedChargeResponseDto(osho, returnWalletOperations, returnWalletOperationDetails);
+                    ofNullable(chargeToApply.getOrderProductId()).flatMap(id ->
+                            ofNullable(orderProductService.findById(chargeToApply.getOrderProductId()))).ifPresent(orderProduct -> {
+                        oshoDto.setOrderProductId(orderProduct.getId());
+                        oshoDto.setOrderOfferId(orderProduct.getOrderOffer().getId());
+                    });
 				} else {
 					oshoDto = methodCallingUtils.callCallableInNewTx(() -> {
 						OneShotChargeInstance osho = subscriptionApi.applyOneShotChargeInstance(chargeToApply, isVirtual);

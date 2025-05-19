@@ -24,7 +24,7 @@ public class UtilsDto {
         quotePrice.setQuoteVersion(quoteVersion!=null?quoteVersion: quoteOffer != null ? quoteOffer.getQuoteVersion() : null);
         quotePrice.setQuoteOffer(quoteOffer);
         
-        Optional<QuotePrice> price = pricesPerType.get(key).stream().reduce((a, b) -> {
+        Optional<QuotePrice> price = pricesPerType.get(key).stream().filter(qp -> priceLevelEnum.equals(qp.getPriceLevelEnum())).reduce((a, b) -> {
         	quotePrice.setTaxAmount(a.getTaxAmount().add(b.getTaxAmount()));
 		    quotePrice.setAmountWithTax(a.getAmountWithTax().add(b.getAmountWithTax()));
 		    quotePrice.setAmountWithoutTax(a.getAmountWithoutTax().add(b.getAmountWithoutTax()));

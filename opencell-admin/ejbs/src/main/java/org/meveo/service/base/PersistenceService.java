@@ -888,7 +888,7 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
                 mapStringAndType.put("isEntity", Boolean.toString(isEntity));
                 mapStringAndType.put("isEnum", Boolean.toString(att.getJavaType().isEnum()));
                 mapStringAndType.put("isEmbeddable", Boolean.toString(isEmbeddable));
-                if ((isEntity || isEmbeddable) && !att.getJavaType().equals(parentEntity) && (maxDepth == 0 || currentDepth < maxDepth) && currentDepth <= MAX_DEPTH) {
+                if ((isEntity || isEmbeddable) && !att.getJavaType().equals(parentEntity) && (currentDepth < maxDepth) && currentDepth <= MAX_DEPTH) {
                     PersistenceService<?> persistenceService = (PersistenceService<?>) EjbUtils.getServiceInterface(att.getJavaType().getSimpleName() + "Service");
                     if (persistenceService == null) {
                         persistenceService = (PersistenceService) EjbUtils.getServiceInterface("BaseEntityService");

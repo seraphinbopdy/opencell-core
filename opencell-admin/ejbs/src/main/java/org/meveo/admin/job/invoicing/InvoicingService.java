@@ -48,6 +48,7 @@ import org.meveo.model.billing.WalletInstance;
 import org.meveo.model.catalog.DiscountPlan;
 import org.meveo.model.catalog.DiscountPlanItem;
 import org.meveo.model.catalog.DiscountPlanItemTypeEnum;
+import org.meveo.model.cpq.commercial.CommercialOrder;
 import org.meveo.model.crm.CustomFieldTemplate;
 import org.meveo.model.crm.custom.CustomFieldTypeEnum;
 import org.meveo.model.jobs.JobExecutionResultImpl;
@@ -201,7 +202,7 @@ public class InvoicingService extends PersistenceService<Invoice> {
     private void createAggregatesAndInvoiceFromInvoicingItems(BillingAccountDetailsItem billingAccountDetailsItem, BillingRun billingRun, List<Invoice> invoices, BillingCycle billingCycle, BillingAccount billingAccount, boolean isFullAutomatic){
 
     	for (List<InvoicingItem> groupedItems : billingAccountDetailsItem.getInvoicingItems()) {
-	        final Invoice invoice = initInvoice(billingAccountDetailsItem, billingRun, billingAccount, billingCycle, isFullAutomatic, groupedItems);
+	        final Invoice invoice = initInvoice(billingAccountDetailsItem, billingRun, billingAccount, billingCycle, isFullAutomatic, groupedItems.get(0));
 	        Set<SubCategoryInvoiceAgregate> invoiceSCAs = createInvoiceAgregates(billingAccountDetailsItem, billingAccount, invoice, groupedItems);
 	        evalDueDate(invoice, billingCycle, null, billingAccountDetailsItem.getCaDueDateDelayEL(), billingRun.isExceptionalBR());
 	        invoiceService.setInitialCollectionDate(invoice, billingCycle, billingRun);
@@ -307,10 +308,12 @@ public class InvoicingService extends PersistenceService<Invoice> {
         addInvoiceAggregateWithAmounts(invoice, scAggregate);
         itemsBySubCategory.put(scAggregate,items);
     }
-    private Invoice initInvoice(BillingAccountDetailsItem billingAccountDetailsItem, BillingRun billingRun, BillingAccount billingAccount, BillingCycle billingCycle, boolean isFullAutomatic, List<InvoicingItem> groupedItems) {
+    private Invoice initInvoice(BillingAccountDetailsItem billingAccountDetailsItem, BillingRun billingRun, BillingAccount billingAccount, BillingCycle billingCycle, boolean isFullAutomatic, InvoicingItem invoicingItem) {
         Invoice invoice = new Invoice();
         invoice.setBillingAccount(billingAccount);
-        invoice.setSeller(getEntityManager().getReference(Seller.class, groupedItems.get(0).getSellerId()));
+        invoice.setSeller(billingAccountDetailsItem.getSellerId() != null ? getEntityManager().getReference(Seller.class, billingAccountDetailsItem.getSellerId()) : null);
+        invoice.setSubscription(invoicingItem.getSubscriptionId() != null ? getEntityManager().getReference(Subscription.class, invoicingItem.getSubscriptionId()) : null);
+        invoice.setCommercialOrder(invoicingItem.getCommercialOrderId() != null ? getEntityManager().getReference(CommercialOrder.class, invoicingItem.getCommercialOrderId()) : null);
         invoice.setStatus(isFullAutomatic?InvoiceStatusEnum.VALIDATED:InvoiceStatusEnum.DRAFT);
         
         invoice.setInvoiceDate(billingRun.getInvoiceDate());
@@ -328,7 +331,7 @@ public class InvoicingService extends PersistenceService<Invoice> {
 		invoice.setDueBalance(balance.setScale(getInvoiceRounding(), getRoundingMode()));
         invoice.setNewInvoicingProcess(true);
         populateCustomFieldDefaultValues(invoice);
-        invoice.setInvoiceKey(groupedItems.get(0).getInvoiceKey());
+        invoice.setInvoiceKey(invoicingItem.getInvoiceKey());
         InvoiceType invoiceType = invoiceTypeService.retrieveIfNotManaged(invoiceService.determineInvoiceType(false, false, false, billingCycle, billingRun, billingAccount, invoice));
         invoice.setInvoiceType(invoiceType);
         return invoice;

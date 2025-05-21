@@ -30,6 +30,8 @@ public class InvoicingItem {
 	private BigDecimal transactionalAmountWithoutTax = BigDecimal.ZERO;
 	private BigDecimal transactionalAmountTax = BigDecimal.ZERO;
 	private BigDecimal transactionalAmountWithTax = BigDecimal.ZERO;
+	private Long subscriptionId;
+	private Long commercialOrderId;
 	
 	public InvoicingItem(Object[] fields) {
 		int i = 0;
@@ -48,6 +50,8 @@ public class InvoicingItem {
 		this.transactionalAmountWithoutTax = (BigDecimal) fields[i++];
 		this.transactionalAmountTax = (BigDecimal) fields[i++];
 		this.transactionalAmountWithTax = (BigDecimal) fields[i];
+		this.setSubscriptionId((Long) fields[i++]);
+		this.setCommercialOrderId((Long) fields[i++]);
 	}
 
 	/**
@@ -202,7 +206,19 @@ public class InvoicingItem {
 	public void setInvoiceKey(String invoiceKey) {
 		this.invoiceKey = invoiceKey;
 	}
-
+	public Long getSubscriptionId() {
+		return subscriptionId;
+	}
+	public void setSubscriptionId(Long subscriptionId) {
+		this.subscriptionId = subscriptionId;
+	}
+	public Long getCommercialOrderId() {
+		return commercialOrderId;
+	}
+	public void setCommercialOrderId(Long commercialOrderId) {
+		this.commercialOrderId = commercialOrderId;
+	}
+	
 	@Override
 	public String toString() {
 		return "InvoicingItem [billingAccountId : " + billingAccountId + ", invoiceSubCategoryId : " + invoiceSubCategoryId

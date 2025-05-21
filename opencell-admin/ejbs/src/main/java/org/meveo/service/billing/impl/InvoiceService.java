@@ -26,6 +26,8 @@ import static java.util.Comparator.comparingInt;
 import static java.util.Optional.ofNullable;
 import static java.util.Set.of;
 import static java.util.stream.Collectors.toList;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.meveo.commons.utils.NumberUtils.round;
 import static org.meveo.commons.utils.StringUtils.isBlank;
@@ -2801,9 +2803,29 @@ public class InvoiceService extends PersistenceService<Invoice> {
         invoice.setStatus(InvoiceStatusEnum.VALIDATED);
         invoice.setRejectedByRule(null);
         invoice.setRejectReason(null);
+        checkInvoiceAggregateUserAccount(invoice);
         serviceSingleton.assignInvoiceNumber(invoice, true);
     }
-    
+
+    private void checkInvoiceAggregateUserAccount(Invoice invoice) {
+        UserAccount userAccount = null;
+        if (invoice.getSubscription() != null && invoice.getSubscription().getUserAccount() != null) {
+            userAccount = invoice.getSubscription().getUserAccount();
+        } else if (invoice.getBillingAccount() != null && isNotEmpty(invoice.getBillingAccount().getUsersAccounts())) {
+            userAccount = invoice.getBillingAccount().getUsersAccounts().get(0);
+        }
+        if (userAccount != null) {
+            for (InvoiceAgregate invoiceAgregate : invoice.getInvoiceAgregates()) {
+                if (invoiceAgregate instanceof CategoryInvoiceAgregate) {
+                    ((CategoryInvoiceAgregate) invoiceAgregate).setUserAccount(userAccount);
+                } else if (invoiceAgregate instanceof SubCategoryInvoiceAgregate) {
+                    ((SubCategoryInvoiceAgregate) invoiceAgregate).setUserAccount(userAccount);
+                }
+                invoiceAgregateService.update(invoiceAgregate);
+            }
+        }
+    }
+
     /**
      * @param billingRunId
      * @param invoiceIds
@@ -5073,7 +5095,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
     private Map<InvoiceSubCategory, List<RatedTransaction>> extractMappedRatedTransactionsTolink(InvoiceDto invoiceDTO, BillingAccount billingAccount) {
         List<Long> ratedTransactionsIdsTolink = invoiceDTO.getRatedTransactionsTolink();
         List<RatedTransaction> ratedTransactionsTolink = null;
-        if (CollectionUtils.isNotEmpty(ratedTransactionsIdsTolink)) {
+        if (isNotEmpty(ratedTransactionsIdsTolink)) {
             if (!InvoiceModeEnum.DETAILLED.equals(invoiceDTO.getInvoiceMode())) {
                 throw new BusinessException("use of ratedTransactionsTolink is only allowed if invoiceMode=='DETAILLED'");
             }
@@ -5642,7 +5664,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
             return billingAccount.getPaymentMethod();
         } else if (billingAccount.getCustomerAccount().getPreferredPaymentMethod() != null) {
             return billingAccount.getCustomerAccount().getPreferredPaymentMethod();
-        } else if (CollectionUtils.isNotEmpty(billingAccount.getCustomerAccount().getPaymentMethods())) {
+        } else if (isNotEmpty(billingAccount.getCustomerAccount().getPaymentMethods())) {
             return billingAccount.getCustomerAccount().getPaymentMethods().get(0);
         }
         return null;
@@ -6727,7 +6749,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
     private Map<InvoiceSubCategory, List<InvoiceLine>> extractMappedInvoiceLinesTolink(org.meveo.apiv2.billing.Invoice invoiceRessource, BillingAccount billingAccount) {
         List<Long> invoiceLinesIdsTolink = invoiceRessource.getInvoiceLinesTolink();
         List<InvoiceLine> invoiceLinesTolink = null;
-        if (CollectionUtils.isNotEmpty(invoiceLinesIdsTolink)) {
+        if (isNotEmpty(invoiceLinesIdsTolink)) {
             Set<Long> uniqueIds = new HashSet<>();
             invoiceLinesIdsTolink.removeIf(id -> !uniqueIds.add(id));
             if (uniqueIds.size() != invoiceLinesIdsTolink.size()) {
@@ -6897,7 +6919,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
             toUpdate.setSubscription(null);
         }
 
-        if (CollectionUtils.isNotEmpty(invoiceResource.getListLinkedInvoices())) {
+        if (isNotEmpty(invoiceResource.getListLinkedInvoices())) {
             List<Long> toUpdateLinkedInvoice = toUpdate.getLinkedInvoices().stream()
                     .map(li -> li.getLinkedInvoiceValue().getId()).collect(toList());
             
@@ -7568,7 +7590,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 	public void applyAdvanceInvoice(Invoice invoice, List<Invoice> advInvoices, boolean allowUsingUnpaidAdvance) {
 		checkAllowUsingUnpaidAdvance(invoice, advInvoices, allowUsingUnpaidAdvance);
         BigDecimal invoiceBalance = invoice.getTransactionalInvoiceBalance();
-        if (invoiceBalance != null && CollectionUtils.isNotEmpty(invoice.getLinkedInvoices())) {
+        if (invoiceBalance != null && isNotEmpty(invoice.getLinkedInvoices())) {
             CommercialOrder orderInvoice = invoice.getCommercialOrder();
 			Subscription subscriptionInvoice = invoice.getSubscription();
             BigDecimal sum = invoice.getLinkedInvoices().stream()
@@ -7578,14 +7600,14 @@ public class InvoiceService extends PersistenceService<Invoice> {
                     .reduce(BigDecimal::add).orElse(ZERO);
             //if balance is well calculated and balance=0, we don't need to recalculate
             if ((sum.add(invoiceBalance)).compareTo(invoice.getTransactionalAmountWithTax()) == 0) {
-                CommercialOrder commercialOrder = CollectionUtils.isNotEmpty(advInvoices) ? advInvoices.get(0).getCommercialOrder() : null;
+                CommercialOrder commercialOrder = isNotEmpty(advInvoices) ? advInvoices.get(0).getCommercialOrder() : null;
                 if (BigDecimal.ZERO.compareTo(invoiceBalance) == 0 && !(commercialOrder != null && commercialOrder.equals(invoice.getCommercialOrder()))) {
                     return;
                 }
             }
             cancelInvoiceAdvances(invoice, advInvoices, false);
         }
-        if (CollectionUtils.isNotEmpty(advInvoices)) {
+        if (isNotEmpty(advInvoices)) {
             sort(advInvoices, (inv1, inv2) -> {
                 int compCommercialOrder = 0;
                 if (inv1.getCommercialOrder() != null && inv2.getCommercialOrder() == null) {
@@ -7722,7 +7744,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
                 .setParameter("ID_INVOICE_ADJ", invoiceAdjId)
                 .getResultList();
 
-        if (CollectionUtils.isNotEmpty(results)) {
+        if (isNotEmpty(results)) {
             return results.get(0);
         }
 
@@ -7890,7 +7912,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         }
 
         // Check invoice line
-        if (CollectionUtils.isNotEmpty(newInvoice.getInvoiceLines())) {
+        if (isNotEmpty(newInvoice.getInvoiceLines())) {
             newInvoice.getInvoiceLines().forEach(invoiceLine -> {
                 if (invoiceLine.getLinkedInvoiceLine() != null) {
                     // check amount with tax

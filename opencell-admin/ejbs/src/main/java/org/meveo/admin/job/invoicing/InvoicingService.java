@@ -1,6 +1,7 @@
 package org.meveo.admin.job.invoicing;
 
 import static java.util.stream.Collectors.toList;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.math.BigDecimal;
@@ -286,6 +287,7 @@ public class InvoicingService extends PersistenceService<Invoice> {
         CategoryInvoiceAgregate cAggregate = new CategoryInvoiceAgregate(invoiceCategory, billingAccount, firstSCIA.getUserAccount(), invoice);
 		cAggregate.setUseSpecificPriceConversion(scAggregateList.stream().anyMatch(InvoiceAgregate::isUseSpecificPriceConversion));
         cAggregate.updateAudit(currentUser);
+        cAggregate.setUserAccount(firstSCIA.getUserAccount());
         addTranslatedDescription(languageCode, invoiceCategory, cAggregate,"C");
         invoice.addInvoiceAggregate(cAggregate);
         return cAggregate;
@@ -303,6 +305,9 @@ public class InvoicingService extends PersistenceService<Invoice> {
         UserAccount userAccount = invoicingItem.getUserAccountId()==null? null : getEntityManager().getReference(UserAccount.class, invoicingItem.getUserAccountId());
 		SubCategoryInvoiceAgregate scAggregate = new SubCategoryInvoiceAgregate(getEntityManager().getReference(InvoiceSubCategory.class, invoicingItem.getInvoiceSubCategoryId()), invoice.getBillingAccount(), userAccount, null, invoice, invoiceSubCategory.getAccountingCode());
         scAggregate.updateAudit(currentUser);
+        if(scAggregate.getUserAccount() == null && isNotEmpty(invoice.getBillingAccount().getUsersAccounts())) {
+            scAggregate.setUserAccount(invoice.getBillingAccount().getUsersAccounts().get(0));
+        }
         addTranslatedDescription(getTradingLanguageCode(invoicingItem.getBillingAccountId()), invoiceSubCategory, scAggregate,"");
         addAggregationAmounts(items, scAggregate, invoicingItem.getTaxId());
         addInvoiceAggregateWithAmounts(invoice, scAggregate);

@@ -1553,7 +1553,8 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
      * @param invoice Invoice
      */
     public void deleteSupplementalRTs(Invoice invoice) {
-        getEntityManager().createNamedQuery("RatedTransaction.deleteSupplementalRTByInvoice").setParameter("invoice", invoice).executeUpdate();
+        getEntityManager().createNamedQuery("RatedTransaction.deleteSupplementalRTByInvoice")
+                .setParameter("invoiceIds", List.of(invoice.getId())).executeUpdate();
     }
 
     /**
@@ -2487,5 +2488,15 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
 			});
 		}
 	}
+
+    public void uninvoiceRTs(List<Long> invoicesIds, RatedTransactionAction rtAction) {
+        getEntityManager().createNamedQuery("RatedTransaction.unInvoiceByInvoices")
+                .setParameter("invoiceIds", invoicesIds)
+                .setParameter("now", new Date())
+                .setParameter("NEW_STATUS", (rtAction == null || rtAction == RatedTransactionAction.REOPEN)
+                        ? RatedTransactionStatusEnum.OPEN : RatedTransactionStatusEnum.CANCELED)
+                .executeUpdate();
+
+    }
 }
 

@@ -41,6 +41,7 @@ import static org.meveo.service.base.ValueExpressionWrapper.VAR_DISCOUNT_PLAN_IN
 import static org.meveo.service.base.ValueExpressionWrapper.VAR_INVOICE;
 import static org.meveo.service.base.ValueExpressionWrapper.VAR_INVOICE_SHORT;
 import static org.meveo.service.base.ValueExpressionWrapper.evaluateExpression;
+import static org.apache.commons.collections4.ListUtils.partition;
 
 import java.io.File;
 import java.io.IOException;
@@ -8257,5 +8258,74 @@ public class InvoiceService extends PersistenceService<Invoice> {
     public boolean isNotEligibleForValidation(Long invoiceId) {
         Invoice invoice = findById(invoiceId);
         return REJECTED == invoice.getStatus() && BillingRunStatusEnum.REJECTED != invoice.getBillingRun().getStatus();
+    }
+
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void cancelInvoices(List<Long> invoiceIds, RatedTransactionAction rtAction, Long billingRunId) {
+        try {
+            if (invoiceIds != null && !invoiceIds.isEmpty()) {
+                final int maxValue =
+                        ParamBean.getInstance().getPropertyAsInteger("database.number.of.inlist.limit", SHORT_MAX_VALUE);
+                if (invoiceIds.size() > maxValue) {
+                    List<List<Long>> invoicesIdsSubList = partition(invoiceIds, maxValue);
+                    invoicesIdsSubList.forEach(subIdsList -> cancelInvoices(invoiceIds, rtAction));
+                } else {
+                    cancelInvoices(invoiceIds, rtAction);
+                }
+                BillingRun billingRun = billingRunService.findById(billingRunId);
+                billingRunService.updateBillingRunStatistics(billingRun);
+            }
+        } catch (Exception exception) {
+            throw new BusinessException(exception);
+        }
+    }
+
+    private void cancelInvoices(List<Long> invoiceIds, RatedTransactionAction rtAction) {
+        ratedTransactionService.deleteSupplementalRTs(invoiceIds);
+        ratedTransactionService.uninvoiceRTs(invoiceIds, rtAction);
+        invoiceService.getEntityManager()
+                .createNamedQuery("Invoice.cancelInvoiceAdvances")
+                .setParameter("invoiceIds", invoiceIds)
+                .executeUpdate();
+        invoiceLinesService.cancelIlByInvoices(invoiceIds);
+        invoiceService.getEntityManager()
+                .createNamedQuery("Invoice.cancelInvoice")
+                .setParameter("now", new Date())
+                .setParameter("updater", currentUser.getUserName())
+                .setParameter("invoiceIds", invoiceIds)
+                .executeUpdate();
+    }
+
+    public List<Object[]> getInvoiceToExcludeFromCancellation(List<Long> invoicesToProcess) {
+        final int maxValue =
+                ParamBean.getInstance().getPropertyAsInteger("database.number.of.inlist.limit", SHORT_MAX_VALUE);
+        if (invoicesToProcess.size() > maxValue) {
+            List<Object[]> invoices = new ArrayList<>();
+            List<List<Long>> invoicesIdsSubList = partition(invoicesToProcess, maxValue);
+            invoicesIdsSubList.forEach(subIdsList -> invoices.addAll(loadInvoices(subIdsList)));
+            return invoices;
+        } else {
+            return loadInvoices(invoicesToProcess);
+        }
+    }
+
+    private List<Object[]> loadInvoices(List<Long> invoicesToProcess) {
+        return invoiceService.getEntityManager()
+                .createNamedQuery("Invoice.getEligibleInvoiceListForCancellation")
+                .setParameter("invoiceIds", invoicesToProcess)
+                .setParameter("status", List.of("VALIDATED", "CANCELED"))
+                .getResultList();
+    }
+
+    /**
+     * Get invoice ids by filters
+     * @param filters Map of filters
+     * @return List of invoice ids
+     */
+    public List<Long> getInvoiceIds(Map<String, Object> filters) {
+        PaginationConfiguration configuration = getPaginationConfigurationFromFilter(filters);
+        return getQuery(configuration, "inv", false)
+                .getIdQuery(getEntityManager())
+                .getResultList();
     }
 }

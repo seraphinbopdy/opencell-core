@@ -3,10 +3,14 @@
  */
 package org.meveo.apiv2.billing.service;
 
+import static java.lang.Boolean.TRUE;
 import static java.util.Arrays.asList;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toList;
+import static org.meveo.apiv2.billing.TransactionMode.PROCESS_ALL;
+import static org.meveo.model.billing.InvoiceStatusEnum.CANCELED;
 import static org.meveo.model.billing.InvoiceStatusEnum.DRAFT;
 import static org.meveo.model.billing.InvoiceStatusEnum.VALIDATED;
 
@@ -22,6 +26,7 @@ import java.util.Optional;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.function.TriFunction;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.job.UpdateHugeEntityJob;
 import org.meveo.admin.util.ResourceBundle;
@@ -36,9 +41,15 @@ import org.meveo.api.exception.MeveoApiException;
 import org.meveo.api.exception.MissingParameterException;
 import org.meveo.api.invoice.InvoiceApi;
 import org.meveo.apiv2.billing.BasicInvoice;
+import org.meveo.apiv2.billing.CancellationOutput;
+import org.meveo.apiv2.billing.Failure;
 import org.meveo.apiv2.billing.GenerateInvoiceResult;
+import org.meveo.apiv2.billing.ImmutableCancellationOutput;
+import org.meveo.apiv2.billing.ImmutableFailure;
 import org.meveo.apiv2.billing.ImmutableInvoiceLine;
 import org.meveo.apiv2.billing.ImmutableInvoiceLinesInput;
+import org.meveo.apiv2.billing.ImmutableStatistic;
+import org.meveo.apiv2.billing.InvoiceCancellationInput;
 import org.meveo.apiv2.billing.InvoiceLine;
 import org.meveo.apiv2.billing.InvoiceLineInput;
 import org.meveo.apiv2.billing.InvoiceLinesInput;
@@ -67,6 +78,7 @@ import org.meveo.model.catalog.DiscountPlan;
 import org.meveo.model.filter.Filter;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.model.payments.OperationCategoryEnum;
+import org.meveo.model.settings.AdvancedSettings;
 import org.meveo.service.billing.impl.BatchEntityService;
 import org.meveo.service.billing.impl.InvoiceLineService;
 import org.meveo.service.billing.impl.InvoiceService;
@@ -88,7 +100,9 @@ import org.meveo.service.settings.impl.AdvancedSettingsService;
 
 public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 
-    @Inject
+	private static final String INVOICE_API_MASS_ACTION_LIMIT_CODE = "invoice.api.mass.action.limit";
+
+	@Inject
     private InvoiceService invoiceService;
 
 	@Inject
@@ -442,7 +456,7 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 		}
 		if (isDraft) {
 			if (invoice.getGeneratePDF() == null) {
-				invoice.setGeneratePDF(Boolean.TRUE);
+				invoice.setGeneratePDF(TRUE);
 			}
 			if (invoice.getGenerateAO() != null) {
 				invoice.setGenerateAO(Boolean.FALSE);
@@ -726,5 +740,127 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 			}
 		}
 		return invoiceService.refreshOrRetrieve(invoice);
+	}
+
+	/**
+	 * Get mass API limit
+	 * @return Mass API limit
+	 */
+	private Integer getMassApiLimit() {
+		final AdvancedSettings massApiLimitSettings = advancedSettingsService.findByCode(INVOICE_API_MASS_ACTION_LIMIT_CODE);
+		return advancedSettingsService.parseValue(massApiLimitSettings);
+	}
+
+	/**
+	 * Validate invoice limit
+	 * @param invoiceCount Invoice count
+	 * @param massApiLimit Mass API limit
+	 */
+	private void validateInvoiceLimit(int invoiceCount, int massApiLimit) {
+		if (invoiceCount > massApiLimit) {
+			throw new BusinessApiException("Number of invoices exceeded action limit");
+		}
+	}
+
+
+	/**
+	 * Cancel invoices based on filter
+	 *
+	 * @param cancellationInput Invoice Cancellation Input
+	 * @return Cancellation output
+	 */
+	public CancellationOutput cancelInvoice(InvoiceCancellationInput cancellationInput) {
+		final Integer billingRunId = (Integer) ofNullable(cancellationInput.getFilters().get("billingRun.id"))
+				.orElseThrow(() -> new BusinessApiException("Billing run ID is required"));
+		final Integer massApiLimit = getMassApiLimit();
+
+		Map<String, Object> filters = new HashMap<>();
+		if(cancellationInput.getFilters().containsKey("status")) {
+			filters.put("status", cancellationInput.getFilters().get("status"));
+		}
+		filters.put("billingRun.id", billingRunId);
+		List<Long> invoicesToProcess = invoiceService.getInvoiceIds(filters);
+		validateInvoiceLimit(invoicesToProcess.size(), massApiLimit);
+		List<Long> cancelledInvoices = new ArrayList<>();
+		Map<Long, String> failures = new HashMap<>();
+		if (PROCESS_ALL == cancellationInput.getMode()) {
+			invoicesToProcess.forEach(invoiceId
+					-> cancelSingleInvoice(invoiceId, cancellationInput, cancelledInvoices, failures));
+		} else {
+			List<Long> invoicesToExclude = getInvoicesToExclude(invoicesToProcess, failures, cancellationInput);
+			invoicesToProcess.removeAll(invoicesToExclude);
+			cancelledInvoices.addAll(invoicesToProcess);
+			invoiceService.cancelInvoices(invoicesToProcess,
+					cancellationInput.getRatedTransactionAction(), billingRunId.longValue());
+		}
+		return buildCustomResponse(cancelledInvoices, failures, massApiLimit,
+				(invoices, failuresResponse, stats) -> ImmutableCancellationOutput.builder()
+						.statistics(stats)
+						.invoicesCancelled(invoices)
+						.invoicesNotCancelled(failuresResponse)
+						.build());
+	}
+
+	private void cancelSingleInvoice(Long invoiceId, InvoiceCancellationInput cancellationInput,
+									 List<Long> cancelledInvoice, Map<Long, String> failures) {
+		try {
+			Invoice invoice = invoiceService.findById(invoiceId);
+			if (VALIDATED == invoice.getStatus() && TRUE.equals(cancellationInput.getFailOnValidatedInvoice())) {
+				failures.put(invoice.getId(), "Invoice in status VALIDATED cannot be cancelled");
+			} else if (CANCELED == invoice.getStatus() && TRUE.equals(cancellationInput.getFailOnCanceledInvoice())) {
+				failures.put(invoice.getId(), "Invoice in status CANCELED cannot be cancelled");
+			} else {
+				if (VALIDATED != invoice.getStatus() && CANCELED != invoice.getStatus()) {
+					invoiceService.cancelInvoiceWithoutDeleteAndRTAction(invoice, cancellationInput.getRatedTransactionAction());
+					cancelledInvoice.add(invoice.getId());
+				}
+			}
+		} catch (Exception exception) {
+			log.error("Failed to cancel invoice {}, error : {} ", invoiceId, exception.getMessage());
+			failures.put(invoiceId, exception.getMessage());
+		}
+	}
+
+	private List<Long> getInvoicesToExclude(List<Long> invoicesToProcess,
+											Map<Long, String> failures, InvoiceCancellationInput cancellationInput) {
+		List<Object[]> invoices = invoiceService.getInvoiceToExcludeFromCancellation(invoicesToProcess);
+		List<Long> invoicesToExclude = new ArrayList<>();
+		invoices.forEach(inv -> {
+			if ((VALIDATED.name().equals(inv[1]) && TRUE.equals(cancellationInput.getFailOnValidatedInvoice()))
+					|| (CANCELED.name().equals(inv[1]) && TRUE.equals(cancellationInput.getFailOnCanceledInvoice()))) {
+				failures.put(((Long) inv[0]), "Invoice in status " + inv[1] + " cannot be cancelled");
+			}
+			invoicesToExclude.add(((Long) inv[0]));
+		});
+		return invoicesToExclude;
+	}
+
+	/**
+	 * Builds a statistics response summarizing success and failure counts
+	 *
+	 * @param invoices invoices
+	 * @param failures Failures map
+	 * @param limit    Mass API limit
+	 * @return Custom response output
+	 */
+	private <T> T buildCustomResponse(List<Long> invoices,
+									  Map<Long, String> failures,
+									  long limit,
+									  TriFunction<List<Long>, List<Failure>, ImmutableStatistic, T> responseBuilder) {
+		List<Failure> failuresResponse = failures.entrySet()
+				.stream()
+				.map(entry -> ImmutableFailure.builder()
+						.id(entry.getKey())
+						.reason(entry.getValue())
+						.build())
+				.collect(toList());
+		long failureCount = failures.size();
+		ImmutableStatistic statistics = ImmutableStatistic.builder()
+				.total(invoices.size() + failureCount)
+				.success((long) invoices.size())
+				.fail(failureCount)
+				.limit(limit)
+				.build();
+		return responseBuilder.apply(invoices, failuresResponse, statistics);
 	}
 }

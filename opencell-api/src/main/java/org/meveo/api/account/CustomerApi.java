@@ -711,7 +711,16 @@ public class CustomerApi extends AccountEntityApi {
         }
 
         customerCategory.setTaxCategoryEl(postData.getTaxCategoryEl());
-
+        // populate customFields
+        try {
+            populateCustomFields(postData.getCustomFields(), customerCategory, false);
+        } catch (MissingParameterException | InvalidParameterException e) {
+            log.error("Failed to associate custom field instance to an entity: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Failed to associate custom field instance to an entity", e);
+            throw e;
+        }
         customerCategoryService.create(customerCategory);
     }
 
@@ -790,6 +799,16 @@ public class CustomerApi extends AccountEntityApi {
         }
 
         if (toUpdate) {
+            // populate customFields
+            try {
+                populateCustomFields(postData.getCustomFields(), customerCategory, false);
+            } catch (MissingParameterException | InvalidParameterException e) {
+                log.error("Failed to associate custom field instance to an entity: {}", e.getMessage());
+                throw e;
+            } catch (Exception e) {
+                log.error("Failed to associate custom field instance to an entity", e);
+                throw e;
+            }
             customerCategoryService.update(customerCategory);
         }
     }

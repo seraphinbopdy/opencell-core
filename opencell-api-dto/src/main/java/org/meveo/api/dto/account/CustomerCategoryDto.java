@@ -23,6 +23,7 @@ import static org.meveo.api.dto.LanguageDescriptionDto.convertMultiLanguageFromM
 import java.util.List;
 
 import org.meveo.api.dto.BusinessEntityDto;
+import org.meveo.api.dto.CustomFieldsDto;
 import org.meveo.api.dto.LanguageDescriptionDto;
 import org.meveo.model.crm.CustomerCategory;
 
@@ -80,6 +81,9 @@ public class CustomerCategoryDto extends BusinessEntityDto {
      **/
     @Schema(description = "Default seller code")
     private String defaultSellerCode;
+
+    @XmlElement(required = false)
+    private CustomFieldsDto customFields;
 
     /**
      * Instantiates a new customer category dto.
@@ -216,4 +220,12 @@ public class CustomerCategoryDto extends BusinessEntityDto {
 	public void setDefaultSellerCode(String defaultSellerCode) {
 		this.defaultSellerCode = defaultSellerCode;
 	}
+
+    public CustomFieldsDto getCustomFields() {
+        return customFields;
+    }
+
+    public void setCustomFields(CustomFieldsDto customFields) {
+        this.customFields = customFields;
+    }
 }

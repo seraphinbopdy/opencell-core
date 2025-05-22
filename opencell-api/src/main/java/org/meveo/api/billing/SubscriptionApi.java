@@ -3527,7 +3527,10 @@ public class SubscriptionApi extends BaseApi {
                 Product product = productService.findByCode(postData.getProductCode());
                 if (product != null) {
                     serviceInstance.setCode(product.getCode());
-                    productService.getCurrentPublishedVersion(product.getCode(), postData.getOperationDate()).ifPresent(serviceInstance::setProductVersion);
+                    Optional<ProductVersion> pVersion = productService.getCurrentPublishedVersion(product.getCode(), postData.getOperationDate());
+                    if(pVersion.isPresent()) {
+                        serviceInstance.setProductVersion(pVersion.get());
+                    }
                 }
             }
 

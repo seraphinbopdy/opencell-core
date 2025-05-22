@@ -77,6 +77,16 @@ public class AppliedChargeResponseDto extends BaseResponse {
     private List<Long> reservationIds;
 
     /**
+     * The order product id.
+     */
+    private Long orderProductId;
+
+    /**
+     * The order offer id.
+     */
+    private Long orderOfferId;
+
+    /**
      * A wallet operations list.
      */
     private List<WalletOperationDto> walletOperations;
@@ -229,6 +239,19 @@ public class AppliedChargeResponseDto extends BaseResponse {
      */
     public void setReservationIds(List<Long> reservationIds) {
         this.reservationIds = reservationIds;
+    }
+
+    public Long getOrderProductId() {
+        return orderProductId;
+    }
+    public void setOrderProductId(Long orderProductId) {
+        this.orderProductId = orderProductId;
+    }
+    public Long getOrderOfferId() {
+        return orderOfferId;
+    }
+    public void setOrderOfferId(Long orderOfferId) {
+        this.orderOfferId = orderOfferId;
     }
 
     public static class CdrError implements Serializable {

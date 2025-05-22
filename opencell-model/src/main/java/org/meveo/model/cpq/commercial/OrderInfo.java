@@ -1,12 +1,7 @@
 package org.meveo.model.cpq.commercial;
 
+import jakarta.persistence.*;
 import org.meveo.model.cpq.ProductVersion;
-
-import jakarta.persistence.Embeddable;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 
 @Embeddable
 public class OrderInfo {
@@ -26,6 +21,12 @@ public class OrderInfo {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_product_id")
     private OrderProduct orderProduct;
+
+    /**
+     * added for performance reason in the front
+     */
+    @Transient
+    private OrderOffer orderOffer;
 
     /**
      * @return the order
@@ -69,6 +70,13 @@ public class OrderInfo {
 
     public void setOrderProduct(OrderProduct orderProduct) {
         this.orderProduct = orderProduct;
+    }
+
+    public OrderOffer getOrderOffer() {
+        return orderOffer;
+    }
+    public void setOrderOffer(OrderOffer orderOffer) {
+        this.orderOffer = orderOffer;
     }
 
 }

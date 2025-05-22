@@ -46,6 +46,7 @@ public interface InvoiceCancellationInput extends Resource {
     }
 
     @Nullable
+    @Value.Default
     @Schema(description = "Rated transaction action to perform")
     default RatedTransactionAction getRatedTransactionAction() {
         return REOPEN;

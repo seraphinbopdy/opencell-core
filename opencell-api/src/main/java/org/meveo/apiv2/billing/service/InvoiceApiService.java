@@ -774,10 +774,7 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 				.orElseThrow(() -> new BusinessApiException("Billing run ID is required"));
 		final Integer massApiLimit = getMassApiLimit();
 
-		Map<String, Object> filters = new HashMap<>();
-		if(cancellationInput.getFilters().containsKey("status")) {
-			filters.put("status", cancellationInput.getFilters().get("status"));
-		}
+		Map<String, Object> filters = new HashMap<>(cancellationInput.getFilters());
 		filters.put("billingRun.id", billingRunId);
 		List<Long> invoicesToProcess = invoiceService.getInvoiceIds(filters);
 		validateInvoiceLimit(invoicesToProcess.size(), massApiLimit);

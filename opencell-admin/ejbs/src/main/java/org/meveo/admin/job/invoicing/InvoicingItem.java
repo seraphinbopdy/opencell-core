@@ -49,9 +49,14 @@ public class InvoicingItem {
 		this.useSpecificTransactionalAmount = (boolean) fields[i++];
 		this.transactionalAmountWithoutTax = (BigDecimal) fields[i++];
 		this.transactionalAmountTax = (BigDecimal) fields[i++];
-		this.transactionalAmountWithTax = (BigDecimal) fields[i];
-		this.setSubscriptionId((Long) fields[i++]);
-		this.setCommercialOrderId((Long) fields[i++]);
+		this.transactionalAmountWithTax = (BigDecimal) fields[i++];
+		this.setSubscriptionId(getId(fields[i++]));
+		this.setCommercialOrderId(getId(fields[i]));
+
+	}
+
+	private Long getId(Object id) {
+		return (id instanceof BigDecimal) ? ((BigDecimal) id).longValue() : null;
 	}
 
 	/**

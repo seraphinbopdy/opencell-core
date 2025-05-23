@@ -246,8 +246,8 @@ public class CustomEntityTemplateApi extends BaseCrudApi<CustomEntityTemplate, C
         if (cet == null) {
             throw new EntityDoesNotExistsException(CustomEntityTemplate.class, code);
         }
-        
-        if(!currentUser.hasRole(cet.getReadPermission())) {
+
+        if(!currentUser.hasRoles(cet.getReadPermission(), "ReadAllCE")) {
             throw new ActionForbiddenException("User does not have permission to read data from '" + cet.getReadPermission() + "'");
         }
         

@@ -315,9 +315,12 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
 
         boolean isNewTx = isProcessItemInNewTx();
 
-        // Multiple item processing will happen only if batch size is greater than one,
+        // Multiple item processing will happen only if batch size is greater than one. In case of multiple item processing is not used, use batch size of 1 to retrieve just one item at a time.
         Long batchSize = (Long) getParamOrCFValue(jobInstance, Job.CF_BATCH_SIZE, 1L);
         boolean useMultipleItemProcessing = (processMultipleItemFunction != null && batchSize != null && batchSize > 1) || processSingleItemFunction == null;
+        if (batchSize > 1 && !useMultipleItemProcessing) {
+            batchSize = 1L;
+        } 
 
         List<Runnable> tasks = new ArrayList<Runnable>(nbThreads.intValue());
 
@@ -364,10 +367,11 @@ public abstract class IteratorBasedJobBean<T> extends BaseJobBean {
                     log.info("{}/{} Will submit {} task(s) to publish data for cluster-wide data processing", jobInstance.getJobTemplate(), jobInstance.getCode(), nbPublishers);
 
                     final Queue jobQueueFinal = jobQueue;
+                    final Long batchSizeFinal = batchSize;
                     for (int k = 0; k < nbPublishers; k++) {
                         int kFinal = k;
                         Runnable publishingTask = methodCallingUtils
-                            .callCallableInNoTx(() -> getDataPublishingToQueueTask(jobInstance.getCode(), lastCurrentUser, finalIterator, batchSize, jobQueueFinal, jobExecutionResult, kFinal));
+                            .callCallableInNoTx(() -> getDataPublishingToQueueTask(jobInstance.getCode(), lastCurrentUser, finalIterator, batchSizeFinal, jobQueueFinal, jobExecutionResult, kFinal));
                         tasks.add(publishingTask);
                     }
                 }

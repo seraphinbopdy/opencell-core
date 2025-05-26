@@ -754,10 +754,6 @@ public class Invoice extends AuditableCFEntity implements ISearchable {
     @Convert(converter = NumericBooleanConverter.class)
     private boolean autoMatching;
 
-    @Column(name = "external_purchase_order_number")
-    @Size(max = 100)
-    private String externalPurchaseOrderNumber;
-
     @Column(name = "ubl_reference")
     @Convert(converter = NumericBooleanConverter.class)
     private boolean ublReference;
@@ -839,7 +835,6 @@ public class Invoice extends AuditableCFEntity implements ISearchable {
         this.paymentStatusDate = null;
         this.invoiceLines = new ArrayList<>();
         this.invoiceAgregates = new ArrayList<>();
-        this.externalPurchaseOrderNumber = copy.externalPurchaseOrderNumber;
         this.subscription = copy.subscription;
     }
 
@@ -2033,14 +2028,6 @@ public class Invoice extends AuditableCFEntity implements ISearchable {
 
     public void setAutoMatching(boolean autoMatching) {
         this.autoMatching = autoMatching;
-    }
-
-    public String getExternalPurchaseOrderNumber() {
-        return externalPurchaseOrderNumber;
-    }
-
-    public void setExternalPurchaseOrderNumber(String externalPurchaseOrderNumber) {
-        this.externalPurchaseOrderNumber = externalPurchaseOrderNumber;
     }
 
     public boolean isUblReference() {

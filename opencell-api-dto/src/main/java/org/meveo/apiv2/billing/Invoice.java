@@ -323,8 +323,8 @@ public interface Invoice extends Resource {
 	@Schema(description = "The flag for auto matching")
 	@Nullable
 	Boolean getAutoMatching();
-	
-	@Schema(description = "The external purchase order number")
-	@Nullable
-	String getPurchaseOrder();
+
+	@Schema(description = "The list of purchase order numbers")
+	@javax.annotation.Nullable
+	List<String> getPurchaseOrders();
 }

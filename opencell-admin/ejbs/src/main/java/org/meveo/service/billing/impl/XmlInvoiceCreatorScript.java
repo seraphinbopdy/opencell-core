@@ -2254,9 +2254,9 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
             header.appendChild(discountsTag);
         }
 
-        Element externalPurchaseOrder = doc.createElement("externalPurchaseOrder");
-        externalPurchaseOrder.appendChild(createTextNode(doc, invoice.getExternalPurchaseOrderNumber()));
-        header.appendChild(externalPurchaseOrder);
+//        Element externalPurchaseOrder = doc.createElement("externalPurchaseOrder");
+//        externalPurchaseOrder.appendChild(createTextNode(doc, invoice.getExternalPurchaseOrderNumber()));
+//        header.appendChild(externalPurchaseOrder);
 
         ofNullable(createSubTotals(doc, invoice.getInvoiceType(),
                 invoice.getInvoiceLines(), invoice.getBillingAccount().getTradingLanguage()))

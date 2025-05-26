@@ -627,7 +627,7 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
      * @param actionInstance Action instance
      */
     private void triggerActionAndRefreshLevelsAndActions(DunningCollectionPlan collectionPlan, DunningLevelInstance levelInstance, DunningActionInstance actionInstance) {
-        actionInstanceService.triggerAction(actionInstance, null, collectionPlan);
+        actionInstanceService.triggerAction(actionInstance, collectionPlan.getRelatedInvoice(), collectionPlan);
         collectionPlan = collectionPlanService.refreshOrRetrieve(collectionPlan);
         actionInstance.setActionStatus(DunningActionInstanceStatusEnum.DONE);
         actionInstance.setExecutionDate(new Date());

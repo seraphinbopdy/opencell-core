@@ -479,18 +479,7 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 
 		for (Invoice inv : invoices) {
 			if (invoice.getPurchaseOrders() != null && !invoice.getPurchaseOrders().isEmpty()) {
-				Set<PurchaseOrder> purchaseOrders = new HashSet<>();
-				for(String po : invoice.getPurchaseOrders()) {
-					PurchaseOrder purchaseOrder = purchaseOrderService.findByNumber(po);
-					if (purchaseOrder != null) {
-						throw new EntityAlreadyExistsException(PurchaseOrder.class, po);
-					} else {
-						purchaseOrders.add(purchaseOrder);
-					}
-				}
-				if (!purchaseOrders.isEmpty()) {
-					inv.setPurchaseOrders(purchaseOrders);
-				}
+				invoiceService.managePurchaseOrders(invoice.getPurchaseOrders(), inv);
 				invoiceService.update(inv);
 			}
 		}

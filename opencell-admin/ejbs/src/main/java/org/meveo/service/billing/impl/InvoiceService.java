@@ -26,7 +26,6 @@ import static java.util.Comparator.comparingInt;
 import static java.util.Optional.ofNullable;
 import static java.util.Set.of;
 import static java.util.stream.Collectors.toList;
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.meveo.commons.utils.NumberUtils.round;
 import static org.meveo.commons.utils.StringUtils.isBlank;
@@ -296,7 +295,6 @@ import jakarta.persistence.Query;
 import jakarta.xml.bind.JAXBException;
 import net.sf.jasperreports.engine.DefaultJasperReportsContext;
 import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
@@ -307,7 +305,6 @@ import net.sf.jasperreports.pdf.SimplePdfExporterConfiguration;
 import net.sf.jasperreports.pdf.type.PdfaConformanceEnum;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
-import net.sf.jasperreports.engine.JasperReport;
 
 /**
  * The Class InvoiceService.
@@ -5606,7 +5603,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
      * @param listOfPurchaseOrders List of purchase orders
      * @param invoice Invoice
      */
-    private void managePurchaseOrders(List<String> listOfPurchaseOrders, Invoice invoice) {
+    public void managePurchaseOrders(List<String> listOfPurchaseOrders, Invoice invoice) {
         Set<PurchaseOrder> purchaseOrders = new HashSet<>();
         if (listOfPurchaseOrders != null && !listOfPurchaseOrders.isEmpty()) {
             for(String po : listOfPurchaseOrders) {

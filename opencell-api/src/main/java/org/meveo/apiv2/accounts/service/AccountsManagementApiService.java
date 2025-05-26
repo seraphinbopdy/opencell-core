@@ -744,12 +744,8 @@ public class AccountsManagementApiService {
 					});
 				}
 
-                if(oshoDto.getAmountWithoutTax().compareTo(BigDecimal.ZERO) == 0) {
-                    log.warn("applyOneShotChargeInstance #{}: charge amount is 0", chargePosition);
-                }else{
-                    result.addAppliedCharge(chargePosition, oshoDto);
-                    result.getStatistics().addSuccess();
-                }
+                result.addAppliedCharge(chargePosition, oshoDto);
+                result.getStatistics().addSuccess();
 			} catch (Exception e) {
 				log.error("Error when applying OSO at position #["+chargePosition+"]" , e);
 				result.getStatistics().addFail();

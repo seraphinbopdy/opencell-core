@@ -3,12 +3,12 @@ package org.meveo.apiv2.billing;
 import static java.lang.Boolean.FALSE;
 
 import java.util.Date;
+import java.util.List;
 
 import jakarta.annotation.Nullable;
 
 import org.immutables.value.Value;
 import org.immutables.value.Value.Immutable;
-import org.immutables.value.Value.Style;
 import org.meveo.api.dto.CustomFieldsDto;
 import org.meveo.api.dto.FilterDto;
 import org.meveo.apiv2.models.Resource;
@@ -120,9 +120,8 @@ public interface GenerateInvoiceInput extends Resource {
     @Nullable
     @Schema(description = "OpenOrder code")
     String getOpenOrderCode();
-    
-	@Schema(description = "The external purchase order number")
-	@Nullable
-	String getPurchaseOrder();
-    
+
+    @Schema(description = "The list of purchase order numbers")
+    @javax.annotation.Nullable
+    List<String> getPurchaseOrders();
 }

@@ -27,7 +27,6 @@ import static java.util.Optional.ofNullable;
 import static java.util.Set.of;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.meveo.commons.utils.NumberUtils.round;
 import static org.meveo.commons.utils.StringUtils.isBlank;
@@ -118,6 +117,7 @@ import org.meveo.api.dto.CategoryInvoiceAgregateDto;
 import org.meveo.api.dto.RatedTransactionDto;
 import org.meveo.api.dto.SubCategoryInvoiceAgregateDto;
 import org.meveo.api.dto.billing.QuarantineBillingRunDto;
+import org.meveo.api.dto.LanguageDescriptionDto;
 import org.meveo.api.dto.invoice.GenerateInvoiceRequestDto;
 import org.meveo.api.dto.invoice.InvoiceDto;
 import org.meveo.api.exception.ActionForbiddenException;
@@ -185,6 +185,7 @@ import org.meveo.model.billing.InvoiceValidationRule;
 import org.meveo.model.billing.InvoiceValidationStatusEnum;
 import org.meveo.model.billing.LinkedInvoice;
 import org.meveo.model.billing.MinAmountForAccounts;
+import org.meveo.model.billing.PurchaseOrder;
 import org.meveo.model.billing.RatedTransaction;
 import org.meveo.model.billing.RatedTransactionAction;
 import org.meveo.model.billing.RatedTransactionGroup;
@@ -484,6 +485,9 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
     @Inject
     protected CustomFieldTemplateService customFieldTemplateService;
+
+    @Inject
+    private PurchaseOrderService purchaseOrderService;
 
 	/**
      * folder for adjustment pdf.
@@ -5575,7 +5579,6 @@ public class InvoiceService extends PersistenceService<Invoice> {
         final String invoiceTypeCode = (invoiceTypeCodeInput != null && !invoiceTypeCodeInput.isEmpty() && !invoiceTypeCodeInput.isBlank()) ? resource.getInvoiceTypeCode() : "COM";
         InvoiceType invoiceType = (InvoiceType) tryToFindByEntityClassAndCode(InvoiceType.class, invoiceTypeCode);
         String comment = resource.getComment();
-        String purchaseOrder = resource.getPurchaseOrder();
         
         Seller seller;
         if(resource.getSeller() != null) {
@@ -5589,11 +5592,70 @@ public class InvoiceService extends PersistenceService<Invoice> {
         }
 
         Invoice invoice = initBasicInvoiceInvoice(amountWithTax, invoiceDate, order, billingAccount, invoiceType, comment, seller,
-                buildAutoMatching(resource.getAutoMatching(), invoiceType), purchaseOrder, resource.getDueDate());
+                buildAutoMatching(resource.getAutoMatching(), invoiceType), resource.getDueDate());
+        managePurchaseOrders(resource.getPurchaseOrders(), invoice);
         invoice.updateAudit(currentUser);
         getEntityManager().persist(invoice);
         postCreate(invoice);
         return invoice;
+    }
+
+    /**
+     * Manage purchase orders
+     *
+     * @param listOfPurchaseOrders List of purchase orders
+     * @param invoice Invoice
+     */
+    private void managePurchaseOrders(List<String> listOfPurchaseOrders, Invoice invoice) {
+        Set<PurchaseOrder> purchaseOrders = new HashSet<>();
+        if (listOfPurchaseOrders != null && !listOfPurchaseOrders.isEmpty()) {
+            for(String po : listOfPurchaseOrders) {
+                PurchaseOrder purchaseOrder = purchaseOrderService.findByNumber(po);
+                if (purchaseOrder != null) {
+                    switch (purchaseOrder.getAccountLevel()) {
+                        case SELLER:
+                            if(purchaseOrder.getSeller() == null || purchaseOrder.getSeller().getId() == null
+                                    || invoice.getSeller() == null || invoice.getSeller().getId() == null
+                                    || !purchaseOrder.getSeller().getId().equals(invoice.getSeller().getId())) {
+                                throw new BusinessApiException("The account level of the purchase order " + po + " is seller and is not the same as the invoice seller");
+                            }
+                            break;
+                        case CUSTOMER:
+                            if (purchaseOrder.getCustomer() == null || purchaseOrder.getCustomer().getId() == null
+                                    || invoice.getBillingAccount() == null || invoice.getBillingAccount().getCustomerAccount() == null
+                                    || invoice.getBillingAccount().getCustomerAccount().getCustomer() == null
+                                    || invoice.getBillingAccount().getCustomerAccount().getCustomer().getId() == null
+                                    || !purchaseOrder.getCustomer().getId().equals(invoice.getBillingAccount().getCustomerAccount().getCustomer().getId())) {
+                                throw new BusinessApiException("The account level of the purchase order " + po + " is customer and is not the same as the invoice customer");
+                            }
+                            break;
+                        case CUSTOMER_ACCOUNT:
+                            if (purchaseOrder.getCustomerAccount() == null || purchaseOrder.getCustomerAccount().getId() == null
+                                    || invoice.getBillingAccount() == null || invoice.getBillingAccount().getCustomerAccount() == null
+                                    || invoice.getBillingAccount().getCustomerAccount().getId() == null
+                                    || !purchaseOrder.getCustomerAccount().getId().equals(invoice.getBillingAccount().getCustomerAccount().getId())) {
+                                throw new BusinessApiException("The account level of the purchase order " + po + " is customer account and is not the same as the invoice customer account");
+                            }
+                            break;
+                        case BILLING_ACCOUNT:
+                            if (purchaseOrder.getBillingAccount() == null || purchaseOrder.getBillingAccount().getId() == null
+                                    || invoice.getBillingAccount() == null || invoice.getBillingAccount().getId() == null
+                                    || !purchaseOrder.getBillingAccount().getId().equals(invoice.getBillingAccount().getId())) {
+                                throw new BusinessApiException("The account level of the purchase order " + po + " is billing account and is not the same as the invoice billing account");
+                            }
+                            break;
+                        default:
+                            throw new IllegalArgumentException("AccountLevel not supported: " + purchaseOrder.getAccountLevel());
+                    }
+                } else {
+                    throw new EntityDoesNotExistsException(PurchaseOrder.class, po);
+                }
+
+                purchaseOrders.add(purchaseOrder);
+            }
+        }
+
+        invoice.setPurchaseOrders(purchaseOrders);
     }
 
     private boolean buildAutoMatching(Boolean autoMatchingInput, InvoiceType invoiceType){
@@ -5612,7 +5674,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
             throw new EntityDoesNotExistsException(InvoiceType.class, "SECURITY_DEPOSIT");
         }
         Seller defaultSeller = securityDepositInput.getSeller();
-		Invoice invoice = initBasicInvoiceInvoice(securityDepositInput.getAmount(), new Date(), null, securityDepositInput.getBillingAccount(), advType, "", defaultSeller, false, null, null);
+        Invoice invoice = initBasicInvoiceInvoice(securityDepositInput.getAmount(), new Date(), null, securityDepositInput.getBillingAccount(), advType, "", defaultSeller, false, null);
         invoice.updateAudit(currentUser);
         getEntityManager().persist(invoice);
         postCreate(invoice);
@@ -5629,7 +5691,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
      * @param comment Comment
      * @return {@link Invoice}
      */
-    private Invoice initBasicInvoiceInvoice(final BigDecimal amountWithTax, final Date invoiceDate, Order order, BillingAccount billingAccount, InvoiceType advType, String comment, Seller seller, boolean isAutoMatching, String purchaseOrder, Date dueDate) {
+    private Invoice initBasicInvoiceInvoice(final BigDecimal amountWithTax, final Date invoiceDate, Order order, BillingAccount billingAccount, InvoiceType advType, String comment, Seller seller, boolean isAutoMatching, Date dueDate) {
         Invoice invoice = new Invoice();
         invoice.setInvoiceType(advType);
         invoice.setBillingAccount(billingAccount);
@@ -5655,7 +5717,6 @@ public class InvoiceService extends PersistenceService<Invoice> {
         invoice.setAmountWithoutTaxBeforeDiscount(BigDecimal.ZERO);
         invoice.setComment(comment);
         invoice.setAutoMatching(isAutoMatching);
-        invoice.setExternalPurchaseOrderNumber(purchaseOrder);
         return invoice;
     }
 
@@ -7009,16 +7070,15 @@ public class InvoiceService extends PersistenceService<Invoice> {
         }
         
         toUpdate.setAutoMatching(buildAutoMatching(invoiceResource.getAutoMatching(), toUpdate.getInvoiceType()));
-        
-        if (invoiceResource.getPurchaseOrder() != null) {
-            toUpdate.setExternalPurchaseOrderNumber(invoiceResource.getPurchaseOrder());
-        }
 	    
 	    if(invoiceResource.getSellerCode() != null ) {
 		    Seller seller = new Seller();
 		    seller.setCode(invoiceResource.getSellerCode());
 		    toUpdate.setSeller(tryToFindByCodeOrId(seller));
 	    }
+
+        managePurchaseOrders(invoiceResource.getPurchaseOrders(), toUpdate);
+
         return update(toUpdate);
     }
 
@@ -7494,7 +7554,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
      * @param customFieldValues Custom Field {@link CustomFieldValues}
      * @return Updated Invoice {@link Invoice}
      */
-    public Invoice updateValidatedInvoice(Invoice toUpdate, String comment, CustomFieldValues customFieldValues, String purchaseOrder) {
+    public Invoice updateValidatedInvoice(Invoice toUpdate, String comment, CustomFieldValues customFieldValues, List<String> listOfPurchaseOrders) {
         toUpdate = refreshOrRetrieve(toUpdate);
 
 		if (org.apache.commons.lang3.StringUtils.isNotBlank(comment)) {
@@ -7505,9 +7565,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 			toUpdate.setCfValues(customFieldValues);
 		}
 
-		if (purchaseOrder != null) {
-			toUpdate.setExternalPurchaseOrderNumber(purchaseOrder);
-		}
+        managePurchaseOrders(listOfPurchaseOrders, toUpdate);
 
 		return update(toUpdate);
     }

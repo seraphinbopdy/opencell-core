@@ -19,6 +19,7 @@
 package org.meveo.api.dto.invoice;
 
 import java.util.Date;
+import java.util.List;
 
 import org.meveo.api.dto.CustomFieldsDto;
 import org.meveo.api.dto.FilterDto;
@@ -119,11 +120,11 @@ public class GenerateInvoiceRequestDto {
      * if true then validation script is NOT executed
      */
     private Boolean skipValidation = false;
-    
+
     /**
-     * The external purchase order number
+     * The list of purchase order numbers
      */
-    private String purchaseOrder;
+    private List<String> purchaseOrders;
 
     /**
      * Instantiates a new generate invoice request dto.
@@ -428,18 +429,18 @@ public class GenerateInvoiceRequestDto {
         this.applyBillingRules = applyBillingRules;
     }
 
-	/**
-	 * @return the purchaseOrder
-	 */
-	public String getPurchaseOrder() {
-		return purchaseOrder;
-	}
+    /**
+     * @return the purchaseOrders
+     */
+    public List<String> getPurchaseOrders() {
+        return purchaseOrders;
+    }
 
-	/**
-	 * @param purchaseOrder the purchaseOrder to set
-	 */
-	public void setPurchaseOrder(String purchaseOrder) {
-		this.purchaseOrder = purchaseOrder;
-	}
+    /**
+     * @param purchaseOrders the purchaseOrders to set
+     */
+    public void setPurchaseOrders(List<String> purchaseOrders) {
+        this.purchaseOrders = purchaseOrders;
+    }
 	
 }

@@ -220,7 +220,7 @@ public class InvoiceUblHelper {
 		if (creditNote != null) {
 			setGeneralInfo(invoice, creditNote);
 			setBillingReference(invoice, creditNote);
-			setOrderReference(invoice, creditNote);
+			//setOrderReference(invoice, creditNote);
 			setInvoiceLine(invoice.getInvoiceLines(), creditNote, invoiceLanguageCode);
 			if(payableAmount.compareTo(BigDecimal.ZERO) > 0) {
 				DueDate dueDate = objectFactorycommonBasic.createDueDate();
@@ -232,7 +232,7 @@ public class InvoiceUblHelper {
 		} else {
 			setGeneralInfo(invoice, invoiceXml);
 			//setBillingReference(invoice, invoiceXml);
-			setOrderReference(invoice, invoiceXml);
+			//setOrderReference(invoice, invoiceXml);
 			setInvoiceLine(invoice.getInvoiceLines(), invoiceXml, invoiceLanguageCode);
 			invoiceXml.setLegalMonetaryTotal(setTaxExclusiveAmount(totalPrepaidAmount, curreny, amountWithoutTax , amountWithTax, lineExtensionAmount, payableAmount, discountAmount));
 			var commercialorderIds = invoice.getInvoiceLines().stream().map(InvoiceLine::getCommercialOrder).filter(Objects::nonNull)
@@ -261,28 +261,6 @@ public class InvoiceUblHelper {
 
 		return pathCreatedFile;
 	}
-
-	/**
-	 * Set the billing reference for the invoice
-	 * @param invoice the invoice
-	 * @param invoiceXml the invoice xml
-	 */
-	private void setOrderReferenceId(org.meveo.model.billing.Invoice invoice, Invoice invoiceXml) {
-		if(StringUtils.isNotBlank(invoice.getExternalPurchaseOrderNumber())) {
-			if (invoiceXml.getOrderReference() == null) {
-				OrderReference orderReference = objectFactoryCommonAggrement.createOrderReference();
-				ID id  = objectFactorycommonBasic.createID();
-				id.setValue(invoice.getExternalPurchaseOrderNumber());
-				orderReference.setID(id);
-				invoiceXml.setOrderReference(orderReference);
-			} else {
-				ID id  = objectFactorycommonBasic.createID();
-				id.setValue(invoice.getExternalPurchaseOrderNumber());
-				invoiceXml.getOrderReference().setID(id);
-			}
-		}
-	}
-
 
 	public void toXml(Object invoiceXml, File absoluteFileName) throws JAXBException {
 		if(absoluteFileName == null || !absoluteFileName.isFile()) {
@@ -1227,26 +1205,7 @@ public class InvoiceUblHelper {
 		orderReference.setID(id);
 		return orderReference;
 	}
-	private void setOrderReference(org.meveo.model.billing.Invoice source, Invoice target){
-		target.setOrderReference(getOrderReference(source.getCommercialOrder(), source.getInvoiceDate(), source.getExternalPurchaseOrderNumber()));
-	}
-	private void setOrderReference(org.meveo.model.billing.Invoice source, CreditNote target){
-		if(StringUtils.isNotBlank(source.getExternalPurchaseOrderNumber())){
-			OrderReference orderReference = objectFactoryCommonAggrement.createOrderReference();
-			SalesOrderID salesOrderID = objectFactorycommonBasic.createSalesOrderID();
-			//Optional<LinkedInvoice> documentReference = source.getLinkedInvoices().stream().filter(linkedInvoice -> linkedInvoice.getLinkedInvoiceValue().getInvoiceType().getCode().equalsIgnoreCase("COM")).findFirst();
-			ID id = objectFactorycommonBasic.createID();
-			id.setValue(source.getExternalPurchaseOrderNumber());
-			orderReference.setID(id);
-			if(source.getCommercialOrder() != null){
-				salesOrderID.setValue(source.getCommercialOrder().getOrderNumber());
-				orderReference.setSalesOrderID(salesOrderID);
-				orderReference.setIssueDate(getIssueDate(source.getCommercialOrder().getOrderDate()));
-			}
-			target.setOrderReference(orderReference);
 
-		}
-	}
 	private void setBillingReference(org.meveo.model.billing.Invoice source, Invoice target){
 		source.getLinkedInvoices().forEach(linInv -> {
 			BillingReference billingReference = setBillingReference(linInv.getLinkedInvoiceValue());

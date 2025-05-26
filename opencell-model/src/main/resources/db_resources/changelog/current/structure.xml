@@ -18003,4 +18003,8 @@ Opencell team.
         <dropForeignKeyConstraint baseTableName="billing_wallet_operation" constraintName="fk_wallet_operation_order_product"/>
     </changeSet>
 
+    <changeSet id="#INTRD-28761_20250521" author="zelmeliani">
+        <dropColumn columnName="external_purchase_order_number" tableName="billing_invoice" />
+    </changeSet>
+
 </databaseChangeLog>

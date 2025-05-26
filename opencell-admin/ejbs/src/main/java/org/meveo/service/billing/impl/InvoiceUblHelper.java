@@ -24,6 +24,7 @@ import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Customiz
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Department;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.Description;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.DescriptionCode;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.MultiplierFactorNumeric;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.DocumentCurrencyCode;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.DueDate;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_2.ElectronicMail;
@@ -92,6 +93,8 @@ import org.meveo.model.billing.UntdidAllowanceCode;
 import org.meveo.model.billing.UntdidTaxationCategory;
 import org.meveo.model.billing.UserAccount;
 import org.meveo.model.billing.VatDateCodeEnum;
+import org.meveo.model.catalog.DiscountPlanItem;
+import org.meveo.model.catalog.DiscountPlanItemTypeEnum;
 import org.meveo.model.cpq.commercial.CommercialOrder;
 import org.meveo.model.crm.Customer;
 import org.meveo.model.crm.Provider;
@@ -102,6 +105,7 @@ import org.meveo.model.shared.Name;
 import org.meveo.model.shared.Title;
 import org.meveo.service.admin.impl.TradingCurrencyService;
 import org.meveo.service.base.ValueExpressionWrapper;
+import org.meveo.service.catalog.impl.DiscountPlanItemService;
 import org.meveo.service.cpq.order.CommercialOrderService;
 import org.meveo.service.crm.impl.ProviderService;
 import org.slf4j.Logger;
@@ -141,8 +145,8 @@ public class InvoiceUblHelper {
 	private final static PaymentTermService paymentTermService;
 	private final static EinvoiceSettingService einvoiceSettingService;
 	private final static ProviderService providerService;
-	private final static CommercialOrderService commercialOrderService;
 	private final static TradingCurrencyService tradingCurrencyService;
+	private final static DiscountPlanItemService discountPlanItemService;
 
 	private static final String XUN = "XUN";
 	public static final String ISO_IEC_6523 = "ISO/IEC 6523";
@@ -163,8 +167,8 @@ public class InvoiceUblHelper {
 		paymentTermService = (PaymentTermService) EjbUtils.getServiceInterface(PaymentTermService.class.getSimpleName());
 		einvoiceSettingService = (EinvoiceSettingService) EjbUtils.getServiceInterface(EinvoiceSettingService.class.getSimpleName());
 		providerService = (ProviderService) EjbUtils.getServiceInterface(ProviderService.class.getSimpleName());
-		commercialOrderService = (CommercialOrderService) EjbUtils.getServiceInterface(CommercialOrderService.class.getSimpleName());
 		tradingCurrencyService = (TradingCurrencyService) EjbUtils.getServiceInterface(TradingCurrencyService.class.getSimpleName());
+		discountPlanItemService = (DiscountPlanItemService) EjbUtils.getServiceInterface(DiscountPlanItemService.class.getSimpleName());
 		Provider provider = providerService.getProvider();
 		if(provider != null) {
 			rounding = provider.getInvoiceRounding();
@@ -802,6 +806,51 @@ public class InvoiceUblHelper {
 		priceAmount.setCurrencyID(currencyCode);
 		priceAmount.setValue(invoiceLine.getUnitPrice().setScale(rounding, RoundingMode.HALF_UP).abs());
 		priceType.setPriceAmount(priceAmount);
+
+		//cac:Price/cac:AllowanceCharge/cbc:BaseAmount
+		AllowanceChargeType allowanceCharge = objectFactoryCommonAggrement.createAllowanceChargeType();
+		ChargeIndicator chargeIndicator = objectFactorycommonBasic.createChargeIndicator();
+		chargeIndicator.setValue(false);
+		allowanceCharge.setChargeIndicator(chargeIndicator);
+		var currency  = invoiceLine.getInvoice().getTradingCurrency().getCurrencyCode();
+
+		BaseAmount baseAmount = objectFactorycommonBasic.createBaseAmount();
+		baseAmount.setCurrencyID(currency);
+		baseAmount.setValue(invoiceLine.getUnitPrice().abs().setScale(rounding, RoundingMode.HALF_UP));
+		allowanceCharge.setBaseAmount(baseAmount);
+	
+		if(invoiceLine.getDiscountPlanItem() != null) {
+			var discountItem = (DiscountPlanItem)Hibernate.unproxy(invoiceLine.getDiscountPlanItem());
+			Amount amount = objectFactorycommonBasic.createAmount();
+			amount.setCurrencyID(currency);
+			amount.setValue(invoiceLine.getRawAmount().setScale(rounding, RoundingMode.HALF_UP));
+			allowanceCharge.setAmount(amount);
+			BigDecimal result = discountItem.getDiscountValue();
+			if(discountItem.getDiscountPlanItemType() == DiscountPlanItemTypeEnum.PERCENTAGE) {
+				MultiplierFactorNumeric multiplierFactorNumeric = objectFactorycommonBasic.createMultiplierFactorNumeric();
+				if(StringUtils.isNotBlank(discountItem.getDiscountValueEL())){
+					Map<Object, Object> userMap = new HashMap<>();
+					userMap.put("ca", invoiceLine.getInvoice().getBillingAccount().getCustomerAccount());
+					userMap.put("ba", invoiceLine.getInvoice().getBillingAccount());
+					userMap.put("iv", invoiceLine.getInvoice());
+					userMap.put("invoice", invoiceLine.getInvoice());
+					result = ValueExpressionWrapper.evaluateExpression(discountItem.getDiscountValueEL(), userMap, BigDecimal.class);
+				}
+				multiplierFactorNumeric.setValue(result.setScale(rounding, RoundingMode.HALF_UP));
+				allowanceCharge.setMultiplierFactorNumeric(multiplierFactorNumeric);
+			}
+			var article = discountItem.getAccountingArticle();
+			if(article != null && article.getAllowanceCode() != null) {
+				UntdidAllowanceCode untdidAllowanceCode = article.getAllowanceCode();
+				AllowanceChargeReasonCode allowanceChargeReasonCode = objectFactorycommonBasic.createAllowanceChargeReasonCode();
+				allowanceChargeReasonCode.setValue(untdidAllowanceCode.getCode());
+				allowanceCharge.setAllowanceChargeReasonCode(allowanceChargeReasonCode);
+				AllowanceChargeReason allowanceChargeReason = objectFactorycommonBasic.createAllowanceChargeReason();
+				allowanceChargeReason.setValue(untdidAllowanceCode.getDescription());
+				allowanceCharge.getAllowanceChargeReasons().add(allowanceChargeReason);
+			}
+		}
+		priceType.getAllowanceCharges().add(allowanceCharge);
 		return priceType;
 	}
 	private void setAccountingCustomerParty(BillingAccount billingAccount, Invoice target, CreditNote creditNote){

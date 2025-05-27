@@ -171,6 +171,14 @@ public class DunningActionInstanceService extends PersistenceService<DunningActi
      * @param pInvoice Invoice
      */
     private void executeScriptAction(DunningSettings dunningSettings, DunningActionInstance actionInstance, Invoice pInvoice) {
+        if (pInvoice == null) {
+            throw new BusinessException("Cannot execute script action: Invoice is null for action instance " + actionInstance.getId());
+        }
+        
+        if (pInvoice.getBillingAccount() == null) {
+            throw new BusinessException("Cannot execute script action: Invoice " + pInvoice.getId() + " has no billing account");
+        }
+        
         HashMap<String, Object> context = new HashMap<>();
         context.put(Script.CONTEXT_ENTITY, pInvoice);
         context.put("customerAccount", pInvoice.getBillingAccount().getCustomerAccount());

@@ -27,6 +27,7 @@ import org.meveo.model.billing.Subscription;
 import org.meveo.model.billing.WalletOperation;
 import org.meveo.model.catalog.ChargeTemplate;
 import org.meveo.model.catalog.OneShotChargeTemplate;
+import org.meveo.model.catalog.OneShotChargeTemplateTypeEnum;
 import org.meveo.model.cpq.AttributeValue;
 import org.meveo.model.cpq.commercial.CommercialOrder;
 import org.meveo.model.rating.EDR;
@@ -99,6 +100,11 @@ public class OneShotRatingService extends RatingService implements Serializable 
         // Skip rating if charge does not match filters
         if (!RatingService.isORChargeMatch(chargeInstance)) {
             log.debug("Not rating oneshot chargeInstance {}/{}, filter expression or service attributes evaluated to FALSE", chargeInstance.getId(), chargeInstance.getCode());
+            RatingResult ratingResult = new RatingResult();
+            ratingResult.setWasRatingSkipped(true);
+            return ratingResult;
+        } else if (chargeInstance.getChargeTemplate() instanceof OneShotChargeTemplate && OneShotChargeTemplateTypeEnum.OTHER.equals(((OneShotChargeTemplate) chargeInstance.getChargeTemplate()).getOneShotChargeTemplateType())) {
+            log.debug("Not rating oneshot chargeInstance {}/{}, OSO Charge should not be rated", chargeInstance.getId(), chargeInstance.getCode());
             RatingResult ratingResult = new RatingResult();
             ratingResult.setWasRatingSkipped(true);
             return ratingResult;

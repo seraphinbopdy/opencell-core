@@ -73,6 +73,7 @@ import org.meveo.model.catalog.DiscountPlanItem;
 import org.meveo.model.catalog.DiscountPlanStatusEnum;
 import org.meveo.model.catalog.DiscountPlanTypeEnum;
 import org.meveo.model.catalog.OfferTemplate;
+import org.meveo.model.catalog.OneShotChargeTemplate;
 import org.meveo.model.catalog.OneShotChargeTemplateTypeEnum;
 import org.meveo.model.catalog.ServiceCharge;
 import org.meveo.model.catalog.ServiceChargeTemplateRecurring;
@@ -564,7 +565,8 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
                 oneShotChargeInstance.setQuantity(serviceInstance.getQuantity());
                 oneShotChargeInstance.setChargeDate(serviceInstance.getSubscriptionDate());
 
-                if (applySubscriptionCharges) {
+                boolean isOSO = oneShotChargeInstance.getChargeTemplate() instanceof OneShotChargeTemplate && OneShotChargeTemplateTypeEnum.OTHER.equals(((OneShotChargeTemplate) oneShotChargeInstance.getChargeTemplate()).getOneShotChargeTemplateType());
+                if (applySubscriptionCharges && !isOSO) {
 
                     ratingResult = oneShotRatingService.rateOneShotCharge(oneShotChargeInstance, oneShotChargeInstance.getQuantity(), null, serviceInstance.getSubscriptionDate(),
                         serviceInstance.getOrderNumber(), ChargeApplicationModeEnum.SUBSCRIPTION, false, false, null);
@@ -579,7 +581,7 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
 //                    }
 
                 } else {
-                    log.debug("ServiceActivation: subscription charges were not applied/rated.");
+                    log.debug("ServiceActivation: {} charges were not applied/rated.", isOSO ? "OSO" : "subscription");
                 }
 
                 oneShotChargeInstanceService.update(oneShotChargeInstance);

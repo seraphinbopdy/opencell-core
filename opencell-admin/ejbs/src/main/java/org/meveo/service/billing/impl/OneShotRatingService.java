@@ -103,11 +103,6 @@ public class OneShotRatingService extends RatingService implements Serializable 
             RatingResult ratingResult = new RatingResult();
             ratingResult.setWasRatingSkipped(true);
             return ratingResult;
-        } else if (chargeInstance.getChargeTemplate() instanceof OneShotChargeTemplate && OneShotChargeTemplateTypeEnum.OTHER.equals(((OneShotChargeTemplate) chargeInstance.getChargeTemplate()).getOneShotChargeTemplateType())) {
-            log.debug("Not rating oneshot chargeInstance {}/{}, OSO Charge should not be rated", chargeInstance.getId(), chargeInstance.getCode());
-            RatingResult ratingResult = new RatingResult();
-            ratingResult.setWasRatingSkipped(true);
-            return ratingResult;
         }
         if (chargeInstance.getChargeTemplate() != null
                 && chargeInstance.getChargeTemplate().getQuantityAttribute() != null) {

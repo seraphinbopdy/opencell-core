@@ -581,7 +581,7 @@ public class ServiceInstanceService extends BusinessService<ServiceInstance> {
 //                    }
 
                 } else {
-                    log.debug("ServiceActivation: subscription charges were not applied/rated.");
+                    log.debug("ServiceActivation: {} charges were not applied/rated.", isOSO ? "OSO" : "subscription");
                 }
 
                 oneShotChargeInstanceService.update(oneShotChargeInstance);

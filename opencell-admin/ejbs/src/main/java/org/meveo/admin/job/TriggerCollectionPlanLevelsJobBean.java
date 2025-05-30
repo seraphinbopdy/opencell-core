@@ -270,7 +270,9 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
                     }
 
                         // Update collection plan status to FAILED if is end of dunning and invoice is unpaid
-                    if (levelInstance.getDunningLevel() != null && levelInstance.getDunningLevel().isEndOfDunningLevel() && collectionPlan.getRelatedInvoice().getPaymentStatus().equals(InvoicePaymentStatusEnum.UNPAID)) {
+                    if (levelInstance.getDunningLevel() != null && levelInstance.getDunningLevel().isEndOfDunningLevel() &&
+                            (levelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.DONE || levelInstance.getLevelStatus() == DunningLevelInstanceStatusEnum.IGNORED) &&
+                            collectionPlan.getRelatedInvoice().getPaymentStatus().equals(InvoicePaymentStatusEnum.UNPAID)) {
                         collectionPlan.setStatus(collectionPlanStatusService.findByStatus(DunningCollectionPlanStatusEnum.UNRECOVERED));
                         collectionPlan.setNextAction(null);
                         collectionPlan.setNextActionDate(null);

@@ -70,12 +70,12 @@
 			<id>opencell-nexus</id>
 			<url>https://nexus.int.opencell.work/repository/maven-snapshots/</url>
 		</repository>
+		<repository>
+	        <id>central</id>
+	        <url>https://repo.maven.apache.org/maven2</url>
+	    </repository>
 	</repositories>
 	<pluginRepositories>
-		<pluginRepository>
-			<id>opencast-public</id>
-			<url>https://nexus.opencast.org/nexus/content/repositories/public/</url>
-		</pluginRepository>
 		<pluginRepository>
 			<id>central-maven</id>
 			<url>https://central.maven.org/maven2/</url>

@@ -436,8 +436,8 @@ public class TriggerCollectionPlanLevelsJobBean extends BaseJobBean {
 
                         levelInstance = levelInstanceService.refreshOrRetrieve(levelInstance);
 
-                        // Set current dunning level sequence
-                        if (nextLevel < collectionPlan.getDunningLevelInstances().size()) {
+                        if(nextLevel < collectionPlan.getDunningLevelInstances().size() &&
+                                levelInstance.getActions().stream().allMatch(action -> action.getActionStatus() == DunningActionInstanceStatusEnum.DONE || action.getActionStatus() == DunningActionInstanceStatusEnum.IGNORED)) {
                             collectionPlan.setCurrentDunningLevelSequence(levelInstance.getSequence() + 1);
                         }
 

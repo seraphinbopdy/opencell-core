@@ -115,34 +115,32 @@
 				</executions>
 			</plugin>
 			<!-- SWAGGER UI -->
-			<!--			<plugin>-->
-			<!--				<groupId>com.googlecode.maven-download-plugin</groupId>-->
-			<!--				<artifactId>download-maven-plugin</artifactId>-->
-			<!--				<version>1.9.0</version>-->
-			<!--				<executions>-->
-			<!--					<execution>-->
-			<!--						<id>swagger-ui</id>-->
-			<!--						<phase>prepare-package</phase>-->
-			<!--						<goals>-->
-			<!--							<goal>wget</goal>-->
-			<!--						</goals>-->
-			<!--						<configuration>-->
-			<!--							<skipCache>false</skipCache>-->
-			<!--							<url>-->
-			<!--
-			https://github.com/swagger-api/swagger-ui/archive/master.tar.gz</url>-->
-			<!--							<unpack>true</unpack>-->
-			<!--							<outputDirectory>./target</outputDirectory>-->
-			<!--						</configuration>-->
-			<!--					</execution>-->
-			<!--				</executions>-->
-			<!--			</plugin>-->
+			<plugin>
+				<groupId>com.googlecode.maven-download-plugin</groupId>
+				<artifactId>download-maven-plugin</artifactId>
+				<version>1.9.0</version>
+				<executions>
+					<execution>
+						<id>swagger-ui</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>wget</goal>
+						</goals>
+						<configuration>
+							<skipCache>false</skipCache>
+							<url>https://github.com/swagger-api/swagger-ui/archive/master.tar.gz</url>
+							<unpack>true</unpack>
+							<outputDirectory>./target</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<artifactId>maven-resources-plugin</artifactId>
 				<executions>
 					<execution>
 						<id>copy-resources-apiv0</id>
-						<phase>package</phase>
+						<phase>prepare-package</phase>
 						<goals>
 							<goal>copy-resources</goal>
 						</goals>
@@ -157,7 +155,7 @@
 					</execution>
 					<execution>
 						<id>copy-resources-apiv1</id>
-						<phase>package</phase>
+						<phase>prepare-package</phase>
 						<goals>
 							<goal>copy-resources</goal>
 						</goals>
@@ -172,7 +170,7 @@
 					</execution>
 					<execution>
 						<id>copy-resources-apiv2</id>
-						<phase>package</phase>
+						<phase>prepare-package</phase>
 						<goals>
 							<goal>copy-resources</goal>
 						</goals>
@@ -196,7 +194,7 @@
 						<goals>
 							<goal>replace</goal>
 						</goals>
-						<phase>verify</phase>
+						<phase>prepare-package</phase>
 						<configuration>
 							<includes>
 								<include>
@@ -220,7 +218,7 @@
 					</execution>
 					<execution>
 						<id>replace-swagger-json-location</id>
-						<phase>verify</phase>
+						<phase>prepare-package</phase>
 						<goals>
 							<goal>replace</goal>
 						</goals>
@@ -230,7 +228,7 @@
 						<goals>
 							<goal>replace</goal>
 						</goals>
-						<phase>verify</phase>
+						<phase>prepare-package</phase>
 						<configuration>
 							<includes>
 								<include>
@@ -250,7 +248,7 @@
 						<goals>
 							<goal>replace</goal>
 						</goals>
-						<phase>verify</phase>
+						<phase>prepare-package</phase>
 						<configuration>
 							<includes>
 								<include>

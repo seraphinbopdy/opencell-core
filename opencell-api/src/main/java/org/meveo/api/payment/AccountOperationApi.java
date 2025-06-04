@@ -209,22 +209,27 @@ public class AccountOperationApi extends BaseApi {
      */
     public Long create(AccountOperationDto postData) throws MeveoApiException, BusinessException {
 
-        if (StringUtils.isBlank(postData.getType())) {
-            missingParameters.add("Type");
-            handleMissingParameters();
+    	if (StringUtils.isBlank(postData.getType())) {
+            missingParameters.add("Type");            
         }
+        if (StringUtils.isBlank(postData.getCode())) {
+            missingParameters.add("Code");            
+        }
+
+        handleMissingParameters();
 
         Object aoSubclassObject = getSubclassObjectByDiscriminatorValue(AccountOperation.class, postData.getType());
         AccountOperation accountOperation = null;
-        CustomerAccount customerAccount = customerAccountService.findByCode(postData.getCustomerAccount());
-        OperationCategoryEnum transactionCategory = postData.getTransactionCategory();
-        if(transactionCategory == null){
-            transactionCategory = ((AccountOperation)aoSubclassObject).getTransactionCategory();
-        }
+        CustomerAccount customerAccount = customerAccountService.findByCode(postData.getCustomerAccount());       
+       
         if (customerAccount == null) {
             throw new EntityDoesNotExistsException(CustomerAccount.class, postData.getCustomerAccount());
         }
-
+        
+        OCCTemplate occTemplate = oCCTemplateService.findByCode(postData.getCode());
+        if (occTemplate == null) {
+            throw new BusinessException("Cannot find OCC Template with code=" + postData.getCode());
+        }
         if (aoSubclassObject == null) {
             throw new MeveoApiException("Type and data mismatch OCC=otherCreditAndCharge, R=rejectedPayment, W=writeOff.");
         }
@@ -252,8 +257,7 @@ public class AccountOperationApi extends BaseApi {
             
             accountOperation = rejectedPayment;
         } else if (aoSubclassObject instanceof WriteOff) {
-            WriteOff writeOff = new WriteOff();
-            transactionCategory = OperationCategoryEnum.CREDIT;
+            WriteOff writeOff = new WriteOff();            
             accountOperation = writeOff;
         }
 
@@ -281,7 +285,7 @@ public class AccountOperationApi extends BaseApi {
         }
         accountOperation.setType(postData.getType());
 
-        accountOperation.setTransactionCategory(transactionCategory);
+        accountOperation.setTransactionCategory(occTemplate.getOccCategory());
         accountOperation.setReference(postData.getReference());
         if (!StringUtils.isBlank(postData.getAccountingCode())) {
             AccountingCode accountingCode = accountingCodeService.findByCode(postData.getAccountingCode());
@@ -299,11 +303,7 @@ public class AccountOperationApi extends BaseApi {
                 accountOperation.setAccountingCode(accountingCode);
             }
         }
-        
-        OCCTemplate occTemplate = oCCTemplateService.findByCode(postData.getCode());
-        if (occTemplate == null) {
-            throw new BusinessException("Cannot find OCC Template with code=" + postData.getCode());
-        }
+                
         if (!occTemplate.isManualCreationEnabled()) {
             throw new BusinessException(String.format("Creation is prohibited; occTemplate %s is not allowed for manual creation", postData.getCode()));
         }

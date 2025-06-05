@@ -6952,7 +6952,8 @@ public class InvoiceService extends PersistenceService<Invoice> {
             toUpdate.setPaymentMethod(pm);
         }
 
-        if (invoiceResource.getSubscription() != null && invoiceResource.getSubscription().getId() != null) {
+        if (toUpdate.getBillingRun() == null
+                && invoiceResource.getSubscription() != null && invoiceResource.getSubscription().getId() != null) {
             // Subscription can only be edited for manual invoice in draft-like status (NEW, DRAFT, REJECTED, SUSPECT)
             if (!(toUpdate.getStatus() == InvoiceStatusEnum.NEW || toUpdate.getStatus() == DRAFT ||
                     toUpdate.getStatus() == InvoiceStatusEnum.REJECTED ||toUpdate.getStatus() == InvoiceStatusEnum.SUSPECT)) {

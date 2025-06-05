@@ -522,7 +522,7 @@
 					        </dependency>
 					    </dependencies>
 					    <configuration>
-					        <outputPath>${project.build.directory}/doc/swagger</outputPath>
+					        <outputPath>${project.basedir}/src/main/resources/doc/swagger</outputPath>
 					        <outputFormat>JSONANDYAML</outputFormat>
 					        <prettyPrint>true</prettyPrint>
 					        <resourcePackages>

@@ -295,6 +295,10 @@ public class CommercialOrderApi extends BaseApi {
 		//Set the sales person name
 		order.setSalesPersonName(orderDto.getSalesPersonName());
 		commercialOrderService.create(order);
+		if(StringUtils.isBlank(order.getOrderNumber())){
+			serviceSingleton.assignCommercialOrderNumber(order);
+
+		}
 		CommercialOrderDto dto = new CommercialOrderDto(order);
 		dto.setCustomFields(entityToDtoConverter.getCustomFieldsDTO(order,CustomFieldInheritanceEnum.INHERIT_NO_MERGE));
 		return dto;

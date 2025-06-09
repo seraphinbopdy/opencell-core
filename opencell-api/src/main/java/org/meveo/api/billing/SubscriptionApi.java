@@ -158,6 +158,7 @@ import org.meveo.model.cpq.AgreementDateSettingEnum;
 import org.meveo.model.cpq.Attribute;
 import org.meveo.model.cpq.Product;
 import org.meveo.model.cpq.ProductVersion;
+import org.meveo.model.cpq.ProductVersionAttribute;
 import org.meveo.model.cpq.commercial.CommercialOrder;
 import org.meveo.model.cpq.commercial.OrderAttribute;
 import org.meveo.model.cpq.commercial.OrderProduct;
@@ -867,6 +868,7 @@ public class SubscriptionApi extends BaseApi {
                 // Instantiate if it was not instantiated earlier
             } else if (serviceInstance == null) {
                 Optional<ProductVersion> productVersion = null;
+	            serviceInstance = new ServiceInstance();
                 ServiceTemplate serviceTemplate = serviceTemplateService.findByCode(serviceToActivateDto.getCode());
                 if (serviceTemplate == null) {
                     productVersion = productService.getCurrentPublishedVersion(serviceToActivateDto.getCode(), serviceToActivateDto.getSubscriptionDate() != null ? serviceToActivateDto.getSubscriptionDate() : new Date());
@@ -875,6 +877,52 @@ public class SubscriptionApi extends BaseApi {
                         if(ProductStatusEnum.CLOSED.equals(product.getStatus())) {
                             throw new BusinessApiException("Can not instantiate service and product status is CLOSED, product code : " + product.getCode());
                         }
+	                    
+						for(ProductVersionAttribute productVersionAttribute : productVersion.get().getAttributes()) {
+							AttributeInstance attributeInstance = new AttributeInstance(currentUser);
+							Attribute attribute = attributeService.refreshOrRetrieve(productVersionAttribute.getAttribute());
+							attributeInstance.setAttribute(attribute);
+							productVersionAttribute.setAttribute((Attribute) Hibernate.unproxy(attribute));
+							attributeInstance.setServiceInstance(serviceInstance);
+							attributeInstance.setSubscription(subscription);
+							if(!StringUtils.isBlank(productVersionAttribute.getDefaultValue())){
+								switch (attribute.getAttributeType()) {
+									case BOOLEAN:
+										if(attributeInstance.getStringValue()==null)
+											attributeInstance.setStringValue(productVersionAttribute.getDefaultValue());
+										break;
+									case TOTAL :
+									case COUNT :
+									case NUMERIC :
+									case INTEGER:
+										if(attributeInstance.getDoubleValue()==null)
+											attributeInstance.setDoubleValue(Double.valueOf(productVersionAttribute.getDefaultValue()));
+										break;
+									case LIST_MULTIPLE_TEXT:
+									case LIST_TEXT:
+									case EXPRESSION_LANGUAGE :
+									case TEXT:
+										if(attributeInstance.getStringValue()==null)
+											attributeInstance.setStringValue(productVersionAttribute.getDefaultValue());
+										break;
+									case DATE:
+										if(attributeInstance.getDateValue()==null){
+											try {
+												attributeInstance.setDateValue(new SimpleDateFormat("yyyy-MM-dd").parse(productVersionAttribute.getDefaultValue()));
+											} catch (Exception e) {
+												attributeInstance.setDateValue(new Date());
+											}
+										}
+										break;
+									default:
+										if(attributeInstance.getStringValue()==null)
+											attributeInstance.setStringValue(productVersionAttribute.getDefaultValue());
+										break;
+								}
+							}
+							attributeService.validAttribute(productVersionAttribute, attributeInstance);
+							serviceInstance.addAttributeInstance(attributeInstance);
+						};
                     }
                     log.debug("getServiceToActivate - productVersion: " + productVersion + " - serviceToActivateDto.getCode(): " + serviceToActivateDto.getCode() + " - serviceToActivateDto.getSubscriptionDate(): " + serviceToActivateDto.getSubscriptionDate());
                     if(productVersion.isEmpty()){
@@ -886,7 +934,6 @@ public class SubscriptionApi extends BaseApi {
 
                 log.debug("Will instantiate as part of activation service {} for subscription {} quantity {}", serviceCharge.getCode(), subscription.getCode(), serviceToActivateDto.getQuantity());
 
-                serviceInstance = new ServiceInstance();
                 serviceInstance.setCode(serviceCharge.getCode());
                 if (serviceToActivateDto.getOverrideCode() != null) {
                     serviceInstance.setCode(serviceToActivateDto.getOverrideCode());

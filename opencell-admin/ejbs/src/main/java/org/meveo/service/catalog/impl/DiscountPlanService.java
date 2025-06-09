@@ -118,7 +118,7 @@ public class DiscountPlanService extends BusinessService<DiscountPlan> {
 	        if (StringUtils.isBlank(expression)) {
 	            return result;
 	        }
-	        Object res = ValueExpressionWrapper.evaluateExpression(expression, Boolean.class, entities);
+	        Object res = ValueExpressionWrapper.evaluateExpression(expression, Boolean.class, entity, entities);
 	        try {
 	            result = (Boolean) res;
 	        } catch (Exception e) {

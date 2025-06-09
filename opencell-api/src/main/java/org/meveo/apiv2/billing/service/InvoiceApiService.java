@@ -83,6 +83,7 @@ import org.meveo.service.settings.impl.AdvancedSettingsService;
 public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 
 	private static final String INVOICE_API_MASS_ACTION_LIMIT_CODE = "invoice.api.mass.action.limit";
+	private static final Integer DEFAULT_INVOICE_API_MASS_ACTION_LIMIT = 1000;
 
 	@Inject
     private InvoiceService invoiceService;
@@ -733,6 +734,10 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 	 */
 	private Integer getMassApiLimit() {
 		final AdvancedSettings massApiLimitSettings = advancedSettingsService.findByCode(INVOICE_API_MASS_ACTION_LIMIT_CODE);
+		if (massApiLimitSettings == null) {
+			log.warn("Failed to find mass api limit settings, default value {} will be used ", DEFAULT_INVOICE_API_MASS_ACTION_LIMIT);
+			return DEFAULT_INVOICE_API_MASS_ACTION_LIMIT;
+		}
 		return advancedSettingsService.parseValue(massApiLimitSettings);
 	}
 

@@ -44,6 +44,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import jakarta.persistence.NonUniqueResultException;
 import org.apache.commons.collections.CollectionUtils;
 import org.meveo.admin.async.SynchronizedIterator;
 import org.meveo.admin.exception.BusinessException;
@@ -1108,6 +1109,32 @@ public class SubscriptionService extends BusinessService<Subscription> {
     public Subscription findByCode(String code) {
         List<Subscription> subscriptions = findListByCode(code);
         return getActiveOrLastUpdated(subscriptions);
+    }
+
+    @Override
+    public Subscription findByCode(String code, List<String> fetchFields) {
+
+        if (StringUtils.isBlank(code)) {
+            return null;
+        }
+
+        QueryBuilder qb = new QueryBuilder(Subscription.class, "be", fetchFields);
+        qb.addCriterion("be.code", "=", code, true);
+        qb.addSqlCriterion("be.nextVersion is null", null, null);
+        qb.addOrderCriterion("be.auditable.created", false);
+        Query query = qb.getQuery(getEntityManager());
+        query.setMaxResults(1);
+
+        try {
+            return (Subscription) query.getSingleResult();
+
+        } catch (NoResultException e) {
+            log.debug("No {} of code {} found", getEntityClass().getSimpleName(), code);
+            return null;
+        } catch (NonUniqueResultException e) {
+            log.error("More than one entity of type {} with code {} found. A first entry is returned.", entityClass, code);
+            return (Subscription) qb.getQuery(getEntityManager()).getResultList().get(0);
+        }
     }
 
     public List<Subscription> findListByCode(String code) {

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -140,17 +141,19 @@ public class AccountingArticleService extends BusinessService<AccountingArticle>
                     && filterMappingLines(walletOperation, articleMappingLine.getMappingKeyEL())) {
 
                 filteredArticleMappingLines.add(articleMappingLine);
-		}
+			}
 		}
 		
 		AttributeMappingLineMatch attributeMappingLineMatch = new AttributeMappingLineMatch();
+		List<ArticleMappingLine> tmpArticleMappingLines = new ArrayList<>(filteredArticleMappingLines);
+		filteredArticleMappingLines.sort(Comparator.comparing(alm -> alm.getAttributesMapping().isEmpty()));
 		for (ArticleMappingLine aml : filteredArticleMappingLines) {
-			
-			if (aml.getAttributesMapping().isEmpty()) {
+			var noneAttributeExist = tmpArticleMappingLines.stream().allMatch(amls -> amls.getAttributesMapping().isEmpty());
+			if (aml.getAttributesMapping().isEmpty() && noneAttributeExist) {
                 attributeMappingLineMatch.addFullMatch(aml);
                 continue;
-		}
-            
+			}
+   
 			List<AttributeMapping> matchedAttributesMapping = new ArrayList<>();
 			List<AttributeMapping> attributesMapping = aml.getAttributesMapping();
 				AtomicBoolean continueProcess = new AtomicBoolean(true);
@@ -159,6 +162,7 @@ public class AccountingArticleService extends BusinessService<AccountingArticle>
 						if (continueProcess.get()) {
 							if (checkAttribute(product, walletOperation, attributes, attributeMapping)) {
 								matchedAttributesMapping.add(attributeMapping);
+								tmpArticleMappingLines.add(aml);
 							} else {
 								// for AND operator, if at least we have 1 unmatchedAttributs (else), all previous matchedAttribut shall not taken into account
 								matchedAttributesMapping.clear();

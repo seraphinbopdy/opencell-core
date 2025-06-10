@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -145,6 +146,7 @@ public class AccountingArticleService extends BusinessService<AccountingArticle>
 		
 		AttributeMappingLineMatch attributeMappingLineMatch = new AttributeMappingLineMatch();
 		List<ArticleMappingLine> tmpArticleMappingLines = new ArrayList<>(filteredArticleMappingLines);
+		filteredArticleMappingLines.sort(Comparator.comparing(alm -> alm.getAttributesMapping().isEmpty()));
 		for (ArticleMappingLine aml : filteredArticleMappingLines) {
 			var noneAttributeExist = tmpArticleMappingLines.stream().allMatch(amls -> amls.getAttributesMapping().isEmpty());
 			if (aml.getAttributesMapping().isEmpty() && noneAttributeExist) {

@@ -3568,7 +3568,11 @@ public class SubscriptionApi extends BaseApi {
         if (postData.getAttributes() != null) {
             serviceInstance = new ServiceInstance(); // Create a virtual ServiceInstance
             serviceInstance.setSubscription(subscription);
-
+	        Optional<ServiceInstance> serviceInstanceOfSub = subscription.getServiceInstances().stream().filter(si -> si.getCode().equals(postData.getProductCode()))
+			        .findFirst();
+	        if(serviceInstanceOfSub.isPresent()) {
+		        serviceInstance.getDiscountPlanInstances().addAll(serviceInstanceOfSub.get().getDiscountPlanInstances());
+	        }
             // Product data
             if (StringUtils.isNotBlank(postData.getProductCode())) {
                 Product product = productService.findByCode(postData.getProductCode());

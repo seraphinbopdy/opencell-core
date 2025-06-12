@@ -2,7 +2,6 @@ package org.meveo.apiv2.billing;
 
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
 
 import org.immutables.value.Value;
 import org.meveo.apiv2.admin.Seller;
@@ -60,8 +59,9 @@ public interface BasicInvoice extends Resource {
 	@Schema(description = "The flag for auto matching")
 	@Nullable
 	Boolean getAutoMatching();
+	
+	@Schema(description = "The external purchase order number")
+	@Nullable
+	String getPurchaseOrder();
 
-	@Schema(description = "The list of purchase order numbers")
-	@javax.annotation.Nullable
-	List<String> getPurchaseOrders();
 }

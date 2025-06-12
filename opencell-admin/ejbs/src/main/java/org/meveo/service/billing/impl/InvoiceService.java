@@ -6231,13 +6231,14 @@ public class InvoiceService extends PersistenceService<Invoice> {
                         List<Long> ilIds = (List<Long>) aggregateAndILIds[1];
                         ListUtils.partition(ilIds, maxValue).forEach(ids -> {
                             SubCategoryInvoiceAgregate subCategoryAggregate = (SubCategoryInvoiceAgregate) aggregateAndILIds[0];
-                            em.createNamedQuery("InvoiceLine.updateWithInvoice")
+                            int result = em.createNamedQuery("InvoiceLine.updateWithInvoice")
                                     .setParameter("billingRun", billingRun)
                                     .setParameter("invoice", invoice)
                                     .setParameter("now", now)
                                     .setParameter("invoiceAgregateF", subCategoryAggregate)
                                     .setParameter("ids", ids)
                                     .executeUpdate();
+                            log.debug("Number of invoice lines updated {}", result);
                         });
                     }
 
@@ -6254,6 +6255,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
                     if (!ilMassUpdates.isEmpty() || !ilUpdates.isEmpty()) {
                         em.flush();
+                        em.clear();
                     }
                 }
             }
@@ -7360,7 +7362,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
     }
 
     private void calculateOrUpdateInvoice(List<Long> invoiceLinesIds, Invoice adjustmentInvoice) {
-        if (invoiceLinesIds != null && !invoiceLinesIds.isEmpty()) {
+        if ((invoiceLinesIds != null && !invoiceLinesIds.isEmpty()) || isNotEmpty(adjustmentInvoice.getInvoiceLines())) {
             calculateInvoice(adjustmentInvoice, true);
         }
         else {

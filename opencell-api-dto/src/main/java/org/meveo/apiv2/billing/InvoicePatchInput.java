@@ -10,8 +10,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-import java.util.List;
-
 @Value.Immutable
 @Value.Style(jdkOnly = true, jakarta = true)
 @JsonDeserialize(as = ImmutableInvoicePatchInput.class)
@@ -24,8 +22,8 @@ public interface InvoicePatchInput extends Resource {
     @Schema(description = "The comment for the invoice")
     @Nullable
     String getComment();
-
-    @Schema(description = "The list of purchase order numbers")
-    @javax.annotation.Nullable
-    List<String> getPurchaseOrders();
+    
+	@Schema(description = "The external purchase order number")
+	@Nullable
+	String getPurchaseOrder();
 }

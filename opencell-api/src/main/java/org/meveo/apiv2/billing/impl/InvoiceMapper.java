@@ -23,7 +23,6 @@ import org.meveo.model.BaseEntity;
 import org.meveo.model.billing.BillingRun;
 import org.meveo.model.billing.Invoice;
 import org.meveo.model.billing.InvoiceType;
-import org.meveo.model.billing.PurchaseOrder;
 import org.meveo.model.order.Order;
 import org.meveo.service.billing.impl.article.AccountingArticleService;
 
@@ -125,7 +124,7 @@ public class InvoiceMapper extends ResourceMapper<org.meveo.apiv2.billing.Invoic
 		generateInvoiceRequestDto.setOrderNumber(invoiceInput.getOrderNumber());
 		generateInvoiceRequestDto.setApplyBillingRules(invoiceInput.isApplyBillingRules());
 		generateInvoiceRequestDto.setOpenOrderCode(invoiceInput.getOpenOrderCode());
-		generateInvoiceRequestDto.setPurchaseOrders(invoiceInput.getPurchaseOrders());
+		generateInvoiceRequestDto.setPurchaseOrder(invoiceInput.getPurchaseOrder());
 		return generateInvoiceRequestDto;
 	}
 
@@ -163,7 +162,7 @@ public class InvoiceMapper extends ResourceMapper<org.meveo.apiv2.billing.Invoic
 				.endDate(invoice.getEndDate())
 				.description(invoice.getDescription())
 				.previousInvoiceNumber(invoice.getPreviousInvoiceNumber())
-				.purchaseOrders(invoice.getPurchaseOrders() == null ? null : invoice.getPurchaseOrders().stream().map(PurchaseOrder::getNumber).collect(toList()))
+				.purchaseOrder(invoice.getExternalPurchaseOrderNumber())
 				.build();
 		return invoiceResult;
 	}

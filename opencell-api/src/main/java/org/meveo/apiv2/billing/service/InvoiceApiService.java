@@ -16,7 +16,13 @@ import static org.meveo.model.billing.InvoiceStatusEnum.VALIDATED;
 
 import java.math.BigDecimal;
 import java.security.InvalidParameterException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections4.CollectionUtils;
@@ -29,7 +35,10 @@ import org.meveo.api.BaseApi;
 import org.meveo.api.dto.FilterDto;
 import org.meveo.api.dto.billing.QuarantineBillingRunDto;
 import org.meveo.api.dto.invoice.GenerateInvoiceRequestDto;
-import org.meveo.api.exception.*;
+import org.meveo.api.exception.BusinessApiException;
+import org.meveo.api.exception.EntityDoesNotExistsException;
+import org.meveo.api.exception.MeveoApiException;
+import org.meveo.api.exception.MissingParameterException;
 import org.meveo.api.invoice.InvoiceApi;
 import org.meveo.apiv2.billing.BasicInvoice;
 import org.meveo.apiv2.billing.CancellationOutput;
@@ -59,13 +68,22 @@ import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.IBillableEntity;
 import org.meveo.model.ICustomFieldEntity;
-import org.meveo.model.billing.*;
+import org.meveo.model.billing.BillingAccount;
+import org.meveo.model.billing.Invoice;
+import org.meveo.model.billing.InvoiceStatusEnum;
+import org.meveo.model.billing.RatedTransaction;
+import org.meveo.model.billing.RatedTransactionAction;
+import org.meveo.model.billing.WalletOperation;
 import org.meveo.model.catalog.DiscountPlan;
 import org.meveo.model.filter.Filter;
 import org.meveo.model.jobs.JobInstance;
 import org.meveo.model.payments.OperationCategoryEnum;
 import org.meveo.model.settings.AdvancedSettings;
-import org.meveo.service.billing.impl.*;
+import org.meveo.service.billing.impl.BatchEntityService;
+import org.meveo.service.billing.impl.InvoiceLineService;
+import org.meveo.service.billing.impl.InvoiceService;
+import org.meveo.service.billing.impl.InvoiceTypeService;
+import org.meveo.service.billing.impl.RatedTransactionService;
 import org.meveo.service.filter.FilterService;
 import org.meveo.service.job.JobInstanceService;
 import org.meveo.service.securityDeposit.impl.FinanceSettingsService;
@@ -122,9 +140,6 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 	
 	@Inject
 	private JobInstanceService jobInstanceService;
-
-	@Inject
-	private PurchaseOrderService purchaseOrderService;
 
 	public List<Invoice> list(Long offset, Long limit, String sort, String orderBy, String filter) {
         PaginationConfiguration paginationConfiguration = new PaginationConfiguration(offset.intValue(), limit.intValue(), null, filter, null, null, null);
@@ -477,10 +492,10 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 		if (invoices == null || invoices.isEmpty()) {
 			throw new BusinessException(resourceMessages.getString("error.invoicing.noTransactions"));
 		}
-
+		
 		for (Invoice inv : invoices) {
-			if (invoice.getPurchaseOrders() != null && !invoice.getPurchaseOrders().isEmpty()) {
-				invoiceService.managePurchaseOrders(invoice.getPurchaseOrders(), inv);
+			if (invoice.getPurchaseOrder() != null) {
+				inv.setExternalPurchaseOrderNumber(invoice.getPurchaseOrder());
 				invoiceService.update(inv);
 			}
 		}
@@ -635,7 +650,7 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	public Invoice updateValidatedInvoice(Invoice invoice, org.meveo.apiv2.billing.InvoicePatchInput invoiceResource) {      
     	ICustomFieldEntity customFieldEntity = invoiceBaseApi.populateCustomFieldsForGenericApi(invoiceResource.getCustomFields(), invoice, true);
-		return invoiceService.updateValidatedInvoice(invoice, invoiceResource.getComment(), customFieldEntity.getCfValues(), invoiceResource.getPurchaseOrders());
+        return invoiceService.updateValidatedInvoice(invoice, invoiceResource.getComment(), customFieldEntity.getCfValues(), invoiceResource.getPurchaseOrder());
     }
 
 	@Transactional

@@ -1043,6 +1043,7 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
             //Build default columns
             CsvSchema.Builder columns = CsvSchema.builder().addColumns(dynamicColumns, CsvSchema.ColumnType.NUMBER_OR_STRING);
 
+            fillEmptyFields(records, dynamicColumns);
             return columns.build().withColumnSeparator(Optional.ofNullable(fieldSeparator).map(f -> f.charAt(0)).orElse(';')).withLineSeparator("\n").withoutQuoteChar().withHeader();
         }
 
@@ -1094,5 +1095,18 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
         }
     }
 
+    /**
+     * Fill empty fields in records with empty string to ensure all columns are present in the CSV/Excel output.
+     *
+     * @param records        Set of records to fill
+     * @param dynamicColumns List of dynamic columns to check and fill
+     */
+    private static void fillEmptyFields(Set<LinkedHashMap<String, Object>> records, List<String> dynamicColumns) {
+        records.forEach(record -> {
+            for (String dynamicColumn : dynamicColumns) {
+                record.putIfAbsent(dynamicColumn, "\"\"");
+            }
+        });
+    }
 }
 

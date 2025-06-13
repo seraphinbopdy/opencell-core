@@ -70,8 +70,7 @@ public class SellerApiService extends BaseApi {
 				customerSequence.setAuditable(new Auditable(meveoUser));
 			}
 		}
-		sellerService.create(seller);
-		
+
 		seller.getRegistrationNumbers().forEach(registrationNumber -> {
 			if(registrationNumber.getIsoIcd() == null){
 				registrationNumber.setIsoIcd(appProvider.getIcdId());
@@ -80,6 +79,8 @@ public class SellerApiService extends BaseApi {
 				registrationNumberService.create(registrationNumber);
 			}
 		});
+
+		sellerService.create(seller);
 	}
 	private void addNewInvoiceTypeSequence(Seller seller, List<Long> invoiceTypeIds){
 		var missingParam = new ArrayList<String>();

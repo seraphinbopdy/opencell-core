@@ -88,6 +88,7 @@ import org.meveo.model.billing.InvoiceSubCategory;
 import org.meveo.model.billing.InvoiceSubTotals;
 import org.meveo.model.billing.InvoiceType;
 import org.meveo.model.billing.LinkedInvoice;
+import org.meveo.model.billing.PurchaseOrder;
 import org.meveo.model.billing.RatedTransaction;
 import org.meveo.model.billing.ServiceInstance;
 import org.meveo.model.billing.SubCategoryInvoiceAgregate;
@@ -2254,9 +2255,20 @@ public class XmlInvoiceCreatorScript implements IXmlInvoiceCreatorScript {
             header.appendChild(discountsTag);
         }
 
-        Element externalPurchaseOrder = doc.createElement("externalPurchaseOrder");
-        externalPurchaseOrder.appendChild(createTextNode(doc, invoice.getExternalPurchaseOrderNumber()));
-        header.appendChild(externalPurchaseOrder);
+        Set<PurchaseOrder> purchaseOrders =invoice.getPurchaseOrders();
+        if(!purchaseOrders.isEmpty()) {
+        Element purchasesElement = doc.createElement("purchaseOrders");
+        Element externalPurchaseOrderNumber=null;	
+        for(PurchaseOrder po : purchaseOrders) {
+        	if(po.getNumber()!=null) {
+        	 externalPurchaseOrderNumber = doc.createElement("externalPurchaseOrderNumber");
+        	 externalPurchaseOrderNumber.appendChild(createTextNode(doc, po.getNumber()));
+        	 purchasesElement.appendChild(externalPurchaseOrderNumber);
+        	}
+        } 
+        header.appendChild(purchasesElement);
+        
+        }
 
         ofNullable(createSubTotals(doc, invoice.getInvoiceType(),
                 invoice.getInvoiceLines(), invoice.getBillingAccount().getTradingLanguage()))

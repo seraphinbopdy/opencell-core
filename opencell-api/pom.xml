@@ -486,6 +486,9 @@
 		</profile>
 		<profile>
 			<id>swagger</id>
+			<activation>
+	            <activeByDefault>true</activeByDefault>
+	        </activation>
 			<dependencies>
 				<dependency>
 					<groupId>io.swagger.core.v3</groupId>
@@ -522,7 +525,7 @@
 					        </dependency>
 					    </dependencies>
 					    <configuration>
-					        <outputPath>${project.basedir}/src/main/resources/doc/swagger</outputPath>
+					        <outputPath>${project.build.directory}/doc/swagger</outputPath>
 					        <outputFormat>JSONANDYAML</outputFormat>
 					        <prettyPrint>true</prettyPrint>
 					        <resourcePackages>

@@ -91,6 +91,8 @@ public class QuoteProductDTO extends BaseEntityDto{
 	
 	@Schema(description = "The action type")
     private ProductActionTypeEnum actionType;
+	
+	private List<MediaDto> medias = new ArrayList<>();
     
     public QuoteProductDTO() {
     	super();
@@ -112,7 +114,15 @@ public class QuoteProductDTO extends BaseEntityDto{
 		quantity=quoteProduct.getQuantity();
 		discountPlanCode=quoteProduct.getDiscountPlan() != null ?quoteProduct.getDiscountPlan().getCode() : null;
 		deliveryDate=quoteProduct.getDeliveryDate();
-	   }
+		if(quoteProduct.getProductVersion().getProduct().getMedias()!=null){
+			medias = quoteProduct.getProductVersion()
+								 .getProduct()
+								 .getMedias()
+								 .stream()
+								 .map(MediaDto::new)
+								 .toList();
+		}
+	}
 	
 	public QuoteProductDTO(QuoteProduct quoteProduct, boolean loadAttributes,
 						   Map<String, TaxDTO> mapTaxIndexes) {
@@ -334,6 +344,12 @@ public class QuoteProductDTO extends BaseEntityDto{
 	public void setActionType(ProductActionTypeEnum actionType) {
 		this.actionType = actionType;
 	}
-	
-	
+
+	public List<MediaDto> getMedias() {
+		return medias;
+	}
+
+	public void setMedias(List<MediaDto> medias) {
+		this.medias = medias;
+	}
 }

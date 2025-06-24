@@ -251,7 +251,7 @@ public class PricePlanMatrixColumnService extends BusinessService<PricePlanMatri
 			
 			line = scanner.nextLine();
 			if (line.isEmpty()) continue;
-			String[] nextLine = line.replaceAll("\"", "").split(";");;
+			String[] nextLine = removeEmptyColumns(line, columns.size());
 
 			for(var columnIndex=0; columnIndex < columns.size() ; columnIndex++ ) {
 				PricePlanMatrixValueDto pricePlanMatrixValueDto = new PricePlanMatrixValueDto();
@@ -353,6 +353,25 @@ public class PricePlanMatrixColumnService extends BusinessService<PricePlanMatri
         pricePlanMatrixLinesDto.setPricePlanMatrixLines(pricePlanMatrixLines);
 		
 		return pricePlanMatrixLinesDto;
+	}
+
+	/**
+	 * Remove empty columns from the line.
+	 * @param line the line to process
+	 * @param expectedColumns the expected number of columns in the line
+	 * @return an array of strings representing the non-empty columns
+	 */
+	private String[] removeEmptyColumns(String line, int expectedColumns) {
+		String[] fields = line.split(";", -1);
+		List<String> list = Arrays.asList(fields);
+		List<String> result = new ArrayList<>(expectedColumns);
+		list.forEach(field -> {
+			if (result.size() <= expectedColumns) {
+				result.add(field.replaceAll("\"", ""));
+			}
+		});
+
+		return result.toArray(new String[0]);
 	}
 
 	private boolean inAllowedValues(boolean isNumericType, List<String> allowedValues, String value)

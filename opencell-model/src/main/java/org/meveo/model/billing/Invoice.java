@@ -1045,6 +1045,15 @@ public class Invoice extends AuditableCFEntity implements ISearchable {
             amountTax = amountTax.add(amountToAdd);
         }
     }
+	
+	public void addAmountWithoutTaxBeforeDiscount(BigDecimal amountToAdd) {
+		if (amountWithoutTaxBeforeDiscount == null) {
+			amountWithoutTaxBeforeDiscount = ZERO;
+		}
+		if (amountToAdd != null) {
+			amountWithoutTaxBeforeDiscount = amountWithoutTaxBeforeDiscount.add(amountToAdd);
+		}
+	}
 
     public void addTransactionalAmountWithTax(BigDecimal amountToAdd) {
         if (transactionalAmountWithTax == null) {
@@ -1072,6 +1081,14 @@ public class Invoice extends AuditableCFEntity implements ISearchable {
             transactionalAmountTax = transactionalAmountTax.add(amountToAdd);
         }
     }
+	public void addTransactionalAmountWithoutTaxBeforeDiscount(BigDecimal amountToAdd) {
+		if (transactionalAmountWithoutTaxBeforeDiscount == null) {
+			transactionalAmountWithoutTaxBeforeDiscount = ZERO;
+		}
+		if (amountToAdd != null) {
+			transactionalAmountWithoutTaxBeforeDiscount = transactionalAmountWithoutTaxBeforeDiscount.add(amountToAdd);
+		}
+	}
 
     public String getTemporaryInvoiceNumber() {
         return temporaryInvoiceNumber;

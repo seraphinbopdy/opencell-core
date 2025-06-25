@@ -198,7 +198,9 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
         	//Get Charge Template Id from file name
         	 String lChargeTemplateId = importItem.getFileName().split("_-_")[1];
              ChargeTemplate lChargeTemplate = chargeTemplateService.findById(Long.parseLong(lChargeTemplateId));
-             pricePlanMatrixs = pricePlanMatrixService.listByChargeCode(lChargeTemplate.getCode());
+            if (lChargeTemplate != null) {
+                pricePlanMatrixs = pricePlanMatrixService.listByChargeCode(lChargeTemplate.getCode());
+            }
         }
         
         if (pricePlanMatrixs == null || pricePlanMatrixs.size() == 0) {

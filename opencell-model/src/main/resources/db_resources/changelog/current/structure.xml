@@ -18002,5 +18002,27 @@ Opencell team.
         <comment>Foreign key fk_wallet_operation_order_product exist and will be dropped</comment>
         <dropForeignKeyConstraint baseTableName="billing_wallet_operation" constraintName="fk_wallet_operation_order_product"/>
     </changeSet>
+    
+    <changeSet id="#INTRD-30139_20250626" author="AbdelmounaimAkadid">
+        <update tableName="meveo_script_instance">
+            <column name="script"><![CDATA[package org.meveo.service.script;
+
+import org.meveo.admin.exception.BusinessException;
+
+import java.util.Map;
+
+
+public class DummyPaymentGatewayScript extends Script {
+
+    private static final String ERROR_MESSAGE
+            = "Dummy gateway for SEPA files generation (For now, its only purpose is to store rejection codes. Please continue to use DD requests for SEPA files)";
+    @Override
+    public void execute(Map<String, Object> context) throws BusinessException {
+        throw new BusinessException(ERROR_MESSAGE);
+    }
+}]]></column>
+            <where>code='org.meveo.service.script.DummyPaymentGatewayScript'</where>
+        </update>
+    </changeSet>
 
 </databaseChangeLog>

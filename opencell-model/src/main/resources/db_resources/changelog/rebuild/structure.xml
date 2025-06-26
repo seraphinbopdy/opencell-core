@@ -20923,6 +20923,7 @@
     <changeSet id="INTRD-29281_20210306" author="abdelkader.bouazza" />
     <changeSet id="#INTRD-30413_collection_plan_status_color" author="zelmeliani" />
     <changeSet id="INTRD-31176_delete_fk" author="a.rouaguebe_ext" />
+    <changeSet id="#INTRD-30139_20250626" author="AbdelmounaimAkadid" />
 
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 

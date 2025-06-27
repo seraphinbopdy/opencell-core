@@ -274,6 +274,9 @@ public class InvoicingService extends PersistenceService<Invoice> {
         boolean calculateTaxOnSubCategoryLevel = invoice.getInvoiceType().getTaxScript() == null;
         
         Map<SubCategoryInvoiceAgregate, List<InvoicingItem>> itemsBySubCategory = createInvoiceSubCategories(groupedItems, invoice);
+
+        BigDecimal amountWithoutTax = itemsBySubCategory.values().stream().flatMap(Collection::stream)
+                .map(InvoicingItem::getAmountWithoutTax).reduce(BigDecimal.ZERO, BigDecimal::add);
         
         List<DiscountPlanItem> applicableDiscountPlanItems = getApplicableDiscounts(billingAccountDetailsItem, invoice);
         final Map<String, List<SubCategoryInvoiceAgregate>> scMap = itemsBySubCategory.keySet().stream().collect(Collectors.groupingBy(SubCategoryInvoiceAgregate::getCategoryAggKey));
@@ -290,6 +293,10 @@ public class InvoicingService extends PersistenceService<Invoice> {
         }
         initTaxAggregations(billingAccountDetailsItem, invoice, calculateTaxOnSubCategoryLevel, billingAccount, languageCode, groupedItems);
         invoice.setNetToPay(invoice.getAmountWithTax().add(invoice.getDueBalance() != null ? invoice.getDueBalance() : BigDecimal.ZERO));
+		if(invoice.getDiscountPlan() != null) {
+			invoice.setAmountWithoutTaxBeforeDiscount(amountWithoutTax);
+			invoice.setTransactionalAmountWithoutTaxBeforeDiscount(amountWithoutTax);
+		}
         return itemsBySubCategory.keySet();
     }
     private CategoryInvoiceAgregate initInvoiceCategoryAgg(BillingAccount billingAccount, Invoice invoice, String languageCode, List<SubCategoryInvoiceAgregate> scAggregateList) {
@@ -501,15 +508,12 @@ public class InvoicingService extends PersistenceService<Invoice> {
     }
     private void addAggregationAmounts(List<InvoicingItem> items, InvoiceAgregate invoiceAggregate, Long taxId) {
         InvoicingItem summuryItem = new InvoicingItem(items);
-        Tax tax = getTax(taxId);
-        BigDecimal[] amounts = NumberUtils.computeDerivedAmounts(summuryItem.getAmountWithoutTax(), summuryItem.getAmountWithTax(), tax.getPercent(), isEntreprise() , getInvoiceRounding(), getRoundingMode());
-        BigDecimal[] transactionalAmounts = NumberUtils.computeDerivedAmounts(summuryItem.getTransactionalAmountWithoutTax(), summuryItem.getTransactionalAmountWithTax(), tax.getPercent(), isEntreprise() , getInvoiceRounding(), getRoundingMode());
-        invoiceAggregate.addAmountWithoutTax(amounts[0]);
-        invoiceAggregate.addAmountWithTax(amounts[1]);
-        invoiceAggregate.addAmountTax(amounts[2]);
-        invoiceAggregate.addTransactionAmountWithoutTax(transactionalAmounts[0]);
-        invoiceAggregate.addTransactionAmountWithTax(transactionalAmounts[1]);
-        invoiceAggregate.addTransactionAmountTax(transactionalAmounts[2]);
+        invoiceAggregate.addAmountWithoutTax(summuryItem.getAmountWithoutTax());
+        invoiceAggregate.addAmountWithTax(summuryItem.getAmountWithTax());
+        invoiceAggregate.addAmountTax(summuryItem.getAmountTax());
+        invoiceAggregate.addTransactionAmountWithoutTax(summuryItem.getTransactionalAmountWithoutTax());
+        invoiceAggregate.addTransactionAmountWithTax(summuryItem.getTransactionalAmountWithTax());
+        invoiceAggregate.addTransactionAmountTax(summuryItem.getTransactionalAmountTax());
         invoiceAggregate.addItemNumber(summuryItem.getCount());
 		if (items.stream().anyMatch(InvoicingItem::isUseSpecificTransactionalAmount)) {
 			invoiceAggregate.setUseSpecificPriceConversion(true);
@@ -591,6 +595,10 @@ public class InvoicingService extends PersistenceService<Invoice> {
         if (discountAmount == null || discountAmount.compareTo(BigDecimal.ZERO) == 0) {
             return null;
         }
+		invoice.setDiscountAmount(discountAmount.compareTo(BigDecimal.ZERO) == 0 ? amountToApplyDiscountOn : discountAmount);
+	    invoice.setTransactionalDiscountAmount(invoice.getDiscountAmount());
+		invoice.setDiscountPlan(discountPlanItem.getDiscountPlan());
+		invoice.setHasDiscounts(true);
         SubCategoryInvoiceAgregate discountAggregate = new SubCategoryInvoiceAgregate(scAggregate.getInvoiceSubCategory(), billingAccount, scAggregate.getUserAccount(), scAggregate.getWallet(), invoice, null);
         discountAggregate.updateAudit(currentUser);
         discountAggregate.setItemNumber(scAggregate.getItemNumber());
@@ -606,6 +614,11 @@ public class InvoicingService extends PersistenceService<Invoice> {
         discountAggregate.setAmountWithoutTax(discountedItemSum.getAmountWithoutTax().subtract(scAggregate.getAmountWithoutTax()));
         discountAggregate.setAmountWithTax(discountedItemSum.getAmountWithTax().subtract(scAggregate.getAmountWithTax()));
         discountAggregate.setAmountTax(discountedItemSum.getAmountTax().subtract(scAggregate.getAmountTax()));
+	    discountAggregate.setTransactionalAmountWithoutTax(discountedItemSum.getTransactionalAmountWithoutTax().subtract(scAggregate.getTransactionalAmountWithoutTax()));
+		discountAggregate.setTransactionalAmountWithTax(discountedItemSum.getTransactionalAmountWithTax().subtract(scAggregate.getTransactionalAmountWithTax()));
+		discountAggregate.setTransactionalAmountTax(discountedItemSum.getTransactionalAmountTax().subtract(scAggregate.getTransactionalAmountTax()));
+        invoice.setDiscountAmount(discountAggregate.getAmountWithoutTax().abs());
+        invoice.setTransactionalDiscountAmount(discountAggregate.getTransactionalAmountWithoutTax().abs());
         addInvoiceAggregateWithAmounts(invoice, discountAggregate);
         return discountAggregate;
     }
@@ -623,7 +636,6 @@ public class InvoicingService extends PersistenceService<Invoice> {
 		if (invoiceAgg.isUseSpecificPriceConversion()) {
 			invoice.setUseSpecificPriceConversion(true);
 		}
-		invoice.setAmountWithoutTaxBeforeDiscount(invoice.getAmountWithoutTax());
     }
     
     public void addInvoiceAggregateWithAmounts(Invoice invoice, InvoiceAgregate invoiceAgg) {
@@ -644,6 +656,10 @@ public class InvoicingService extends PersistenceService<Invoice> {
         taxItem.setAmountWithTax(amounts[0]);
         taxItem.setAmountWithoutTax(amounts[1]);
         taxItem.setAmountTax(amounts[2]);
+        BigDecimal[] transactionalAmounts = getAppliedDiscount(taxItem.getTransactionalAmountWithoutTax(), taxItem.getTransactionalAmountWithTax(), percent);
+        taxItem.setTransactionalAmountWithTax(transactionalAmounts[0]);
+        taxItem.setTransactionalAmountWithoutTax(transactionalAmounts[1]);
+        taxItem.setTransactionalAmountTax(transactionalAmounts[2]);
     }
     private BigDecimal[] getAppliedDiscount(BigDecimal amountWithoutTax, BigDecimal amountWithTax, BigDecimal percent) {
         amountWithoutTax = applyDiscount(amountWithoutTax, percent);

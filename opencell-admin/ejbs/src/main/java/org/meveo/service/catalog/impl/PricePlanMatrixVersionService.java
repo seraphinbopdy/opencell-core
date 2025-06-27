@@ -838,12 +838,11 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
                     fileName.append(fileNameSeparator + chargeTemplate.getId());
                     fileName.append(fileNameSeparator + chargeTemplate.getDescription()).append(fileNameSeparator + chargeTemplate.getCode());
                 } else {
-					var firstCharge = ppmv.getPricePlanMatrix().getChargeTemplates().stream().sorted(Comparator.comparing(chargeTemplate -> {
-						return chargeTemplate.getAuditable().getCreated();
-					})).findFirst().orElse(null);
-	                fileName.append(fileNameSeparator + firstCharge.getId());
-                    fileName.append(fileNameSeparator + ppmv.getPricePlanMatrix().getCode());
-            }
+                    ChargeTemplate chargeTemplate = ppmv.getPricePlanMatrix().getChargeTemplates().stream()
+                            .min(Comparator.comparing(ChargeTemplate::getId)).orElse(null);
+                    fileName.append(fileNameSeparator + chargeTemplate.getId());
+                    fileName.append(fileNameSeparator + chargeTemplate.getDescription()).append(fileNameSeparator + chargeTemplate.getCode());
+                }
             }
 	        
 	        fileName.append(fileNameSeparator + ppmv.getLabel());

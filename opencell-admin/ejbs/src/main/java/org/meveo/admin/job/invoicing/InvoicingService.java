@@ -232,7 +232,9 @@ public class InvoicingService extends PersistenceService<Invoice> {
         	invoices.forEach(invoice-> {
                 serviceSingleton.assignInvoiceNumberVirtual(invoice);
                 invoiceService.updatePaymentStatus(invoice, new Date());
-                generateAutomaticAO(billingRun.getId(), invoice);
+                if(billingRun.getGenerateAO()) {
+                    generateAutomaticAO(billingRun.getId(), invoice);
+                }
             });
         	invoiceService.incrementBAInvoiceDate(billingRun, invoices.get(0).getBillingAccount());
         }

@@ -424,7 +424,7 @@ public class RecordedInvoiceService extends PersistenceService<RecordedInvoice> 
 					}
 					
 					if (occTemplate == null) {
-						occTemplate = invoice.getInvoiceType().getOccTemplate();
+						occTemplate = occTemplateService.findById(invoice.getInvoiceType().getOccTemplate().getId());
 						if (occTemplate == null) {
 							return null;
 						}

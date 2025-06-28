@@ -787,14 +787,16 @@
 			</dependency>
 			<!-- Jakarta XML Binding (Replacement for javax.xml.bind) -->
 			<dependency>
-				<groupId>jakarta.xml.bind</groupId>
-				<artifactId>jakarta.xml.bind-api</artifactId>
-				<version>3.0.1</version>
+			    <groupId>jakarta.xml.bind</groupId>
+			    <artifactId>jakarta.xml.bind-api</artifactId>
+			    <version>4.0.1</version>
 			</dependency>
+			<!-- Runtime Implementation (Glassfish JAXB) -->
 			<dependency>
-				<groupId>org.glassfish.jaxb</groupId>
-				<artifactId>jaxb-runtime</artifactId>
-				<version>3.0.1</version>
+			    <groupId>org.glassfish.jaxb</groupId>
+			    <artifactId>jaxb-runtime</artifactId>
+			    <version>4.0.4</version>
+			    <scope>runtime</scope>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

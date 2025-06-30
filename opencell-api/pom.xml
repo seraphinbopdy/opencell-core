@@ -486,9 +486,11 @@
 		</profile>
 		<profile>
 			<id>swagger</id>
+			<!--
 			<activation>
 	            <activeByDefault>true</activeByDefault>
 	        </activation>
+	        -->
 			<dependencies>
 				<dependency>
 					<groupId>io.swagger.core.v3</groupId>
@@ -498,7 +500,6 @@
 				<dependency>
 					<groupId>com.github.javaparser</groupId>
 					<artifactId>javaparser-symbol-solver-core</artifactId>
-					<version>3.24.0</version>
 				</dependency>
 			</dependencies>
 			<build>

@@ -287,7 +287,7 @@ import jakarta.validation.constraints.Size;
     @OneToMany(mappedBy = "customerAccount", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, orphanRemoval = true)
     private Set<PaymentPlan> paymentPlans = new HashSet<>();
 
-    @OneToMany(mappedBy = "customerAccount", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "customerAccount", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RegistrationNumber> registrationNumbers = new ArrayList<>();
 
     public List<RegistrationNumber> getRegistrationNumbers() {

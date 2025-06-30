@@ -21,6 +21,8 @@ package org.meveo.model.catalog;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.meveo.model.BaseEntity;
@@ -47,6 +49,9 @@ import jakarta.persistence.UniqueConstraint;
 @Entity
 @Table(name = "cpq_product_charge_template_mapping", uniqueConstraints = @UniqueConstraint(columnNames = { "id" }))
 @GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "cpq_product_charge_template_mapping_seq"), @Parameter(name = "increment_size", value = "1") })
+@NamedQueries({
+        @NamedQuery(name = "ProductChargeTemplateMapping.findByProductId", query = "SELECT mapping FROM ProductChargeTemplateMapping mapping WHERE mapping.product.id=:productId"),
+})
 public class ProductChargeTemplateMapping<T extends ChargeTemplate> extends BaseEntity {
 
     private static final long serialVersionUID = -1872859127097329926L;

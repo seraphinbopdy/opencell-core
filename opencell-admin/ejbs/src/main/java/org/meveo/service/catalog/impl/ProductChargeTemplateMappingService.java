@@ -57,4 +57,11 @@ public class ProductChargeTemplateMappingService extends PersistenceService<Prod
                 .setParameter("CHARGE_CODE", chargeTemplateCode)
                 .getSingleResult() > 0;
     }
+
+    public List<ProductChargeTemplateMapping> getProductMappingByProductId(Long productId) {
+        return (List<ProductChargeTemplateMapping>) getEntityManager()
+                .createNamedQuery("ProductChargeTemplateMapping.findByProductId")
+                .setParameter("productId", productId)
+                .getResultList();
+    }
 }

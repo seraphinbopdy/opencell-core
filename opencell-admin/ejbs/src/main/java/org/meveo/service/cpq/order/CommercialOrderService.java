@@ -47,6 +47,7 @@ import org.meveo.model.catalog.ProductChargeTemplateMapping;
 import org.meveo.model.cpq.AgreementDateSettingEnum;
 import org.meveo.model.cpq.Attribute;
 import org.meveo.model.cpq.OfferTemplateAttribute;
+import org.meveo.model.cpq.OfferTemplateInformation;
 import org.meveo.model.cpq.Product;
 import org.meveo.model.cpq.ProductVersion;
 import org.meveo.model.cpq.ProductVersionAttribute;
@@ -59,7 +60,7 @@ import org.meveo.model.cpq.commercial.OrderProduct;
 import org.meveo.model.cpq.commercial.ProductActionTypeEnum;
 import org.meveo.model.cpq.enums.AttributeTypeEnum;
 import org.meveo.model.cpq.enums.PriceVersionDateSettingEnum;
-import org.meveo.model.payments.CustomerAccount;
+import org.meveo.model.payments.PaymentMethod;
 import org.meveo.service.base.BusinessService;
 import org.meveo.service.billing.impl.DiscountPlanInstanceService;
 import org.meveo.service.billing.impl.OneShotChargeInstanceService;
@@ -67,11 +68,9 @@ import org.meveo.service.billing.impl.ServiceInstanceService;
 import org.meveo.service.billing.impl.ServiceSingleton;
 import org.meveo.service.billing.impl.SubscriptionService;
 import org.meveo.service.catalog.impl.DiscountPlanService;
-import org.meveo.service.catalog.impl.OfferTemplateService;
+import org.meveo.service.catalog.impl.ProductChargeTemplateMappingService;
 import org.meveo.service.cpq.AttributeService;
 import org.meveo.service.cpq.ProductService;
-import org.meveo.service.payments.impl.CustomerAccountService;
-import org.meveo.service.payments.impl.PaymentMethodService;
 import org.meveo.service.settings.impl.AdvancedSettingsService;
 
 import jakarta.ejb.Stateless;
@@ -113,16 +112,16 @@ public class CommercialOrderService extends BusinessService<CommercialOrder> {
 	private ProductService productService;
 
 	@Inject
-	private CustomerAccountService customerAccountService;
-
-	@Inject
-	private OfferTemplateService offerTemplateService;
-
-	@Inject
 	private OrderProductService orderProductService;
 
 	@Inject
 	private AdvancedSettingsService advancedSettingsService;
+
+	@Inject
+	private ProductChargeTemplateMappingService productChargeTemplateMappingService;
+
+	@Inject
+	private OrderOfferService orderOfferService;
 	
 	public CommercialOrder findByOrderNumer(String orderNumber) throws  BusinessException{
 		QueryBuilder queryBuilder = new QueryBuilder(CommercialOrder.class, "co");
@@ -186,13 +185,13 @@ public class CommercialOrderService extends BusinessService<CommercialOrder> {
 			if(o.getProducts().isEmpty()) return false;
 			for(OrderProduct quoteProduct: o.getProducts()) {
 				if(quoteProduct.getProductVersion() != null) {
-					Product product = quoteProduct.getProductVersion().getProduct();
-					for(ProductChargeTemplateMapping charge: product.getProductCharges()) {
+					List<ProductChargeTemplateMapping> mappings = productChargeTemplateMappingService.
+							getProductMappingByProductId(quoteProduct.getProductVersion().getProduct().getId());
+					for(ProductChargeTemplateMapping charge: mappings) {
 						if(charge.getChargeTemplate() != null) {
 							ChargeTemplate templateCharge = (ChargeTemplate) Hibernate.unproxy(charge.getChargeTemplate());
-							if(templateCharge instanceof OneShotChargeTemplate) {
-								var oneShotCharge = (OneShotChargeTemplate) templateCharge;
-								if(oneShotCharge.getOneShotChargeTemplateType() != OneShotChargeTemplateTypeEnum.OTHER)
+							if(templateCharge instanceof OneShotChargeTemplate oneShotCharge) {
+                                if(oneShotCharge.getOneShotChargeTemplateType() != OneShotChargeTemplateTypeEnum.OTHER)
 									return true;
 							}else
 								return true;
@@ -247,18 +246,20 @@ public class CommercialOrderService extends BusinessService<CommercialOrder> {
 				}
 				subscription.setEndAgreementDate(null);
 				subscription.setRenewed(true);
-				CustomerAccount customerAccount = order.getBillingAccount().getCustomerAccount();
-				subscription.setPaymentMethod(customerAccount.getPaymentMethods().get(0));
+				PaymentMethod paymentMethod = getPreferredPaymentMethod(order.getBillingAccount().getId());
+				subscription.setPaymentMethod(paymentMethod);
 				subscription.setOrder(order);
 				subscription.setOrderOffer(offer);
 				subscription.setContract((offer.getContract() != null)? offer.getContract() : order.getContract());
 				OfferTemplate offerTemplate = offer.getOfferTemplate();
-				if (offerTemplate != null && offerTemplate.isDisabled() && offer.getQuoteOffer() == null && !orderCompleted) {
+				OfferTemplateInformation offerTemplateInformation = orderOfferService.getOfferTemplateInformation(offer.getId());
+				if (offerTemplateInformation != null && offerTemplateInformation.isDisabled() && offer.getQuoteOffer() == null && !orderCompleted) {
 		            throw new BusinessException(String.format("OfferTemplate[code=%s] is disabled and cannot be ordered. Please select another offer.", offerTemplate.getCode()));
 		        }
-				subscription.setSubscriptionRenewal(offerTemplate != null ? offerTemplate.getSubscriptionRenewal().copy() : null);
+				subscription.setSubscriptionRenewal(offerTemplateInformation != null
+						? offerTemplateInformation.getSubscriptionRenewal().copy() : null);
 				subscription.setSalesPersonName(order.getSalesPersonName());
-				subscription.setAutoEndOfEngagement(offerTemplate.getAutoEndOfEngagement());
+				subscription.setAutoEndOfEngagement(offerTemplateInformation.isAutoEndOfEngagement());
 				subscription.setPriceList(order.getPriceList());
 				if(offer.getTerminationDate() != null) {
 					subscription.setRenewed(false);
@@ -276,8 +277,9 @@ public class CommercialOrderService extends BusinessService<CommercialOrder> {
 				if(offer.getDiscountPlan()!=null) {
 					discountPlans.add(offer.getDiscountPlan());
 				}
-				
-				for (OrderProduct product : offer.getProducts()){
+
+				List<OrderProduct> orderProducts = orderProductService.findOrderProductsByOffer(offer.getId());
+				for (OrderProduct product : orderProducts) {
 					processProductWithDiscount(subscription, product);
 				}
 				instanciateDiscountPlans(subscription, discountPlans);
@@ -860,5 +862,15 @@ public class CommercialOrderService extends BusinessService<CommercialOrder> {
 				"                ) subquery" +
 				"            WHERE ord.id = subquery.order_id").executeUpdate();
 		
+	}
+
+	public PaymentMethod getPreferredPaymentMethod(Long billingAccountId) {
+		return ((List<PaymentMethod>) getEntityManager().createNamedQuery("BillingAccount.getPreferredPaymentMethod")
+				.setParameter("billingAccountId", billingAccountId)
+				.getResultList())
+				.stream()
+				.filter(PaymentMethod::isPreferred)
+				.findFirst()
+				.orElse(null);
 	}
 }

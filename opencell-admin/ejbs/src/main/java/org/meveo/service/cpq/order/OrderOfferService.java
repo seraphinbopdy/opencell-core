@@ -7,6 +7,8 @@ import java.util.Objects;
 import org.apache.logging.log4j.util.Strings;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.api.exception.EntityAlreadyExistsException;
+import org.meveo.model.catalog.OfferTemplate;
+import org.meveo.model.cpq.OfferTemplateInformation;
 import org.meveo.model.cpq.commercial.OfferLineTypeEnum;
 import org.meveo.model.cpq.commercial.OrderOffer;
 import org.meveo.model.cpq.commercial.OrderProduct;
@@ -88,6 +90,17 @@ public class OrderOfferService extends PersistenceService<OrderOffer> {
 		try {
 			return (List<OrderOffer>) query.getResultList();
 		}catch(NoResultException e ) {
+			return null;
+		}
+	}
+
+	public OfferTemplateInformation getOfferTemplateInformation(Long orderOfferId) {
+		try {
+			return (OfferTemplateInformation) getEntityManager()
+					.createNamedQuery("OrderOffer.findOfferTemplateInformation")
+					.setParameter("orderOfferId", orderOfferId)
+					.getSingleResult();
+		} catch (NoResultException e ) {
 			return null;
 		}
 	}

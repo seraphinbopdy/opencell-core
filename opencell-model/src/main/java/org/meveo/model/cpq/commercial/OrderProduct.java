@@ -48,7 +48,10 @@ import jakarta.validation.constraints.NotNull;
 @Table(name = "cpq_order_product")
 @CustomFieldEntity(cftCodePrefix = "OrderProduct", inheritCFValuesFrom = "quoteProduct")
 @GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "cpq_order_product_seq"), @Parameter(name = "increment_size", value = "1") })
-@NamedQueries({ @NamedQuery(name = "OrderProduct.findOrderProductByOrder", query = "select op FROM OrderProduct op WHERE op.order.id = :commercialOrderId") })
+@NamedQueries({
+        @NamedQuery(name = "OrderProduct.findOrderProductByOrder", query = "select op FROM OrderProduct op WHERE op.order.id = :commercialOrderId"),
+        @NamedQuery(name = "OrderProduct.findOrderProductByOffer", query = "SELECT op FROM OrderProduct op WHERE op.orderOffer.id = :offerId")
+})
 
 @NamedNativeQuery(name = "OrderProduct.calculateMrr", query = "SELECT " +
         "                        SUM(" +

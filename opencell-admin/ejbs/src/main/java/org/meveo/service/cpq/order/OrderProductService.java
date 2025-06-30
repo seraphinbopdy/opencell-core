@@ -44,4 +44,11 @@ public class OrderProductService extends PersistenceService<OrderProduct> {
 		}
 	}
 
+	public List<OrderProduct> findOrderProductsByOffer(Long offerId) {
+		return getEntityManager()
+				.createNamedQuery("OrderProduct.findOrderProductByOffer")
+				.setParameter("offerId", offerId)
+				.getResultList();
+	}
+
 }

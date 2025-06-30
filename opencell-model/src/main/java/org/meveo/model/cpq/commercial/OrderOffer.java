@@ -52,7 +52,9 @@ import jakarta.validation.constraints.NotNull;
 @Table(name = "cpq_order_offer", uniqueConstraints = @UniqueConstraint(columnNames = { "code", "order_id" }))
 @GenericGenerator(name = "ID_GENERATOR", type = org.hibernate.id.enhanced.SequenceStyleGenerator.class, parameters = { @Parameter(name = "sequence_name", value = "cpq_order_offer_seq"), @Parameter(name = "increment_size", value = "1") })
 @NamedQueries({ @NamedQuery(name = "OrderOffer.findByCodeAndOrderCode", query = "select oo from OrderOffer oo left join oo.order oorder  where oorder.code=:orderCode  and oo.code=:code"),
-        @NamedQuery(name = "OrderOffer.findByStatusAndSubscription", query = "select oo from OrderOffer oo join oo.order oorder  where oo.subscription.code=:subscriptionCode and oo.orderLineType=:status and oorder.status<>'VALIDATED'") })
+        @NamedQuery(name = "OrderOffer.findByStatusAndSubscription", query = "select oo from OrderOffer oo join oo.order oorder  where oo.subscription.code=:subscriptionCode and oo.orderLineType=:status and oorder.status<>'VALIDATED'"),
+        @NamedQuery(name = "OrderOffer.findOfferTemplateInformation", query = "SELECT new org.meveo.model.cpq.OfferTemplateInformation(offerTemplate.id, offerTemplate.code, offerTemplate.disabled, offerTemplate.subscriptionRenewal, offerTemplate.autoEndOfEngagement) from OrderOffer oo LEFT JOIN oo.offerTemplate offerTemplate  WHERE oo.id=:orderOfferId"),
+})
 public class OrderOffer extends BusinessCFEntity {
 
     /**

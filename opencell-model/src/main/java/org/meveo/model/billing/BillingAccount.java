@@ -120,6 +120,7 @@ import jakarta.validation.constraints.Size;
         @NamedQuery(name = "BillingAccount.getBaFetchCaAndCustomer", query = "select ba from BillingAccount ba left join fetch ba.customerAccount as ca left join fetch ca.customer as c left join fetch c.parentCustomer where ba.id = :id "),
         @NamedQuery(name = "BillingAccount.fetchIdByCode", query = "SELECT b.id FROM BillingAccount b where b.code=:code", hints = { @QueryHint(name = "org.hibernate.cacheable", value = "TRUE") }),
         @NamedQuery(name = "BillingAccount.listIdByCode", query = "SELECT b.code, b.id FROM BillingAccount b "),
+        @NamedQuery(name = "BillingAccount.getPreferredPaymentMethod", query = "SELECT ca.paymentMethods FROM BillingAccount ba LEFT JOIN ba.customerAccount ca WHERE ba.id = :billingAccountId"),
         @NamedQuery(name = "BillingAccount.unlinkPriceList", query = "update BillingAccount set priceList = null where priceList.id = :priceListId") })
 public class BillingAccount extends AccountEntity implements IInvoicingMinimumApplicable, IBillableEntity, IWFEntity, IDiscountable, ICounterEntity {
 

@@ -486,33 +486,20 @@
 		</profile>
 		<profile>
 			<id>swagger</id>
-			<!--
 			<activation>
 	            <activeByDefault>true</activeByDefault>
 	        </activation>
-	        -->
-			<dependencies>
-				<dependency>
-					<groupId>io.swagger.core.v3</groupId>
-					<artifactId>swagger-maven-plugin</artifactId>
-					<version>2.2.15</version> 
-				</dependency>
-				<dependency>
-					<groupId>com.github.javaparser</groupId>
-					<artifactId>javaparser-symbol-solver-core</artifactId>
-				</dependency>
-			</dependencies>
 			<build>
 				<plugins>
 					<plugin>
 					    <groupId>io.swagger.core.v3</groupId>
 					    <artifactId>swagger-maven-plugin</artifactId>
-					    <version>2.2.15</version>
+					    <version>2.2.31</version>
 					    <dependencies>
 					        <dependency>
 					            <groupId>io.swagger.core.v3</groupId>
 					            <artifactId>swagger-jaxrs2-jakarta</artifactId>
-					            <version>2.2.15</version>
+					            <version>2.2.31</version>
 					        </dependency>
 					        <dependency>
 					            <groupId>jakarta.ws.rs</groupId>
@@ -525,25 +512,67 @@
 					            <version>4.0.3</version>
 					        </dependency>
 					    </dependencies>
-					    <configuration>
-					        <outputPath>${project.build.directory}/doc/swagger</outputPath>
-					        <outputFormat>JSONANDYAML</outputFormat>
-					        <prettyPrint>true</prettyPrint>
-					        <resourcePackages>
-					            <resourcePackage>org.meveo.api.rest</resourcePackage>
-					            <resourcePackage>org.meveo.apiv2</resourcePackage>
-					        </resourcePackages>
-					        <ignoredRoutes>/api/.*</ignoredRoutes>
-					    </configuration>
 					    <executions>
 					        <execution>
+					        	<id>generate-swagger-v0</id>
 					            <phase>compile</phase>
 					            <goals>
 					                <goal>resolve</goal>
 					            </goals>
+					            <configuration>
+							        <outputPath>${project.build.directory}/swagger</outputPath>
+							        <outputFormat>JSONANDYAML</outputFormat>
+							        <outputFileName>openapi-v0.json</outputFileName>
+							        <prettyPrint>true</prettyPrint>
+							        <resourcePackages>
+							            <resourcePackage>org.meveo.api.rest</resourcePackage>
+							        </resourcePackages>
+							        <ignoredRoutes>/api/.*</ignoredRoutes>
+							    </configuration>
 					        </execution>
+					        <execution>
+					        	<id>generate-swagger-v2</id>
+					            <phase>compile</phase>
+					            <goals>
+					                <goal>resolve</goal>
+					            </goals>
+							    <configuration>
+							        <outputPath>${project.build.directory}/swagger</outputPath>
+							        <outputFormat>JSONANDYAML</outputFormat>
+							        <outputFileName>openapi-v2.json</outputFileName>
+							        <prettyPrint>true</prettyPrint>
+							        <resourcePackages>
+							            <resourcePackage>org.meveo.apiv2</resourcePackage>
+							        </resourcePackages>
+							        <ignoredRoutes>/api/.*</ignoredRoutes>
+							    </configuration>
+							</execution>
 					    </executions>
 					</plugin>
+			        <plugin>
+		                <groupId>org.apache.maven.plugins</groupId>
+		                <artifactId>maven-resources-plugin</artifactId>
+		                <executions>
+		                    <execution>
+		                        <id>copy-generated-swagger-specs</id>
+		                        <phase>prepare-package</phase> <goals>
+		                            <goal>copy-resources</goal>
+		                        </goals>
+		                        <configuration>
+		                            <outputDirectory>${project.build.outputDirectory}/swagger</outputDirectory>
+		                            <resources>
+		                                <resource>
+		                                    <directory>${project.build.directory}/swagger</directory>
+		                                    <includes>
+		                                        <include>**/*.json</include>
+		                                        <include>**/*.yaml</include>
+		                                    </includes>
+		                                </resource>
+		                            </resources>
+		                        </configuration>
+		                    </execution>
+		                </executions>
+		            </plugin>
 				</plugins>
 			</build>
 		</profile>

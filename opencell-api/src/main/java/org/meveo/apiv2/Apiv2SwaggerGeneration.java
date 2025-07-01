@@ -34,7 +34,7 @@ public class Apiv2SwaggerGeneration extends BaseOpenApiResource {
     @io.swagger.v3.oas.annotations.Operation(hidden = true)
     public Response getOpenApi(@Context HttpHeaders headers, @Context UriInfo uriInfo) {
 
-    	String fileName = "doc/swagger/openapi.json";
+    	String fileName = "swagger/openapi-v2.json";
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileName)) {
             if (inputStream == null) {
                 log.error("OpenAPI file not found: {}", fileName);

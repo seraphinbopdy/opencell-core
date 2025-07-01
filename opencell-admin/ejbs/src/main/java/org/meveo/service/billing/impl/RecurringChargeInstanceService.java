@@ -26,6 +26,7 @@ import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.IncorrectChargeInstanceException;
 import org.meveo.admin.exception.RatingException;
 import org.meveo.commons.utils.QueryBuilder;
+import org.meveo.commons.utils.StringUtils;
 import org.meveo.event.qualifier.Rejected;
 import org.meveo.jpa.JpaAmpNewTx;
 import org.meveo.model.DatePeriod;
@@ -41,6 +42,7 @@ import org.meveo.model.billing.Subscription;
 import org.meveo.model.billing.SubscriptionStatusEnum;
 import org.meveo.model.billing.WalletInstance;
 import org.meveo.model.billing.WalletOperation;
+import org.meveo.model.catalog.Calendar;
 import org.meveo.model.catalog.CounterTemplate;
 import org.meveo.model.catalog.RecurringChargeTemplate;
 import org.meveo.model.catalog.ServiceCharge;
@@ -204,6 +206,15 @@ public class RecurringChargeInstanceService extends BusinessService<RecurringCha
         } else {
             chargeInstance.setPrepaid(false);
             chargeInstance.getWalletInstances().add(serviceInstance.getSubscription().getUserAccount().getWallet());
+        }
+        
+        if(StringUtils.isNotBlank(recurringChargeTemplate.getCalendarCodeEl())) {
+            Calendar calendarFromEl = recurringRatingService.getCalendarFromEl(recurringChargeTemplate.getCalendarCodeEl(), serviceInstance, null, recurringChargeTemplate, chargeInstance);
+            if(calendarFromEl != null) {
+                chargeInstance.setCalendar(calendarFromEl);
+            } else {
+                log.warn("Calendar from EL {} is not found for service instance {} and charge template {}", recurringChargeTemplate.getCalendarCodeEl(), serviceInstance.getId(), chargeCode);
+            }
         }
 
         if (!isVirtual) {

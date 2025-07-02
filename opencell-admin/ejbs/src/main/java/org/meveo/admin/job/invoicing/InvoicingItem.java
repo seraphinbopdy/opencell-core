@@ -49,9 +49,9 @@ public class InvoicingItem {
 		this.useSpecificTransactionalAmount = (boolean) fields[i++];
 		this.transactionalAmountWithoutTax = (BigDecimal) fields[i++];
 		this.transactionalAmountWithTax = (BigDecimal) fields[i++];
-		this.transactionalAmountTax = (BigDecimal) fields[i];
+		this.transactionalAmountTax = (BigDecimal) fields[i++];
 		this.setSubscriptionId(getId(fields[i++]));
-		this.setCommercialOrderId(getId(fields[i]));
+		this.setCommercialOrderId(getId(fields[i++]));
 		
 	}
 	

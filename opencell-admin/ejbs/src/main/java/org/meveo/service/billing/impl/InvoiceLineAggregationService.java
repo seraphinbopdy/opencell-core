@@ -229,8 +229,8 @@ public class InvoiceLineAggregationService implements Serializable {
     private List<String> buildAggregationFieldList(AggregationConfiguration aggregationConfiguration) {
 
         String usageDateAggregationFunction = getUsageDateAggregationFunction(aggregationConfiguration.getDateAggregationOption(), "usageDate", "a");
-        String unitAmount = appProvider.isEntreprise() ? "amountWithoutTax" : "amountWithTax";
-        String unitAmountAggregationFunction = aggregationConfiguration.isAggregationPerUnitAmount() ? "SUM(a."+unitAmount+")/count(1)" : unitAmount;
+        String unitAmount = appProvider.isEntreprise() ? "unitAmountWithoutTax" : "unitAmountWithTax";
+        String unitAmountAggregationFunction = aggregationConfiguration.isAggregationPerUnitAmount() ? getAggregatedUnitAmount() : unitAmount;
 
         List<String> fieldToFetch;
         if (aggregationConfiguration.isDisableAggregation()) {
@@ -281,6 +281,12 @@ public class InvoiceLineAggregationService implements Serializable {
 
         return fieldToFetch;
     }
+
+	private String getAggregatedUnitAmount() {
+		String unitAmount = appProvider.isEntreprise() ? "unitAmountWithoutTax" : "unitAmountWithTax";
+		String amount = appProvider.isEntreprise() ? "amountWithoutTax" : "amountWithTax";
+		return "CASE WHEN SUM(a.quantity)=0 THEN SUM(a."+unitAmount+")/count(1) ELSE SUM(a."+amount+")/SUM(a.quantity) END";
+	}
 
     /**
      * Construct RT to IL aggregation query
@@ -413,9 +419,9 @@ public class InvoiceLineAggregationService implements Serializable {
 
         if (!aggregationConfiguration.isAggregationPerUnitAmount()) {
             if (appProvider.isEntreprise()) {
-                groupBy.add("amountWithoutTax");
+                groupBy.add("unitAmountWithoutTax");
             } else {
-                groupBy.add("amountWithTax");
+                groupBy.add("unitAmountWithTax");
             }
         }
 

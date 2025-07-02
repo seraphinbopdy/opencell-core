@@ -292,10 +292,10 @@ public class DunningActionInstanceService extends PersistenceService<DunningActi
         params.put("invoiceInvoiceNumber", invoice.getInvoiceNumber());
         params.put("invoiceOrderOrderNumber", invoice.getOpenOrderNumber());
         params.put("invoicePaymentMethodType", invoice.getPaymentMethod() != null ? invoice.getPaymentMethod().getPaymentType().name() : StringUtils.EMPTY);
-        params.put("invoiceAmountWithoutTax", invoice.getAmountWithoutTax());
-        params.put("invoiceAmountWithTax", invoice.getAmountWithTax());
+        params.put("invoiceAmountWithoutTax", invoice.getAmountWithoutTax().setScale(appProvider.getInvoiceRounding(), appProvider.getInvoiceRoundingMode().getRoundingMode()));
+        params.put("invoiceAmountWithTax", invoice.getAmountWithTax().setScale(appProvider.getInvoiceRounding(), appProvider.getInvoiceRoundingMode().getRoundingMode()));
         params.put("invoicePaymentStatus", invoice.getPaymentStatus().name());
-        params.put("invoiceTotal", invoice.getAmountWithTax());
+        params.put("invoiceTotal", invoice.getAmountWithTax().setScale(appProvider.getInvoiceRounding(), appProvider.getInvoiceRoundingMode().getRoundingMode()));
         params.put("invoiceDueDate", formatter.format(invoice.getDueDate()));
         params.put("dayDate", formatter.format(new Date()));
     }

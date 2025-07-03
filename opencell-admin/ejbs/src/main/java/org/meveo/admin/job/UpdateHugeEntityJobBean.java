@@ -167,7 +167,7 @@ public class UpdateHugeEntityJobBean extends IteratorBasedScopedJobBean<Map.Entr
             if (entityReferenceWrapper != null) {
                 preUpdateScriptCode = entityReferenceWrapper.getCode();
             }
-            if (StringUtils.isBlank(preUpdateScriptCode)) {
+            if (StringUtils.isBlank(preUpdateScriptCode) && "MarkWOToRerateJob".equals(jobInstance.getCode())) {
                 Map<String, Object> advancedSettingsValues = advancedSettingsService.getAdvancedSettingsMapByGroup("rating", Object.class);
                 Boolean allowBilledItemsRerating = (Boolean) advancedSettingsValues.get("rating.allowBilledItemsRerating");
                 if (Boolean.TRUE.equals(allowBilledItemsRerating)) {

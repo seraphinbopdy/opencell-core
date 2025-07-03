@@ -418,10 +418,13 @@ public class ContractApi extends BaseApi{
     	}else {
         	item.setContractRateType(contractItemDto.getContractRateType());
     	}
-    	if(contractItemDto.getSeperateDiscountLine()!=null) {
+
+		if (contractItemDto.getSeparateDiscount()!=null) {
+			item.setSeparateDiscount(contractItemDto.getSeparateDiscount());
+		} else if(contractItemDto.getSeperateDiscountLine()!=null) {
     		item.setSeparateDiscount(contractItemDto.getSeperateDiscountLine()); 
     	}
-    	if(ContractRateTypeEnum.FIXED.equals(item.getContractRateType()) && Boolean.TRUE.equals(contractItemDto.getSeperateDiscountLine())){
+    	if(ContractRateTypeEnum.FIXED.equals(item.getContractRateType()) && item.isSeparateDiscount()){
 			throw new InvalidParameterException("generate separate discount line is valable only for the types 'Global discount' and 'Custom discount grid'");
 		}
     	item.setApplicationEl(contractItemDto.getApplicationEl());
@@ -487,9 +490,12 @@ public class ContractApi extends BaseApi{
     	}else {
         	item.setContractRateType(contractItemDto.getContractRateType());
     	}
-    	if(contractItemDto.getSeperateDiscountLine()!=null) {
-    		item.setSeparateDiscount(contractItemDto.getSeperateDiscountLine()); 
-    	}
+
+		if (contractItemDto.getSeparateDiscount()!=null) {
+			item.setSeparateDiscount(contractItemDto.getSeparateDiscount());
+		} else if(contractItemDto.getSeperateDiscountLine()!=null) {
+			item.setSeparateDiscount(contractItemDto.getSeperateDiscountLine());
+		}
     	
     	if(ContractRateTypeEnum.FIXED.equals(item.getContractRateType()) && item.isSeparateDiscount()){
 			throw new InvalidParameterException("generate separate discount line is valable only for the types 'Global discount' and 'Custom discount grid'");

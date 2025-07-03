@@ -548,7 +548,7 @@ public class InvoiceResourceImpl implements InvoiceResource {
      * @return {@link org.meveo.apiv2.billing.Invoice}
      */
     private Invoice findValidatedInvoiceToUpdate(Long id) {
-        Invoice invoice = invoiceApiService.findById(id, asList("invoiceType")).orElseThrow(NotFoundException::new);
+        Invoice invoice = invoiceApiService.findById(id, asList("invoiceType", "billingRun")).orElseThrow(NotFoundException::new);
         final InvoiceStatusEnum status = invoice.getStatus();
 
         if(!(VALIDATED.equals(status))) {

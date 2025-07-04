@@ -522,7 +522,7 @@
 					            <configuration>
 							        <outputPath>${project.build.directory}/swagger</outputPath>
 							        <outputFormat>JSONANDYAML</outputFormat>
-							        <outputFileName>openapi-v0.json</outputFileName>
+							        <outputFileName>openapi-v0</outputFileName>
 							        <prettyPrint>true</prettyPrint>
 							        <resourcePackages>
 							            <resourcePackage>org.meveo.api.rest</resourcePackage>
@@ -539,7 +539,7 @@
 							    <configuration>
 							        <outputPath>${project.build.directory}/swagger</outputPath>
 							        <outputFormat>JSONANDYAML</outputFormat>
-							        <outputFileName>openapi-v2.json</outputFileName>
+							        <outputFileName>openapi-v2</outputFileName>
 							        <prettyPrint>true</prettyPrint>
 							        <resourcePackages>
 							            <resourcePackage>org.meveo.apiv2</resourcePackage>

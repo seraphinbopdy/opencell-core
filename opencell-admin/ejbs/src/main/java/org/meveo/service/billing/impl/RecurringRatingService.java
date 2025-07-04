@@ -178,6 +178,7 @@ public class RecurringRatingService extends RatingService implements Serializabl
         RatingResult ratingResult = new RatingResult();
         CounterValueChangeInfo firstChargeCounterChange = null;
         List<DatePeriod> periods = new ArrayList<>();
+        Date today = new Date();
 
         // Check if there is any attribute with value FALSE, indicating that service instance is not active
         if (anyFalseAttributeMatch(chargeInstance)) {
@@ -485,6 +486,12 @@ public class RecurringRatingService extends RatingService implements Serializabl
                         }
                     }
 
+                    if (shouldAdjustChargeForTermination(chargeInstance, prorate, prorateLastPeriod, today)) {
+                        effectiveChargeToDate = chargeInstance.getTerminationDate();
+                        effectiveChargeFromDate = getRecurringPeriodStartDate(chargeInstance, chargeInstance.getChargeToDateOnTermination());
+                        inputQuantity = computeProrate(chargeInstance, effectiveChargeFromDate,
+                                effectiveChargeToDate, currentPeriodFromDate, currentPeriodToDate, inputQuantity);
+                    }
 
                     if (chargeMode.isReimbursement()) {
                         log.debug("Applying {} recurring charge {} for period {} - {}, quantity {}", "reimbursement", chargeInstance.getId(), effectiveChargeFromDate, effectiveChargeToDate, inputQuantity);
@@ -600,6 +607,16 @@ public class RecurringRatingService extends RatingService implements Serializabl
         }
 
         return ratingResult;
+    }
+
+    private boolean shouldAdjustChargeForTermination(RecurringChargeInstance chargeInstance,
+                                                     boolean prorate,
+                                                     boolean prorateLastPeriod,
+                                                     Date today) {
+        return (chargeInstance.getSubscription() != null
+                && chargeInstance.getSubscription().getSubscribedTillDate() != null)
+                && (!prorate && !prorateLastPeriod) && chargeInstance.getTerminationDate() != null
+                && chargeInstance.getTerminationDate().compareTo(today) < 0;
     }
 
     private BigDecimal computeProrate(RecurringChargeInstance chargeInstance,

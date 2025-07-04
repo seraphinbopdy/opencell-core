@@ -24,6 +24,7 @@ import org.meveo.model.billing.InstanceStatusEnum;
 import org.meveo.model.billing.OverrideProrataEnum;
 import org.meveo.model.billing.RecurringChargeInstance;
 import org.meveo.model.billing.ServiceInstance;
+import org.meveo.model.billing.Subscription;
 import org.meveo.model.billing.SubscriptionTerminationReason;
 import org.meveo.model.billing.WalletOperation;
 import org.meveo.model.catalog.CalendarYearly;
@@ -62,7 +63,7 @@ public class RecurringRatingServiceTest {
 
         calendar = new CalendarYearly();
 
-        List<DayInYear> days = new ArrayList<DayInYear>();
+        List<DayInYear> days = new ArrayList<>();
 
         for (int i = 1; i <= 12; i++) {
             DayInYear day = new DayInYear();
@@ -71,24 +72,6 @@ public class RecurringRatingServiceTest {
             days.add(day);
         }
         calendar.setDays(days);
-
-//        when(recurringRatingService.rateChargeAndInstantiateTriggeredEDRs(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), anyBoolean(), anyBoolean())).thenAnswer(new Answer<RatingResult>() {
-//            public RatingResult answer(InvocationOnMock invocation) throws Throwable {
-//
-//                WalletOperation wo = new WalletOperation();
-//                wo.setChargeInstance((ChargeInstance) invocation.getArguments()[0]);
-//                wo.setOperationDate((Date) invocation.getArguments()[1]);
-//                wo.setQuantity((BigDecimal) invocation.getArguments()[2]);
-//                wo.setStartDate((Date) invocation.getArguments()[5]);
-//                wo.setEndDate((Date) invocation.getArguments()[6]);
-//                wo.setFullRatingPeriod((DatePeriod) invocation.getArgument(7));
-//
-//                RatingResult ratingResult = new RatingResult();
-//                ratingResult.addWalletOperation(wo);
-//
-//                return ratingResult;
-//            }
-//        });
 
         // Use the form "doAnswer().when().method" instead of "when().thenAnswer()" because on spied object the later will call a real method at the setup time, which will fail because of null values being passed.
         doAnswer(new Answer<RatingResult>() {
@@ -538,7 +521,7 @@ public class RecurringRatingServiceTest {
         RecurringChargeInstance chargeInstance = getChargeInstance(DateUtils.newDate(2019, 4, 1, 0, 0, 0), DateUtils.newDate(2018, 4, 1, 0, 0, 0), false, false, false, null, null);
 
         CalendarYearly newCalendar = new CalendarYearly();
-        List<DayInYear> days = new ArrayList<DayInYear>();
+        List<DayInYear> days = new ArrayList<>();
 
         for (int i = 1; i <= 12; i = i + 2) {
             DayInYear day = new DayInYear();
@@ -1872,6 +1855,93 @@ public class RecurringRatingServiceTest {
         assertThat(wos.get(1).getStartDate()).isEqualTo(DateUtils.newDate(2019, 3, 1, 0, 0, 0));
         assertThat(wos.get(1).getEndDate()).isEqualTo(DateUtils.newDate(2019, 3, 16, 0, 0, 0));
         assertThat(wos.get(1).getFullRatingPeriod()).isEqualTo(new DatePeriod(DateUtils.newDate(2019, 3, 1, 0, 0, 0), DateUtils.newDate(2019, 4, 1, 0, 0, 0)));
+    }
+
+    @Test
+    public void should_generate_reimbursement_wo_when_till_date_is_before_termination_date() {
+        RecurringChargeInstance chargeInstance = getChargeInstance(
+                DateUtils.newDate(2019, 2, 1, 0, 0, 0),
+                DateUtils.newDate(2018, 5, 1, 0, 0, 0),
+                false, false, true,
+                DateUtils.newDate(2019, 2, 10, 0, 0, 0),
+                DateUtils.newDate(2019, 3, 16, 0, 0, 0)
+        );
+
+        Subscription subscription = new Subscription();
+        subscription.setSubscribedTillDate(DateUtils.newDate(2019, 3, 10, 0, 0, 0));
+        chargeInstance.setSubscription(subscription);
+        chargeInstance.setChargeToDateOnTermination(DateUtils.newDate(2019, 3, 30, 0, 0, 0));
+
+        // WHEN
+        RatingResult ratingResult = recurringRatingService.rateReccuringCharge(
+                chargeInstance,
+                ChargeApplicationModeEnum.AGREEMENT,
+                false,
+                DateUtils.newDate(2019, 3, 16, 0, 0, 0),
+                null,
+                false,
+                false
+        );
+
+        assertThat(chargeInstance.getChargeDate()).isEqualTo(DateUtils.newDate(2019, 3, 16, 0, 0, 0));
+        assertThat(chargeInstance.getChargedToDate()).isEqualTo(DateUtils.newDate(2019, 3, 16, 0, 0, 0));
+        assertThat(chargeInstance.getNextChargeDate()).isEqualTo(DateUtils.newDate(2019, 4, 1, 0, 0, 0));
+
+        List<WalletOperation> wos = ratingResult.getWalletOperations();
+        assertThat(wos.size()).isEqualTo(2);
+
+        assertThat(wos.get(0).getQuantity().doubleValue()).isEqualTo(100d);
+        assertThat(wos.get(0).getStartDate()).isEqualTo(DateUtils.newDate(2019, 2, 1, 0, 0, 0));
+        assertThat(wos.get(0).getEndDate()).isEqualTo(DateUtils.newDate(2019, 3, 1, 0, 0, 0));
+
+        assertThat(wos.get(1).getQuantity().doubleValue()).isEqualTo(50d);
+        assertThat(wos.get(1).getStartDate()).isEqualTo(DateUtils.newDate(2019, 3, 1, 0, 0, 0));
+        assertThat(wos.get(1).getEndDate()).isEqualTo(DateUtils.newDate(2019, 3, 16, 0, 0, 0));
+        assertThat(wos.get(1).getFullRatingPeriod())
+                .isEqualTo(new DatePeriod(DateUtils.newDate(2019, 3, 1, 0, 0, 0), DateUtils.newDate(2019, 4, 1, 0, 0, 0)));
+    }
+
+    @Test
+    public void should_generate_reimbursement_wa_when_till_date_is_after_termination_date() {
+        RecurringChargeInstance chargeInstance = getChargeInstance(
+                DateUtils.newDate(2019, 2, 1, 0, 0, 0),
+                DateUtils.newDate(2018, 5, 1, 0, 0, 0),
+                false, false, true,
+                DateUtils.newDate(2019, 2, 10, 0, 0, 0),
+                DateUtils.newDate(2019, 3, 16, 0, 0, 0)
+        );
+
+        Subscription subscription = new Subscription();
+        subscription.setSubscribedTillDate(new Date());
+        chargeInstance.setSubscription(subscription);
+        chargeInstance.setChargeToDateOnTermination(DateUtils.newDate(2019, 3, 16, 0, 0, 0));
+
+        RatingResult ratingResult = recurringRatingService.rateReccuringCharge(
+                chargeInstance,
+                ChargeApplicationModeEnum.AGREEMENT,
+                false,
+                DateUtils.newDate(2019, 3, 16, 0, 0, 0),
+                null,
+                false,
+                false
+        );
+
+        assertThat(chargeInstance.getChargeDate()).isEqualTo(DateUtils.newDate(2019, 3, 16, 0, 0, 0));
+        assertThat(chargeInstance.getChargedToDate()).isEqualTo(DateUtils.newDate(2019, 3, 16, 0, 0, 0));
+        assertThat(chargeInstance.getNextChargeDate()).isEqualTo(DateUtils.newDate(2019, 4, 1, 0, 0, 0));
+
+        List<WalletOperation> wos = ratingResult.getWalletOperations();
+        assertThat(wos.size()).isEqualTo(2);
+
+        assertThat(wos.get(0).getQuantity().doubleValue()).isEqualTo(100d);
+        assertThat(wos.get(0).getStartDate()).isEqualTo(DateUtils.newDate(2019, 2, 1, 0, 0, 0));
+        assertThat(wos.get(0).getEndDate()).isEqualTo(DateUtils.newDate(2019, 3, 1, 0, 0, 0));
+
+        assertThat(wos.get(1).getQuantity().doubleValue()).isEqualTo(50d);
+        assertThat(wos.get(1).getStartDate()).isEqualTo(DateUtils.newDate(2019, 3, 1, 0, 0, 0));
+        assertThat(wos.get(1).getEndDate()).isEqualTo(DateUtils.newDate(2019, 3, 16, 0, 0, 0));
+        assertThat(wos.get(1).getFullRatingPeriod())
+                .isEqualTo(new DatePeriod(DateUtils.newDate(2019, 3, 1, 0, 0, 0), DateUtils.newDate(2019, 4, 1, 0, 0, 0)));
     }
 
     private RecurringChargeInstance getChargeInstance(Date chargedToDate, Date subscriptionDate, boolean isCycleForward, boolean prorateSubscription, boolean prorateTermination, Date terminationDate,

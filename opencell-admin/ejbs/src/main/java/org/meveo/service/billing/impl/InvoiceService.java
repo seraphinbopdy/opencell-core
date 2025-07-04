@@ -80,7 +80,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -112,9 +111,6 @@ import org.meveo.admin.exception.InvoiceJasperNotFoundException;
 import org.meveo.admin.exception.ValidationException;
 import org.meveo.admin.job.AggregationConfiguration;
 import org.meveo.admin.job.PDFParametersConstruction;
-import org.meveo.admin.job.invoicing.DiscountPlanSummary;
-import org.meveo.admin.job.invoicing.InvoicingService;
-import org.meveo.admin.storage.StorageFactory;
 import org.meveo.admin.util.PdfWaterMark;
 import org.meveo.admin.util.ResourceBundle;
 import org.meveo.admin.util.pagination.PaginationConfiguration;
@@ -547,9 +543,6 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
     @Inject
     private FinanceSettingsService financeSettingsService;
-
-    @Inject
-    private InvoicingService invoicingService;
     
     private enum RuleValidationEnum {
         RULE_TRUE, RULE_FALSE, RULE_IGNORE
@@ -1874,10 +1867,10 @@ public class InvoiceService extends PersistenceService<Invoice> {
             JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
             JRPdfExporter exporter = new JRPdfExporter();
             exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
-            exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(pdfFullFilename));
+            exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(pdfFullFilename)); 
             SimplePdfExporterConfiguration configuration = new SimplePdfExporterConfiguration();
             configuration.setTagged(true);
-            exporter.setConfiguration(configuration);
+            exporter.setConfiguration(configuration); 
             exporter.exportReport();
 
             if ("true".equals(paramBeanFactory.getInstance().getProperty("invoice.pdf.addWaterMark", "true"))) {
@@ -3442,7 +3435,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         reCalculateDates(invoice, billingRun, billingAccount, billingCycle, isCalculateInvoiceDateByDelayEL);
     }
     
-    private void recalculateDateByBR(Invoice invoice, BillingRun billingRun, BillingAccount billingAccount,
+    private void recalculateDateByBR(Invoice invoice, BillingRun billingRun, BillingAccount billingAccount, 
             BillingCycle billingCycle, boolean isBillingRun) {
         int delay = 0;
         boolean isCalculateInvoiceDateByDelayEL = !isBillingRun;
@@ -4186,6 +4179,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
                     otherDiscount = otherDiscount.add(discountAggregate.getAmountWithoutTax().abs());
                 }
             }
+
             // Add tax aggregate or update its amounts
 
             if (calculateTaxOnSubCategoryLevel && !isExonerated && !amountCumulativeForTax.isEmpty()) {
@@ -4282,7 +4276,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 	        invoice.setAmountWithoutTaxBeforeDiscount(invoice.getAmountWithoutTax());
             if(!amountDiscount.equals(BigDecimal.ZERO)) {
                 invoice.setDiscountAmount(amountDiscount);
-                invoice.setAmountWithoutTaxBeforeDiscount(subCategoryAggregates.stream().map(SubCategoryInvoiceAgregate::getCategoryInvoiceAgregate).map(CategoryInvoiceAgregate::getAmountWithoutTax).reduce(ZERO, BigDecimal::add));
+                invoice.setAmountWithoutTaxBeforeDiscount(invoice.getAmountWithoutTax().add(amountDiscount.abs()));
             }
             if(amountDiscount.equals(BigDecimal.ZERO) && invoice.getDiscountPlan() != null
                     && invoice.getDiscountPlan().getDiscountPlanType() == DiscountPlanTypeEnum.INVOICE && discountAggregates != null) {
@@ -4292,7 +4286,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
                         .reduce(BigDecimal::add)
                         .orElse(BigDecimal.ZERO);
                 invoice.setDiscountAmount(amountDiscount);
-                invoice.setAmountWithoutTaxBeforeDiscount(invoice.getAmountWithoutTax().add(amountDiscount));
+                invoice.setAmountWithoutTaxBeforeDiscount(invoice.getAmountWithoutTax().add(amountDiscount.abs()));
             }
         }
         
@@ -4436,7 +4430,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
                 }
             } else {
                 discountAmountsByTax = getFromMapValues(amountsByTax, discountAmount);
-                }
+            }
         }
 
         if (discountAmount == null || discountAmount.compareTo(BigDecimal.ZERO) == 0) {
@@ -5824,7 +5818,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
             }
         }
 
-        return invoiceTypeCode;
+        return invoiceTypeCode;   
     }
     
     private PaymentMethod resolvePMethod(BillingAccount billingAccount, BillingCycle billingCycle, PaymentMethod defaultPaymentMethod, InvoiceLine invoiceLine) {
@@ -8359,26 +8353,4 @@ public class InvoiceService extends PersistenceService<Invoice> {
                 .getIdQuery(getEntityManager())
                 .getResultList();
     }
-    private void createInvoiceAgregates(Invoice invoice){
-        var invoicingItems = invoicingService.createBillingAccountDetailsItem(invoice);
-        var detail  = invoicingItems.values().iterator().next();
-        if(invoice.getDiscountPlan() != null){
-            var discountPlan = invoice.getDiscountPlan();
-            if(!detail.getdiscountPlanSummaries().stream().anyMatch(dps -> dps.getDiscountPlanId() == discountPlan.getId()))
-                detail.getdiscountPlanSummaries().add(new DiscountPlanSummary(discountPlan.getId(), discountPlan.getStartDate(), discountPlan.getEndDate()));
-        }
-        invoicingItems.forEach((taxId, billingAccountDetauksItem) -> {
-            invoicingService.createInvoiceAgregates(billingAccountDetauksItem, invoice.getBillingAccount(), invoice, billingAccountDetauksItem.getInvoicingItems().get(0));
-        } );
-    }
-
-    public Object calculateInvoiceV3(Invoice invoice) {
-        invoice = invoiceService.retrieveIfNotManaged(invoice);
-        final BillingAccount billingAccount = billingAccountService.retrieveIfNotManaged(invoice.getBillingAccount());
-        invoiceService.updateBillingRunStatistics(invoice);
-        cleanInvoiceAggregates(invoice.getId());
-        this.createInvoiceAgregates(invoice);
-        return invoice;
-    }
-	
 }

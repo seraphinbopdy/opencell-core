@@ -270,7 +270,7 @@ public class InvoicingService extends PersistenceService<Invoice> {
 
     }
     
-    public Set<SubCategoryInvoiceAgregate> createInvoiceAgregates(BillingAccountDetailsItem billingAccountDetailsItem,
+    private Set<SubCategoryInvoiceAgregate> createInvoiceAgregates(BillingAccountDetailsItem billingAccountDetailsItem,
                                 BillingAccount billingAccount, Invoice invoice, List<InvoicingItem> groupedItems) {
         String languageCode = getTradingLanguageCode(billingAccountDetailsItem.getTradingLanguageId());
         boolean calculateTaxOnSubCategoryLevel = invoice.getInvoiceType().getTaxScript() == null;
@@ -295,14 +295,10 @@ public class InvoicingService extends PersistenceService<Invoice> {
         }
         initTaxAggregations(billingAccountDetailsItem, invoice, calculateTaxOnSubCategoryLevel, billingAccount, languageCode, groupedItems);
         invoice.setNetToPay(invoice.getAmountWithTax().add(invoice.getDueBalance() != null ? invoice.getDueBalance() : BigDecimal.ZERO));
-		if(invoice.getDiscountPlan() != null || (CollectionUtils.isNotEmpty(billingAccount.getDiscountPlanInstances()))) {
+		if(invoice.getDiscountPlan() != null) {
 			invoice.setAmountWithoutTaxBeforeDiscount(amountWithoutTax);
 			invoice.setTransactionalAmountWithoutTaxBeforeDiscount(amountWithoutTax);
-		}else {
-            invoice.setAmountWithoutTaxBeforeDiscount(BigDecimal.ZERO);
-            invoice.setTransactionalAmountWithoutTaxBeforeDiscount(BigDecimal.ZERO);
-            invoice.setTransactionalDiscountAmount(BigDecimal.ZERO);
-        }
+		}
         return itemsBySubCategory.keySet();
     }
     private CategoryInvoiceAgregate initInvoiceCategoryAgg(BillingAccount billingAccount, Invoice invoice, String languageCode, List<SubCategoryInvoiceAgregate> scAggregateList) {
@@ -558,9 +554,9 @@ public class InvoicingService extends PersistenceService<Invoice> {
 		List<DiscountPlanItem> getApplicableDiscountPlanItems = new ArrayList<>();
 	    applicableDiscountPlanItems.forEach(discountPlanItem -> {
 			BillingAccount billingAccount = invoice.getBillingAccount();
-		    if(discountPlanService.isDiscountPlanApplicable(billingAccount, discountPlanItem.getDiscountPlan(), invoice.getInvoiceDate(), billingAccount, invoice)) {
+		    if(invoice.getDiscountPlan()!=null && discountPlanService.isDiscountPlanApplicable(billingAccount, discountPlanItem.getDiscountPlan(), invoice.getInvoiceDate())) {
 			    List<DiscountPlanItem> discountItems = discountPlanItemService.getApplicableDiscountPlanItems(billingAccount, discountPlanItem.getDiscountPlan(),
-					    null, invoice.getInvoiceDate(), billingAccount, invoice);
+					    null, invoice.getInvoiceDate());
 			    getApplicableDiscountPlanItems.addAll(discountItems);
 		    }
 	    });
@@ -603,6 +599,7 @@ public class InvoicingService extends PersistenceService<Invoice> {
         }
 		invoice.setDiscountAmount(discountAmount.compareTo(BigDecimal.ZERO) == 0 ? amountToApplyDiscountOn : discountAmount);
 	    invoice.setTransactionalDiscountAmount(invoice.getDiscountAmount());
+		invoice.setDiscountPlan(discountPlanItem.getDiscountPlan());
 		invoice.setHasDiscounts(true);
         SubCategoryInvoiceAgregate discountAggregate = new SubCategoryInvoiceAgregate(scAggregate.getInvoiceSubCategory(), billingAccount, scAggregate.getUserAccount(), scAggregate.getWallet(), invoice, null);
         discountAggregate.updateAudit(currentUser);
@@ -797,23 +794,5 @@ public class InvoicingService extends PersistenceService<Invoice> {
             throw new BusinessException("Due date delay is null");
         }
         invoice.setDueDate(dueDate);
-    }
-
-    public Map<Long, BillingAccountDetailsItem> createBillingAccountDetailsItem(Invoice invoice){
-        String namedQuery = "BillingAccount.getBillingAccountDetailsItems";
-
-        boolean isBalanceLitigation = ParamBean.getInstance().getPropertyAsBoolean("invoice.balance.includeLitigation", false);
-        List<MatchingStatusEnum> status = isBalanceLitigation? List.of(MatchingStatusEnum.O, MatchingStatusEnum.P, MatchingStatusEnum.I) : List.of(MatchingStatusEnum.O, MatchingStatusEnum.P);
-        final Query queryB = getEntityManager().createNamedQuery(namedQuery).setParameter("baIDs", List.of(invoice.getBillingAccount().getId())).setParameter("aoStatus", status);
-
-        List<Object[]> resultList = queryB.getResultList();
-        final Map<Long, BillingAccountDetailsItem> billingAccountDetailsMap = resultList.stream().map(BillingAccountDetailsItem::new).collect(Collectors.toMap(BillingAccountDetailsItem::getBillingAccountId, Function.identity()));
-
-        Query query = getEntityManager().createNamedQuery("InvoiceLine.getInvoicingItemsByInvoiceId").setParameter("invoiceId", invoice.getId());
-        final Map<Long, List<InvoicingItem>> itemsByBAID = ((List<Object[]>)query.getResultList()).stream().map(InvoicingItem::new).collect(Collectors.groupingBy(InvoicingItem::getBillingAccountId));
-
-        billingAccountDetailsMap.values().forEach(x->x.setInvoicingItems(itemsByBAID.get(x.getBillingAccountId()).stream()
-                .collect(Collectors.groupingBy(InvoicingItem::getInvoiceKey)).values().stream().collect(Collectors.toList())));
-        return billingAccountDetailsMap;
     }
 }

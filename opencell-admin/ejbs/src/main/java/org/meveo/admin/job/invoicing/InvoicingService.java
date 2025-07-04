@@ -395,7 +395,7 @@ public class InvoicingService extends PersistenceService<Invoice> {
                 }
                 break;
             default:
-                value = null;
+                value = String.valueOf(defaultValue);
         }
         return value;
     }

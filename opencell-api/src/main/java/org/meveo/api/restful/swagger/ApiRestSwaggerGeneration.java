@@ -1,20 +1,11 @@
 package org.meveo.api.restful.swagger;
 
+import java.io.IOException;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
-
-import jakarta.inject.Inject;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.HttpHeaders;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriInfo;
 
 import org.meveo.api.restful.constant.MapRestUrlAndStandardUrl;
 import org.meveo.api.restful.swagger.service.Apiv1SwaggerDeleteOperation;
@@ -29,8 +20,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 
-import io.swagger.v3.jaxrs2.integration.JaxrsAnnotationScanner;
 import io.swagger.v3.jaxrs2.integration.resources.BaseOpenApiResource;
 import io.swagger.v3.oas.integration.GenericOpenApiContext;
 import io.swagger.v3.oas.integration.GenericOpenApiContextBuilder;
@@ -46,6 +40,16 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.servers.Server;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 
 /**
  * This class is used to generate Swagger documentation for RESTful endpoints of APIv1
@@ -66,6 +70,8 @@ public class ApiRestSwaggerGeneration extends BaseOpenApiResource {
 
     @Inject
     private Apiv1SwaggerDeleteOperation deleteOperation;
+    
+    private static final Logger log = LoggerFactory.getLogger(ApiRestSwaggerGeneration.class);
 
     private static String oasRestApiTxt;
 
@@ -87,77 +93,122 @@ public class ApiRestSwaggerGeneration extends BaseOpenApiResource {
      */
     private void loadOpenAPI() {
         try {
+        	
+            Gson gson = new GsonBuilder()
+                .registerTypeAdapter(OffsetDateTime.class, new TypeAdapter<OffsetDateTime>() {
+                    @Override
+                    public void write(JsonWriter out, OffsetDateTime value) throws IOException {
+                        out.value(value != null ? value.toString() : null);
+                    }
+                    @Override
+                    public OffsetDateTime read(JsonReader in) throws IOException {
+                        return in.hasNext() ? OffsetDateTime.parse(in.nextString()) : null;
+                    }
+                })
+                .create();
+            
+            OpencellJaxrsScanner customScanner = new OpencellJaxrsScanner();
+            customScanner.setResourcePackages(new HashSet<>(Arrays.asList(
+                "org.meveo.api.rest", 
+                "org.meveo.api.rest.impl"
+            )));
 
-            // Get standard API endpoints in Opencell and populate MAP_SWAGGER_PATHS
             OpenAPI oasStandardApi = new OpenAPI();
-            SwaggerConfiguration oasStandardConfig = new SwaggerConfiguration().openAPI(oasStandardApi).readAllResources(false)
-                // scanner implementation only considering defined resourcePackages and classes
-                // and ignoring resource packages and classes defined in JAX-RS Application
-                .scannerClass(JaxrsAnnotationScanner.class.getName()).resourcePackages(new HashSet<>(Arrays.asList("org.meveo.api.rest")));
+            SwaggerConfiguration oasStandardConfig = new SwaggerConfiguration()
+                .openAPI(oasStandardApi)
+                .scannerClass(OpencellJaxrsScanner.class.getName())
+                .resourcePackages(new HashSet<>(Arrays.asList(
+                    "org.meveo.api.rest", 
+                    "org.meveo.api.rest.impl"
+                )));
 
-            OpenApiContext ctx = OpenApiContextLocator.getInstance().getOpenApiContext(OpenApiContext.OPENAPI_CONTEXT_ID_DEFAULT);
+            OpenApiContext ctx = OpenApiContextLocator.getInstance()
+                .getOpenApiContext(OpenApiContext.OPENAPI_CONTEXT_ID_DEFAULT);
+                
             if (ctx instanceof GenericOpenApiContext) {
-                ((GenericOpenApiContext) ctx).getOpenApiScanner().setConfiguration(oasStandardConfig);
+                ((GenericOpenApiContext) ctx).setOpenApiScanner(customScanner);
+                ((GenericOpenApiContext) ctx).setOpenApiConfiguration(oasStandardConfig);
                 oasStandardApi = ctx.read();
             }
 
-//      Map<String, PathItem> MAP_SWAGGER_PATHS = new LinkedHashMap<>(GenericOpencellRestfulAPIv1.API_STD_SWAGGER.getPaths());
-            String jsonApiStd = new Gson().toJson(oasStandardApi.getPaths());
-            Map<String, PathItem> MAP_SWAGGER_PATHS = new Gson().fromJson(jsonApiStd, new TypeToken<Map<String, PathItem>>() {
-            }.getType());
+            String jsonApiStd = gson.toJson(oasStandardApi.getPaths());
+            Map<String, PathItem> MAP_SWAGGER_PATHS = gson.fromJson(jsonApiStd, 
+                new TypeToken<Map<String, PathItem>>() {}.getType());
 
-            OpenAPI oasRestApi = new OpenAPI().info(new Info().title("Opencell OpenApi definition V1").version("1.0").description("This Swagger documentation contains API v1 endpoints")
-                .termsOfService("http://opencell.com/terms/").contact(new Contact().email("opencell@opencellsoft.com")).license(new License().name("Apache 2.0").url("http://www.apache.org/licenses/LICENSE-2.0.html")));
+            OpenAPI oasRestApi = new OpenAPI();
+            Info info = new Info()
+                .title("Opencell OpenApi definition V1")
+                .version("1.0")
+                .description("This Swagger documentation contains API v1 endpoints")
+                .termsOfService("http://opencell.com/terms/")
+                .contact(new Contact().email("opencell@opencellsoft.com"))
+                .license(new License().name("Apache 2.0").url("http://www.apache.org/licenses/LICENSE-2.0.html"));
+            
+            oasRestApi.setInfo(info);
 
-            SwaggerConfiguration oasRestConfig = new SwaggerConfiguration().openAPI(oasRestApi).prettyPrint(true).readAllResources(false);
+            SwaggerConfiguration oasRestConfig = new SwaggerConfiguration()
+                .openAPI(oasRestApi)
+                .prettyPrint(true)
+                .readAllResources(false)
+                .scannerClass(OpencellJaxrsScanner.class.getName());
 
             setOpenApiConfiguration(oasRestConfig);
 
-            try {
-                GenericOpenApiContextBuilder ctxBuilder = new GenericOpenApiContextBuilder();
-                ctxBuilder.setCtxId("Apiv1-rest-id");
-                oasRestApi = ctxBuilder.openApiConfiguration(oasRestConfig).buildContext(true).read();
-            } catch (OpenApiConfigurationException e) {
-                throw new RuntimeException(e.getMessage(), e);
-            }
+            GenericOpenApiContextBuilder ctxBuilder = new GenericOpenApiContextBuilder();
+            ctxBuilder.setCtxId("Apiv1-rest-id");
+            ctxBuilder.openApiConfiguration(oasRestConfig);
+            
+            OpencellJaxrsScanner restScanner = new OpencellJaxrsScanner();
+            restScanner.setResourcePackages(new HashSet<>(Arrays.asList(
+                "org.meveo.api.restful"
+            )));
+            
+            //ctxBuilder.openApiScanner(restScanner);
+            OpenApiContext restContext;
+			try {
+				restContext = ctxBuilder.buildContext(true);
+	            oasRestApi = restContext.read();
 
-            // Populate paths of oasRestApi
+			} catch (OpenApiConfigurationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
             Paths paths = new Paths();
             oasRestApi.setPaths(paths);
-
-            // Populate tags, components, extensions and servers of oasRestApi
-            oasRestApi.components(oasStandardApi.getComponents()).servers(Collections.singletonList(new Server().url("/opencell").description("Root path")))
-                .security(Collections.singletonList(new SecurityRequirement().addList("auth")));
+            oasRestApi.setComponents(oasStandardApi.getComponents());
+            oasRestApi.setServers(Collections.singletonList(new Server().url("/opencell").description("Root path")));
+            oasRestApi.setSecurity(Collections.singletonList(new SecurityRequirement().addList("auth")));
 
             for (Map.Entry<String, String> mapPathEntry : MapRestUrlAndStandardUrl.MAP_RESTFUL_URL_AND_STANDARD_URL.entrySet()) {
                 String aStdPath = mapPathEntry.getKey();
                 String aRFPath = mapPathEntry.getValue();
-                PathItem pathItem = oasRestApi.getPaths().containsKey(aRFPath) ? oasRestApi.getPaths().get(aRFPath) : new PathItem();
+                PathItem pathItem = oasRestApi.getPaths().containsKey(aRFPath) ? 
+                    oasRestApi.getPaths().get(aRFPath) : new PathItem();
 
                 for (Map.Entry<String, PathItem> mapSwaggerEntry : MAP_SWAGGER_PATHS.entrySet()) {
                     String anOldPath = mapSwaggerEntry.getKey();
                     PathItem pathItemInOldSwagger = mapSwaggerEntry.getValue();
                     String[] splitStdPath = aStdPath.split(MapRestUrlAndStandardUrl.SEPARATOR);
+                    
                     if (splitStdPath[1].equals(anOldPath)) {
-
-                        // set operations for pathItem (a pathItem can have many operations CRUD)
                         switch (splitStdPath[0]) {
-                        case MapRestUrlAndStandardUrl.GET:
-                            if (pathItemInOldSwagger.getGet() != null)
-                                getOperation.setGet(pathItem, pathItemInOldSwagger.getGet(), aRFPath);
-                            break;
-                        case MapRestUrlAndStandardUrl.POST:
-                            if (pathItemInOldSwagger.getPost() != null)
-                                postOperation.setPost(pathItem, pathItemInOldSwagger.getPost(), aRFPath);
-                            break;
-                        case MapRestUrlAndStandardUrl.PUT:
-                            if (pathItemInOldSwagger.getPut() != null)
-                                putOperation.setPut(pathItem, pathItemInOldSwagger.getPut(), aRFPath);
-                            break;
-                        case MapRestUrlAndStandardUrl.DELETE:
-                            if (pathItemInOldSwagger.getDelete() != null)
-                                deleteOperation.setDelete(pathItem, pathItemInOldSwagger.getDelete(), aRFPath);
-                            break;
+                            case MapRestUrlAndStandardUrl.GET:
+                                if (pathItemInOldSwagger.getGet() != null)
+                                    getOperation.setGet(pathItem, pathItemInOldSwagger.getGet(), aRFPath);
+                                break;
+                            case MapRestUrlAndStandardUrl.POST:
+                                if (pathItemInOldSwagger.getPost() != null)
+                                    postOperation.setPost(pathItem, pathItemInOldSwagger.getPost(), aRFPath);
+                                break;
+                            case MapRestUrlAndStandardUrl.PUT:
+                                if (pathItemInOldSwagger.getPut() != null)
+                                    putOperation.setPut(pathItem, pathItemInOldSwagger.getPut(), aRFPath);
+                                break;
+                            case MapRestUrlAndStandardUrl.DELETE:
+                                if (pathItemInOldSwagger.getDelete() != null)
+                                    deleteOperation.setDelete(pathItem, pathItemInOldSwagger.getDelete(), aRFPath);
+                                break;
                         }
                         break;
                     }
@@ -167,13 +218,11 @@ public class ApiRestSwaggerGeneration extends BaseOpenApiResource {
             }
 
             oasRestApi.setPaths(paths);
-
             ObjectMapper mapper = new ObjectMapper();
             mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
             oasRestApiTxt = mapper.writeValueAsString(oasRestApi);
 
         } catch (JsonProcessingException e) {
-            Logger log = LoggerFactory.getLogger(this.getClass());
             log.error("Failed to create a Swagger documentation file", e);
         }
     }

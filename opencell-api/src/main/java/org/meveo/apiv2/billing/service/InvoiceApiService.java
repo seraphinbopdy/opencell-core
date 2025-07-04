@@ -399,7 +399,7 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 		}
 		invoiceService.cancelUnpaidAdv(invoice);
 		invoiceService.getEntityManager().flush();
-		invoiceService.calculateInvoiceV3(updateInvoice);
+		invoiceService.calculateInvoice(updateInvoice, false);
 		return updateInvoice;
     }
 
@@ -407,7 +407,7 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 	 * @param invoice
 	 */
 	public void calculateInvoice(Invoice invoice) {
-		invoiceService.calculateInvoiceV3(invoice);
+		invoiceService.calculateInvoice(invoice, true);
         invoiceService.updateBillingRunStatistics(invoice);
 	}
 	

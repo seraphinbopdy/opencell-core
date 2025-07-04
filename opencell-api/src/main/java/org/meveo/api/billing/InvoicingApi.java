@@ -259,8 +259,8 @@ public class InvoicingApi extends BaseApi {
         }
 
         if(dto.getDescriptionsTranslated() == null || dto.getDescriptionsTranslated().isEmpty()){
-        	LanguageDescriptionDto languageDescriptionEn = new LanguageDescriptionDto("ENG", "Billing run (id="+billingRun.getId()+"; billing cycle="+billingCycle.getDescription()+"; invoice date="+(billingRun.getInvoiceDate()!=null ? new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(billingRun.getInvoiceDate()) : "")+")"); 
-        	LanguageDescriptionDto languageDescriptionFr = new LanguageDescriptionDto("FRA", "Run de facturation (id="+billingRun.getId()+"; billing cycle="+billingCycle.getDescription()+"; invoice date="+(billingRun.getInvoiceDate()!=null ? new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(billingRun.getInvoiceDate()) : "")+")"); 
+        	LanguageDescriptionDto languageDescriptionEn = new LanguageDescriptionDto("ENG", "Billing run (id="+billingRun.getId()+"; billing cycle="+billingCycle.getDescription()+"; invoice date=" + DateUtils.formatDateWithPattern(billingRun.getInvoiceDate(), "YYYY-MM-dd HH:mm:ss") + ")"); 
+        	LanguageDescriptionDto languageDescriptionFr = new LanguageDescriptionDto("FRA", "Run de facturation (id="+billingRun.getId()+"; billing cycle="+billingCycle.getDescription()+"; invoice date=" + DateUtils.formatDateWithPattern(billingRun.getInvoiceDate(), "YYYY-MM-dd HH:mm:ss") + ")"); 
         	
         	List<LanguageDescriptionDto> descriptionsTranslated = new ArrayList<LanguageDescriptionDto>();
         	descriptionsTranslated.add(languageDescriptionEn);

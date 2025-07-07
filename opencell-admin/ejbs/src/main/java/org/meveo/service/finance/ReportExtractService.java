@@ -59,6 +59,8 @@ import org.meveo.service.script.ScriptInstanceService;
 import org.meveo.service.script.finance.ReportExtractScript;
 
 import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
 import jakarta.inject.Inject;
 
 /**
@@ -88,18 +90,18 @@ public class ReportExtractService extends BusinessService<ReportExtract> {
 
     private String globalFileName;
 
-//@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public void runReport(ReportExtract entity) throws ReportExtractExecutionException, BusinessException {
         runReport(entity, null, ReportExtractExecutionOrigin.GUI);
     }
 
-//    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public void runReport(ReportExtract entity, Map<String, String> mapParams) throws ReportExtractExecutionException, BusinessException {
         runReport(entity, mapParams, ReportExtractExecutionOrigin.GUI);
     }
 
     @SuppressWarnings("rawtypes")
-//    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public ReportExtractExecutionResult runReport(ReportExtract entity, Map<String, String> mapParams, ReportExtractExecutionOrigin origin) throws ReportExtractExecutionException, BusinessException {
         Map<String, Object> context = new HashMap<>();
         int reportSize = 0;
@@ -164,17 +166,32 @@ public class ReportExtractService extends BusinessService<ReportExtract> {
             }
 
             FileDetails fileDetails = null;
+            List<Map<String, Object>> dataForCustomTable = new ArrayList<>();
 
             if (results != null && results.next()) {
                 if (entity.getReportExtractResultType().equals(ReportExtractResultTypeEnum.CSV)) {
                     fileDetails = writeAsFile(filename, ofNullable(entity.getFileSeparator()).orElse(";"), reportDir, results, ofNullable(entity.getMaximumLine()).orElse(0L),
-                        ofNullable(entity.getDecimalSeparator()).orElse("."), entity);
+                        ofNullable(entity.getDecimalSeparator()).orElse("."), entity, entity.getCustomTableCode() != null ? dataForCustomTable : null);
 
                 } else {
-                    fileDetails = writeAsHtml(filename, reportDir, results, entity);
+                    fileDetails = writeAsHtml(filename, reportDir, results, entity, entity.getCustomTableCode() != null ? dataForCustomTable : null);
                 }
                 filename = fileDetails.getFileName();
                 reportExtractExecutionResult.setLineCount(fileDetails.getSize());
+
+                // Store data in custom table if configured
+                if (entity.getCustomTableCode() != null && !dataForCustomTable.isEmpty()) {
+                    try {
+                        log.debug("Storing {} rows in custom table {}", dataForCustomTable.size(), entity.getCustomTableCode());
+                        storeDataInCT(entity.getCustomTableCode(), dataForCustomTable, entity.isAccumulate());
+                    } catch (Exception e) {
+                        log.error("Failed to store data in custom table {}: {}", entity.getCustomTableCode(), e.getMessage(), e);
+                        // Continue execution even if custom table storage fails
+                    }
+                } else {
+                    log.debug("Custom table storage skipped. CustomTableCode: {}, dataForCustomTable size: {}", 
+                        entity.getCustomTableCode(), dataForCustomTable.size());
+                }
 
             } else if (be == null && entity.isGenerateEmptyReport()) {
                 filename = generateEmptyReport(filename, reportDir, entity.getReportExtractResultType());
@@ -219,7 +236,7 @@ public class ReportExtractService extends BusinessService<ReportExtract> {
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private FileDetails writeAsHtml(String filename, StringBuilder sbDir, ScrollableResults results, ReportExtract entity) throws BusinessException {
+    private FileDetails writeAsHtml(String filename, StringBuilder sbDir, ScrollableResults results, ReportExtract entity, List<Map<String, Object>> dataForCustomTable) throws BusinessException {
         Writer fileWriter = null;
         Map<String, Object> row = null;
         int rowNumber = 0;
@@ -250,6 +267,12 @@ public class ReportExtractService extends BusinessService<ReportExtract> {
             tableBody.append("<tbody>");
             do {
                 row = (Map<String, Object>) results.get();
+                
+                // Collect data for custom table if needed
+                if (dataForCustomTable != null) {
+                    dataForCustomTable.add(new HashMap<>(row));
+                }
+                
                 ite = firstRow.keySet().iterator();
                 tableBody.append("<tr class='" + (ctr++ % 2 == 0 ? "odd" : "even") + "'>");
                 while (ite.hasNext()) {
@@ -305,7 +328,7 @@ public class ReportExtractService extends BusinessService<ReportExtract> {
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private FileDetails writeAsFile(String filename, String fileSeparator, StringBuilder sbDir, ScrollableResults results, long maxLinePerFile, String decimalSeparator, ReportExtract entity) throws BusinessException {
+    private FileDetails writeAsFile(String filename, String fileSeparator, StringBuilder sbDir, ScrollableResults results, long maxLinePerFile, String decimalSeparator, ReportExtract entity, List<Map<String, Object>> dataForCustomTable) throws BusinessException {
         Writer fileWriter = null;
         StringBuilder line = new StringBuilder();
         Object value = null;
@@ -340,6 +363,12 @@ public class ReportExtractService extends BusinessService<ReportExtract> {
             int counter = 0;
             do {
                 row = (Map<String, Object>) results.get();
+                
+                // Collect data for custom table if needed
+                if (dataForCustomTable != null) {
+                    dataForCustomTable.add(new HashMap<>(row));
+                }
+                
                 ite = firstRow.keySet().iterator();
                 while (ite.hasNext()) {
                     value = row.get(ite.next());
@@ -419,16 +448,36 @@ public class ReportExtractService extends BusinessService<ReportExtract> {
     }
 
     private int storeDataInCT(String customTableCode, List<Map<String, Object>> data, boolean append) {
+        log.debug("Starting storeDataInCT for custom table: {}, append: {}, data size: {}", customTableCode, append, data.size());
+        
         CustomEntityTemplate customTable = ofNullable(customEntityTemplateService.findByCode(customTableCode)).orElseThrow(() -> new BusinessException("No custom table found with the given code : " + customTableCode));
+        
+        log.debug("Found custom table: {}", customTable.getCode());
+        
         List<Map<String, Object>> result = new ArrayList<>();
         for (Map<String, Object> resultList : data) {
             Map<String, Object> newResultList = new HashMap<>();
+            log.debug("Original row data: {}", resultList);
+            
             for (String key : resultList.keySet()) {
-                newResultList.put(key.replaceAll("\\s+", "_").toUpperCase(), resultList.get(key));
+                String transformedKey = key.replaceAll("\\s+", "_");
+                Object value = resultList.get(key);
+                newResultList.put(transformedKey, value);
+                log.debug("Transformed key '{}' to '{}' with value: {}", key, transformedKey, value);
             }
             result.add(newResultList);
+            log.debug("Transformed row: {}", newResultList);
         }
-        return customTableService.importData(customTable, result, append);
+        
+        log.debug("Calling customTableService.importData with {} rows", result.size());
+        try {
+            int importedCount = customTableService.importData(customTable, result, append);
+            log.debug("Import completed. Imported {} rows", importedCount);
+            return importedCount;
+        } catch (Exception e) {
+            log.error("Failed to import data to custom table: {}", e.getMessage(), e);
+            throw new BusinessException("Failed to import data to custom table", e);
+        }
     }
 
     private List<Map<String, Object>> readGeneratedFile(String path, String separator) {

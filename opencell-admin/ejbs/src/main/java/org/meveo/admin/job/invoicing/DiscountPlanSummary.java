@@ -19,6 +19,12 @@ public class DiscountPlanSummary {
 			}
 		}
 	}
+
+	public DiscountPlanSummary(long discountPlanId, Date startDate, Date endDate) {
+		this.discountPlanId = discountPlanId;
+		this.startDate = startDate;
+		this.endDate = endDate;
+	}
 	/**
 	 * @return the startDate
 	 */

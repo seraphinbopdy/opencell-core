@@ -9,7 +9,7 @@ import jakarta.ws.rs.core.Application;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-//@ApplicationPath("/api/rest/v0")
+@ApplicationPath("/api/rest/v0")
 public class JaxRsActivatorLegacyAPIConfig extends Application {
 
     @Override

@@ -486,10 +486,9 @@
 		</profile>
 		<profile>
 			<id>swagger</id>
-			<!--
 			<activation>
 	            <activeByDefault>true</activeByDefault>
-	        </activation>-->
+	        </activation>
 			<build>
 				<plugins>
 					<plugin>

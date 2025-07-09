@@ -428,11 +428,11 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
      * @param id entity id
      * @param fetchFields fields to left join fetch
      * @param refresh refresh entityManager
-     * @param useCache query will be cacheable if true
+     * @param cacheable query will be cacheable if true
      * @return
      */
     @SuppressWarnings("unchecked")
-    public E findById(Long id, List<String> fetchFields, boolean refresh, boolean useCache) {
+    public E findById(Long id, List<String> fetchFields, boolean refresh, boolean cacheable) {
         log.trace("Find {}/{} by id with refresh {}", entityClass.getSimpleName(), id, refresh);
         final Class<? extends E> productClass = getEntityClass();
         StringBuilder queryString = new StringBuilder("from " + productClass.getName() + " a");
@@ -445,7 +445,7 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
         Query query = getEntityManager().createQuery(queryString.toString());
         query.setParameter("id", id);
         
-        if (useCache) {
+        if (cacheable) {
             query.setHint("org.hibernate.cacheable", true);
         }
 
@@ -1061,7 +1061,7 @@ public abstract class PersistenceService<E extends IEntity> extends BaseService 
     @Override
     public E retrieveIfNotManaged(E entity) {
 
-        if (entity.getId() == null) {
+        if (entity == null || entity.getId() == null) {
             return entity;
         }
 

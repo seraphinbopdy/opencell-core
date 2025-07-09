@@ -2089,6 +2089,16 @@ public class RatedTransactionService extends PersistenceService<RatedTransaction
                     .executeUpdate();
         }
     }
+    
+    /**
+     * Reopen all invoiceLine linked RTs
+     * 
+     * @param invoiceLineId 
+     */
+	public void reopenRatedTransactionByInvoiceLine(Long invoiceLineId) {
+		getEntityManager().createNamedQuery("RatedTransaction.reopenRatedTransactionsByIL")
+				.setParameter("invoiceLineId", invoiceLineId).setParameter("now", new Date()).executeUpdate();
+	}
 
     public RatedTransaction findByEDR(Long edrId) {
         try {

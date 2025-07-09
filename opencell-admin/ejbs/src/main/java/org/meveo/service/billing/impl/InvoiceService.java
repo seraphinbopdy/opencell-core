@@ -8370,7 +8370,9 @@ public class InvoiceService extends PersistenceService<Invoice> {
                 detail.getdiscountPlanSummaries().add(new DiscountPlanSummary(discountPlan.getId(), discountPlan.getStartDate(), discountPlan.getEndDate()));
         }
         invoicingItems.forEach((taxId, billingAccountDetauksItem) -> {
-            invoicingService.createInvoiceAgregates(billingAccountDetauksItem, invoice.getBillingAccount(), invoice, billingAccountDetauksItem.getInvoicingItems().get(0));
+            if (isNotEmpty(billingAccountDetauksItem.getInvoicingItems())) {
+                invoicingService.createInvoiceAgregates(billingAccountDetauksItem, invoice.getBillingAccount(), invoice, billingAccountDetauksItem.getInvoicingItems().get(0));
+            }
         } );
     }
 

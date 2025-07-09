@@ -89,6 +89,17 @@ public interface IPersistenceService<E extends IEntity> {
      * @return Entity found.
      */
     E findById(Long id, List<String> fetchFields, boolean refresh);
+    
+    /**
+     * Find an entity by its id and fetch required fields.
+     * 
+     * @param id Id to find entity by.
+     * @param fetchFields List of fields to fetch.
+     * @param refresh Is entity refresh after load needed.
+     * @param cacheable query should be cacheable.
+     * @return Entity found.
+     */
+    E findById(Long id, List<String> fetchFields, boolean refresh, boolean cacheable);
 
     /**
      * Persist an entity.

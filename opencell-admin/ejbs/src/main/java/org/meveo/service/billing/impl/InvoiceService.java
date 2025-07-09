@@ -5848,6 +5848,9 @@ public class InvoiceService extends PersistenceService<Invoice> {
     
     private Seller getSelectedSeller(InvoiceLine invoiceLine) {
         Invoice invoice=invoiceLine.getInvoice();
+        if(invoice!=null && invoice.getSeller()!=null) {
+                return invoice.getSeller();
+        }
         if(invoiceLine.getSubscription() != null) {
             if(invoiceLine.getSubscription().getSeller() != null)
                 return invoiceLine.getSubscription().getSeller();

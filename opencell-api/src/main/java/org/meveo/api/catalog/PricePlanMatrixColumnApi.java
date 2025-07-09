@@ -68,7 +68,7 @@ public class PricePlanMatrixColumnApi extends BaseApi {
         return new PricePlanMatrixColumnDto(pricePlanMatrixColumn);
     }
 
-    public PricePlanMatrixColumn update(String pricePlanMatrixCode, int version, PricePlanMatrixColumnDto dtoData) throws MeveoApiException, BusinessException {
+    public PricePlanMatrixColumnDto update(String pricePlanMatrixCode, int version, PricePlanMatrixColumnDto dtoData) throws MeveoApiException, BusinessException {
         checkMissingParameters(pricePlanMatrixCode, version,dtoData);
         PricePlanMatrixVersion pricePlanMatrixVersion = getPricePlanMatrixVersion(pricePlanMatrixCode, version);
         
@@ -88,7 +88,7 @@ public class PricePlanMatrixColumnApi extends BaseApi {
         pricePlanMatrixColumn.setAttribute(attribute);
         pricePlanMatrixColumnService.update(pricePlanMatrixColumn);
         pricePlanMatrixColumn.getPricePlanMatrixVersion().setPricePlanMatrix(pricePlanMatrixService.findByCode(pricePlanMatrixCode));
-        return pricePlanMatrixColumn;
+        return new PricePlanMatrixColumnDto(pricePlanMatrixColumn);
     }
 
     public void removePricePlanColumn(String pricePlanMatrixCode, int version, String code){

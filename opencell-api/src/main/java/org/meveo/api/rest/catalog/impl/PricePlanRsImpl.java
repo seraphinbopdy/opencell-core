@@ -326,8 +326,8 @@ public class PricePlanRsImpl extends BaseRs implements PricePlanRs {
     public Response update(String pricePlanMatrixCode, int pricePlanMatrixVersion,PricePlanMatrixColumnDto postData) {
         GetPricePlanMatrixColumnResponseDto response = new GetPricePlanMatrixColumnResponseDto();
         try {
-            PricePlanMatrixColumn pricePlanMatrixColumn = pricePlanMatrixColumnApi.update(pricePlanMatrixCode, pricePlanMatrixVersion, postData);
-            response.setPricePlanMatrixColumnDto(new PricePlanMatrixColumnDto(pricePlanMatrixColumn));
+            PricePlanMatrixColumnDto pricePlanMatrixColumn = pricePlanMatrixColumnApi.update(pricePlanMatrixCode, pricePlanMatrixVersion, postData);
+            response.setPricePlanMatrixColumnDto(pricePlanMatrixColumn);
             return Response.ok(response).build();
         } catch (MeveoApiException e) {
             return errorResponse(e, response.getActionStatus());

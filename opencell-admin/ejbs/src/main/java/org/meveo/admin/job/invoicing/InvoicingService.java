@@ -366,7 +366,7 @@ public class InvoicingService extends PersistenceService<Invoice> {
         // ILs could be also grouped by invoice type id. if set then its invoiceKey should have it already in its parts
         InvoiceType invoiceType;
         if (invoicingItem.getInvoiceTypeId() != null) {
-            invoiceType = invoiceTypeService.findById(groupedItems.get(0).getInvoiceTypeId());
+            invoiceType = invoiceTypeService.findById(invoicingItem.getInvoiceTypeId());
         } else {
             invoiceType = invoiceTypeService.retrieveIfNotManaged(invoiceService.determineInvoiceType(false, false, false, billingCycle, billingRun, billingAccount, invoice));
         }

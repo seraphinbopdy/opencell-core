@@ -21,6 +21,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.meveo.admin.exception.BusinessException;
+import org.meveo.admin.exception.InvalidELException;
+import org.meveo.model.article.AccountingArticle;
+import org.meveo.model.billing.InvoiceLine;
 import org.meveo.model.billing.InvoiceType;
 import org.meveo.model.crm.Provider;
 import org.meveo.model.payments.OperationCategoryEnum;
@@ -31,6 +34,11 @@ import org.meveo.service.payments.impl.OCCTemplateService;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.meveo.commons.utils.StringUtils.isBlank;
+import static org.meveo.service.base.ValueExpressionWrapper.evaluateExpression;
 
 /**
  * The Class InvoiceTypeService.
@@ -241,4 +249,41 @@ public class InvoiceTypeService extends BusinessService<InvoiceType> {
 			throw new BusinessException("Cant update global InvoiceTypeSequence : " + e.getMessage());
 		}
 	}
+
+    /**
+     * Evaluate invoice type code from EL
+     * @param expression EL expression
+     * @param invoiceLine IL to pass as param to EL
+     * @return evaluated invoice type code
+     * @throws InvalidELException Invalid EL Exception
+     */
+    public String evaluateInvoiceTypeEl(String expression, InvoiceLine invoiceLine) throws InvalidELException {
+
+        String invoiceTypeCode = null;
+
+        if (!isBlank(expression)) {
+            AccountingArticle accountingArticle = invoiceLine.getAccountingArticle();
+
+            Map<Object, Object> contextMap = new HashMap<>();
+            if (expression.indexOf("article") >= 0 || expression.indexOf("accountingArticle") >= 0) {
+                contextMap.put("article", accountingArticle);
+                contextMap.put("accountingArticle", accountingArticle);
+            }
+            if (expression.indexOf("il") >= 0 || expression.indexOf("invoiceLine") >= 0) {
+                contextMap.put("il", invoiceLine);
+                contextMap.put("invoiceLine", invoiceLine);
+            }
+
+            try {
+                String value = evaluateExpression(expression, contextMap, String.class);
+                if (value != null) {
+                    invoiceTypeCode = value;
+                }
+            } catch (Exception e) {
+                log.warn("Error when evaluate InvoiceTypeEl for accountingArticle id=" + accountingArticle.getId());
+            }
+        }
+
+        return invoiceTypeCode;
+    }
 }

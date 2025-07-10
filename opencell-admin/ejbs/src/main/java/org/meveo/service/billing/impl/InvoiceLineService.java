@@ -10,6 +10,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.collections4.ListUtils.partition;
 import static org.meveo.commons.utils.ParamBean.getInstance;
+import static org.meveo.commons.utils.StringUtils.isBlank;
 import static org.meveo.model.billing.InvoiceLineStatusEnum.OPEN;
 import static org.meveo.model.billing.InvoiceLineTaxModeEnum.RATE;
 import static org.meveo.model.billing.InvoiceStatusEnum.VALIDATED;
@@ -1422,7 +1423,21 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
         if (invoiceLine.getSeller() != null) {
             invoiceKey.add(formatId(invoiceLine.getSeller().getId()));
         }
-        invoiceKey.add(formatId(invoiceLine.getInvoiceTypeId()));
+        // If IL's invoice type is null then try to get it from its article
+        if (invoiceLine.getInvoiceType() == null && invoiceLine.getAccountingArticle() != null) {
+            InvoiceType invoiceType = null;
+            AccountingArticle accountingArticle = accountingArticleService.retrieveIfNotManaged(invoiceLine.getAccountingArticle());
+            if (!isBlank(accountingArticle.getInvoiceTypeEl())) {
+                String invoiceTypeCode =  invoiceTypeService.evaluateInvoiceTypeEl(accountingArticle.getInvoiceTypeEl(), invoiceLine);
+                invoiceType = invoiceTypeService.findByCode(invoiceTypeCode);
+            }
+            if (invoiceType == null) {
+                invoiceType = accountingArticle.getInvoiceType();
+            }
+            invoiceLine.setInvoiceType(invoiceType);
+        }
+        invoiceKey.add(formatEntityId(invoiceLine.getInvoiceType()));
+
         invoiceKey.add(formatId(invoiceLine.getPaymentMethodId()));invoiceKey.add(formatId(invoiceLine.getPaymentMethodId()));
         if(billingRun != null && billingRun.getBillingCycle() != null) {
             if(billingRun.getBillingCycle().getType()==BillingEntityTypeEnum.SUBSCRIPTION) {
@@ -1460,8 +1475,8 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
             InvoiceLine firstInvoiceLine = invoiceLines.get(0);
             InvoiceType invoiceType;
 
-            if (firstInvoiceLine.getInvoiceTypeId() != null) {
-                invoiceType = invoiceTypeService.findById(firstInvoiceLine.getInvoiceTypeId());
+            if (firstInvoiceLine.getInvoiceType() != null) {
+                invoiceType = invoiceTypeService.findById(firstInvoiceLine.getInvoiceType().getId());
             } else {
                 invoiceType = invoiceService.determineInvoiceType(false, false, false,
                         billingRun.getBillingCycle(), billingRun, firstInvoiceLine.getBillingAccount());

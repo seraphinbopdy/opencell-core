@@ -550,7 +550,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
     @Inject
     private InvoicingService invoicingService;
-    
+
     private enum RuleValidationEnum {
         RULE_TRUE, RULE_FALSE, RULE_IGNORE
     }
@@ -5753,7 +5753,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
                 AccountingArticle accountingArticle = invoiceLine.getAccountingArticle();
                 accountingArticle = accountingArticleService.refreshOrRetrieve(accountingArticle);
                 if (!isBlank(accountingArticle.getInvoiceTypeEl())) {
-                    String invoiceTypeCode = evaluateInvoiceTypeEl(accountingArticle.getInvoiceTypeEl(), invoiceLine);
+                    String invoiceTypeCode = invoiceTypeService.evaluateInvoiceTypeEl(accountingArticle.getInvoiceTypeEl(), invoiceLine);
                     invoiceType = invoiceTypeService.findByCode(invoiceTypeCode);
                 }
                 if (invoiceType == null) {
@@ -5796,37 +5796,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         return new InvoiceLinesToInvoice(moreIls, convertedIlGroups);
 
     }
-    
-    private String evaluateInvoiceTypeEl(String expression, InvoiceLine invoiceLine) throws InvalidELException {
 
-        String invoiceTypeCode = null;
-
-        if (!isBlank(expression)) {
-            AccountingArticle accountingArticle = invoiceLine.getAccountingArticle();
-
-            Map<Object, Object> contextMap = new HashMap<>();
-            if (expression.indexOf("article") >= 0 || expression.indexOf("accountingArticle") >= 0) {
-                contextMap.put("article", accountingArticle);
-                contextMap.put("accountingArticle", accountingArticle);
-            }
-            if (expression.indexOf("il") >= 0 || expression.indexOf("invoiceLine") >= 0) {
-                contextMap.put("il", invoiceLine);
-                contextMap.put("invoiceLine", invoiceLine);
-            }
-
-            try {
-                String value = evaluateExpression(expression, contextMap, String.class);
-                if (value != null) {
-                    invoiceTypeCode = value;
-                }
-            } catch (Exception e) {
-                log.warn("Error when evaluate InvoiceTypeEl for accountingArticle id=" + accountingArticle.getId());
-            }
-        }
-
-        return invoiceTypeCode;
-    }
-    
     private PaymentMethod resolvePMethod(BillingAccount billingAccount, BillingCycle billingCycle, PaymentMethod defaultPaymentMethod, InvoiceLine invoiceLine) {
         if (BillingEntityTypeEnum.SUBSCRIPTION.equals(billingCycle.getType()) || (BillingEntityTypeEnum.BILLINGACCOUNT.equals(billingCycle.getType()) && billingCycle.isSplitPerPaymentMethod())) {
             if (invoiceLine.getSubscription() != null
@@ -8362,7 +8332,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
                 .getIdQuery(getEntityManager())
                 .getResultList();
     }
-	
+
 
     private void createInvoiceAgregates(Invoice invoice){
         var invoicingItems = invoicingService.createBillingAccountDetailsItem(invoice);
@@ -8387,5 +8357,5 @@ public class InvoiceService extends PersistenceService<Invoice> {
         this.createInvoiceAgregates(invoice);
         return invoice;
     }
-	
+
 }

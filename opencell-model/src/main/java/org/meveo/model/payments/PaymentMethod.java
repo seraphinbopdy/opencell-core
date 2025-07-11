@@ -74,7 +74,8 @@ import jakarta.persistence.Transient;
                 + "left join Subscription sub on sub.paymentMethod.id = pm.id "
                 + "left join BillingAccount ba on ba.paymentMethod.id = pm.id "
                 + "left join Invoice inv on inv.paymentMethod.id = pm.id and inv.status = org.meveo.model.billing.InvoiceStatusEnum.VALIDATED "
-                + "where pm.id = :pmId"),
+                + "where pm.id = :pmId "
+                + "and (sub.id is not null or ba.id is not null or inv.id is not null)"),
         @NamedQuery(name = "PaymentMethod.getPreferredPaymentMethodForDDRequestItem", query = "SELECT ca.id, ca.code, ca.description, pm.class, pm.bankCoordinates.bic, pm.bankCoordinates.iban, pm.alias, pm.mandateIdentification, pm.mandateDate, pm.mandateChangeAction, pm.id FROM CustomerAccount ca JOIN DDPaymentMethod pm on ca.id = pm.customerAccount.id JOIN AccountOperation ao on ca.id = ao.customerAccount.id  WHERE ao.ddRequestItem.id = :id AND pm.preferred = true ORDER BY ao.id ASC"),
         @NamedQuery(name = "PaymentMethod.getNumberOfTokenId", query = "select count(*) from  PaymentMethod pm where pm.tokenId = :tokenId and pm.disabled = false") })
 public abstract class PaymentMethod extends EnableCFEntity {

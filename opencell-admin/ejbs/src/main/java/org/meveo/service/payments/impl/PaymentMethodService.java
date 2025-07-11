@@ -20,7 +20,6 @@ package org.meveo.service.payments.impl;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.ValidationException;
@@ -29,6 +28,7 @@ import org.meveo.api.dto.payment.HostedCheckoutStatusResponseDto;
 import org.meveo.api.dto.payment.MandatInfoDto;
 import org.meveo.api.dto.payment.PaymentHostedCheckoutResponseDto;
 import org.meveo.commons.utils.ParamBean;
+import org.meveo.commons.utils.ParamBeanFactory;
 import org.meveo.commons.utils.QueryBuilder;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.admin.Seller;
@@ -118,7 +118,17 @@ public class PaymentMethodService extends PersistenceService<PaymentMethod> {
         }
         if (paymentMethod instanceof DDPaymentMethod) {        	
 	        List<DDPaymentMethod> ddPaymentMethods = paymentMethod.getCustomerAccount().getDDPaymentMethods();
-	        customerAccountService.validatePaymentMethod(paymentMethod.getCustomerAccount().getPreferredPaymentMethod(), ddPaymentMethods);
+            if (paymentMethod.getCustomerAccount().getPreferredPaymentMethod() == null) {
+                throw new BusinessException("CustomerAccount does not have a preferred payment method");
+            }
+            boolean isCheckIbanUnicityEnabled = Boolean.parseBoolean(ParamBeanFactory.getAppScopeInstance().getProperty("iban.unique.check.enabled", "true"));
+            if(isCheckIbanUnicityEnabled){
+                String iban = ((DDPaymentMethod) paymentMethod).getBankCoordinates().getIban();
+                if (ddPaymentMethods.stream()
+                        .anyMatch(entry -> entry.getBankCoordinates().getIban().equals(iban))) {
+                    throw new BusinessException("CustomerAccount already has a Direct Debit payment method with the same IBAN");
+                }
+            }
         }
         super.create(paymentMethod);
 

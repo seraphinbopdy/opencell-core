@@ -113,6 +113,7 @@ import org.meveo.admin.job.AggregationConfiguration;
 import org.meveo.admin.job.PDFParametersConstruction;
 import org.meveo.admin.job.invoicing.BillingAccountDetailsItem;
 import org.meveo.admin.job.invoicing.DiscountPlanSummary;
+import org.meveo.admin.job.invoicing.InvoicingItem;
 import org.meveo.admin.job.invoicing.InvoicingService;
 import org.meveo.admin.storage.StorageFactory;
 import org.meveo.admin.util.PdfWaterMark;
@@ -8354,7 +8355,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
         for (Map.Entry<Long, BillingAccountDetailsItem> entry : invoicingItems.entrySet()) {
             BillingAccountDetailsItem item = entry.getValue();
-            List<InvoicingItem> invoicingItemList = item.getInvoicingItems();
+            List<List<InvoicingItem>> invoicingItemList = item.getInvoicingItems();
             if (invoicingItemList != null && !invoicingItemList.isEmpty()) {
                 invoicingService.createInvoiceAggregates(item, invoice.getBillingAccount(), invoice,invoicingItemList.get(0));
             }
@@ -8366,7 +8367,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         final BillingAccount billingAccount = billingAccountService.retrieveIfNotManaged(invoice.getBillingAccount());
         invoiceService.updateBillingRunStatistics(invoice);
         cleanInvoiceAggregates(invoice.getId());
-        this.createInvoiceAgregates(invoice);
+        this.createInvoiceAggregates(invoice);
         return invoice;
     }
 

@@ -117,10 +117,10 @@ public class BillingAccountDetailsItem {
 				.mapToInt(InvoicingItem::getCount).sum();
 		this.invoicingItems = invoicingItems;
 	}
-	public List<DiscountPlanSummary> getdiscountPlanSummaries() {
+	public List<DiscountPlanSummary> getDiscountPlanSummaries() {
 		return discountPlanSummaries;
 	}
-	public void setdiscountPlanSummaries(List<DiscountPlanSummary> discountPlanSummaries) {
+	public void setDiscountPlanSummaries(List<DiscountPlanSummary> discountPlanSummaries) {
 		this.discountPlanSummaries = discountPlanSummaries;
 	}
 	public int getTotalILs() {

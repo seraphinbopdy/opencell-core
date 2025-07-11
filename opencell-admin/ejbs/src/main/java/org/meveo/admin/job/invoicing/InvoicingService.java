@@ -205,7 +205,7 @@ public class InvoicingService extends PersistenceService<Invoice> {
 
     	for (List<InvoicingItem> groupedItems : billingAccountDetailsItem.getInvoicingItems()) {
 	        final Invoice invoice = initInvoice(billingAccountDetailsItem, billingRun, billingAccount, billingCycle, isFullAutomatic, groupedItems.get(0));
-	        Set<SubCategoryInvoiceAgregate> invoiceSCAs = createInvoiceAgregates(billingAccountDetailsItem, billingAccount, invoice, groupedItems);
+	        Set<SubCategoryInvoiceAgregate> invoiceSCAs = createInvoiceAggregates(billingAccountDetailsItem, billingAccount, invoice, groupedItems);
 	        evalDueDate(invoice, billingCycle, null, billingAccountDetailsItem.getCaDueDateDelayEL(), billingRun.isExceptionalBR());
 	        invoiceService.setInitialCollectionDate(invoice, billingCycle, billingRun);
 	        invoice.setSubCategoryInvoiceAgregate(invoiceSCAs);
@@ -269,7 +269,7 @@ public class InvoicingService extends PersistenceService<Invoice> {
 
     }
     
-    public Set<SubCategoryInvoiceAgregate> createInvoiceAgregates(BillingAccountDetailsItem billingAccountDetailsItem,
+    public Set<SubCategoryInvoiceAgregate> createInvoiceAggregates(BillingAccountDetailsItem billingAccountDetailsItem,
                                 BillingAccount billingAccount, Invoice invoice, List<InvoicingItem> groupedItems) {
         String languageCode = getTradingLanguageCode(billingAccountDetailsItem.getTradingLanguageId());
         boolean calculateTaxOnSubCategoryLevel = invoice.getInvoiceType().getTaxScript() == null;
@@ -556,7 +556,7 @@ public class InvoicingService extends PersistenceService<Invoice> {
         } else if ( subscription.getDiscountPlanInstances() != null && !subscription.getDiscountPlanInstances().isEmpty()) {
             applicableDiscountPlanItems.addAll(getApplicableDiscountPlanItems(billingAccount, subscription.getDiscountPlanInstances(), invoice));
         }*/
-        final List<DiscountPlanSummary> discountPlanInstances = billingAccountDetailsItem.getdiscountPlanSummaries();
+        final List<DiscountPlanSummary> discountPlanInstances = billingAccountDetailsItem.getDiscountPlanSummaries();
         if (discountPlanInstances != null && !discountPlanInstances.isEmpty()) {
             applicableDiscountPlanItems.addAll(getApplicableDiscountPlanItems(billingAccountDetailsItem, discountPlanInstances,invoice));
         }

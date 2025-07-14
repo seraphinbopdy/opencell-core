@@ -18032,5 +18032,9 @@ public class DummyPaymentGatewayScript extends Script {
         <addForeignKeyConstraint baseColumnNames="invoice_type_id" baseTableName="billing_invoice_line" constraintName="fk_InvoiceLine_invoiceType" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
                                  onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="billing_invoice_type" />
     </changeSet>
+    
+    <changeSet id="#INTRD-32937_20250711" author="anasseh">
+      <modifyDataType tableName="ar_ddrequest_item" columnName="amount" newDataType="numeric(23,12)"  />
+    </changeSet>
 
 </databaseChangeLog>

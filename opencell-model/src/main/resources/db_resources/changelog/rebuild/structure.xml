@@ -2366,8 +2366,8 @@
                 <constraints nullable="false" />
             </column>
             <column name="updated" type="datetime" />
-            <column name="amount" type="numeric(19, 2)" />
-            <column name="amount_invoices" type="numeric(19, 2)" />
+            <column name="amount" type="numeric(23, 12)" />
+            <column name="amount_invoices" type="numeric(23, 12)" />
             <column name="billing_account_name" type="varchar(255)" />
             <column name="due_date" type="date" />
             <column name="payment_info" type="varchar(255)" />
@@ -20931,6 +20931,8 @@
     <changeSet id="INTRD-31176_delete_fk" author="a.rouaguebe_ext" />
     <changeSet id="#INTRD-30139_20250626" author="AbdelmounaimAkadid" />
     <changeSet id="#INTRD-29434_20250310" author="MounirBOUKAYOUA" />
+    <changeSet id="#INTRD-32937_20250711" author="anasseh" />
+    
     <changeSet id="#liquibase_update_old_data_to_structure" author="AbdelmounaimAkadid" />
 
 </databaseChangeLog>

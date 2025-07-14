@@ -46,7 +46,7 @@ public class DDRequestItem extends AuditableEntity {
 
     private static final long serialVersionUID = 1L;
 
-    @Column(name = "amount")
+    @Column(name = "amount", precision = NB_PRECISION, scale = NB_DECIMALS)
     private BigDecimal amount;
 
     @Column(name = "payment_info", length = 255)

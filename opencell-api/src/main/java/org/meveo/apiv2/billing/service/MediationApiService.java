@@ -81,6 +81,7 @@ import org.meveo.model.rating.EDRStatusEnum;
 import org.meveo.security.CurrentUser;
 import org.meveo.security.MeveoUser;
 import org.meveo.security.keycloak.CurrentUserProvider;
+import org.meveo.service.admin.impl.CurrencyService;
 import org.meveo.service.base.ValueExpressionWrapper;
 import org.meveo.service.billing.impl.CounterInstanceService;
 import org.meveo.service.billing.impl.EdrService;
@@ -98,6 +99,7 @@ import org.meveo.service.medina.impl.DuplicateException;
 import org.meveo.service.medina.impl.ICdrCsvReader;
 import org.meveo.service.medina.impl.ICdrParser;
 import org.meveo.service.medina.impl.ICdrReader;
+import org.meveo.service.tax.TaxClassService;
 import org.meveo.util.ApplicationProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -167,6 +169,12 @@ public class MediationApiService {
 
     @Inject
     private WalletOperationService walletOperationService;
+
+    @Inject
+    CurrencyService currencyService;
+
+    @Inject
+    TaxClassService taxClassService;
 
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -682,6 +690,8 @@ public class MediationApiService {
             for (WalletOperation walletOperation : walletOperations) {
                 if (returnWalletOperationDetails) {
                     walletOperation = walletOperationService.retrieveIfNotManaged(walletOperation);
+                    walletOperation.setCurrency(currencyService.retrieveIfNotManaged(walletOperation.getCurrency()));
+                    walletOperation.setTaxClass(taxClassService.retrieveIfNotManaged(walletOperation.getTaxClass()));
                     WalletOperationDto walletOperationDto = new WalletOperationDto(walletOperation, walletOperation.getAccountingArticle());
                     result.getWalletOperations().add(walletOperationDto);
 

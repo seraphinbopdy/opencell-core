@@ -154,13 +154,13 @@ import jakarta.validation.constraints.Size;
 						+ " group by il.billingAccount.id, il.accountingArticle.invoiceSubCategory.id, il.userAccount.id, il.tax.id, il.seller.id, il.invoiceType.id, il.invoiceKey "
 						+ " order by il.billingAccount.id"),
 		@NamedQuery(name = "InvoiceLine.getInvoicingItemsByInvoiceId", query =
-				"select il.billingAccount.id, il.accountingArticle.invoiceSubCategory.id, il.userAccount.id, il.tax.id, il.seller.id, sum(il.amountWithoutTax), sum(il.amountWithTax), sum(il.amountTax), count(il.id), (string_agg(cast(il.id as text),',')),"
+				"select il.billingAccount.id, il.accountingArticle.invoiceSubCategory.id, il.userAccount.id, il.tax.id, il.seller.id, il.invoiceType.id, sum(il.amountWithoutTax), sum(il.amountWithTax), sum(il.amountTax), count(il.id), (string_agg(cast(il.id as text),',')),"
 						+ " il.invoiceKey, (CASE WHEN COUNT(CASE WHEN il.useSpecificPriceConversion <> TRUE OR il.useSpecificPriceConversion IS NULL THEN 1 END) > 0 THEN TRUE ELSE FALSE END), sum(il.transactionalAmountWithoutTax), sum(il.transactionalAmountWithTax), sum(il.transactionalAmountTax) "
 						+ ", CASE WHEN COUNT(DISTINCT il.subscription.id) = 1 THEN MAX(il.subscription.id)  ELSE NULL END AS subscription "
 						+ ", CASE WHEN COUNT(DISTINCT il.commercialOrder.id) = 1 THEN MAX(il.commercialOrder.id)  ELSE NULL END AS commercialOrder "
 						+ " FROM InvoiceLine il "
 						+ " WHERE il.invoice.id=:invoiceId"
-						+ " group by il.billingAccount.id, il.accountingArticle.invoiceSubCategory.id, il.userAccount.id, il.tax.id, il.seller.id, il.invoiceKey "),
+						+ " group by il.billingAccount.id, il.accountingArticle.invoiceSubCategory.id, il.userAccount.id, il.tax.id, il.seller.id, il.invoiceType.id, il.invoiceKey "),
 		@NamedQuery(name = "InvoiceLine.findByIdsAndAdjustmentStatus", query = "SELECT il from InvoiceLine il left join fetch il.invoice i left join fetch i.invoiceType WHERE il.adjustmentStatus = :status and il.id in (:invoiceLinesIds)"),
         @NamedQuery(name = "InvoiceLine.findByIdsAndOtherAdjustmentStatus", query = "SELECT il from InvoiceLine il  left join fetch il.invoice i left join fetch i.invoiceType WHERE il.adjustmentStatus <> :status and il.id in (:invoiceLinesIds)"),
         @NamedQuery(name = "InvoiceLine.findByAdjustmentStatus", query = "SELECT il from InvoiceLine il left join fetch il.invoice WHERE il.adjustmentStatus = :status"),

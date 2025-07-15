@@ -690,8 +690,8 @@ public class MediationApiService {
             for (WalletOperation walletOperation : walletOperations) {
                 if (returnWalletOperationDetails) {
                     walletOperation = walletOperationService.retrieveIfNotManaged(walletOperation);
-                    walletOperation.setCurrency(currencyService.refreshOrRetrieve(walletOperation.getCurrency()));
-                    walletOperation.setTaxClass(taxClassService.refreshOrRetrieve(walletOperation.getTaxClass()));
+                    walletOperation.setCurrency(currencyService.retrieveIfNotManaged(walletOperation.getCurrency()));
+                    walletOperation.setTaxClass(taxClassService.retrieveIfNotManaged(walletOperation.getTaxClass()));
                     WalletOperationDto walletOperationDto = new WalletOperationDto(walletOperation, walletOperation.getAccountingArticle());
                     result.getWalletOperations().add(walletOperationDto);
 

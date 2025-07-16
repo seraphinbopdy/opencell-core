@@ -219,6 +219,9 @@ public class InvoicingService extends PersistenceService<Invoice> {
         log.info("======== CREATING INVOICES FOR {} BAs========", invoicesbyBA.size());
         invoicesbyBA.forEach(invoices->assignNumberAndCreate(billingRun, isFullAutomatic, invoices));
         getEntityManager().flush();//to be able to update ILs
+        if (billingRun.getGenerateAO()) {
+            invoicesbyBA.forEach(invoices -> generateAutomaticAO(billingRun.getId(), invoices));
+        }
         log.info("======== UPDATING ILs ========");
         invoicesbyBA.forEach(invoices -> invoices.forEach(invoice->invoice.getSubCategoryInvoiceAgregate().forEach(sca -> updateInvoiceLines(invoice, sca))));
         linkInvoiceObjects(invoicesbyBA.stream().flatMap(List::stream).map(Invoice::getId).collect(Collectors.toList()));
@@ -233,9 +236,6 @@ public class InvoicingService extends PersistenceService<Invoice> {
         	invoices.forEach(invoice-> {
                 serviceSingleton.assignInvoiceNumberVirtual(invoice);
                 invoiceService.updatePaymentStatus(invoice, new Date());
-                if(billingRun.getGenerateAO()) {
-                    generateAutomaticAO(billingRun.getId(), invoice);
-                }
             });
         	invoiceService.incrementBAInvoiceDate(billingRun, invoices.get(0).getBillingAccount());
         }
@@ -248,13 +248,16 @@ public class InvoicingService extends PersistenceService<Invoice> {
         });
     }
 
-    private void generateAutomaticAO(Long billingRunId, Invoice invoice) {
-        try {
+    private void generateAutomaticAO(Long billingRunId, List<Invoice> invoices) {
+        invoices.forEach(invoice -> {
             log.info("Generate account operation for invoice {}", invoice.getId());
-            invoiceService.generateRecordedInvoiceAO(invoice);
-        } catch (BusinessException | InvoiceExistException | ImportInvoiceException e) {
-            log.error("Error while trying to generate account operation for billing run: {}, invoice: {}", billingRunId, invoice.getId());
-        }
+            try {
+                invoiceService.generateRecordedInvoiceAO(invoice);
+            } catch (BusinessException | InvoiceExistException | ImportInvoiceException exception) {
+                log.error("Error while trying to generate account operation for billing run: {}, invoice: {}",
+                        billingRunId, invoice.getId());
+            }
+        });
     }
 
 	private void linkInvoiceObjects(List<Long> invoiceIds) {

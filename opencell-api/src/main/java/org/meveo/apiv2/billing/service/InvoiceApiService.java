@@ -305,7 +305,7 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
 			invoiceService.update(invoice);
 			invoiceService.getEntityManager().flush();
 		}
-		invoiceService.calculateInvoice(invoice, false);
+		invoiceService.calculateInvoiceV3(invoice);
 		invoiceService.updateBillingRunStatistics(invoice);
 		result.skipValidation(invoiceLinesInput.getSkipValidation());
 		return result.build();
@@ -340,7 +340,7 @@ public class InvoiceApiService extends BaseApi implements ApiService<Invoice> {
         // Update Invoice Line
 		invoiceLinesService.updateInvoiceLine(invoiceLine, invoiceLineInput.getInvoiceLine(), discountPlan);
 		invoiceService.getEntityManager().flush();
-		invoiceService.calculateInvoice(invoice, false);
+		invoiceService.calculateInvoiceV3(invoice);
 		BigDecimal lastApliedRate = invoiceService.getCurrentRate(invoice,invoice.getInvoiceDate());
 		invoiceService.refreshAdvanceInvoicesConvertedAmount(invoice,lastApliedRate);
 		invoiceService.updateBillingRunStatistics(invoice);

@@ -128,7 +128,7 @@ public abstract class AccountDto extends BusinessEntityDto {
     private String minimumChargeTemplate;
 
     @Schema(description = "indicate if this is a company")
-    protected Boolean isCompany=Boolean.FALSE;
+    protected Boolean isCompany;
 
     @Schema(description = "The legal entity type")
     protected TitleDto legalEntityType;

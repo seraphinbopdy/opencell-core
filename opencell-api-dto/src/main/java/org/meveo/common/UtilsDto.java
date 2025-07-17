@@ -25,6 +25,11 @@ public class UtilsDto {
         quotePrice.setQuoteOffer(quoteOffer);
         
         Optional<QuotePrice> price = pricesPerType.get(key).stream().filter(qp -> priceLevelEnum.equals(qp.getPriceLevelEnum())).reduce((a, b) -> {
+        	// Copy ID from the first element to preserve reference to database record
+            if (quotePrice.getId() == null && a.getId() != null) {
+                quotePrice.setId(a.getId());
+            }
+            
         	quotePrice.setTaxAmount(a.getTaxAmount().add(b.getTaxAmount()));
 		    quotePrice.setAmountWithTax(a.getAmountWithTax().add(b.getAmountWithTax()));
 		    quotePrice.setAmountWithoutTax(a.getAmountWithoutTax().add(b.getAmountWithoutTax()));

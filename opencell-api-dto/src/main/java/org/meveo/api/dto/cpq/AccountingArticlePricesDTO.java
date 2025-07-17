@@ -87,20 +87,10 @@ public class AccountingArticlePricesDTO extends BaseEntityDto {
 		super();
 		accountingArticleCode=quoteArticleline.getAccountingArticle().getCode();
 		accountingArticleLabel=quoteArticleline.getAccountingArticle().getDescription();
-		Map<BigDecimal, List<QuotePrice>> pricesPerTaux = quoteArticleline.getQuotePrices().stream()
-                .collect(Collectors.groupingBy(QuotePrice::getTaxRate));
-	        for (BigDecimal taux: pricesPerTaux.keySet()) {
-
-	            Map<PriceTypeEnum, List<QuotePrice>> pricesPerType = pricesPerTaux.get(taux).stream()
-	                    .collect(Collectors.groupingBy(QuotePrice::getPriceTypeEnum));
-
-	            accountingArticlePrices = pricesPerType
-	                    .keySet()
-	                    .stream()
-	                    .map(key -> reducePrices(key, pricesPerType, quoteArticleline.getQuoteVersion(), quoteArticleline.getQuoteProduct()!=null?quoteArticleline.getQuoteProduct().getQuoteOffer():null, PriceLevelEnum.PRODUCT))
-	                    .filter(Optional::isPresent)
-	                    .map(price -> new PriceDTO(price.get(), mapTaxIndexes)).collect(Collectors.toList());
-	        }
+		accountingArticlePrices = quoteArticleline.getQuotePrices().stream()
+			.filter(qp -> PriceLevelEnum.PRODUCT.equals(qp.getPriceLevelEnum()))
+			.map(quotePrice -> new PriceDTO(quotePrice, mapTaxIndexes))
+			.collect(Collectors.toList());
 	}
 	
 	 private Optional<QuotePrice> reducePrices(PriceTypeEnum key, Map<PriceTypeEnum, List<QuotePrice>> pricesPerType, QuoteVersion quoteVersion,QuoteOffer quoteOffer, PriceLevelEnum level) {

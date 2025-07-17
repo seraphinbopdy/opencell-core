@@ -1,6 +1,5 @@
 package org.meveo.admin.job.invoicing;
 
-import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -15,7 +14,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.Future;
@@ -162,11 +160,11 @@ public class InvoicingService extends PersistenceService<Invoice> {
 		}
 		final Map<Long, BillingAccountDetailsItem> billingAccountDetailsMap = resultList.stream().map(BillingAccountDetailsItem::new).collect(Collectors.toMap(BillingAccountDetailsItem::getBillingAccountId, Function.identity()));
 		Query query = getEntityManager().createNamedQuery("InvoiceLine.getInvoicingItems").setParameter("ids", baIDs).setParameter("billingRunId", billingRun.getId());
-		final Map<Long, List<InvoicingItem>> itemsByBAID = ((List<Object[]>)query.getResultList()).stream().map(InvoicingItem::new).collect(groupingBy(InvoicingItem::getBillingAccountId));
+		final Map<Long, List<InvoicingItem>> itemsByBAID = ((List<Object[]>)query.getResultList()).stream().map(InvoicingItem::new).collect(Collectors.groupingBy(InvoicingItem::getBillingAccountId));
 		log.info("======= {} InvoicingItems found =======",itemsByBAID.size());
 
 		billingAccountDetailsMap.values().stream().forEach(x->x.setInvoicingItems(itemsByBAID.get(x.getBillingAccountId()).stream()
-		        .collect(groupingBy(InvoicingItem::getInvoiceKey)).values().stream().collect(Collectors.toList())));
+		        .collect(Collectors.groupingBy(InvoicingItem::getInvoiceKey)).values().stream().collect(Collectors.toList())));
 		return new ArrayList<>(billingAccountDetailsMap.values());
 	}
 
@@ -207,7 +205,7 @@ public class InvoicingService extends PersistenceService<Invoice> {
 
     	for (List<InvoicingItem> groupedItems : billingAccountDetailsItem.getInvoicingItems()) {
 	        final Invoice invoice = initInvoice(billingAccountDetailsItem, billingRun, billingAccount, billingCycle, isFullAutomatic, groupedItems.get(0));
-	        Set<SubCategoryInvoiceAgregate> invoiceSCAs = createInvoiceAgregates(billingAccountDetailsItem, billingAccount, invoice, groupedItems);
+	        Set<SubCategoryInvoiceAgregate> invoiceSCAs = createInvoiceAggregates(billingAccountDetailsItem, billingAccount, invoice, groupedItems);
 	        evalDueDate(invoice, billingCycle, null, billingAccountDetailsItem.getCaDueDateDelayEL(), billingRun.isExceptionalBR());
 	        invoiceService.setInitialCollectionDate(invoice, billingCycle, billingRun);
 	        invoice.setSubCategoryInvoiceAgregate(invoiceSCAs);
@@ -271,7 +269,7 @@ public class InvoicingService extends PersistenceService<Invoice> {
 
     }
     
-    public Set<SubCategoryInvoiceAgregate> createInvoiceAgregates(BillingAccountDetailsItem billingAccountDetailsItem,
+    public Set<SubCategoryInvoiceAgregate> createInvoiceAggregates(BillingAccountDetailsItem billingAccountDetailsItem,
                                 BillingAccount billingAccount, Invoice invoice, List<InvoicingItem> groupedItems) {
         String languageCode = getTradingLanguageCode(billingAccountDetailsItem.getTradingLanguageId());
         boolean calculateTaxOnSubCategoryLevel = invoice.getInvoiceType().getTaxScript() == null;
@@ -282,7 +280,7 @@ public class InvoicingService extends PersistenceService<Invoice> {
                 .map(InvoicingItem::getAmountWithoutTax).reduce(BigDecimal.ZERO, BigDecimal::add);
 
         List<DiscountPlanItem> applicableDiscountPlanItems = getApplicableDiscounts(billingAccountDetailsItem, invoice);
-        final Map<String, List<SubCategoryInvoiceAgregate>> scMap = itemsBySubCategory.keySet().stream().collect(groupingBy(SubCategoryInvoiceAgregate::getCategoryAggKey));
+        final Map<String, List<SubCategoryInvoiceAgregate>> scMap = itemsBySubCategory.keySet().stream().collect(Collectors.groupingBy(SubCategoryInvoiceAgregate::getCategoryAggKey));
         for (List<SubCategoryInvoiceAgregate> scAggregateList : scMap.values()) {
             CategoryInvoiceAgregate cAggregate = initInvoiceCategoryAgg(billingAccount, invoice, languageCode,scAggregateList);
             for (SubCategoryInvoiceAgregate scAggregate : scAggregateList) {
@@ -319,8 +317,8 @@ public class InvoicingService extends PersistenceService<Invoice> {
         return cAggregate;
     }
     private Map<SubCategoryInvoiceAgregate, List<InvoicingItem>> createInvoiceSubCategories(List<InvoicingItem> invoicingItems, Invoice invoice) {
-        final Map<String, List<InvoicingItem>> scaGroup = invoicingItems.stream().collect(groupingBy(InvoicingItem::getScaKey));
-        Map<SubCategoryInvoiceAgregate, List<InvoicingItem>> itemsBySubCategory = new HashMap<>();
+        final Map<String, List<InvoicingItem>> scaGroup = invoicingItems.stream().collect(Collectors.groupingBy(InvoicingItem::getScaKey));
+        Map<SubCategoryInvoiceAgregate, List<InvoicingItem>> itemsBySubCategory = new HashMap<SubCategoryInvoiceAgregate, List<InvoicingItem>>();
         scaGroup.values().forEach(items->initSubCategoryInvoiceAggregate(items, invoice, itemsBySubCategory));
         return itemsBySubCategory;
     }
@@ -430,9 +428,9 @@ public class InvoicingService extends PersistenceService<Invoice> {
             return;
         }
         if (calculateTaxOnSubCategoryLevel) {
-            Map<Long, List<InvoicingItem>> itemsByTax = invoicingItems.stream().collect(groupingBy(InvoicingItem::getTaxId));
+            Map<Long, List<InvoicingItem>> itemsByTax = invoicingItems.stream().collect(Collectors.groupingBy(InvoicingItem::getTaxId));
             //tax aggregations will be used to override amounts
-            Map<Long, TaxInvoiceAgregate> taxAggByMap = new TreeMap<Long, TaxInvoiceAgregate>();
+            Map<Long, TaxInvoiceAgregate> taxAggByMap = new TreeMap<Long, TaxInvoiceAgregate>(); 
             invoice.initAmounts();
             for(List<InvoicingItem> items: itemsByTax.values()) {
                 if(!items.isEmpty() && items.get(0).getTaxId() != null) {
@@ -558,7 +556,7 @@ public class InvoicingService extends PersistenceService<Invoice> {
         } else if ( subscription.getDiscountPlanInstances() != null && !subscription.getDiscountPlanInstances().isEmpty()) {
             applicableDiscountPlanItems.addAll(getApplicableDiscountPlanItems(billingAccount, subscription.getDiscountPlanInstances(), invoice));
         }*/
-        final List<DiscountPlanSummary> discountPlanInstances = billingAccountDetailsItem.getdiscountPlanSummaries();
+        final List<DiscountPlanSummary> discountPlanInstances = billingAccountDetailsItem.getDiscountPlanSummaries();
         if (discountPlanInstances != null && !discountPlanInstances.isEmpty()) {
             applicableDiscountPlanItems.addAll(getApplicableDiscountPlanItems(billingAccountDetailsItem, discountPlanInstances,invoice));
         }
@@ -817,19 +815,11 @@ public class InvoicingService extends PersistenceService<Invoice> {
         final Map<Long, BillingAccountDetailsItem> billingAccountDetailsMap = resultList.stream().map(BillingAccountDetailsItem::new).collect(Collectors.toMap(BillingAccountDetailsItem::getBillingAccountId, Function.identity()));
 
         Query query = getEntityManager().createNamedQuery("InvoiceLine.getInvoicingItemsByInvoiceId").setParameter("invoiceId", invoice.getId());
-        final Map<Long, List<InvoicingItem>> itemsByBAID = ((List<Object[]>)query.getResultList()).stream().map(InvoicingItem::new).collect(groupingBy(InvoicingItem::getBillingAccountId));
+        final Map<Long, List<InvoicingItem>> itemsByBAID = ((List<Object[]>)query.getResultList()).stream().map(InvoicingItem::new).collect(Collectors.groupingBy(InvoicingItem::getBillingAccountId));
 
-        billingAccountDetailsMap.values()
-                .forEach(billingAccountDetails -> billingAccountDetails.
-                        setInvoicingItems(getInvoicingItems(itemsByBAID.get(billingAccountDetails.getBillingAccountId()))));
+        billingAccountDetailsMap.values().forEach(x->x.setInvoicingItems(itemsByBAID.get(x.getBillingAccountId()).stream()
+                .collect(Collectors.groupingBy(InvoicingItem::getInvoiceKey)).values().stream().collect(Collectors.toList())));
         return billingAccountDetailsMap;
     }
-
-    private ArrayList<List<InvoicingItem>> getInvoicingItems(List<InvoicingItem> invoicingItems) {
-        return new ArrayList<>(invoicingItems
-                .stream()
-                .filter(invoicingItem -> Objects.nonNull(invoicingItem.getInvoiceKey()))
-                .collect(groupingBy(InvoicingItem::getInvoiceKey))
-                .values());
-    }
+    
 }

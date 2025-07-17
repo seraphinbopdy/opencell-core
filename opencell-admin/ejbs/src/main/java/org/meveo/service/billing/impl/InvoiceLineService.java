@@ -488,6 +488,7 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
         	invoiceLine.setDiscountedInvoiceLine(discountedInvoiceLine);
         }
         invoiceLine.setValueDate(new Date());
+        buildInvoiceKey(invoiceLine, null);
         create(invoiceLine);
         commit();
         return invoiceLine;
@@ -920,7 +921,8 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
         invoiceLine.setProductVersion((ProductVersion) tryToFindByEntityClassAndId(ProductVersion.class, resource.getProductVersionId()));
         invoiceLine.setOfferServiceTemplate((OfferServiceTemplate) tryToFindByEntityClassAndId(OfferServiceTemplate.class, resource.getOfferServiceTemplateId()));
         invoiceLine.setCommercialOrder((CommercialOrder) tryToFindByEntityClassAndId(CommercialOrder.class, resource.getCommercialOrderId()));
-        invoiceLine.setBillingRun((BillingRun) tryToFindByEntityClassAndId(BillingRun.class, resource.getBillingRunId()));
+        BillingRun billingrun = (BillingRun) tryToFindByEntityClassAndId(BillingRun.class, resource.getBillingRunId());
+		invoiceLine.setBillingRun(billingrun);
 
         if(resource.getTaxMode() != null && resource.getTaxMode().equals(RATE.name())) {
             invoiceLine.setTax(findTaxByTaxRateAndAccountingCode(resource.getTaxRate(), resource.getTaxAccountingCode()));
@@ -938,6 +940,7 @@ public class InvoiceLineService extends PersistenceService<InvoiceLine> {
         invoiceLine.setInvoiceRounding(appProvider.getInvoiceRounding());
         invoiceLine.setRoundingMode(appProvider.getInvoiceRoundingMode());
         InvoiceLine.setRoundingConfig(appProvider.getInvoiceRounding(), appProvider.getInvoiceRoundingMode());
+        buildInvoiceKey(invoiceLine, billingrun);
 
         return invoiceLine;
     }

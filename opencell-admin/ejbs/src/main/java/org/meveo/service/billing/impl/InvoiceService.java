@@ -111,7 +111,9 @@ import org.meveo.admin.exception.InvoiceJasperNotFoundException;
 import org.meveo.admin.exception.ValidationException;
 import org.meveo.admin.job.AggregationConfiguration;
 import org.meveo.admin.job.PDFParametersConstruction;
+import org.meveo.admin.job.invoicing.BillingAccountDetailsItem;
 import org.meveo.admin.job.invoicing.DiscountPlanSummary;
+import org.meveo.admin.job.invoicing.InvoicingItem;
 import org.meveo.admin.job.invoicing.InvoicingService;
 import org.meveo.admin.storage.StorageFactory;
 import org.meveo.admin.util.PdfWaterMark;
@@ -8334,21 +8336,30 @@ public class InvoiceService extends PersistenceService<Invoice> {
                 .getIdQuery(getEntityManager())
                 .getResultList();
     }
+    
+    private void createInvoiceAggregates(Invoice invoice) {
+        Map<Long, BillingAccountDetailsItem> invoicingItems = invoicingService.createBillingAccountDetailsItem(invoice);
 
-
-    private void createInvoiceAgregates(Invoice invoice){
-        var invoicingItems = invoicingService.createBillingAccountDetailsItem(invoice);
-        var detail  = invoicingItems.values().iterator().next();
-        if(invoice.getDiscountPlan() != null){
-            var discountPlan = invoice.getDiscountPlan();
-            if(!detail.getdiscountPlanSummaries().stream().anyMatch(dps -> dps.getDiscountPlanId() == discountPlan.getId()))
-                detail.getdiscountPlanSummaries().add(new DiscountPlanSummary(discountPlan.getId(), discountPlan.getStartDate(), discountPlan.getEndDate()));
+        BillingAccountDetailsItem detail = invoicingItems.values().stream().findFirst().orElse(null);
+        if (detail == null) {
+            return;
         }
-        invoicingItems.forEach((taxId, billingAccountDetauksItem) -> {
-            if (isNotEmpty(billingAccountDetauksItem.getInvoicingItems())) {
-                invoicingService.createInvoiceAgregates(billingAccountDetauksItem, invoice.getBillingAccount(), invoice, billingAccountDetauksItem.getInvoicingItems().get(0));
+
+        DiscountPlan discountPlan = invoice.getDiscountPlan();
+        if (discountPlan != null) {
+            boolean alreadyExists = detail.getDiscountPlanSummaries().stream().anyMatch(dps -> Objects.equals(dps.getDiscountPlanId(), discountPlan.getId()));
+            if (!alreadyExists) {
+                detail.getDiscountPlanSummaries().add(new DiscountPlanSummary(discountPlan.getId(), discountPlan.getStartDate(), discountPlan.getEndDate()));
             }
-        } );
+        }
+
+        for (Map.Entry<Long, BillingAccountDetailsItem> entry : invoicingItems.entrySet()) {
+            BillingAccountDetailsItem item = entry.getValue();
+            List<List<InvoicingItem>> invoicingItemList = item.getInvoicingItems();
+            if (invoicingItemList != null && !invoicingItemList.isEmpty()) {
+                invoicingService.createInvoiceAggregates(item, invoice.getBillingAccount(), invoice,invoicingItemList.get(0));
+            }
+        }
     }
 
     public Object calculateInvoiceV3(Invoice invoice) {
@@ -8356,7 +8367,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
         final BillingAccount billingAccount = billingAccountService.retrieveIfNotManaged(invoice.getBillingAccount());
         invoiceService.updateBillingRunStatistics(invoice);
         cleanInvoiceAggregates(invoice.getId());
-        this.createInvoiceAgregates(invoice);
+        this.createInvoiceAggregates(invoice);
         return invoice;
     }
 

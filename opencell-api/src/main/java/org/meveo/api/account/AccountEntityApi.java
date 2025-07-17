@@ -233,7 +233,7 @@ public class AccountEntityApi extends BaseApi {
         if (postData.getVatNo() != null) {
             accountEntity.setVatNo(StringUtils.isEmpty(postData.getVatNo()) ? null : postData.getVatNo());
             // check of the vatNo is valid and set the status
-            if(postData.getIsCompany()){
+            if(Boolean.TRUE.equals(postData.getIsCompany())){
                 boolean valid = false;
                 if(postData.getVatNo().length() > 2) {
                     valid = validationByNumberCountryService.getValByValNbCountryCode(postData.getVatNo() .substring(2), postData.getVatNo().substring(0, 2));

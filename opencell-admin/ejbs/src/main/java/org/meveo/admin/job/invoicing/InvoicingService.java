@@ -600,7 +600,7 @@ public class InvoicingService extends PersistenceService<Invoice> {
             itemsBySubCategory.stream().forEach(item->apllyDiscountPercent(item, discountValue.abs().divide(HUNDRED)));
             discountAmount = applyDiscount(amountToApplyDiscountOn, discountValue.abs().divide(HUNDRED));
         } else {
-            discountAmount = discountValue;
+            discountAmount = discountValue.min(amountToApplyDiscountOn);
             dispatchDiscountBetweenItems(itemsBySubCategory, discountAmount, amountToApplyDiscountOn);
         }
         if (discountAmount == null || discountAmount.compareTo(BigDecimal.ZERO) == 0) {

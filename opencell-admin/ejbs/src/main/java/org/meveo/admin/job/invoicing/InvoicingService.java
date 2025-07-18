@@ -209,6 +209,8 @@ public class InvoicingService extends PersistenceService<Invoice> {
 	        evalDueDate(invoice, billingCycle, null, billingAccountDetailsItem.getCaDueDateDelayEL(), billingRun.isExceptionalBR());
 	        invoiceService.setInitialCollectionDate(invoice, billingCycle, billingRun);
 	        invoice.setSubCategoryInvoiceAgregate(invoiceSCAs);
+            invoice.setInvoiceBalance(invoice.getAmountWithTax());
+            invoice.setTransactionalInvoiceBalance(invoice.getTransactionalAmountWithTax());
 	        invoices.add(invoice);
     	}
     }
@@ -294,6 +296,7 @@ public class InvoicingService extends PersistenceService<Invoice> {
         }
         initTaxAggregations(billingAccountDetailsItem, invoice, calculateTaxOnSubCategoryLevel, billingAccount, languageCode, groupedItems);
         invoice.setNetToPay(invoice.getAmountWithTax().add(invoice.getDueBalance() != null ? invoice.getDueBalance() : BigDecimal.ZERO));
+        invoice.setTransactionalNetToPay(invoice.getTransactionalAmountWithTax().add(invoice.getDueBalance() != null ? invoice.getDueBalance() : BigDecimal.ZERO));
 		if(invoice.getDiscountPlan() != null || (CollectionUtils.isNotEmpty(billingAccount.getDiscountPlanInstances()))) {
 			invoice.setAmountWithoutTaxBeforeDiscount(amountWithoutTax);
 			invoice.setTransactionalAmountWithoutTaxBeforeDiscount(amountWithoutTax);

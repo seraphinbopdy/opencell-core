@@ -3,6 +3,7 @@ package org.meveo.admin.job.invoicing;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.meveo.commons.utils.NumberUtils.computeDerivedAmounts;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -65,10 +66,8 @@ import org.meveo.service.base.ValueExpressionWrapper;
 import org.meveo.service.billing.impl.BillingAccountService;
 import org.meveo.service.billing.impl.InvoiceService;
 import org.meveo.service.billing.impl.InvoiceTypeService;
-import org.meveo.service.billing.impl.PurchaseOrderService;
 import org.meveo.service.billing.impl.RejectedBillingAccountService;
 import org.meveo.service.billing.impl.ServiceSingleton;
-import org.meveo.service.billing.impl.SubscriptionService;
 import org.meveo.service.catalog.impl.DiscountPlanItemService;
 import org.meveo.service.catalog.impl.DiscountPlanService;
 import org.meveo.service.catalog.impl.InvoiceSubCategoryService;
@@ -121,10 +120,6 @@ public class InvoicingService extends PersistenceService<Invoice> {
 	private DiscountPlanService discountPlanService;
 	@Inject
 	private DiscountPlanItemService discountPlanItemService;
-    @Inject
-    private SubscriptionService subscriptionService;
-    @Inject
-    private PurchaseOrderService PurchaseOrderService;
 
     @Inject
     @InvoiceNumberAssigned
@@ -524,20 +519,25 @@ public class InvoicingService extends PersistenceService<Invoice> {
         return tradingLanguages.get(tradingLanguageId)!=null?tradingLanguages.get(tradingLanguageId).getLanguageCode():"";
     }
     private void addAggregationAmounts(List<InvoicingItem> items, InvoiceAgregate invoiceAggregate, Long taxId) {
-        InvoicingItem summuryItem = new InvoicingItem(items);
-        invoiceAggregate.addAmountWithoutTax(summuryItem.getAmountWithoutTax());
-        invoiceAggregate.addAmountWithTax(summuryItem.getAmountWithTax());
-        invoiceAggregate.addAmountTax(summuryItem.getAmountTax());
-        invoiceAggregate.addTransactionAmountWithoutTax(summuryItem.getTransactionalAmountWithoutTax());
-        invoiceAggregate.addTransactionAmountWithTax(summuryItem.getTransactionalAmountWithTax());
-        invoiceAggregate.addTransactionAmountTax(summuryItem.getTransactionalAmountTax());
-        invoiceAggregate.addItemNumber(summuryItem.getCount());
+        InvoicingItem itemSummary = new InvoicingItem(items);
+        Tax tax = getTax(taxId);
+        BigDecimal[] amounts = computeDerivedAmounts(itemSummary.getAmountWithoutTax(), itemSummary.getAmountWithTax(),
+                tax.getPercent(), isEntreprise() , getInvoiceRounding(), getRoundingMode());
+        BigDecimal[] transactionalAmounts = computeDerivedAmounts(itemSummary.getTransactionalAmountWithoutTax(),
+                itemSummary.getTransactionalAmountWithTax(), tax.getPercent(), isEntreprise() , getInvoiceRounding(), getRoundingMode());
+        invoiceAggregate.addAmountWithoutTax(amounts[0]);
+        invoiceAggregate.addAmountWithTax(amounts[1]);
+        invoiceAggregate.addAmountTax(amounts[2]);
+        invoiceAggregate.addTransactionAmountWithoutTax(transactionalAmounts[0]);
+        invoiceAggregate.addTransactionAmountWithTax(transactionalAmounts[1]);
+        invoiceAggregate.addTransactionAmountTax(transactionalAmounts[2]);
+        invoiceAggregate.addItemNumber(itemSummary.getCount());
 		if (items.stream().anyMatch(InvoicingItem::isUseSpecificTransactionalAmount)) {
 			invoiceAggregate.setUseSpecificPriceConversion(true);
 		}
 		;
         if(invoiceAggregate instanceof SubCategoryInvoiceAgregate) {
-            ((SubCategoryInvoiceAgregate)invoiceAggregate).addILs(summuryItem.getilIDs());
+            ((SubCategoryInvoiceAgregate)invoiceAggregate).addILs(itemSummary.getilIDs());
         }
     }
     

@@ -26,6 +26,7 @@ import org.meveo.api.dto.response.catalog.PricePlanMatrixLinesDto;
 import org.meveo.commons.utils.StringUtils;
 import org.meveo.model.BaseEntity;
 import org.meveo.model.catalog.ColumnTypeEnum;
+import org.meveo.model.catalog.PricePlanMatrix;
 import org.meveo.model.catalog.PricePlanMatrixColumn;
 import org.meveo.model.catalog.PricePlanMatrixVersion;
 import org.meveo.model.cpq.Attribute;
@@ -112,15 +113,8 @@ public class PricePlanMatrixColumnService extends BusinessService<PricePlanMatri
         Scanner scanner = new Scanner(data);
         List<Map.Entry<String, Optional<Attribute> >> columns = new LinkedList<>();
         
-        /*
-        File format example:
-        id(text);Booléen(BOOLEAN);Nombres(LIST_MULTIPLE_NUMERIC);Valeurs(LIST_MULTIPLE_TEXT);description(text);priority(number);priceWithoutTax(number)
-        252;true;;3XL|Bleu;;0;20
-        */
-        
         // Get columns types
-        createColumns(pricePlanMatrixVersion, scanner, columns);
-        
+        createColumns(pricePlanMatrixVersion, scanner, columns, null);
         // Populate lines
         PricePlanMatrixLinesDto pricePlanMatrixLinesDto = populateLines(pricePlanMatrixCode, pricePlanMatrixVersion,
                 scanner, columns);
@@ -128,8 +122,40 @@ public class PricePlanMatrixColumnService extends BusinessService<PricePlanMatri
         
         return pricePlanMatrixLinesDto;
     }
+
+	public PricePlanMatrixLinesDto createColumnsAndPopulateLinesAndValues(PricePlanMatrix pricePlanMatrix, String data,
+																		  PricePlanMatrixVersion pricePlanMatrixVersion, List<PricePlanMatrixVersion> pvs) {
+		Scanner scanner = new Scanner(data);
+		List<Map.Entry<String, Optional<Attribute> >> columns = new LinkedList<>();
+
+		// Get the list of price plan matrix columns for the current version
+		List<PricePlanMatrixColumn> pricePlanMatrixColumnList = getPricePlanMatrixColumns(pvs);
+		// Get columns types
+		createColumns(pricePlanMatrixVersion, scanner, columns, pricePlanMatrixColumnList);
+		// Populate lines
+		PricePlanMatrixLinesDto pricePlanMatrixLinesDto = populateLines(pricePlanMatrix.getCode(), pricePlanMatrixVersion,
+				scanner, columns);
+		scanner.close();
+
+		return pricePlanMatrixLinesDto;
+	}
+
+	/**
+	 * Get the list of price plan matrix columns for the current version.
+	 * @param pricePlanMatrixVersionList List of PricePlanMatrixVersion
+	 * @return pricePlanMatrixColumnList List of PricePlanMatrixColumn
+	 */
+	private List<PricePlanMatrixColumn> getPricePlanMatrixColumns(List<PricePlanMatrixVersion> pricePlanMatrixVersionList) {
+		List<PricePlanMatrixColumn> pricePlanMatrixColumnList = new ArrayList<>();
+		if (pricePlanMatrixVersionList != null && !pricePlanMatrixVersionList.isEmpty()) {
+			pricePlanMatrixColumnList = pricePlanMatrixVersionList.stream()
+					.flatMap(pv -> findByPricePlanMatrixVersion(pv).stream())
+					.collect(Collectors.toList());
+		}
+		return pricePlanMatrixColumnList;
+	}
 	
-	private void createColumns(PricePlanMatrixVersion pricePlanMatrixVersion, Scanner scanner, List<Map.Entry<String, Optional<Attribute>>> columns) {
+	private void createColumns(PricePlanMatrixVersion pricePlanMatrixVersion, Scanner scanner, List<Map.Entry<String, Optional<Attribute>>> columns, List<PricePlanMatrixColumn> pricePlanMatrixColumnList) {
         String line = scanner.nextLine();
 		String fieldSeparator = Optional.ofNullable(advancedSettingsService.findByCode("standardExports.fieldsSeparator"))
 				.map(AdvancedSettings::getValue)
@@ -140,8 +166,17 @@ public class PricePlanMatrixColumnService extends BusinessService<PricePlanMatri
             String column = firstLine[i].split("\\[")[0];
             boolean isRange = firstLine[i].split("\\[").length > 1 && firstLine[i].split("\\[")[1].toLowerCase().contains("range");
             if (StringUtils.isNotBlank(column) && isValidColumn(column)) {
+				PricePlanMatrixColumn pricePlanMatrixColumn = null;
 
-                PricePlanMatrixColumn pricePlanMatrixColumn = findByCode(column);
+				if (pricePlanMatrixColumnList != null && !pricePlanMatrixColumnList.isEmpty()) {
+					Optional<PricePlanMatrixColumn> first = pricePlanMatrixColumnList.stream()
+							.filter(ppmc -> ppmc.getCode().equals(column))
+							.findFirst();
+					pricePlanMatrixColumn = first.orElseGet(() -> findByCode(column));
+				} else {
+					pricePlanMatrixColumn = findByCode(column);
+				}
+
                 if (pricePlanMatrixColumn == null) {
                     throw new NotFoundException("PricePlanMatrixColumn with code= " + column + " does not exists");
                 }

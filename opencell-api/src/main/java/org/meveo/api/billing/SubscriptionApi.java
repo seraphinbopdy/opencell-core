@@ -154,10 +154,7 @@ import org.meveo.model.catalog.ServiceTemplate;
 import org.meveo.model.catalog.WalletTemplate;
 import org.meveo.model.communication.email.EmailTemplate;
 import org.meveo.model.communication.email.MailingTypeEnum;
-import org.meveo.model.cpq.AgreementDateSettingEnum;
-import org.meveo.model.cpq.Attribute;
-import org.meveo.model.cpq.Product;
-import org.meveo.model.cpq.ProductVersion;
+import org.meveo.model.cpq.*;
 import org.meveo.model.cpq.commercial.CommercialOrder;
 import org.meveo.model.cpq.commercial.OrderAttribute;
 import org.meveo.model.cpq.commercial.OrderProduct;
@@ -1123,6 +1120,8 @@ public class SubscriptionApi extends BaseApi {
             serviceInstance.setServiceTemplate(serviceToInstantiateDto.getServiceTemplate());
         } else {
             serviceInstance.setProductVersion(serviceToInstantiateDto.getProductVersion());
+            Map<String,AttributeInstance> instantiatedAttributes = new HashMap<>();
+
             for (AttributeInstanceDto attributeInstanceDto : serviceToInstantiateDto.getAttributeInstanceDtoList()) {
                 AttributeInstance attributeInstance = new AttributeInstance();
                 attributeInstance.setAttribute(loadEntityByCode(attributeService,
@@ -1138,8 +1137,10 @@ public class SubscriptionApi extends BaseApi {
                 Auditable auditable = new Auditable();
                 auditable.setCreated(new Date());
                 attributeInstance.setAuditable(auditable);
-                serviceInstance.addAttributeInstance(attributeInstance);
+                instantiatedAttributes.put(attributeInstance.getAttribute().getCode(), attributeInstance);
             }
+
+            manageAttributeInstances(serviceInstance, instantiatedAttributes, subscription, serviceInstance.getProductVersion());
         }
         serviceInstance.setSubscription(subscription);
         serviceInstance.setRateUntilDate(serviceToInstantiateDto.getRateUntilDate());
@@ -1179,6 +1180,63 @@ public class SubscriptionApi extends BaseApi {
         } catch (BusinessException e) {
             log.error("Failed to instantiate a service {} on subscription {}", serviceToInstantiateDto.getCode(), subscription.getCode(), e);
             throw e;
+        }
+    }
+
+    /**
+     * Manage attribute instances for a service instance.
+     *
+     * @param serviceInstance The service instance to manage attributes for
+     * @param instantiatedAttributes Map of already instantiated attributes
+     * @param subscription The subscription associated with the service instance
+     * @param productVersion The product version associated with the service instance
+     */
+    private void manageAttributeInstances(ServiceInstance serviceInstance, Map<String, AttributeInstance> instantiatedAttributes, Subscription subscription, ProductVersion productVersion) {
+        AttributeInstance attributeInstance;
+
+        for(ProductVersionAttribute productVersionAttribute : productVersion.getAttributes()) {
+            Attribute attribute = productVersionAttribute.getAttribute();
+            if(!instantiatedAttributes.containsKey(attribute.getCode())) {
+                attributeInstance = new AttributeInstance(currentUser);
+                attributeInstance.setAttribute(attribute);
+                attributeInstance.setServiceInstance(serviceInstance);
+                attributeInstance.setSubscription(subscription);
+            } else {
+                attributeInstance=instantiatedAttributes.get(attribute.getCode());
+            }
+
+            if(!StringUtils.isBlank(productVersionAttribute.getDefaultValue())){
+                switch (attribute.getAttributeType()) {
+                    case BOOLEAN:
+                        if(attributeInstance.getStringValue()==null) {
+                            attributeInstance.setStringValue(productVersionAttribute.getDefaultValue());
+                        }
+                        break;
+                    case TOTAL :
+                    case COUNT :
+                    case NUMERIC :
+                    case INTEGER:
+                        if(attributeInstance.getDoubleValue()==null) {
+                            attributeInstance.setDoubleValue(Double.valueOf(productVersionAttribute.getDefaultValue()));
+                        }
+                        break;
+                    case LIST_MULTIPLE_TEXT:
+                    case LIST_TEXT:
+                    case EXPRESSION_LANGUAGE :
+                    case TEXT:
+                        if(attributeInstance.getStringValue()==null) {
+                            attributeInstance.setStringValue(productVersionAttribute.getDefaultValue());
+                        }
+                        break;
+                    default:
+                        if(attributeInstance.getStringValue()==null) {
+                            attributeInstance.setStringValue(productVersionAttribute.getDefaultValue());
+                        }
+                        break;
+                }
+            }
+
+            serviceInstance.addAttributeInstance(attributeInstance);
         }
     }
 

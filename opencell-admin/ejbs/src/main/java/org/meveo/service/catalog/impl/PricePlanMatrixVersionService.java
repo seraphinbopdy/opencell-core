@@ -218,10 +218,9 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
 
         Integer lastCurrentVersion = null;
         PricePlanMatrix pricePlanMatrix = pricePlanMatrixs.get(0);
+        List<PricePlanMatrixVersion> pvs = findEndDates(pricePlanMatrix, newFrom);
 
         if (importItem.getStatus() == VersionStatusEnum.PUBLISHED) {
-            List<PricePlanMatrixVersion> pvs = findEndDates(pricePlanMatrix, newFrom);
-
             for (PricePlanMatrixVersion pv : pvs) {
                 DatePeriod validity = pv.getValidity();
                 List<TradingPricePlanVersion> listTradingPricePlanVersion = tradingPricePlanVersionService.getListTradingPricePlanVersionByPpmvId(pv.getId());
@@ -302,7 +301,7 @@ public class PricePlanMatrixVersionService extends PersistenceService<PricePlanM
                 newPv.setLabel(split.length >= 5 ? split[4] : null);
                 create(newPv);
                 String data = new StringBuilder(header).append("\n").append(readAllLines(lnr)).toString();
-                PricePlanMatrixLinesDto pricePlanMatrixLinesDto = pricePlanMatrixColumnService.createColumnsAndPopulateLinesAndValues(pricePlanMatrix.getCode(), data, newPv);
+                PricePlanMatrixLinesDto pricePlanMatrixLinesDto = pricePlanMatrixColumnService.createColumnsAndPopulateLinesAndValues(pricePlanMatrix, data, newPv, pvs);
                 pricePlanMatrixLineService.updatePricePlanMatrixLines(newPv, pricePlanMatrixLinesDto);
             }
         }

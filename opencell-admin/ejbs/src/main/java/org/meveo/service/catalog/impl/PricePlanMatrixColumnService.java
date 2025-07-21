@@ -166,8 +166,17 @@ public class PricePlanMatrixColumnService extends BusinessService<PricePlanMatri
             String column = firstLine[i].split("\\[")[0];
             boolean isRange = firstLine[i].split("\\[").length > 1 && firstLine[i].split("\\[")[1].toLowerCase().contains("range");
             if (StringUtils.isNotBlank(column) && isValidColumn(column)) {
+				PricePlanMatrixColumn pricePlanMatrixColumn = null;
 
-                PricePlanMatrixColumn pricePlanMatrixColumn = findByCode(column);
+				if (pricePlanMatrixColumnList != null && !pricePlanMatrixColumnList.isEmpty()) {
+					Optional<PricePlanMatrixColumn> first = pricePlanMatrixColumnList.stream()
+							.filter(ppmc -> ppmc.getCode().equals(column))
+							.findFirst();
+					pricePlanMatrixColumn = first.orElseGet(() -> findByCode(column));
+				} else {
+					pricePlanMatrixColumn = findByCode(column);
+				}
+
                 if (pricePlanMatrixColumn == null) {
                     throw new NotFoundException("PricePlanMatrixColumn with code= " + column + " does not exists");
                 }

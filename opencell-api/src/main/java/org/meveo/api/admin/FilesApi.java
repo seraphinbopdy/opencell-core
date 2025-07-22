@@ -75,6 +75,9 @@ public class FilesApi extends BaseApi {
     public static final String SOURCE_FILE_OR_FOLDER_DOES_NOT_EXISTS = "Source file or folder does not exist: ";
 
     public static final String DESTINATION_FILE_OR_FOLDER_ALREADY_EXISTS = "Destination file or folder already exists: ";
+
+    private static final String ROOT = "./";
+
     @Inject
     private FlatFileValidator flatFileValidator;
 
@@ -415,6 +418,10 @@ public class FilesApi extends BaseApi {
     public File checkAndGetExistingFile(String filePath) {
 
         String providerRootDir = getProviderRootDir();
+
+        if (!filePath.startsWith(ROOT)) {
+            filePath = ROOT + filePath;
+        }
 
         File javaXMlFormatFile = (filePath.contains(providerRootDir.replace("\\", "/"))) ? new File(filePath) : new File(providerRootDir + File.separator + normalizePath(filePath));
 

@@ -389,7 +389,6 @@ public class InvoiceLineAggregationService implements Serializable {
 		if (startDate != null) {
 			bcFilter.put("fromRange billingAccount.nextInvoiceDate" , startDate);
 		}
-
 		if (endDate != null) {
 			bcFilter.put("toRange billingAccount.nextInvoiceDate" , endDate);
 		}

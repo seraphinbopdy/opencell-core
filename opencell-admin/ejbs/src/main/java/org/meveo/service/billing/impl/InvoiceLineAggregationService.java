@@ -13,6 +13,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -301,6 +302,8 @@ public class InvoiceLineAggregationService implements Serializable {
         List<String> fieldToFetch = buildAggregationFieldList(aggregationConfiguration);
 
         Set<String> groupBy = getAggregationQueryGroupBy(aggregationConfiguration);
+        
+        addInvoiceNextDateCondition(billingRun, bcFilter);
 
         PaginationConfiguration searchConfig = new PaginationConfiguration(null, null, evaluateFilters(bcFilter, RatedTransaction.class), null, fieldToFetch, groupBy, (Set<String>) null, "billingAccount.id", SortOrder.ASCENDING);
 
@@ -374,6 +377,22 @@ public class InvoiceLineAggregationService implements Serializable {
         return sql.toString();
 
     }
+    
+	private void addInvoiceNextDateCondition(BillingRun billingRun, Map<String, Object> bcFilter) {
+
+		Date startDate = billingRun.getStartDate();
+		Date endDate = billingRun.getEndDate();
+
+		if ((startDate != null) && (endDate == null)) {
+			endDate = new Date();
+		}
+		if (startDate != null) {
+			bcFilter.put("fromRange billingAccount.nextInvoiceDate" , startDate);
+		}
+		if (endDate != null) {
+			bcFilter.put("toRange billingAccount.nextInvoiceDate" , endDate);
+		}
+	}
 
     private Set<String> getAggregationQueryGroupBy(AggregationConfiguration aggregationConfiguration) {
 

@@ -196,7 +196,8 @@ public class DiscountPlanItemService extends PersistenceService<DiscountPlanItem
         userMap.put("invoiceLine", invoiceLine);
         userMap.put("wa", wallet);
         userMap.put("amount", subCatTotal);
-        userMap.put("walletOperation", walletOperation);
+	    userMap.put("walletOperation", walletOperation);
+	    userMap.put("op", walletOperation);
 
         BigDecimal result = ValueExpressionWrapper.evaluateExpression(expression, userMap, BigDecimal.class);
         return result;

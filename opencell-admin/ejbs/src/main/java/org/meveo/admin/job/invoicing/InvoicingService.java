@@ -3,6 +3,7 @@ package org.meveo.admin.job.invoicing;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.meveo.commons.utils.NumberUtils.computeDerivedAmounts;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -65,10 +66,8 @@ import org.meveo.service.base.ValueExpressionWrapper;
 import org.meveo.service.billing.impl.BillingAccountService;
 import org.meveo.service.billing.impl.InvoiceService;
 import org.meveo.service.billing.impl.InvoiceTypeService;
-import org.meveo.service.billing.impl.PurchaseOrderService;
 import org.meveo.service.billing.impl.RejectedBillingAccountService;
 import org.meveo.service.billing.impl.ServiceSingleton;
-import org.meveo.service.billing.impl.SubscriptionService;
 import org.meveo.service.catalog.impl.DiscountPlanItemService;
 import org.meveo.service.catalog.impl.DiscountPlanService;
 import org.meveo.service.catalog.impl.InvoiceSubCategoryService;
@@ -121,10 +120,6 @@ public class InvoicingService extends PersistenceService<Invoice> {
 	private DiscountPlanService discountPlanService;
 	@Inject
 	private DiscountPlanItemService discountPlanItemService;
-    @Inject
-    private SubscriptionService subscriptionService;
-    @Inject
-    private PurchaseOrderService PurchaseOrderService;
 
     @Inject
     @InvoiceNumberAssigned
@@ -219,6 +214,9 @@ public class InvoicingService extends PersistenceService<Invoice> {
         log.info("======== CREATING INVOICES FOR {} BAs========", invoicesbyBA.size());
         invoicesbyBA.forEach(invoices->assignNumberAndCreate(billingRun, isFullAutomatic, invoices));
         getEntityManager().flush();//to be able to update ILs
+        if (billingRun.getGenerateAO()) {
+            invoicesbyBA.forEach(invoices -> generateAutomaticAO(billingRun.getId(), invoices));
+        }
         log.info("======== UPDATING ILs ========");
         invoicesbyBA.forEach(invoices -> invoices.forEach(invoice->invoice.getSubCategoryInvoiceAgregate().forEach(sca -> updateInvoiceLines(invoice, sca))));
         linkInvoiceObjects(invoicesbyBA.stream().flatMap(List::stream).map(Invoice::getId).collect(Collectors.toList()));
@@ -233,9 +231,6 @@ public class InvoicingService extends PersistenceService<Invoice> {
         	invoices.forEach(invoice-> {
                 serviceSingleton.assignInvoiceNumberVirtual(invoice);
                 invoiceService.updatePaymentStatus(invoice, new Date());
-                if(billingRun.getGenerateAO()) {
-                    generateAutomaticAO(billingRun.getId(), invoice);
-                }
             });
         	invoiceService.incrementBAInvoiceDate(billingRun, invoices.get(0).getBillingAccount());
         }
@@ -248,13 +243,16 @@ public class InvoicingService extends PersistenceService<Invoice> {
         });
     }
 
-    private void generateAutomaticAO(Long billingRunId, Invoice invoice) {
-        try {
+    private void generateAutomaticAO(Long billingRunId, List<Invoice> invoices) {
+        invoices.forEach(invoice -> {
             log.info("Generate account operation for invoice {}", invoice.getId());
-            invoiceService.generateRecordedInvoiceAO(invoice);
-        } catch (BusinessException | InvoiceExistException | ImportInvoiceException e) {
-            log.error("Error while trying to generate account operation for billing run: {}, invoice: {}", billingRunId, invoice.getId());
-        }
+            try {
+                invoiceService.generateRecordedInvoiceAO(invoice);
+            } catch (BusinessException | InvoiceExistException | ImportInvoiceException exception) {
+                log.error("Error while trying to generate account operation for billing run: {}, invoice: {}",
+                        billingRunId, invoice.getId());
+            }
+        });
     }
 
 	private void linkInvoiceObjects(List<Long> invoiceIds) {
@@ -521,20 +519,25 @@ public class InvoicingService extends PersistenceService<Invoice> {
         return tradingLanguages.get(tradingLanguageId)!=null?tradingLanguages.get(tradingLanguageId).getLanguageCode():"";
     }
     private void addAggregationAmounts(List<InvoicingItem> items, InvoiceAgregate invoiceAggregate, Long taxId) {
-        InvoicingItem summuryItem = new InvoicingItem(items);
-        invoiceAggregate.addAmountWithoutTax(summuryItem.getAmountWithoutTax());
-        invoiceAggregate.addAmountWithTax(summuryItem.getAmountWithTax());
-        invoiceAggregate.addAmountTax(summuryItem.getAmountTax());
-        invoiceAggregate.addTransactionAmountWithoutTax(summuryItem.getTransactionalAmountWithoutTax());
-        invoiceAggregate.addTransactionAmountWithTax(summuryItem.getTransactionalAmountWithTax());
-        invoiceAggregate.addTransactionAmountTax(summuryItem.getTransactionalAmountTax());
-        invoiceAggregate.addItemNumber(summuryItem.getCount());
+        InvoicingItem itemSummary = new InvoicingItem(items);
+        Tax tax = getTax(taxId);
+        BigDecimal[] amounts = computeDerivedAmounts(itemSummary.getAmountWithoutTax(), itemSummary.getAmountWithTax(),
+                tax.getPercent(), isEntreprise() , getInvoiceRounding(), getRoundingMode());
+        BigDecimal[] transactionalAmounts = computeDerivedAmounts(itemSummary.getTransactionalAmountWithoutTax(),
+                itemSummary.getTransactionalAmountWithTax(), tax.getPercent(), isEntreprise() , getInvoiceRounding(), getRoundingMode());
+        invoiceAggregate.addAmountWithoutTax(amounts[0]);
+        invoiceAggregate.addAmountWithTax(amounts[1]);
+        invoiceAggregate.addAmountTax(amounts[2]);
+        invoiceAggregate.addTransactionAmountWithoutTax(transactionalAmounts[0]);
+        invoiceAggregate.addTransactionAmountWithTax(transactionalAmounts[1]);
+        invoiceAggregate.addTransactionAmountTax(transactionalAmounts[2]);
+        invoiceAggregate.addItemNumber(itemSummary.getCount());
 		if (items.stream().anyMatch(InvoicingItem::isUseSpecificTransactionalAmount)) {
 			invoiceAggregate.setUseSpecificPriceConversion(true);
 		}
 		;
         if(invoiceAggregate instanceof SubCategoryInvoiceAgregate) {
-            ((SubCategoryInvoiceAgregate)invoiceAggregate).addILs(summuryItem.getilIDs());
+            ((SubCategoryInvoiceAgregate)invoiceAggregate).addILs(itemSummary.getilIDs());
         }
     }
     

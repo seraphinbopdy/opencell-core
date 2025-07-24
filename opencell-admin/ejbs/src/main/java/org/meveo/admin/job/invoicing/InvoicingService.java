@@ -22,6 +22,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.meveo.admin.exception.BusinessException;
 import org.meveo.admin.exception.ImportInvoiceException;
 import org.meveo.admin.exception.InvoiceExistException;
@@ -214,9 +215,6 @@ public class InvoicingService extends PersistenceService<Invoice> {
         log.info("======== CREATING INVOICES FOR {} BAs========", invoicesbyBA.size());
         invoicesbyBA.forEach(invoices->assignNumberAndCreate(billingRun, isFullAutomatic, invoices));
         getEntityManager().flush();//to be able to update ILs
-        if (billingRun.getGenerateAO()) {
-            invoicesbyBA.forEach(invoices -> generateAutomaticAO(billingRun.getId(), invoices));
-        }
         log.info("======== UPDATING ILs ========");
         invoicesbyBA.forEach(invoices -> invoices.forEach(invoice->invoice.getSubCategoryInvoiceAgregate().forEach(sca -> updateInvoiceLines(invoice, sca))));
         linkInvoiceObjects(invoicesbyBA.stream().flatMap(List::stream).map(Invoice::getId).collect(Collectors.toList()));
@@ -243,16 +241,23 @@ public class InvoicingService extends PersistenceService<Invoice> {
         });
     }
 
-    private void generateAutomaticAO(Long billingRunId, List<Invoice> invoices) {
-        invoices.forEach(invoice -> {
-            log.info("Generate account operation for invoice {}", invoice.getId());
-            try {
-                invoiceService.generateRecordedInvoiceAO(invoice);
-            } catch (BusinessException | InvoiceExistException | ImportInvoiceException exception) {
-                log.error("Error while trying to generate account operation for billing run: {}, invoice: {}",
-                        billingRunId, invoice.getId());
-            }
-        });
+    public void generateAutomaticAO(BillingRun billingRun) {
+        Long billingRunId = billingRun.getId();
+        List<Invoice> invoices = invoiceService.getInvoiceIdsBy(billingRun.getId(), billingRun.getInvoiceDate());
+        final int maxValue =
+                ParamBean.getInstance().getPropertyAsInteger("database.number.of.inlist.limit", SHORT_MAX_VALUE);
+        ListUtils.partition(invoices, maxValue).forEach(subList ->
+                subList.forEach(invoice -> {
+                    log.info("Generate account operation for invoice {}", invoice.getId());
+                    try {
+                        invoiceService.generateRecordedInvoiceAO(invoice);
+                    } catch (BusinessException | InvoiceExistException | ImportInvoiceException exception) {
+                        log.error("Error while trying to generate account operation for billing run: {}, invoice: {}",
+                                billingRunId, invoice.getId());
+                    }
+                })
+        );
+
     }
 
 	private void linkInvoiceObjects(List<Long> invoiceIds) {

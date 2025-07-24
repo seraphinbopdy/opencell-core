@@ -8371,4 +8371,11 @@ public class InvoiceService extends PersistenceService<Invoice> {
         return invoice;
     }
 
+    public List<Invoice> getInvoiceIdsBy(Long billingRunId, Date invoiceDate) {
+        return getEntityManager().createNamedQuery("Invoice.byBrInvoiceTypeAndInvoiceDate", Invoice.class)
+                .setParameter("billingRunId", billingRunId)
+                .setParameter("invoiceDate", invoiceDate)
+                .getResultList();
+    }
+
 }

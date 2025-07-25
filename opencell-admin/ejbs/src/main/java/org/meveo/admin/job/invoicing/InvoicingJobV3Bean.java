@@ -1,4 +1,5 @@
 package org.meveo.admin.job.invoicing;
+
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
@@ -214,6 +215,8 @@ public class InvoicingJobV3Bean extends BaseJobBean {
 		if (billingRun.getStatus() == POSTVALIDATED) {
 			if (!isFullAutomatic) {
 				assignInvoiceNumberAndIncrementBAInvoiceDatesAndGenerateAO(billingRun, result);
+			} else if (billingRun.getGenerateAO()) {
+				invoicingService.generateAutomaticAO(billingRun);
 			}
             billingRun = billingRunExtensionService.updateBillingRun(billingRun.getId(), null,null, VALIDATED, null);
 		}

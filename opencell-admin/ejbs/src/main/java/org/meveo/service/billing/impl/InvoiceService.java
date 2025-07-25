@@ -1551,9 +1551,10 @@ public class InvoiceService extends PersistenceService<Invoice> {
             }
             if(billingRun!=null && billingRun.getProcessType() == FULL_AUTOMATIC) {
             	if((InvoiceStatusEnum.SUSPECT.equals(invoice.getStatus()) && BillingRunAutomaticActionEnum.AUTOMATIC_VALIDATION.equals(billingRun.getSuspectAutoAction()))
-            			||  (InvoiceStatusEnum.REJECTED.equals(invoice.getStatus()) && BillingRunAutomaticActionEnum.AUTOMATIC_VALIDATION.equals(billingRun.getRejectAutoAction())))
-        		invoice.setStatus(InvoiceStatusEnum.VALIDATED);
-            	invoice.setRejectReason(null);
+            			||  (InvoiceStatusEnum.REJECTED.equals(invoice.getStatus()) && BillingRunAutomaticActionEnum.AUTOMATIC_VALIDATION.equals(billingRun.getRejectAutoAction()))) {
+                    invoice.setStatus(InvoiceStatusEnum.VALIDATED);
+                    invoice.setRejectReason(null);
+                }
         	}
             if(save) {
 	            update(invoice);
@@ -8369,6 +8370,13 @@ public class InvoiceService extends PersistenceService<Invoice> {
         cleanInvoiceAggregates(invoice.getId());
         this.createInvoiceAggregates(invoice);
         return invoice;
+    }
+
+    public List<Invoice> getInvoiceIdsBy(Long billingRunId, Date invoiceDate) {
+        return getEntityManager().createNamedQuery("Invoice.byBrInvoiceTypeAndInvoiceDate", Invoice.class)
+                .setParameter("billingRunId", billingRunId)
+                .setParameter("invoiceDate", invoiceDate)
+                .getResultList();
     }
 
 }

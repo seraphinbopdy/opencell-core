@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
 import jakarta.inject.Inject;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -100,6 +101,7 @@ public class DiscountPlanItemApi extends BaseApi {
      * @throws MeveoApiException meveo api exception
      * @throws BusinessException business exception.
      */
+    @TransactionAttribute
     public DiscountPlanItem create(DiscountPlanItemDto postData) throws MeveoApiException, BusinessException {
     	if (StringUtils.isBlank(postData.getDiscountPlanCode())) {
             missingParameters.add("discountPlanCode");
@@ -113,11 +115,11 @@ public class DiscountPlanItemApi extends BaseApi {
 		
         handleMissingParameters();
 
-        DiscountPlanItem discountPlanItem = discountPlanItemService.findByCode(postData.getCode());
-        if (discountPlanItem != null && postData.getCode() != null) {
+        if(postData.getCode() != null && discountPlanItemService.findByCode(postData.getCode()) != null) {
             throw new EntityAlreadyExistsException(DiscountPlanItem.class, postData.getCode());
         }
-        discountPlanItem = toDiscountPlanItem(postData, null);
+        
+        DiscountPlanItem discountPlanItem = toDiscountPlanItem(postData, null);
         DiscountPlan discountPlan = discountPlanItem.getDiscountPlan();
         if(BooleanUtils.isTrue(discountPlan.getApplicableOnDiscountedPrice()) || (appProvider.isActivateCascadingDiscounts() && !discountPlan.getApplicableOnDiscountedPrice())){
             List<DiscountPlanItem> items = discountPlanItemService.findBySequence(discountPlan.getId(), discountPlanItem.getSequence());

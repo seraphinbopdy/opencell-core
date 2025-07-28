@@ -153,6 +153,7 @@ public class InvoicingJobV3Bean extends BaseJobBean {
 			ScriptInstance billingRunValidationScript) {
 		boolean prevalidatedAutomaticPrevBRStatus = false;
 		final boolean isFullAutomatic = billingRun.getProcessType() == FULL_AUTOMATIC;
+		boolean firstPassAutomatic = billingRun.getStatus() == INVOICE_LINES_CREATED && billingRun.getProcessType() == AUTOMATIC;
 		result.addReport((!isBlank(result.getReport()) ? "," : "") + "Billing run #" + billingRun.getId());
 		if (billingRun.getStatus() == INVOICE_LINES_CREATED
 				&& (billingRun.getProcessType() == AUTOMATIC || isFullAutomatic)) {
@@ -192,6 +193,7 @@ public class InvoicingJobV3Bean extends BaseJobBean {
 				throw new BadRequestException(exception.getMessage());
 			}
 		}
+		
 		billingRun = billingRunService.refreshOrRetrieve(billingRun);
 		if ((isFullAutomatic || billingRun.getProcessType() == BillingProcessTypesEnum.AUTOMATIC)
 				&& (DRAFT_INVOICES.equals(billingRun.getStatus())
@@ -212,13 +214,15 @@ public class InvoicingJobV3Bean extends BaseJobBean {
 		}
 
 		billingRun = billingRunService.refreshOrRetrieve(billingRun);
-		if (billingRun.getStatus() == POSTVALIDATED) {
+		if (!firstPassAutomatic || billingRun.getStatus() == POSTVALIDATED) {
 			if (!isFullAutomatic) {
 				assignInvoiceNumberAndIncrementBAInvoiceDatesAndGenerateAO(billingRun, result);
 			} else if (billingRun.getGenerateAO()) {
 				invoicingService.generateAutomaticAO(billingRun);
 			}
-            billingRun = billingRunExtensionService.updateBillingRun(billingRun.getId(), null,null, VALIDATED, null);
+			if(billingRun.getStatus() != REJECTED) {
+				billingRun = billingRunExtensionService.updateBillingRun(billingRun.getId(), null,null, VALIDATED, null);
+			}
 		}
 		billingRun = billingRunService.recalculateBRStatisticsByInvoices(billingRun);
 		billingRun = billingRunService.updateBillingRunJobExecution(billingRun.getId(), result);
@@ -280,19 +284,9 @@ public class InvoicingJobV3Bean extends BaseJobBean {
 		Long waitingMillis = (Long) this.getParamOrCFValue(jobInstance, "waitingMillis", 0L);
 		// Find and process invoices
 		for (InvoicesToNumberInfo invoicesToNumberInfo : invoiceSummary) {
-			List<Long> invoiceIds = invoiceService.getInvoiceIds(billingRun.getId(),
-					invoicesToNumberInfo.getInvoiceTypeId(), invoicesToNumberInfo.getSellerId(),
-					invoicesToNumberInfo.getInvoiceDate());
-			// Validate that what was retrieved as summary matches the details
-			if (invoiceIds.size() != invoicesToNumberInfo.getNrOfInvoices().intValue()) {
-				throw new BusinessException(String.format(
-						"Number of invoices retrieved %s dont match the expected number %s for %s/%s/%s/%s",
-						invoiceIds.size(), invoicesToNumberInfo.getNrOfInvoices(), billingRun.getId(),
-						invoicesToNumberInfo.getInvoiceTypeId(), invoicesToNumberInfo.getSellerId(),
-						invoicesToNumberInfo.getInvoiceDate()));
-			}
+			List<Long> invoiceIds = invoiceService.getInvoiceIdsToBeValidated(billingRun,invoicesToNumberInfo);
+
 			// Assign invoice numbers
-			invoiceIds.removeIf(invoiceId -> invoiceService.isNotEligibleForValidation(invoiceId));
 			BiConsumer<Long, JobExecutionResultImpl> task = (invoiceId, jobResult) -> {
 				invoiceService.recalculateDates(invoiceId);
 				invoiceService.assignInvoiceNumber(invoiceId, invoicesToNumberInfo);

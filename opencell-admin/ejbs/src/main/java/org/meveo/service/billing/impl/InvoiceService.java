@@ -6919,7 +6919,7 @@ public class InvoiceService extends PersistenceService<Invoice> {
 
             // check if the input subscription billing account is the same of invoice one
             if (subscription.getUserAccount().getBillingAccount() !=null &&
-                    !subscription.getUserAccount().getBillingAccount().getCode().equals(toUpdate.getBillingAccount().getCode())) {
+                    !subscription.getUserAccount().getBillingAccount().getCode().equals(toUpdate.getBillingAccount().getCode()) && !toUpdate.getInvoiceType().getCode().equals("ADJ")) {
                 throw new BusinessException("Subscription with code " + subscription.getCode()
                         + " is not linked to the same Invoice Customer " + toUpdate.getBillingAccount().getCode());
             }

@@ -383,15 +383,7 @@ public class PaymentMethodApi extends BaseApi {
             validateBankCoordinates(paymentMethodDto);
             return;
         }
-        
-        if(type == PaymentMethodEnum.WIRETRANSFER) {
-            if (paymentMethodDto.getBankCoordinates() != null && StringUtils.isBlank(paymentMethodDto.getBankCoordinates().getAccountOwner())) {
-                missingParameters.add("bankCoordinates.accountOwner");
-            }
-            if (paymentMethodDto.getBankCoordinates() != null && StringUtils.isBlank(paymentMethodDto.getBankCoordinates().getIban())) {
-                missingParameters.add("bankCoordinates.iban");
-            }
-        }
+               
         handleMissingParameters();
 
     }

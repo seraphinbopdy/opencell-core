@@ -377,7 +377,7 @@ public class RatingCancellationJobBean extends IteratorBasedJobBean<List<Object[
 	            "		AND rr.id BETWEEN :min AND :max ";
 	    
 	    String updateRTsQuery = "UPDATE billing_Rated_transaction rt " +
-	            "SET status='CANCELED', updated = CURRENT_TIMESTAMP, reject_Reason='Origin wallet operation has been rerated' " +
+	            "SET status='RERATED', updated = CURRENT_TIMESTAMP, reject_Reason='Origin wallet operation has been rerated' " +
 	            "	FROM " + viewName + " rr CROSS JOIN unnest(string_to_array(" + prefix + "rt_id, ',')) AS to_update" +
 	            "		WHERE rr.id BETWEEN :min AND :max " +
 	            "			AND rr.id NOT IN (SELECT id FROM " + BILLED_VIEW_NAME + ") " +

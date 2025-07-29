@@ -26,6 +26,7 @@ import static java.util.Optional.ofNullable;
 import static org.meveo.commons.utils.NumberUtils.computeDerivedAmounts;
 import static org.meveo.model.BaseEntity.NB_DECIMALS;
 import static org.meveo.model.billing.RatedTransactionStatusEnum.CANCELED;
+import static org.meveo.model.billing.RatedTransactionStatusEnum.RERATED;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -1502,7 +1503,7 @@ public abstract class RatingService extends PersistenceService<WalletOperation> 
             ChargeInstance chargeInstance = operation.getChargeInstance();
 			if (cancelRT && walletOperationToRerate.getRatedTransaction() != null && walletOperationToRerate.getRatedTransaction().getStatus()!=CANCELED) {
                 walletOperationToRerate.getRatedTransaction().setRejectReason("Origin wallet operation has been rerated");
-                walletOperationToRerate.getRatedTransaction().setStatus(CANCELED);
+                walletOperationToRerate.getRatedTransaction().setStatus(RERATED);
                 walletOperationToRerate.getRatedTransaction().setUpdater(currentUser.getUserName());
                 walletOperationToRerate.getRatedTransaction().setUpdated(new Date());
                 ratedTransactionService.update(walletOperationToRerate.getRatedTransaction());

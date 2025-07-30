@@ -170,7 +170,7 @@ public class MediationApi extends BaseApi {
      * Register and rate EDRS
      *
      * @throws MeveoApiException Meveo api exception
-     * @throws BusinessException business exception.
+     * @throws BusinessException business exception!
      */
     @TransactionAttribute(TransactionAttributeType.NEVER)
     public ChargeCDRResponseDto chargeCdr(ChargeCDRDto chargeCDRDto) throws MeveoApiException, BusinessException {
@@ -329,7 +329,7 @@ public class MediationApi extends BaseApi {
     }
 
     /**
-     * Notify of rejected CDRs - for each of rejected lines, trigger a notification
+     * Notify of rejected CDRs - for each of rejected lines, trigger a notification !
      * 
      * @param cdrList A list of rejected CDR lines (can be as json format string instead of csv line)
      */

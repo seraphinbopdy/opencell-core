@@ -324,9 +324,7 @@ public class MediationApi extends BaseApi {
                 throw new MeveoApiException(e.getMessage());
             }
         } else {
-
             missingParameters.add("reservation");
-            
             handleMissingParameters();
         }
     }
@@ -343,6 +341,7 @@ public class MediationApi extends BaseApi {
 
             CDR cdr = new CDR();
             cdr.setLine(cdrLine);
+            
             try {
                 defaultObserver.cdrRejected(cdr);
             } catch (Exception e) {

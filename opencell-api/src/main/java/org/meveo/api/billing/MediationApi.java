@@ -324,7 +324,9 @@ public class MediationApi extends BaseApi {
                 throw new MeveoApiException(e.getMessage());
             }
         } else {
+
             missingParameters.add("reservation");
+            
             handleMissingParameters();
         }
     }

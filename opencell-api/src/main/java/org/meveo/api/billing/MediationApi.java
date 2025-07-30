@@ -260,9 +260,7 @@ public class MediationApi extends BaseApi {
                     edr.setQuantity(reservationDto.getConsumedQuantity());
                     rateUsage(edr, new ChargeCDRDto());
                 } else {
-
                     throw new BusinessException("CONSUMPTION_OVER_QUANTITY_RESERVED");
-                    
                 }
 //                try {
 //                    if (timers.containsKey(reservation.getId())) {
@@ -279,6 +277,7 @@ public class MediationApi extends BaseApi {
             }
         } else {
             missingParameters.add("reservation");
+
             handleMissingParameters();
         }
     }

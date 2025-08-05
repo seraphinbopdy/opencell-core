@@ -338,9 +338,7 @@ public class MediationApi extends BaseApi {
     public void notifyOfRejectedCdrs(CdrListDto cdrList) {
 
         for (String cdrLine : cdrList.getCdr()) {
-
             CDR cdr = new CDR();
-            
             cdr.setLine(cdrLine);
             try {
                 defaultObserver.cdrRejected(cdr);
